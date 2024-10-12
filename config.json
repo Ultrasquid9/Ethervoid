@@ -1,6 +1,6 @@
 {
-	"Up": "Up",
-	"Down": "Down",
-	"Left": "Left",
-	"Right": "Right"
+	"Up": "W",
+	"Left": "A",
+	"Down": "S",
+	"Right": "D"
 }

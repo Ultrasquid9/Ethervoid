@@ -28,8 +28,6 @@ async fn main() {
 
         draw_circle(test_player.x, test_player.y, 15.0, YELLOW);
 
-        draw_text("IT WORKS!", 20.0, 20.0, 30.0, DARKGRAY);
-
         next_frame().await
     }
 }
