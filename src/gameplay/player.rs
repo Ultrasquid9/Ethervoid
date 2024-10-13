@@ -1,11 +1,14 @@
 use macroquad::{input::is_key_down, math::Vec2};
+use serde_json::Value;
 
-use crate::input::get_keycode;
+use crate::input::{get_config, get_keycode};
 
 pub struct Player {
 	pub pos: Vec2,
 	pub health: u8,
 
+	pub config: Value,
+	
 	speed: f32
 }
 
@@ -14,6 +17,8 @@ impl Player {
 		return Player {
 			pos: Vec2::new(0.0, 0.0),
 			health: 100,
+
+			config: get_config("./config.json"),
 			speed: 0.0
 		}
 	}
@@ -24,20 +29,18 @@ impl Player {
 			return self;
 		}
 
-		println!("{}", self.speed);
-
 		let mut new_pos = Vec2::new(self.pos.x, self.pos.y);
 
-		if is_key_down(get_keycode("Up")) {
+		if is_key_down(get_keycode(&self.config, "Up")) {
 			new_pos.y -= self.speed;
 		}
-		if is_key_down(get_keycode("Down")) {
+		if is_key_down(get_keycode(&self.config, "Down")) {
 			new_pos.y += self.speed;
 		}
-		if is_key_down(get_keycode("Left")) {
+		if is_key_down(get_keycode(&self.config, "Left")) {
 			new_pos.x -= self.speed;
 		}
-		if is_key_down(get_keycode("Right")) {
+		if is_key_down(get_keycode(&self.config, "Right")) {
 			new_pos.x += self.speed;
 		}
 
