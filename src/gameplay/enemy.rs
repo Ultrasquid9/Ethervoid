@@ -10,24 +10,10 @@ enum Movement {
 impl Movement {
 	/// Moves the enemy based upon their Movement
 	fn update(&self, enemy: &Enemy, player: &Player) -> Vec2 {
-		let mut new_pos = Vec2::new(0., 0.);
-
 		match &self {
 			// Simple movement AI that tracks the player and moves towards them
 			Self::MoveTowardsPlayer => {
-				if player.stats.pos.x > enemy.stats.pos.x {
-					new_pos.x += 1.;
-				} else if player.stats.pos.x < enemy.stats.pos.x {
-					new_pos.x -= 1.;
-				}
-
-				if player.stats.pos.y > enemy.stats.pos.y {
-					new_pos.y += 1.;
-				} else if player.stats.pos.y < enemy.stats.pos.y {
-					new_pos.y -= 1.;
-				}
-
-				return new_pos.normalize();
+				return enemy.stats.pos.move_towards(player.stats.pos, 1.0)
 			}
 		}
 	}
@@ -76,7 +62,7 @@ impl Enemy {
 
 	/// Updates the enemy based upon their AI and the Player's stats
 	pub fn update(&mut self, player: &mut Player) {
-		self.stats.pos += self.movement.update(self, player);
+		self.stats.pos = self.movement.update(self, player);
 
 		for i in &self.attacks {
 			player.stats.health -= i.attack(&self, &player);
