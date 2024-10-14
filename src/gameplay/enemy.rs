@@ -40,7 +40,7 @@ enum Attacks {
 
 impl Attacks {
 	/// Attacks the player based upon their attacks
-	fn attack(&self, enemy: &Enemy, player: &Player) -> usize {
+	fn attack(&self, enemy: &Enemy, player: &Player) -> isize {
 		match &self {
 			// Simple attack that damages the player if they are too close
 			Self::ContactDamage => {
@@ -80,6 +80,18 @@ impl Enemy {
 
 		for i in &self.attacks {
 			player.stats.health -= i.attack(&self, &player);
+		}
+	}
+
+	pub fn damage(&mut self, val: isize) {
+		self.stats.health -= val;
+	}
+
+	pub fn should_kill(&self) -> bool {
+		if self.stats.health <= 0 {
+			return true
+		} else {
+			return false
 		}
 	}
 }

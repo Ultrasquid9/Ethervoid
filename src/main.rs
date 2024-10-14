@@ -8,7 +8,7 @@ use macroquad::prelude::*;
 /// Eventually, this will hold the main menu and option screens.
 pub enum State {
 	Gameplay, // In-game
-	Quit // Exiting the game
+	Quit // Exiting the gamej
 }
 
 #[macroquad::main("Ethervoid")]

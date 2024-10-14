@@ -3,5 +3,6 @@
 	"Left": "A",
 	"Down": "S",
 	"Right": "D",
-	"Quit": "Escape"
+	"Quit": "Escape",
+	"Attack": "J"
 }

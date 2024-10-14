@@ -10,7 +10,7 @@ mod enemy;
 /// Data used by all entities, including both the player and enemies
 pub struct Entity {
 	pub pos: Vec2,
-	pub health: usize
+	pub health: isize
 }
 
 pub async fn gameplay() -> State {
@@ -32,6 +32,12 @@ pub async fn gameplay() -> State {
 		player.update();
 		enemy.update(&mut player);
 
+		if is_key_down(get_keycode(&player.config, "Attack")) {
+			if enemy.stats.pos.distance(player.stats.pos) < 64.0 {
+				enemy.damage(1);
+			}
+		}
+
 		// The Player and enemies
         draw_circle(player.stats.pos.x, player.stats.pos.y, 15.0, YELLOW); // Player
 		draw_circle(enemy.stats.pos.x, enemy.stats.pos.y, 15.0, GREEN); // Test Object
@@ -40,6 +46,7 @@ pub async fn gameplay() -> State {
  
 		// The UI
 		draw_text(&format!("{}", player.stats.health), 32.0, 64.0, camera_scale() / 10., BLACK);
+		draw_text(&format!("{}", enemy.stats.health), 32.0, 128.0, camera_scale() / 10., BLACK);
 
 		// Quits the game
 		if is_key_down(get_keycode(&player.config, "Quit")) {
