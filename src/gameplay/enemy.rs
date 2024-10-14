@@ -1,14 +1,32 @@
 use macroquad::math::Vec2;
 
-use super::{player::{self, Player}, Entity};
+use super::{player::Player, Entity};
 
 enum Movement {
-	TestAI
+	MoveTowardsPlayer
 }
 
 impl Movement {
-	fn movement(&self) -> Vec2 {
-		return Vec2::new(0., 0.)
+	fn update(&self, enemy: &Enemy, player: &Player) -> Vec2 {
+		match &self {
+			Self::MoveTowardsPlayer => {
+				let mut new_pos = Vec2::new(0., 0.);
+
+				if player.stats.pos.x > enemy.stats.pos.x {
+					new_pos.x += 1.;
+				} else if player.stats.pos.x < enemy.stats.pos.x {
+					new_pos.x -= 1.;
+				}
+
+				if player.stats.pos.y > enemy.stats.pos.y {
+					new_pos.y += 1.;
+				} else if player.stats.pos.y < enemy.stats.pos.y {
+					new_pos.y -= 1.;
+				}
+
+				return new_pos.normalize();
+			}
+		}
 	}
 }
 
@@ -43,12 +61,14 @@ impl Enemy {
 				health: 10,
 				pos: Vec2::new(25., 25.)
 			},
-			movement: Movement::TestAI,
+			movement: Movement::MoveTowardsPlayer,
 			attacks: vec![Attacks::ContactDamage]
 		}
 	}
 
 	pub fn update(&mut self, player: &mut Player) {
+		self.stats.pos += self.movement.update(self, player);
+
 		for i in &self.attacks {
 			player.stats.health -= i.attack(&self, &player);
 		}
