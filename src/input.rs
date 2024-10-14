@@ -2,6 +2,7 @@ use macroquad::input::KeyCode;
 use serde_json::Value;
 use std::fs;
 
+/// Reads the config file
 pub fn get_config(input: &str) -> Value {
 	let try_config = serde_json::from_str(&fs::read_to_string(input).expect("Config does not exist!"));
 	let config: Value = match try_config {
@@ -12,10 +13,11 @@ pub fn get_config(input: &str) -> Value {
 	return config;
 }
 
+/// Gets the KeyCode with the value of the key passed in
 pub fn get_keycode(config: &Value, key: &str) -> KeyCode {
-
 	// There has to be a better way to do this
 	match config[&key].as_str() {
+		Some("Escape") => return KeyCode::Escape,
 		Some("Up") => return KeyCode::Up,
 		Some("Down") => return KeyCode::Down,
 		Some("Left") => return KeyCode::Left,

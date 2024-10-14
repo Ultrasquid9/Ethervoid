@@ -4,18 +4,22 @@ mod gameplay;
 use gameplay::gameplay;
 use macroquad::prelude::*;
 
-enum State {
-	Gameplay
+/// Used to determine what state the game is in.
+/// Eventually, this will hold the main menu and option screens.
+pub enum State {
+	Gameplay, // In-game
+	Quit // Exiting the game
 }
 
 #[macroquad::main("Ethervoid")]
 async fn main() {
-	let state = State::Gameplay;
+	let mut state = State::Gameplay;
 
     loop {
-		match state {
+		state = match state {
 			State::Gameplay => gameplay().await,
-		}
+			State::Quit => return
+		};
 
         next_frame().await
     }

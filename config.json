@@ -2,5 +2,6 @@
 	"Up": "W",
 	"Left": "A",
 	"Down": "S",
-	"Right": "D"
+	"Right": "D",
+	"Quit": "Escape"
 }
