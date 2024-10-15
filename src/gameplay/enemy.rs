@@ -1,13 +1,23 @@
 use macroquad::math::Vec2;
+use serde_json::Value;
 
-use super::{player::Player, Entity};
+use super::{player::Player, builders::enemybuilder::EnemyBuilder, Entity};
 
 /// The movement AI used by an enemy
-enum Movement {
+pub enum Movement {
 	MoveTowardsPlayer
 }
 
 impl Movement {
+	/// Provides a Movement enum based on the provided String
+	pub fn from_str(input: &str) -> Movement {
+		match input {
+			"MoveTowardsPlayer" => Movement::MoveTowardsPlayer,
+
+			_ => Movement::MoveTowardsPlayer
+		}
+	}
+
 	/// Moves the enemy based upon their Movement
 	fn update(&self, enemy: &Enemy, player: &Player) -> Vec2 {
 		match &self {
@@ -20,11 +30,26 @@ impl Movement {
 }
 
 /// The attacks used by an enemy
-enum Attacks {
+pub enum Attacks {
 	ContactDamage
 }
 
 impl Attacks {
+	/// Provides an Attack enum based on the provided Vector
+	pub fn from_vec(input: &Vec<Value>) -> Vec<Attacks> {
+		let mut attacks: Vec<Attacks> = Vec::new();
+
+		for i in input{
+			match i.as_str().unwrap() {
+				"ContactDamage" => attacks.push(Attacks::ContactDamage),
+
+				_ => attacks.push(Attacks::ContactDamage)
+			}
+		}
+
+		return attacks;
+	}
+
 	/// Attacks the player based upon their attacks
 	fn attack(&self, enemy: &Enemy, player: &Player) -> isize {
 		match &self {
@@ -48,15 +73,15 @@ pub struct Enemy {
 }
 
 impl Enemy {
-	/// Creates a basic test enemy
-	pub fn new() -> Self {
-		return Enemy {
+	/// Creates a new Enemy using a Vec2 for the pos and an EnemyBuilder for the stats
+	pub fn from_builder(pos: Vec2, builder: EnemyBuilder) -> Self {
+		return Self {
 			stats: Entity {
-				health: 10,
-				pos: Vec2::new(25., 25.)
+				pos: pos,
+				health: builder.max_health as isize,
 			},
-			movement: Movement::MoveTowardsPlayer,
-			attacks: vec![Attacks::ContactDamage]
+			attacks: builder.attacks,
+			movement: builder.movement,
 		}
 	}
 
@@ -69,10 +94,12 @@ impl Enemy {
 		}
 	}
 
+	/// Damages the enemy based on the provided isize
 	pub fn damage(&mut self, val: isize) {
 		self.stats.health -= val;
 	}
 
+	/// Checks if the enemy is dead
 	pub fn should_kill(&self) -> bool {
 		if self.stats.health <= 0 {
 			return true

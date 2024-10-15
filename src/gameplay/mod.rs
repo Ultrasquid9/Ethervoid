@@ -1,3 +1,4 @@
+use builders::enemybuilder::EnemyBuilder;
 use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
@@ -6,6 +7,7 @@ use crate::{input::get_keycode, State};
 
 mod player;
 mod enemy;
+mod builders;
 
 /// Data used by all entities, including both the player and enemies
 pub struct Entity {
@@ -15,7 +17,9 @@ pub struct Entity {
 
 pub async fn gameplay() -> State {
 	let mut player = Player::new(); // Creates a player
-	let mut enemies = vec![Enemy::new()]; // Creates a list of enemies
+	let mut enemies = Vec::new(); // Creates a list of enemies
+
+	enemies.push(Enemy::from_builder(Vec2::new(25., 25.), EnemyBuilder::new(String::from("./cores/default/enemies/test.json"))));
 
 	loop {		
 		clear_background(RED); // Draws the background

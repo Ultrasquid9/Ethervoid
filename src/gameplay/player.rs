@@ -25,7 +25,7 @@ impl Player {
 	}
 
 	pub fn update(&mut self) -> &Self {
-		if self.stats.health == 0 {
+		if self.stats.health <= 0 {
 			*self = Self::new();
 			return self;
 		}

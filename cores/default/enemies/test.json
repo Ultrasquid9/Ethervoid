@@ -1,0 +1,7 @@
+{
+	"Max Health": 128,
+	"Movement": "MoveTowardsPlayer",
+	"Attacks": [
+		"ContactDamage"
+	]
+}
