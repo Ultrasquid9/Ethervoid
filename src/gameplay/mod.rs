@@ -1,4 +1,4 @@
-use builders::enemybuilder::{get_enemy_builders, EnemyBuilder};
+use builders::enemybuilder::get_enemybuilders;
 use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
@@ -19,9 +19,9 @@ pub async fn gameplay() -> State {
 	let mut player = Player::new(); // Creates a player
 	let mut enemies = Vec::new(); // Creates a list of enemies
 
-	enemies.push(Enemy::from_builder(Vec2::new(25., 25.), EnemyBuilder::new(String::from("./cores/default/enemies/test.json"))));
-
-	get_enemy_builders();
+	for i in get_enemybuilders() {
+		enemies.push(Enemy::from_builder(Vec2::new(25., 25.), i))
+	}
 	
 	loop {		
 		clear_background(RED); // Draws the background
