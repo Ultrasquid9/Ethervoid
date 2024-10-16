@@ -1,6 +1,7 @@
 use std::fs;
 
 pub mod enemybuilder;
+pub mod mapbuilder;
 
 /// Creates a vec of Strings containing the directories of all of the provided builder type in all cores
 pub fn get_builders(builder_type: String) -> Vec<String> {

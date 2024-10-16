@@ -1,4 +1,4 @@
-use builders::enemybuilder::get_enemybuilders;
+use builders::{enemybuilder::get_enemybuilders, mapbuilder::get_mapbuilders};
 use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
@@ -22,6 +22,8 @@ pub async fn gameplay() -> State {
 	for i in get_enemybuilders() {
 		enemies.push(Enemy::from_builder(Vec2::new(25., 25.), i))
 	}
+	
+	get_mapbuilders();
 	
 	loop {		
 		clear_background(RED); // Draws the background
