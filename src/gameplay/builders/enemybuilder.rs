@@ -24,3 +24,25 @@ impl EnemyBuilder {
 		return builder;
 	}
 }
+
+/// Creates a vec of EnemyBuilders containing all EnemyBuilders in all cores
+pub fn get_enemy_builders() -> Vec<EnemyBuilder> {
+	// This function took way too long to write
+	
+	let mut builders: Vec<EnemyBuilder> = Vec::new();
+
+	let mut enemies_paths: Vec<String> = Vec::new();
+
+	for i in fs::read_dir("./cores").unwrap() {
+		let dir = i.unwrap().file_name().to_string_lossy().into_owned();
+		enemies_paths.push(dir);
+	}
+
+	for i in enemies_paths {
+		for j in fs::read_dir(format!("./cores/{}/enemies", i).as_str()).unwrap() {
+			builders.push(EnemyBuilder::new(format!("./cores/{}/enemies/{}", i, j.unwrap().file_name().to_string_lossy().into_owned())));
+		}
+	}
+
+	return builders;
+}

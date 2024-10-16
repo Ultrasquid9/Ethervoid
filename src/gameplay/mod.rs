@@ -1,4 +1,4 @@
-use builders::enemybuilder::EnemyBuilder;
+use builders::enemybuilder::{get_enemy_builders, EnemyBuilder};
 use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
@@ -21,6 +21,8 @@ pub async fn gameplay() -> State {
 
 	enemies.push(Enemy::from_builder(Vec2::new(25., 25.), EnemyBuilder::new(String::from("./cores/default/enemies/test.json"))));
 
+	get_enemy_builders();
+	
 	loop {		
 		clear_background(RED); // Draws the background
 
