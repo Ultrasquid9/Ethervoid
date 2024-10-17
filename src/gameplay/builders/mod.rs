@@ -1,5 +1,7 @@
 use std::fs;
 
+use serde_json::Value;
+
 pub mod enemybuilder;
 pub mod mapbuilder;
 
@@ -23,4 +25,9 @@ pub fn get_builders(builder_type: String) -> Vec<String> {
 	}
 
 	return builders;
+}
+
+pub fn get_name(dir: &str) -> String {
+	let input: Value = serde_json::from_str(&fs::read_to_string(dir).expect("File does not exist!")).unwrap();
+	return input["Name"].as_str().unwrap().to_owned();
 }

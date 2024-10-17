@@ -1,4 +1,4 @@
-use builders::{enemybuilder::get_enemybuilders, mapbuilder::get_mapbuilders};
+use builders::mapbuilder::get_mapbuilders;
 use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
@@ -18,14 +18,17 @@ pub struct Entity {
 pub async fn gameplay() -> State {
 	let mut player = Player::new(); // Creates a player
 	let mut enemies = Vec::new(); // Creates a list of enemies
+	
+	let maps = get_mapbuilders(); // Creates a list of MapBuilders
+	let current_map = String::from("Test"); // Stores the map the player is currently in
 
-	for i in get_enemybuilders() {
-		enemies.push(Enemy::from_builder(Vec2::new(25., 25.), i))
+	for i in maps.get(&current_map).unwrap().enemies.clone() {
+		enemies.push(Enemy::from_builder(i.1, i.0))
 	}
 	
 	get_mapbuilders();
 	
-	loop {		
+	loop {
 		clear_background(RED); // Draws the background
 
 		// Creates a camera targetting the player
@@ -57,9 +60,6 @@ pub async fn gameplay() -> State {
  
 		// Drawing a temporary UI
 		draw_text(&format!("{}", player.stats.health), 32.0, 64.0, camera_scale() / 10., BLACK);
-		if enemies.len() > 0 {
-			draw_text(&format!("{}", enemies[0].stats.health), 32.0, 128.0, camera_scale() / 10., BLACK);
-		}
 
 		// Quits the game
 		if is_key_down(get_keycode(&player.config, "Quit")) {

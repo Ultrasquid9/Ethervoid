@@ -1,12 +1,13 @@
-use std::fs;
+use std::{collections::HashMap, fs};
 
 use serde_json::Value;
 
 use crate::gameplay::enemy::{Attacks, Movement};
 
-use super::get_builders;
+use super::{get_builders, get_name};
 
 /// A struct containing the stats of an enemy type
+#[derive(Clone)]
 pub struct EnemyBuilder {
 	pub max_health: usize,
 	pub movement: Movement,
@@ -14,6 +15,7 @@ pub struct EnemyBuilder {
 }
 
 impl EnemyBuilder {
+	/// Creates an EnemyBuilder from the directory of the given string
 	pub fn from(dir: String) -> EnemyBuilder {
 		let input: Value = serde_json::from_str(&fs::read_to_string(dir).expect("File does not exist!")).unwrap();
 
@@ -27,11 +29,15 @@ impl EnemyBuilder {
 	}
 }
 
-pub fn get_enemybuilders() -> Vec<EnemyBuilder> {
-	let mut builders: Vec<EnemyBuilder> = Vec::new();
+/// Provides a HashMap containing all EnemyBuilders
+pub fn get_enemybuilders() -> HashMap<String, EnemyBuilder> {
+	let mut builders: HashMap<String, EnemyBuilder> = HashMap::new();
 
 	for i in get_builders(String::from("enemies")) {
-		builders.push(EnemyBuilder::from(i));
+		builders.insert(
+			get_name(&i),
+			EnemyBuilder::from(i)
+		);
 	}
 
 	return builders;

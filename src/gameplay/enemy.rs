@@ -4,6 +4,7 @@ use serde_json::Value;
 use super::{player::Player, builders::enemybuilder::EnemyBuilder, Entity};
 
 /// The movement AI used by an enemy
+#[derive(Clone)]
 pub enum Movement {
 	MoveTowardsPlayer
 }
@@ -30,6 +31,7 @@ impl Movement {
 }
 
 /// The attacks used by an enemy
+#[derive(Clone)]
 pub enum Attacks {
 	ContactDamage
 }
