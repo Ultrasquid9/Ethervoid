@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs};
 
 use macroquad::math::Vec2;
-use rapier2d::na::Point2;
+use rapier2d::{na::Point2, prelude::ColliderBuilder};
 use serde_json::Value;
 
 use super::{enemybuilder::{get_enemybuilders, EnemyBuilder}, get_builders, get_name};
@@ -46,6 +46,10 @@ impl MapBuilder {
 		}
 
 		return builder
+	}
+
+	pub fn to_map(&self) -> ColliderBuilder {
+		return ColliderBuilder::polyline(self.points.clone(), Option::None);
 	}
 }
 
