@@ -1,4 +1,5 @@
 use builders::mapbuilder::get_mapbuilders;
+use draw::draw;
 use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
@@ -9,6 +10,7 @@ use crate::{input::get_keycode, State};
 mod player;
 mod enemy;
 mod builders;
+mod draw;
 
 /// Data used by all entities, including both the player and enemies
 pub struct Entity {
@@ -41,15 +43,6 @@ pub async fn gameplay() -> State {
 	}
 		
 	loop {
-		clear_background(RED); // Draws the background
-
-		// Creates a camera targetting the player
-        set_camera(&Camera2D {
-			zoom: vec2(1. / camera_scale(), screen_width() / screen_height() / camera_scale()),
-            target: player.stats.pos,
-            ..Default::default()
-        });
-
 		// Updates the player and all enemies
 		player.update();
 
@@ -60,18 +53,8 @@ pub async fn gameplay() -> State {
 			enemies.retain(|_| *enemies_to_kill.iter().next().unwrap());
 		}
 
-		// Drawing the Player and enemies
-        draw_circle(player.stats.pos.x, player.stats.pos.y, 15.0, YELLOW); // Player
-		if enemies.len() > 0 {
-			for i in &enemies {
-				draw_circle(i.stats.pos.x, i.stats.pos.y, 15.0, GREEN); // Enemies
-			}
-		}
-
-		set_default_camera();
- 
-		// Drawing a temporary UI
-		draw_text(&format!("{}", player.stats.health), 32.0, 64.0, camera_scale() / 10., BLACK);
+		// Draws the player and enemies
+		draw(&player, &enemies);
 
 		// Quits the game
 		if is_key_down(get_keycode(&player.config, "Quit")) {
@@ -81,11 +64,6 @@ pub async fn gameplay() -> State {
 
 		next_frame().await;
 	}
-}
-
-/// Gets the scale that the camera should be rendered at
-fn camera_scale() -> f32 {
-	return screen_width() / screen_height() * 512.
 }
 
 fn update_enemies(player: &mut Player, enemies: &mut Vec<Enemy>) {
