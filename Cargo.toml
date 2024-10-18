@@ -10,3 +10,4 @@ rapier2d = "0.22.*"
 
 [features]
 convert-glam27 = []
+macros = []

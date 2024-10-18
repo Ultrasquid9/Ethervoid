@@ -18,16 +18,6 @@ impl Movement {
 			_ => Movement::MoveTowardsPlayer
 		}
 	}
-
-	/// Moves the enemy based upon their Movement
-	fn update(&self, enemy: &Enemy, player: &Player) -> Vec2 {
-		match &self {
-			// Simple movement AI that tracks the player and moves towards them
-			Self::MoveTowardsPlayer => {
-				return enemy.stats.pos.move_towards(player.stats.pos, 1.0)
-			}
-		}
-	}
 }
 
 /// The attacks used by an enemy
@@ -79,7 +69,7 @@ impl Enemy {
 	pub fn from_builder(pos: Vec2, builder: EnemyBuilder) -> Self {
 		return Self {
 			stats: Entity {
-				pos: pos,
+				pos,
 				health: builder.max_health as isize,
 			},
 			attacks: builder.attacks,
@@ -89,7 +79,7 @@ impl Enemy {
 
 	/// Updates the enemy based upon their AI and the Player's stats
 	pub fn update(&mut self, player: &mut Player) {
-		self.stats.pos = self.movement.update(self, player);
+		self.movement(player);
 
 		for i in &self.attacks {
 			player.stats.health -= i.attack(&self, &player);
@@ -107,6 +97,16 @@ impl Enemy {
 			return true
 		} else {
 			return false
+		}
+	}
+
+	/// Moves the enemy based upon their Movement
+	fn movement(&mut self, player: &Player){
+		match self.movement {
+			// Simple movement AI that tracks the player and moves towards them
+			Movement::MoveTowardsPlayer => {
+				self.stats.pos = self.stats.pos.move_towards(player.stats.pos, 1.0);
+			}
 		}
 	}
 }

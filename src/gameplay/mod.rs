@@ -2,6 +2,7 @@ use builders::mapbuilder::get_mapbuilders;
 use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
+use rapier2d::prelude::*;
 
 use crate::{input::get_keycode, State};
 
@@ -16,18 +17,29 @@ pub struct Entity {
 }
 
 pub async fn gameplay() -> State {
+	// The player and enemies themselves
 	let mut player = Player::new(); // Creates a player
 	let mut enemies = Vec::new(); // Creates a list of enemies
 	
+	// The maps
 	let maps = get_mapbuilders(); // Creates a list of MapBuilders
 	let current_map = String::from("Test"); // Stores the map the player is currently in
 
+	// Populating the enemies with data from the maps
 	for i in maps.get(&current_map).unwrap().enemies.clone() {
 		enemies.push(Enemy::from_builder(i.1, i.0))
 	}
-	
-	get_mapbuilders();
-	
+
+	// Physics
+	let mut rigid_bodies = RigidBodySet::new();
+
+	for i in &enemies {
+		rigid_bodies.insert(RigidBodyBuilder::dynamic()
+			.translation(vector![i.stats.pos.x, i.stats.pos.y])
+			.build()
+		);
+	}
+		
 	loop {
 		clear_background(RED); // Draws the background
 
