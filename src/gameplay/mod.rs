@@ -3,7 +3,6 @@ use draw::draw;
 use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
-use rapier2d::prelude::*;
 
 use crate::{input::get_keycode, State};
 
@@ -32,16 +31,6 @@ pub async fn gameplay() -> State {
 		enemies.push(Enemy::from_builder(i.1, i.0))
 	}
 
-	// Physics
-	let mut rigid_bodies = RigidBodySet::new();
-
-	for i in &enemies {
-		rigid_bodies.insert(RigidBodyBuilder::dynamic()
-			.translation(vector![i.stats.pos.x, i.stats.pos.y])
-			.build()
-		);
-	}
-		
 	loop {
 		// Updates the player and all enemies
 		player.update();
