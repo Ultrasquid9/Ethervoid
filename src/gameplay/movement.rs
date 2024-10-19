@@ -38,30 +38,35 @@ impl Entity {
 
 	/// Tries to move the entity to the provided Vec2
 	pub fn try_move(&mut self, new_pos: Vec2, map: &Vec<Vec2>) {
-		match cast_wide(
-			&Ray {
-				position: (self.x(), self.y()),
-				end_position: (new_pos.x, self.y())
-			}, 
-			&create_barriers(map)
-		) {
-			Ok(_) => (),
-			_ => self.pos.x = new_pos.x
-		}
-
-		match cast_wide(
-			&Ray {
-				position: (self.x(), self.y()),
-				end_position: (self.x(), new_pos.y)
-			}, 
-			&create_barriers(map)
-		) {
-			Ok(_) => (),
-			_ => self.pos.y = new_pos.y
-		}
+		try_move(&mut self.pos, new_pos, map);
 	}
 }
 
+/// Tries to move the provided position to the provided target
+pub fn try_move(pos: &mut Vec2, target: Vec2, map: &Vec<Vec2>) {
+	match cast_wide(
+		&Ray {
+			position: (pos.x, pos.y),
+			end_position: (target.x, pos.y)
+		}, 
+		&create_barriers(map)
+	) {
+		Ok(_) => (),
+		_ => pos.x = target.x
+	}
+
+	match cast_wide(
+		&Ray {
+			position: (pos.x, pos.y),
+			end_position: (pos.x, target.y)
+		}, 
+		&create_barriers(map)
+	) {
+		Ok(_) => (),
+		_ => pos.y = target.y
+	}
+}
+	
 fn create_barriers(map: &Vec<Vec2>) -> Vec<Barrier> {
 	let mut barriers: Vec<Barrier> = Vec::new();
 

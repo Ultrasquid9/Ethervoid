@@ -16,7 +16,7 @@ impl Player {
 		return Player {
 			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100),
 			config: get_config("./config.json"),
-			speed: 0.0
+			speed: 1.
 		}
 	}
 
