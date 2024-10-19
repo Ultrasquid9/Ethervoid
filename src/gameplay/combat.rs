@@ -65,7 +65,13 @@ impl Attack {
 					}
 				}
 			},
-			AttackType::Burst(attributes) => todo!(),
+			AttackType::Burst(attributes) => {
+				for i in enemies {
+					if i.stats.get_pos().distance(self.pos) <= i.stats.size + (attributes * 2.) {
+						i.stats.health -= self.damage * (i.stats.get_pos().distance(self.pos) / (attributes * 2.)) as isize;
+					}
+				}
+			},
 			AttackType::Projectile(attributes) => todo!(),
 			AttackType::Hitscan(attributes) => todo!()
 		}
