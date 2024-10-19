@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use builders::mapbuilder::{get_mapbuilders, MapBuilder};
+use combat::AttackTypes;
 use draw::draw;
 use enemy::Enemy;
 use player::Player;
@@ -34,15 +35,14 @@ pub async fn gameplay() -> State {
 		// Updates the player and all enemies
 		player.update(&get_map(&maps, &current_map));
 
+		// Attacking
+		if is_key_down(get_keycode(&player.config, "Sword")) {
+			AttackTypes::new_physical(player.stats.get_pos(), 1, 30.).damage(&mut enemies, &player);
+		}
+
 		if enemies.len() > 0 {
 			for i in &mut enemies {
 				i.update(&mut player, &get_map(&maps, &current_map));
-		
-				if is_key_down(get_keycode(&player.config, "Attack")) {
-					if i.stats.get_pos().distance(player.stats.get_pos()) < 64.0 {
-						i.damage(1);
-					}
-				}
 			}
 
 			let enemies_to_kill = enemies_to_kill(&enemies);

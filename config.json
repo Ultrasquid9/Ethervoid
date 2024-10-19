@@ -4,5 +4,6 @@
 	"Down": "S",
 	"Right": "D",
 	"Quit": "Escape",
-	"Attack": "J"
+	"Sword": "J",
+	"Gun": "K"
 }

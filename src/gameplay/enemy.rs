@@ -83,11 +83,6 @@ impl Enemy {
 		}
 	}
 
-	/// Damages the enemy based on the provided isize
-	pub fn damage(&mut self, val: isize) {
-		self.stats.health -= val;
-	}
-
 	/// Checks if the enemy is dead
 	pub fn should_kill(&self) -> bool {
 		if self.stats.health <= 0 {
