@@ -10,12 +10,7 @@ mod player;
 mod enemy;
 mod builders;
 mod draw;
-
-/// Data used by all entities, including both the player and enemies
-pub struct Entity {
-	pub pos: Vec2,
-	pub health: isize
-}
+mod movement;
 
 pub async fn gameplay() -> State {
 	// The player and enemies themselves
@@ -60,7 +55,7 @@ fn update_enemies(player: &mut Player, enemies: &mut Vec<Enemy>) {
 		i.update(player);
 
 		if is_key_down(get_keycode(&player.config, "Attack")) {
-			if i.stats.pos.distance(player.stats.pos) < 64.0 {
+			if i.stats.get_pos().distance(player.stats.get_pos()) < 64.0 {
 				i.damage(1);
 			}
 		}

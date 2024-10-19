@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::input::{get_config, get_keycode};
 
-use super::Entity;
+use super::movement::Entity;
 
 pub struct Player {
 	pub stats: Entity,
@@ -14,11 +14,7 @@ pub struct Player {
 impl Player {
 	pub fn new() -> Self {
 		return Player {
-			stats: Entity { 
-				pos: Vec2::new(0.0, 0.0),
-				health: 100,
-			},
-
+			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100),
 			config: get_config("./config.json"),
 			speed: 0.0
 		}
@@ -30,7 +26,7 @@ impl Player {
 			return self;
 		}
 
-		let mut new_pos = Vec2::new(self.stats.pos.x, self.stats.pos.y);
+		let mut new_pos = Vec2::new(self.stats.x(), self.stats.y());
 
 		if is_key_down(get_keycode(&self.config, "Up")) {
 			new_pos.y -= self.speed;
@@ -45,17 +41,17 @@ impl Player {
 			new_pos.x += self.speed;
 		}
 
-		if self.speed < 3.0 && new_pos != self.stats.pos {
+		if self.speed < 3.0 && new_pos != self.stats.get_pos() {
 			self.speed = self.speed + (self.speed / 6.0);
 		}
 
-		if new_pos == self.stats.pos {
+		if new_pos == self.stats.get_pos() {
 			self.speed = 1.0;
 			return self;
-		} else if self.stats.pos.x != new_pos.x && self.stats.pos.y != new_pos.y {
-			self.stats.pos = new_pos.midpoint(new_pos.midpoint(self.stats.pos));
+		} else if self.stats.x() != new_pos.x && self.stats.y() != new_pos.y {
+			self.stats.try_move(new_pos.midpoint(new_pos.midpoint(self.stats.get_pos())));
 		} else {
-			self.stats.pos = new_pos;
+			self.stats.try_move(new_pos);
 		}
 
 		return self;

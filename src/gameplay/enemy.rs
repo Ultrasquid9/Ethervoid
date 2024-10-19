@@ -1,7 +1,7 @@
 use macroquad::math::Vec2;
 use serde_json::Value;
 
-use super::{player::Player, builders::enemybuilder::EnemyBuilder, Entity};
+use super::{player::Player, builders::enemybuilder::EnemyBuilder, movement::Entity};
 
 /// The movement AI used by an enemy
 #[derive(Clone)]
@@ -47,7 +47,7 @@ impl Attacks {
 		match &self {
 			// Simple attack that damages the player if they are too close
 			Self::ContactDamage => {
-				if enemy.stats.pos.distance(player.stats.pos) < 20. {
+				if enemy.stats.get_pos().distance(player.stats.get_pos()) < 20. {
 					return 1;
 				} else {
 					return 0;
@@ -68,10 +68,7 @@ impl Enemy {
 	/// Creates a new Enemy using a Vec2 for the pos and an EnemyBuilder for the stats
 	pub fn from_builder(pos: Vec2, builder: EnemyBuilder) -> Self {
 		return Self {
-			stats: Entity {
-				pos,
-				health: builder.max_health as isize,
-			},
+			stats: Entity::new(pos, builder.size, builder.max_health as isize),
 			attacks: builder.attacks,
 			movement: builder.movement,
 		}
@@ -105,7 +102,7 @@ impl Enemy {
 		match self.movement {
 			// Simple movement AI that tracks the player and moves towards them
 			Movement::MoveTowardsPlayer => {
-				self.stats.pos = self.stats.pos.move_towards(player.stats.pos, 1.0);
+				self.stats.try_move(self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0));
 			}
 		}
 	}

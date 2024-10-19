@@ -9,15 +9,15 @@ pub fn draw(player: &Player, enemies: &Vec<Enemy>) {
 	// Creates a camera targetting the player
 	set_camera(&Camera2D {
 		zoom: vec2(1. / camera_scale(), screen_width() / screen_height() / camera_scale()),
-		target: player.stats.pos,
+		target: player.stats.get_pos(),
 		..Default::default()
 	});
 
 	// Drawing the Player and enemies
-    draw_circle(player.stats.pos.x, player.stats.pos.y, 15.0, YELLOW); // Player
+    draw_circle(player.stats.x(), player.stats.y(), player.stats.size as f32, YELLOW); // Player
 	if enemies.len() > 0 {
 		for i in enemies {
-			draw_circle(i.stats.pos.x, i.stats.pos.y, 15.0, GREEN); // Enemies
+			draw_circle(i.stats.x(), i.stats.y(), i.stats.size as f32, GREEN); // Enemies
 		}
 	}
 

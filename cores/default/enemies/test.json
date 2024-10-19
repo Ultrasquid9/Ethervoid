@@ -1,6 +1,7 @@
 {
 	"Name": "Test",
 	"Max Health": 128,
+	"Size": 15,
 	"Movement": "MoveTowardsPlayer",
 	"Attacks": [
 		"ContactDamage"

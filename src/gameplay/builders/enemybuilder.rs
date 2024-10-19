@@ -10,6 +10,7 @@ use super::{get_builders, get_name};
 #[derive(Clone)]
 pub struct EnemyBuilder {
 	pub max_health: usize,
+	pub size: f32,
 	pub movement: Movement,
 	pub attacks: Vec<Attacks>
 }
@@ -21,6 +22,7 @@ impl EnemyBuilder {
 
 		let builder = EnemyBuilder {
 			max_health: input["Max Health"].as_u64().unwrap() as usize,
+			size: input["Size"].as_f64().unwrap() as f32,
 			movement: Movement::from_str(input["Movement"].as_str().unwrap()),
 			attacks: Attacks::from_vec(input["Attacks"].as_array().unwrap())
 		};
