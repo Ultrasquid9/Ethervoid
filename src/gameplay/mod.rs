@@ -13,7 +13,9 @@ mod enemy;
 mod builders;
 mod draw;
 mod movement;
+mod combat;
 
+/// The gameplay loop of the game
 pub async fn gameplay() -> State {
 	// The player and enemies themselves
 	let mut player = Player::new(); // Creates a player
@@ -60,6 +62,7 @@ pub async fn gameplay() -> State {
 	}
 }
 
+/// Gets the enemies that should be retained
 fn enemies_to_kill(enemies: &Vec<Enemy>) -> Vec<bool> {
 	let mut enemies_to_kill: Vec<bool> = Vec::new();
 
@@ -70,6 +73,12 @@ fn enemies_to_kill(enemies: &Vec<Enemy>) -> Vec<bool> {
 	return enemies_to_kill;
 }
 
+/// Gets the map at the provided String
 fn get_map(maps: &HashMap<String, MapBuilder>, current_map: &str) -> Vec<Vec2> {
 	return maps.get(current_map).unwrap().points.clone();
+}
+
+/// Converts inputted Vec2 into a tuple of f32
+pub fn vec2_to_tuple(vec: &Vec2) -> (f32, f32) {
+	return (vec.x, vec.y)
 }

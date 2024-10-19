@@ -1,6 +1,8 @@
 use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 
+use super::vec2_to_tuple;
+
 /// Data used by all entities, including both the player and enemies
 pub struct Entity {
 	pos: Vec2,
@@ -58,10 +60,6 @@ impl Entity {
 			_ => self.pos.y = new_pos.y
 		}
 	}
-}
-
-fn vec2_to_tuple(vec: &Vec2) -> (f32, f32) {
-	return (vec.x, vec.y)
 }
 
 fn create_barriers(map: &Vec<Vec2>) -> Vec<Barrier> {
