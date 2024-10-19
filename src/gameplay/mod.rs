@@ -46,7 +46,7 @@ pub async fn gameplay() -> State {
 		}
 
 		// Draws the player and enemies
-		draw(&player, &enemies);
+		draw(&player, &enemies, &maps.get(&current_map).unwrap().points);
 
 		// Quits the game
 		if is_key_down(get_keycode(&player.config, "Quit")) {

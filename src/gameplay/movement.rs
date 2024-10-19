@@ -39,14 +39,24 @@ impl Entity {
 		match cast_wide(
 			&Ray {
 				position: (self.x(), self.y()),
-				end_position: (new_pos.x, new_pos.y)
+				end_position: (new_pos.x, self.y())
 			}, 
 			&create_barriers(map)
 		) {
 			Ok(_) => (),
-			_ => self.pos = new_pos
+			_ => self.pos.x = new_pos.x
 		}
-		
+
+		match cast_wide(
+			&Ray {
+				position: (self.x(), self.y()),
+				end_position: (self.x(), new_pos.y)
+			}, 
+			&create_barriers(map)
+		) {
+			Ok(_) => (),
+			_ => self.pos.y = new_pos.y
+		}
 	}
 }
 
