@@ -1,4 +1,6 @@
-use builders::mapbuilder::get_mapbuilders;
+use std::collections::HashMap;
+
+use builders::mapbuilder::{get_mapbuilders, MapBuilder};
 use draw::draw;
 use enemy::Enemy;
 use player::Player;
@@ -28,11 +30,11 @@ pub async fn gameplay() -> State {
 
 	loop {
 		// Updates the player and all enemies
-		player.update(&maps.get(&current_map).unwrap().points);
+		player.update(&get_map(&maps, &current_map));
 
 		if enemies.len() > 0 {
 			for i in &mut enemies {
-				i.update(&mut player, &maps.get(&current_map).unwrap().points);
+				i.update(&mut player, &get_map(&maps, &current_map));
 		
 				if is_key_down(get_keycode(&player.config, "Attack")) {
 					if i.stats.get_pos().distance(player.stats.get_pos()) < 64.0 {
@@ -46,7 +48,7 @@ pub async fn gameplay() -> State {
 		}
 
 		// Draws the player and enemies
-		draw(&player, &enemies, &maps.get(&current_map).unwrap().points);
+		draw(&player, &enemies, &get_map(&maps, &current_map));
 
 		// Quits the game
 		if is_key_down(get_keycode(&player.config, "Quit")) {
@@ -66,4 +68,8 @@ fn enemies_to_kill(enemies: &Vec<Enemy>) -> Vec<bool> {
 	}
 
 	return enemies_to_kill;
+}
+
+fn get_map(maps: &HashMap<String, MapBuilder>, current_map: &str) -> Vec<Vec2> {
+	return maps.get(current_map).unwrap().points.clone();
 }
