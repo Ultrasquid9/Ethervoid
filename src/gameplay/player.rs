@@ -26,32 +26,29 @@ impl Player {
 			return self;
 		}
 
-		let mut new_pos = Vec2::new(self.stats.x(), self.stats.y());
+		let mut new_pos = Vec2::new(0., 0.);
 
 		if is_key_down(get_keycode(&self.config, "Up")) {
-			new_pos.y -= self.speed;
+			new_pos.y -= 1.;
 		}
 		if is_key_down(get_keycode(&self.config, "Down")) {
-			new_pos.y += self.speed;
+			new_pos.y += 1.;
 		}
 		if is_key_down(get_keycode(&self.config, "Left")) {
-			new_pos.x -= self.speed;
+			new_pos.x -= 1.;
 		}
 		if is_key_down(get_keycode(&self.config, "Right")) {
-			new_pos.x += self.speed;
+			new_pos.x += 1.;
 		}
 
-		if self.speed < 3.0 && new_pos != self.stats.get_pos() {
+		if self.speed < 3.0 && new_pos != Vec2::new(0., 0.) {
 			self.speed = self.speed + (self.speed / 6.0);
 		}
 
-		if new_pos == self.stats.get_pos() {
+		if new_pos == Vec2::new(0., 0.) {
 			self.speed = 1.0;
-			return self;
-		} else if self.stats.x() != new_pos.x && self.stats.y() != new_pos.y {
-			self.stats.try_move(new_pos.midpoint(new_pos.midpoint(self.stats.get_pos())), map);
 		} else {
-			self.stats.try_move(new_pos, map);
+			self.stats.try_move((new_pos.normalize() * self.speed) + self.stats.get_pos(), map);
 		}
 
 		return self;
