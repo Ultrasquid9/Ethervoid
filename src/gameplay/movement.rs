@@ -1,4 +1,5 @@
 use macroquad::math::Vec2;
+use raylite::{cast_wide, Barrier, Ray};
 
 /// Data used by all entities, including both the player and enemies
 pub struct Entity {
@@ -34,7 +35,38 @@ impl Entity {
 	}
 
 	/// Tries to move the entity to the provided Vec2
-	pub fn try_move(&mut self, new_pos: Vec2) {
-		self.pos = new_pos;
+	pub fn try_move(&mut self, new_pos: Vec2, map: &Vec<Vec2>) {
+		match cast_wide(
+			&Ray {
+				position: (self.x(), self.y()),
+				end_position: (new_pos.x, new_pos.y)
+			}, 
+			&create_barriers(map)
+		) {
+			Ok(_) => (),
+			_ => self.pos = new_pos
+		}
+		
 	}
+}
+
+fn vec2_to_tuple(vec: &Vec2) -> (f32, f32) {
+	return (vec.x, vec.y)
+}
+
+fn create_barriers(map: &Vec<Vec2>) -> Vec<Barrier> {
+	let mut barriers: Vec<Barrier> = Vec::new();
+
+	for i in 0..map.len() {
+		match map.get(i + 1) {
+			Some(_) => barriers.push(Barrier {
+				positions: (vec2_to_tuple(map.get(i).unwrap()), vec2_to_tuple(map.get(i + 1).unwrap()))
+			}),
+			None => barriers.push(Barrier {
+				positions: (vec2_to_tuple(map.get(i).unwrap()), (vec2_to_tuple(map.get(0).unwrap())))
+			})
+		}
+	}
+
+	return barriers;
 }

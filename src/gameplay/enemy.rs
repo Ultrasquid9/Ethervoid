@@ -75,8 +75,8 @@ impl Enemy {
 	}
 
 	/// Updates the enemy based upon their AI and the Player's stats
-	pub fn update(&mut self, player: &mut Player) {
-		self.movement(player);
+	pub fn update(&mut self, player: &mut Player, map: &Vec<Vec2>) {
+		self.movement(player, map);
 
 		for i in &self.attacks {
 			player.stats.health -= i.attack(&self, &player);
@@ -98,11 +98,11 @@ impl Enemy {
 	}
 
 	/// Moves the enemy based upon their Movement
-	fn movement(&mut self, player: &Player){
+	fn movement(&mut self, player: &Player, map: &Vec<Vec2>){
 		match self.movement {
 			// Simple movement AI that tracks the player and moves towards them
 			Movement::MoveTowardsPlayer => {
-				self.stats.try_move(self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0));
+				self.stats.try_move(self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0), map);
 			}
 		}
 	}

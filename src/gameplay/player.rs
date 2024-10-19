@@ -20,7 +20,7 @@ impl Player {
 		}
 	}
 
-	pub fn update(&mut self) -> &Self {
+	pub fn update(&mut self, map: &Vec<Vec2>) -> &Self {
 		if self.stats.health <= 0 {
 			*self = Self::new();
 			return self;
@@ -49,9 +49,9 @@ impl Player {
 			self.speed = 1.0;
 			return self;
 		} else if self.stats.x() != new_pos.x && self.stats.y() != new_pos.y {
-			self.stats.try_move(new_pos.midpoint(new_pos.midpoint(self.stats.get_pos())));
+			self.stats.try_move(new_pos.midpoint(new_pos.midpoint(self.stats.get_pos())), map);
 		} else {
-			self.stats.try_move(new_pos);
+			self.stats.try_move(new_pos, map);
 		}
 
 		return self;

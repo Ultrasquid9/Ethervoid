@@ -28,10 +28,18 @@ pub async fn gameplay() -> State {
 
 	loop {
 		// Updates the player and all enemies
-		player.update();
+		player.update(&maps.get(&current_map).unwrap().points);
 
 		if enemies.len() > 0 {
-			update_enemies(&mut player, &mut enemies);
+			for i in &mut enemies {
+				i.update(&mut player, &maps.get(&current_map).unwrap().points);
+		
+				if is_key_down(get_keycode(&player.config, "Attack")) {
+					if i.stats.get_pos().distance(player.stats.get_pos()) < 64.0 {
+						i.damage(1);
+					}
+				}
+			}
 
 			let enemies_to_kill = enemies_to_kill(&enemies);
 			enemies.retain(|_| *enemies_to_kill.iter().next().unwrap());
@@ -47,18 +55,6 @@ pub async fn gameplay() -> State {
 		}
 
 		next_frame().await;
-	}
-}
-
-fn update_enemies(player: &mut Player, enemies: &mut Vec<Enemy>) {
-	for i in enemies {
-		i.update(player);
-
-		if is_key_down(get_keycode(&player.config, "Attack")) {
-			if i.stats.get_pos().distance(player.stats.get_pos()) < 64.0 {
-				i.damage(1);
-			}
-		}
 	}
 }
 
