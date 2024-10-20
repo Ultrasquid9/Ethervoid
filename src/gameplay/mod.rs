@@ -32,7 +32,7 @@ pub async fn gameplay() -> State {
 	}
 
 	loop {
-		// Updates the player and all enemies
+		// Updates the player
 		player.update(&get_map(&maps, &current_map));
 
 		// Attacking
@@ -40,6 +40,7 @@ pub async fn gameplay() -> State {
 			Attack::new_physical(player.stats.get_pos(), 1, 30.).damage(&mut enemies, &player);
 		}
 
+		// Updates enemies
 		if enemies.len() > 0 {
 			for i in &mut enemies {
 				i.update(&mut player, &get_map(&maps, &current_map));
