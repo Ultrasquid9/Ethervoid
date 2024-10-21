@@ -1,7 +1,7 @@
 use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 
-use super::{enemy::Enemy, player::Player, vec2_to_tuple};
+use super::{enemy::Enemy, entity::try_move, player::Player, vec2_to_tuple};
 
 pub struct Attack {
 	pub size: f32,
@@ -83,7 +83,7 @@ impl Attack {
 		}
 	}
 
-	pub fn update(&mut self, enemies: &mut Vec<Enemy>, _player: &Player) {
+	pub fn update(&mut self, enemies: &mut Vec<Enemy>, _player: &Player, map: &Vec<Vec2>) {
 		match &self.attack_type {
 			AttackType::Physical => {
 				for i in enemies {
@@ -101,7 +101,32 @@ impl Attack {
 				}
 				self.lifetime -= 1;
 			},
-			AttackType::Projectile(attributes) => todo!(),
+			AttackType::Projectile(attributes) => {
+				let new_pos = self.pos.move_towards(attributes.target, 3.0);
+
+				for i in enemies {
+					match cast_wide(
+						&Ray{
+							position: vec2_to_tuple(&self.pos), 
+							end_position: vec2_to_tuple(&new_pos)
+						}, 
+						&enemy_to_barriers(i)
+					) {
+						Ok(_) => {
+							i.stats.health -= self.damage;
+							self.lifetime = 0;
+							return;
+						},
+						_ => ()
+					}
+				}
+
+				try_move(&mut self.pos, new_pos, map);
+
+				if self.pos != new_pos || self.pos == attributes.target {
+					self.lifetime = 0;
+				}
+			},
 			AttackType::Hitscan(attributes) => {
 				for i in enemies {
 					match cast_wide(

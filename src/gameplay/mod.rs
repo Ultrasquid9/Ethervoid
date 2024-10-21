@@ -45,13 +45,13 @@ pub async fn gameplay() -> State {
 		}
 		if is_key_down(get_keycode(&player.config, "Gun")) && player.gun_cooldown == 0 {
 			player.gun_cooldown = 16;
-			attacks.push(Attack::new_hitscan(player.stats.get_pos(), get_mouse_pos() * 999., 1));
+			attacks.push(Attack::new_projectile(player.stats.get_pos(), get_mouse_pos() * 999., 1));
 		}
 
 		// Updates enemies
 		if attacks.len() > 0 {
 			for i in &mut attacks {
-				i.update(&mut enemies, &mut player);
+				i.update(&mut enemies, &mut player, &get_map(&maps, &current_map));
 			}
 
 			attacks.retain(|x| !x.should_rm());
