@@ -12,6 +12,8 @@ pub struct Player {
 
 	pub swords: [WeaponInfo; 3],
 	pub guns: [WeaponInfo; 3],
+	pub current_sword: u8,
+	pub current_gun: u8, 
 
 	speed: f32,
 	axis_horizontal: Axis,
@@ -60,6 +62,8 @@ impl Player {
 				WeaponInfo {weapon: Weapon::Shotgun, unlocked: true, cooldown: 0},
 				WeaponInfo {weapon: Weapon::RadioCannon, unlocked: true, cooldown: 0}
 			],
+			current_sword: 0,
+			current_gun: 0,
 
 			speed: 1.,
 			axis_horizontal: Axis::None,
@@ -75,6 +79,7 @@ impl Player {
 			return self;
 		}
 
+		// Weapon cooldown
 		for i in self.swords.iter_mut() {
 			if i.cooldown > 0 {
 				i.cooldown -= 1;
@@ -84,6 +89,14 @@ impl Player {
 			if i.cooldown > 0 {
 				i.cooldown -= 1;
 			}
+		}
+
+		// Changing weapons
+		if is_pressed("Change Sword", &self.config) {
+			self.current_sword = swap_weapons(&self.current_sword, &self.swords);
+		}
+		if is_pressed("Change Gun", &self.config) {
+			self.current_gun = swap_weapons(&self.current_gun, &self.guns);
 		}
 
 		self.movement(map);
@@ -160,6 +173,22 @@ impl Player {
 			self.speed = 1.0;
 		} else {
 			self.stats.try_move((new_pos.normalize() * self.speed) + self.stats.get_pos(), map);
+		}
+	}
+}
+
+fn swap_weapons(current_weapon: &u8, weapons: &[WeaponInfo; 3]) -> u8 {
+	let mut to_return: u8 = *current_weapon;
+
+	loop {
+		if *current_weapon >= weapons.len() as u8 {
+			to_return = 0;
+		}
+
+		if weapons[to_return as usize].unlocked {
+			return to_return;
+		} else {
+			to_return += 1;
 		}
 	}
 }

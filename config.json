@@ -5,5 +5,7 @@
 	"Right": "D",
 	"Quit": "Escape",
 	"Sword": "Left Click",
-	"Gun": "Right Click"
+	"Gun": "Right Click",
+	"Change Sword": "R",
+	"Change Gun": "F"
 }
