@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::input::{get_config, get_keycode};
 
-use super::movement::Entity;
+use super::entity::Entity;
 
 pub struct Player {
 	pub stats: Entity,

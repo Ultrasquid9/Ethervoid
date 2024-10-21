@@ -13,7 +13,7 @@ mod player;
 mod enemy;
 mod builders;
 mod draw;
-mod movement;
+mod entity;
 mod combat;
 
 /// The gameplay loop of the game

@@ -1,7 +1,7 @@
 use macroquad::math::Vec2;
 use serde_json::Value;
 
-use super::{player::Player, builders::enemybuilder::EnemyBuilder, movement::Entity};
+use super::{player::Player, builders::enemybuilder::EnemyBuilder, entity::Entity};
 
 /// The movement AI used by an enemy
 #[derive(Clone)]
