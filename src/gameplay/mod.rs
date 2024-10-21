@@ -41,11 +41,11 @@ pub async fn gameplay() -> State {
 		// Attacking
 		if is_down("Sword", &player.config) && player.swords[0].cooldown == 0 {
 			player.swords[0].cooldown = 16;
-			attacks.push(Attack::new_physical(player.stats.get_pos(), 1, 36.));
+			attacks.push(player.attack_sword());
 		}
 		if is_down("Gun", &player.config) && player.guns[0].cooldown == 0 {
 			player.guns[0].cooldown = 16;
-			attacks.push(Attack::new_projectile(player.stats.get_pos(), get_mouse_pos() * 999., 10));
+			attacks.push(player.attack_gun());
 		}
 
 		// Updates enemies
@@ -95,6 +95,6 @@ pub fn tuple_to_vec2(tup: (f32, f32)) -> Vec2 {
 }
 
 /// Gets the current position of the mouse
-fn get_mouse_pos() -> Vec2 {
+pub fn get_mouse_pos() -> Vec2 {
 	tuple_to_vec2(mouse_position()) - Vec2::new(screen_width() / 2., screen_height() / 2.)
 }

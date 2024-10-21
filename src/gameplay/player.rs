@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::input::{get_config, is_down, is_pressed};
 
-use super::entity::Entity;
+use super::{combat::Attack, entity::Entity, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -12,8 +12,8 @@ pub struct Player {
 
 	pub swords: [WeaponInfo; 3],
 	pub guns: [WeaponInfo; 3],
-	pub current_sword: u8,
-	pub current_gun: u8, 
+	pub current_sword: usize,
+	pub current_gun: usize, 
 
 	speed: f32,
 	axis_horizontal: Axis,
@@ -104,6 +104,46 @@ impl Player {
 		return self;
 	}
 
+	// Gets a sword attack based upon the currently selected sword
+	pub fn attack_sword(&mut self) -> Attack {
+		match self.swords[self.current_sword].weapon {
+			Weapon::Sword => {
+				self.swords[self.current_sword].cooldown = 16;
+				Attack::new_physical(self.stats.get_pos(), 1, 36.)
+			},
+			Weapon::Hammer => {
+				self.swords[self.current_sword].cooldown = 32;
+				Attack::new_burst(self.stats.get_pos(), 10, 36.)
+			},
+			Weapon::Boomerang => {
+				self.swords[self.current_sword].cooldown = 48;
+				Attack::new_projectile(self.stats.get_pos(), get_mouse_pos() * 999., 10)
+			},
+			
+			_ => panic!("Bad weapon")
+		}
+	}
+
+	// Gets a gun attack based upon the currently selected gun
+	pub fn attack_gun(&mut self) -> Attack {
+		match self.guns[self.current_gun].weapon {
+			Weapon::Pistol => {
+				self.guns[self.current_gun].cooldown = 16;
+				Attack::new_projectile(self.stats.get_pos(), get_mouse_pos() * 999., 10)
+			},
+			Weapon::Shotgun => {
+				self.guns[self.current_gun].cooldown = 32;
+				Attack::new_burst(self.stats.get_pos(), 10, 36.)
+			},
+			Weapon::RadioCannon => {
+				self.guns[self.current_gun].cooldown = 48;
+				Attack::new_hitscan(self.stats.get_pos(), get_mouse_pos() * 999., 6)
+			},
+			
+			_ => panic!("Bad weapon")
+		}
+	}
+
 	/// Handles player movement
 	fn movement(&mut self, map: &Vec<Vec2>) {
 		// Checks to see if both Up and Down are being held at the same time.
@@ -177,18 +217,17 @@ impl Player {
 	}
 }
 
-fn swap_weapons(current_weapon: &u8, weapons: &[WeaponInfo; 3]) -> u8 {
-	let mut to_return: u8 = *current_weapon;
+fn swap_weapons(current_weapon: &usize, weapons: &[WeaponInfo; 3]) -> usize {
+	let mut to_return: usize = *current_weapon;
 
 	loop {
-		if *current_weapon >= weapons.len() as u8 {
+		to_return += 1;
+		if *current_weapon >= weapons.len() - 1 {
 			to_return = 0;
 		}
 
-		if weapons[to_return as usize].unlocked {
+		if weapons[to_return].unlocked {
 			return to_return;
-		} else {
-			to_return += 1;
 		}
 	}
 }
