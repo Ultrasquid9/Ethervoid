@@ -40,6 +40,9 @@ pub async fn gameplay() -> State {
 		if is_key_down(get_keycode(&player.config, "Sword")) {
 			attacks.push(Attack::new_physical(player.stats.get_pos(), 1, 30.));
 		}
+		if is_key_down(get_keycode(&player.config, "Gun")) {
+			attacks.push(Attack::new_hitscan(player.stats.get_pos(), player.stats.get_pos() * 999., 1));
+		}
 
 		// Updates enemies
 		if attacks.len() > 0 {

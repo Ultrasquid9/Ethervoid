@@ -38,7 +38,18 @@ pub fn draw(player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &
 	// Drawing the Player, enemies, and attacks
 	if attacks.len() > 0 {
 		for i in attacks {
-			draw_circle(i.pos.x, i.pos.y, i.size, PURPLE); // Enemies
+			if i.is_hitscan() {
+				draw_line(
+					i.pos.x, 
+					i.pos.y, 
+					i.get_target().x, 
+					i.get_target().y, 
+					6., 
+					PURPLE
+				); 
+			} else {
+				draw_circle(i.pos.x, i.pos.y, i.size, PURPLE); 
+			}
 		}
 	}
     draw_circle(player.stats.x(), player.stats.y(), player.stats.size as f32, YELLOW); // Player

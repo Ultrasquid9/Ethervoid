@@ -1,6 +1,7 @@
 use macroquad::math::Vec2;
+use raylite::{cast_wide, Barrier, Ray};
 
-use super::{enemy::Enemy, player::Player};
+use super::{enemy::Enemy, player::Player, vec2_to_tuple};
 
 pub struct Attack {
 	pub size: f32,
@@ -67,6 +68,21 @@ impl Attack {
 		}
 	}
 
+	pub fn is_hitscan(&self) -> bool {
+		match self.attack_type {
+			AttackType::Hitscan(_) => true,
+			_ => false
+		}
+	}
+
+	pub fn get_target(&self) -> Vec2 {
+		match &self.attack_type {
+			AttackType::Projectile(attributes) => attributes.target,
+			AttackType::Hitscan(attributes) => attributes.target,
+			_ => panic!("Attack does not have a target")
+		}
+	}
+
 	pub fn update(&mut self, enemies: &mut Vec<Enemy>, _player: &Player) {
 		match &self.attack_type {
 			AttackType::Physical => {
@@ -85,10 +101,22 @@ impl Attack {
 				}
 				self.lifetime -= 1;
 			},
-			AttackType::Projectile(attributes) => {
+			AttackType::Projectile(attributes) => todo!(),
+			AttackType::Hitscan(attributes) => {
+				for i in enemies {
+					match cast_wide(
+						&Ray{
+							position: vec2_to_tuple(&self.pos), 
+							end_position: vec2_to_tuple(&attributes.target)
+						}, 
+						&enemy_to_barriers(i)
+					) {
+						Ok(_) => i.stats.health -= self.damage,
+						_ => ()
+					}
+				}
 				self.lifetime -= 1;
-			},
-			AttackType::Hitscan(attributes) => todo!()
+			}
 		}
 	}
 
@@ -98,4 +126,22 @@ impl Attack {
 		}
 		return false;
 	}
+}
+
+/// Converts the provided enemy into two barriers, a horizontal and a vertical one 
+fn enemy_to_barriers(enemy: &Enemy) -> Vec<Barrier> {
+	vec![
+		Barrier {
+			positions: (
+				(enemy.stats.x() + enemy.stats.size, enemy.stats.y()),
+				(enemy.stats.x() - enemy.stats.size, enemy.stats.y())
+			)
+		},
+		Barrier {
+			positions: (
+				(enemy.stats.x(), enemy.stats.y() + enemy.stats.size),
+				(enemy.stats.x(), enemy.stats.y() - enemy.stats.size)
+			)
+		}
+	]
 }
