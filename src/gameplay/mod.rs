@@ -39,12 +39,12 @@ pub async fn gameplay() -> State {
 		player.update(&get_map(&maps, &current_map));
 
 		// Attacking
-		if is_key_down(get_keycode(&player.config, "Sword")) && player.sword_cooldown == 0 {
-			player.sword_cooldown = 16;
+		if is_key_down(get_keycode(&player.config, "Sword")) && player.swords[0].cooldown == 0 {
+			player.guns[0].cooldown = 16;
 			attacks.push(Attack::new_physical(player.stats.get_pos(), 1, 36.));
 		}
-		if is_key_down(get_keycode(&player.config, "Gun")) && player.gun_cooldown == 0 {
-			player.gun_cooldown = 16;
+		if is_key_down(get_keycode(&player.config, "Gun")) && player.guns[0].cooldown == 0 {
+			player.guns[0].cooldown = 16;
 			attacks.push(Attack::new_projectile(player.stats.get_pos(), get_mouse_pos() * 999., 1));
 		}
 

@@ -5,16 +5,24 @@ use crate::input::{get_config, get_keycode};
 
 use super::entity::Entity;
 
+/// Contains info about the player
 pub struct Player {
 	pub stats: Entity,
 	pub config: Value,
 
-	pub sword_cooldown: u8,
-	pub gun_cooldown: u8,
+	pub swords: [WeaponInfo; 3],
+	pub guns: [WeaponInfo; 3],
 
 	speed: f32,
 	axis_horizontal: Axis,
 	axis_vertical: Axis
+}
+
+/// Contains info about one of the player's weapons
+pub struct WeaponInfo {
+	weapon: Weapon,
+	unlocked: bool,
+	pub cooldown: u8
 }
 
 #[derive(PartialEq)]
@@ -24,14 +32,34 @@ enum Axis {
 	None
 }
 
+pub enum Weapon {
+	// Swords
+	Sword,
+	Hammer,
+	Boomerang,
+
+	// Gunssword_
+	Pistol,
+	Shotgun,
+	RadioCannon
+}
+
 impl Player {
 	pub fn new() -> Self {
 		return Player {
 			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100),
 			config: get_config("./config.json"),
 
-			sword_cooldown: 0,
-			gun_cooldown: 0,
+			swords: [
+				WeaponInfo {weapon: Weapon::Sword, unlocked: true, cooldown: 0},
+				WeaponInfo {weapon: Weapon::Hammer, unlocked: true, cooldown: 0},
+				WeaponInfo {weapon: Weapon::Boomerang, unlocked: true, cooldown: 0}
+			],
+			guns: [
+				WeaponInfo {weapon: Weapon::Pistol, unlocked: true, cooldown: 0},
+				WeaponInfo {weapon: Weapon::Shotgun, unlocked: true, cooldown: 0},
+				WeaponInfo {weapon: Weapon::RadioCannon, unlocked: true, cooldown: 0}
+			],
 
 			speed: 1.,
 			axis_horizontal: Axis::None,
@@ -47,11 +75,11 @@ impl Player {
 			return self;
 		}
 
-		if self.sword_cooldown != 0 {
-			self.sword_cooldown -= 1;
+		for i in self.swords.iter_mut() {
+			i.cooldown -= 1;
 		}
-		if self.gun_cooldown != 0 {
-			self.gun_cooldown -= 1;
+		for i in self.guns.iter_mut() {
+			i.cooldown -= 1;
 		}
 
 		self.movement(map);
