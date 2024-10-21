@@ -18,9 +18,10 @@ mod combat;
 
 /// The gameplay loop of the game
 pub async fn gameplay() -> State {
-	// The player and enemies themselves
+	// The player, enemies, and attacks
 	let mut player = Player::new(); // Creates a player
 	let mut enemies = Vec::new(); // Creates a list of enemies
+	let mut attacks: Vec<Attack> = Vec::new(); // Creates a list of attacks 
 	
 	// The maps
 	let maps = get_mapbuilders(); // Creates a list of MapBuilders
@@ -37,7 +38,16 @@ pub async fn gameplay() -> State {
 
 		// Attacking
 		if is_key_down(get_keycode(&player.config, "Sword")) {
-			Attack::new_physical(player.stats.get_pos(), 1, 30.).damage(&mut enemies, &player);
+			attacks.push(Attack::new_physical(player.stats.get_pos(), 1, 30.));
+		}
+
+		// Updates enemies
+		if attacks.len() > 0 {
+			for i in &mut attacks {
+				i.update(&mut enemies, &mut player);
+			}
+
+			attacks.retain(|x| !x.should_rm());
 		}
 
 		// Updates enemies
@@ -46,12 +56,11 @@ pub async fn gameplay() -> State {
 				i.update(&mut player, &get_map(&maps, &current_map));
 			}
 
-			let enemies_to_kill = enemies_to_kill(&enemies);
-			enemies.retain(|_| *enemies_to_kill.iter().next().unwrap());
+			enemies.retain(|x| !x.stats.should_kill());
 		}
 
 		// Draws the player and enemies
-		draw(&player, &enemies, &get_map(&maps, &current_map));
+		draw(&player, &enemies, &attacks, &get_map(&maps, &current_map));
 
 		// Quits the game
 		if is_key_down(get_keycode(&player.config, "Quit")) {
@@ -61,17 +70,6 @@ pub async fn gameplay() -> State {
 
 		next_frame().await;
 	}
-}
-
-/// Gets the enemies that should be retained
-fn enemies_to_kill(enemies: &Vec<Enemy>) -> Vec<bool> {
-	let mut enemies_to_kill: Vec<bool> = Vec::new();
-
-	for i in enemies {
-		enemies_to_kill.push(!i.should_kill());
-	}
-
-	return enemies_to_kill;
 }
 
 /// Gets the map at the provided String

@@ -3,10 +3,12 @@ use macroquad::math::Vec2;
 use super::{enemy::Enemy, player::Player};
 
 pub struct Attack {
+	pub size: f32,
+	pub pos: Vec2,
+
 	attack_type: AttackType,
 	damage: isize,
-	size: f32,
-	pos: Vec2
+	lifetime: u8,
 }
 
 pub enum AttackType {
@@ -26,7 +28,8 @@ impl Attack {
 			attack_type: AttackType::Physical,
 			damage,
 			size,
-			pos
+			pos,
+			lifetime: 8,
 		}
 	}
 
@@ -35,7 +38,8 @@ impl Attack {
 			attack_type: AttackType::Burst,
 			damage,
 			size,
-			pos
+			pos,
+			lifetime: 12
 		}
 	}
 
@@ -47,6 +51,7 @@ impl Attack {
 			damage,
 			size: 10.,
 			pos,
+			lifetime: 1,
 		}
 	}
 
@@ -57,11 +62,12 @@ impl Attack {
 			}),
 			damage,
 			size: 10.,
-			pos
+			pos,
+			lifetime: 8
 		}
 	}
 
-	pub fn damage(&self, enemies: &mut Vec<Enemy>, _player: &Player) {
+	pub fn update(&mut self, enemies: &mut Vec<Enemy>, _player: &Player) {
 		match &self.attack_type {
 			AttackType::Physical => {
 				for i in enemies {
@@ -69,6 +75,7 @@ impl Attack {
 						i.stats.health -= self.damage;
 					}
 				}
+				self.lifetime -= 1;
 			},
 			AttackType::Burst => {
 				for i in enemies {
@@ -76,9 +83,19 @@ impl Attack {
 						i.stats.health -= self.damage * (i.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize;
 					}
 				}
+				self.lifetime -= 1;
 			},
-			AttackType::Projectile(attributes) => todo!(),
+			AttackType::Projectile(attributes) => {
+				self.lifetime -= 1;
+			},
 			AttackType::Hitscan(attributes) => todo!()
 		}
+	}
+
+	pub fn should_rm(&self) -> bool {
+		if self.lifetime == 0 {
+			return true;
+		}
+		return false;
 	}
 }

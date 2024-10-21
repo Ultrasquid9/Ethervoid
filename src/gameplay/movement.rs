@@ -40,6 +40,15 @@ impl Entity {
 	pub fn try_move(&mut self, new_pos: Vec2, map: &Vec<Vec2>) {
 		try_move(&mut self.pos, new_pos, map);
 	}
+
+	/// Checks if the entity is dead
+	pub fn should_kill(&self) -> bool {
+		if self.health <= 0 {
+			return true
+		} else {
+			return false
+		}
+	}
 }
 
 /// Tries to move the provided position to the provided target

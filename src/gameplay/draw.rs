@@ -1,9 +1,9 @@
 use macroquad::prelude::*;
 
-use super::{enemy::Enemy, player::Player};
+use super::{combat::Attack, enemy::Enemy, player::Player};
 
 /// Draws the content of the game
-pub fn draw(player: &Player, enemies: &Vec<Enemy>, map: &Vec<Vec2>) {
+pub fn draw(player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &Vec<Vec2>) {
 	clear_background(RED); // Draws the background
 
 	// Creates a camera targetting the player
@@ -35,7 +35,12 @@ pub fn draw(player: &Player, enemies: &Vec<Enemy>, map: &Vec<Vec2>) {
 		}
 	}
 
-	// Drawing the Player and enemies
+	// Drawing the Player, enemies, and attacks
+	if attacks.len() > 0 {
+		for i in attacks {
+			draw_circle(i.pos.x, i.pos.y, i.size, PURPLE); // Enemies
+		}
+	}
     draw_circle(player.stats.x(), player.stats.y(), player.stats.size as f32, YELLOW); // Player
 	if enemies.len() > 0 {
 		for i in enemies {

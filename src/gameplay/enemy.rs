@@ -83,15 +83,6 @@ impl Enemy {
 		}
 	}
 
-	/// Checks if the enemy is dead
-	pub fn should_kill(&self) -> bool {
-		if self.stats.health <= 0 {
-			return true
-		} else {
-			return false
-		}
-	}
-
 	/// Moves the enemy based upon their Movement
 	fn movement(&mut self, player: &Player, map: &Vec<Vec2>){
 		match self.movement {

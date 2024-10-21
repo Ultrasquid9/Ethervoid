@@ -36,7 +36,7 @@ impl Player {
 	/// Updates the player
 	pub fn update(&mut self, map: &Vec<Vec2>) -> &Self {
 		// Death code. WIP. 
-		if self.stats.health <= 0 {
+		if self.stats.should_kill() {
 			*self = Self::new();
 			return self;
 		}
