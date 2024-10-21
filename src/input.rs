@@ -1,4 +1,4 @@
-use macroquad::input::KeyCode;
+use macroquad::input::{is_key_down, is_key_pressed, is_mouse_button_down, is_mouse_button_pressed, KeyCode, MouseButton};
 use serde_json::Value;
 use std::fs;
 
@@ -14,7 +14,7 @@ pub fn get_config(input: &str) -> Value {
 }
 
 /// Gets the KeyCode with the value of the key passed in
-pub fn get_keycode(config: &Value, key: &str) -> KeyCode {
+fn get_keycode(config: &Value, key: &str) -> KeyCode {
 	// There has to be a better way to do this
 	match config[&key].as_str() {
 		Some("Escape") => return KeyCode::Escape,
@@ -63,4 +63,44 @@ pub fn get_keycode(config: &Value, key: &str) -> KeyCode {
 
 		_ => panic!("Bad keycode: {} is not a valid value for {}", config[&key], key)
 	}
+}
+
+fn get_mousebutton(config: &Value, key: &str) -> MouseButton {
+	match config[&key].as_str() {
+		Some("Left Click") => return MouseButton::Left,
+		Some("Right Click") => return MouseButton::Right,
+		Some("Middle Click") => return MouseButton::Middle,
+
+		_ => panic!("Bad keycode: {} is not a valid value for {}", config[&key], key)
+	}
+}
+
+/// Checks if the provided input is down, based upon what it is set to in the config
+pub fn is_down(key: &str, config: &Value) -> bool {
+	let mouse_keys = ["Left Click", "Right Click", "Middle Click"];
+	if mouse_keys.contains(&config[&key].as_str().unwrap()) {
+		if is_mouse_button_down(get_mousebutton(config, key)) {
+			return true
+		}
+	} else {
+		if is_key_down(get_keycode(config, key)) {
+			return true
+		}
+	}
+	return false
+}
+
+/// Checks if the provided input was pressed this frame, based upon what it is set to in the config
+pub fn is_pressed(key: &str, config: &Value) -> bool {
+	let mouse_keys = ["Left Click", "Right Click", "Middle Click"];
+	if mouse_keys.contains(&config[&key].as_str().unwrap()) {
+		if is_mouse_button_pressed(get_mousebutton(config, key)) {
+			return true
+		}
+	} else {
+		if is_key_pressed(get_keycode(config, key)) {
+			return true
+		}
+	}
+	return false
 }

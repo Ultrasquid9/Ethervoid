@@ -11,7 +11,7 @@ pub enum State {
 	Quit // Exiting the gamej
 }
 
-#[macroquad::main("Ethervoid")]
+#a[macroquad::main("Ethervoid")]
 async fn main() {
 	let mut state = State::Gameplay;
 

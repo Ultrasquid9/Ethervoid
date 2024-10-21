@@ -1,7 +1,7 @@
-use macroquad::{input::{is_key_down, is_key_pressed}, math::Vec2};
+use macroquad::math::Vec2;
 use serde_json::Value;
 
-use crate::input::{get_config, get_keycode};
+use crate::input::{get_config, is_down, is_pressed};
 
 use super::entity::Entity;
 
@@ -76,10 +76,14 @@ impl Player {
 		}
 
 		for i in self.swords.iter_mut() {
-			i.cooldown -= 1;
+			if i.cooldown > 0 {
+				i.cooldown -= 1;
+			}
 		}
 		for i in self.guns.iter_mut() {
-			i.cooldown -= 1;
+			if i.cooldown > 0 {
+				i.cooldown -= 1;
+			}
 		}
 
 		self.movement(map);
@@ -92,19 +96,19 @@ impl Player {
 		// Checks to see if both Up and Down are being held at the same time.
 		// If they are, sets the direction to move based upon the most recently pressed key. 
 		// Otherwise, sets the direction to move based upon the currently pressed key.
-		if is_key_down(get_keycode(&self.config, "Up")) 
-		&& is_key_down(get_keycode(&self.config, "Down")) {
-			if is_key_pressed(get_keycode(&self.config, "Up")) 
+		if is_down("Up", &self.config)
+		&& is_down("Down", &self.config) {
+			if is_pressed("Up", &self.config)
 			&& self.axis_vertical != Axis::Negative {
 				self.axis_vertical = Axis::Negative;
 			} 
-			if is_key_pressed(get_keycode(&self.config, "Down")) 
+			if is_pressed("Down", &self.config)
 			&& self.axis_vertical != Axis::Positive {
 				self.axis_vertical = Axis::Positive;
 			} 
-		} else if is_key_down(get_keycode(&self.config, "Up")) {
+		} else if is_down("Up", &self.config) {
 			self.axis_vertical = Axis::Negative;
-		} else if is_key_down(get_keycode(&self.config, "Down")) {
+		} else if is_down("Down", &self.config) {
 			self.axis_vertical = Axis::Positive;
 		} else {
 			self.axis_vertical = Axis::None;
@@ -113,19 +117,19 @@ impl Player {
 		// Checks to see if both Left and Right are being held at the same time.
 		// If they are, sets the direction to move based upon the most recently pressed key. 
 		// Otherwise, sets the direction to move based upon the currently pressed key.
-		if is_key_down(get_keycode(&self.config, "Left")) 
-		&& is_key_down(get_keycode(&self.config, "Right")) {
-			if is_key_pressed(get_keycode(&self.config, "Left")) 
+		if is_down("Left", &self.config)
+		&& is_down("Right", &self.config) {
+			if is_pressed("Left", &self.config)
 			&& self.axis_vertical != Axis::Negative {
 				self.axis_horizontal = Axis::Negative;
 			} 
-			if is_key_pressed(get_keycode(&self.config, "Right")) 
+			if is_pressed("Right", &self.config)
 			&& self.axis_vertical != Axis::Positive {
 				self.axis_horizontal = Axis::Positive;
 			} 
-		} else if is_key_down(get_keycode(&self.config, "Left")) {
+		} else if is_down("Left", &self.config) {
 			self.axis_horizontal = Axis::Negative;
-		} else if is_key_down(get_keycode(&self.config, "Right")) {
+		} else if is_down("Right", &self.config) {
 			self.axis_horizontal = Axis::Positive;
 		} else {
 			self.axis_horizontal = Axis::None;

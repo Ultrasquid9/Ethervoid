@@ -7,7 +7,7 @@ use enemy::Enemy;
 use player::Player;
 use macroquad::prelude::*;
 
-use crate::{input::get_keycode, State};
+use crate::{input::is_down, State};
 
 mod player;
 mod enemy;
@@ -39,11 +39,11 @@ pub async fn gameplay() -> State {
 		player.update(&get_map(&maps, &current_map));
 
 		// Attacking
-		if is_key_down(get_keycode(&player.config, "Sword")) && player.swords[0].cooldown == 0 {
-			player.guns[0].cooldown = 16;
+		if is_down("Sword", &player.config) && player.swords[0].cooldown == 0 {
+			player.swords[0].cooldown = 16;
 			attacks.push(Attack::new_physical(player.stats.get_pos(), 1, 36.));
 		}
-		if is_key_down(get_keycode(&player.config, "Gun")) && player.guns[0].cooldown == 0 {
+		if is_down("Gun", &player.config) && player.guns[0].cooldown == 0 {
 			player.guns[0].cooldown = 16;
 			attacks.push(Attack::new_projectile(player.stats.get_pos(), get_mouse_pos() * 999., 1));
 		}
@@ -70,7 +70,7 @@ pub async fn gameplay() -> State {
 		draw(&player, &enemies, &attacks, &get_map(&maps, &current_map));
 
 		// Quits the game
-		if is_key_down(get_keycode(&player.config, "Quit")) {
+		if is_down("Quit", &player.config) {
 			println!("Quitting the game");
 			return State::Quit;
 		}
