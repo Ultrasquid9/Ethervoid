@@ -102,25 +102,15 @@ impl Attack {
 				self.lifetime -= 1;
 			},
 			AttackType::Projectile(attributes) => {
-				let new_pos = self.pos.move_towards(attributes.target, 3.0);
-
 				for i in enemies {
-					match cast_wide(
-						&Ray{
-							position: vec2_to_tuple(&self.pos), 
-							end_position: vec2_to_tuple(&new_pos)
-						}, 
-						&enemy_to_barriers(i)
-					) {
-						Ok(_) => {
-							i.stats.health -= self.damage;
-							self.lifetime = 0;
-							return;
-						},
-						_ => ()
+					if i.stats.get_pos().distance(self.pos) <= i.stats.size + self.size {
+						i.stats.health -= self.damage;
+						self.lifetime = 0;
+						return;
 					}
 				}
 
+				let new_pos = self.pos.move_towards(attributes.target, 3.0);
 				try_move(&mut self.pos, new_pos, map);
 
 				if self.pos != new_pos || self.pos == attributes.target {

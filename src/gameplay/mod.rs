@@ -45,7 +45,7 @@ pub async fn gameplay() -> State {
 		}
 		if is_down("Gun", &player.config) && player.guns[0].cooldown == 0 {
 			player.guns[0].cooldown = 16;
-			attacks.push(Attack::new_projectile(player.stats.get_pos(), get_mouse_pos() * 999., 1));
+			attacks.push(Attack::new_projectile(player.stats.get_pos(), get_mouse_pos() * 999., 10));
 		}
 
 		// Updates enemies
