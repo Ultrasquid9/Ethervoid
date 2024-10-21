@@ -33,15 +33,19 @@ pub async fn gameplay() -> State {
 	}
 
 	loop {
+		//println!("{}", tuple_to_vec2(mouse_position()));
+
 		// Updates the player
 		player.update(&get_map(&maps, &current_map));
 
 		// Attacking
-		if is_key_down(get_keycode(&player.config, "Sword")) {
-			attacks.push(Attack::new_physical(player.stats.get_pos(), 1, 30.));
+		if is_key_down(get_keycode(&player.config, "Sword")) && player.sword_cooldown == 0 {
+			player.sword_cooldown = 16;
+			attacks.push(Attack::new_physical(player.stats.get_pos(), 1, 36.));
 		}
-		if is_key_down(get_keycode(&player.config, "Gun")) {
-			attacks.push(Attack::new_hitscan(player.stats.get_pos(), player.stats.get_pos() * 999., 1));
+		if is_key_down(get_keycode(&player.config, "Gun")) && player.gun_cooldown == 0 {
+			player.gun_cooldown = 16;
+			attacks.push(Attack::new_hitscan(player.stats.get_pos(), get_mouse_pos() * 999., 1));
 		}
 
 		// Updates enemies
@@ -82,5 +86,15 @@ fn get_map(maps: &HashMap<String, MapBuilder>, current_map: &str) -> Vec<Vec2> {
 
 /// Converts inputted Vec2 into a tuple of f32
 pub fn vec2_to_tuple(vec: &Vec2) -> (f32, f32) {
-	return (vec.x, vec.y)
+	return (vec.x, vec.y);
+}
+
+/// Converts the inputted tuple of f32 into a Vec2
+pub fn tuple_to_vec2(tup: (f32, f32)) -> Vec2 {
+	return Vec2::new(tup.0, tup.1);
+}
+
+/// Gets the current position of the mouse
+fn get_mouse_pos() -> Vec2 {
+	tuple_to_vec2(mouse_position()) - Vec2::new(screen_width() / 2., screen_height() / 2.)
 }

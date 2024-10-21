@@ -9,6 +9,9 @@ pub struct Player {
 	pub stats: Entity,
 	pub config: Value,
 
+	pub sword_cooldown: u8,
+	pub gun_cooldown: u8,
+
 	speed: f32,
 	axis_horizontal: Axis,
 	axis_vertical: Axis
@@ -27,6 +30,9 @@ impl Player {
 			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100),
 			config: get_config("./config.json"),
 
+			sword_cooldown: 0,
+			gun_cooldown: 0,
+
 			speed: 1.,
 			axis_horizontal: Axis::None,
 			axis_vertical: Axis::None
@@ -39,6 +45,13 @@ impl Player {
 		if self.stats.should_kill() {
 			*self = Self::new();
 			return self;
+		}
+
+		if self.sword_cooldown != 0 {
+			self.sword_cooldown -= 1;
+		}
+		if self.gun_cooldown != 0 {
+			self.gun_cooldown -= 1;
 		}
 
 		self.movement(map);
