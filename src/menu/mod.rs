@@ -16,7 +16,7 @@ pub async fn menu() -> State {
 
 		// Play button
 		if widgets::Button::new("Play")
-			.position(vec2(screen_width() - 64., (screen_height() / 3.) + 0.))
+			.position(vec2(screen_width() * 0.9, (screen_height() / 3.) + 0.))
 			.size(vec2(screen_width() / 16., screen_height() / 32.))
 			.ui(&mut *root_ui()) {
 				to_return = Some(State::Gameplay)
@@ -24,7 +24,7 @@ pub async fn menu() -> State {
 
 		// Quit button 
 		if widgets::Button::new("Quit")
-			.position(vec2(screen_width() - 64., (screen_height() / 3.) + 64.))
+			.position(vec2(screen_width() * 0.9, (screen_height() / 3.) + 64.))
 			.size(vec2(screen_width() / 16., screen_height() / 32.))
 			.ui(&mut *root_ui()) {
 				to_return = Some(State::Quit)
