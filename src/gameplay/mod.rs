@@ -71,8 +71,8 @@ pub async fn gameplay() -> State {
 
 		// Quits the game
 		if is_down("Quit", &player.config) {
-			println!("Quitting the game");
-			return State::Quit;
+			println!("Returning to the main menu");
+			return State::Menu;
 		}
 
 		next_frame().await;
