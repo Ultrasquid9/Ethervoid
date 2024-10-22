@@ -1,23 +1,13 @@
-use macroquad::{color::GRAY, math::vec2, ui::{root_ui, widgets}, window::{clear_background, next_frame, screen_height, screen_width}};
+use macroquad::{color::GRAY, math::vec2, ui::{root_ui, widgets, Skin}, window::{clear_background, next_frame, screen_height, screen_width}};
 
 use crate::State;
 
 /// The main menu of the game
 pub async fn menu() -> State {
-	let mut to_return: Option<State> = None;
+	let mut to_return: Option<State> = None; // The state that will be returned to Main 
 
-	// creating the UI style
-	let label_style = root_ui()
-		.style_builder()
-		.font_size(64)
-		.build();
-
-	let skin = macroquad::ui::Skin {
-		label_style,
-
-		..root_ui().default_skin()
-	};
-	
+	// Styling the UI
+	let skin = make_skin();
 	root_ui().push_skin(&skin);
 
 	// The menu
@@ -47,5 +37,20 @@ pub async fn menu() -> State {
 		}
 
 		next_frame().await
+	}
+}
+
+/// Creates a skin for the UI
+fn make_skin() -> Skin {
+	// Text styling 
+	let label_style = root_ui()
+		.style_builder()
+		.font_size(64)
+		.build();
+
+	return Skin {
+		label_style,
+
+		..root_ui().default_skin()
 	}
 }
