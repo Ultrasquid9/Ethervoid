@@ -23,7 +23,9 @@ impl Movement {
 pub struct Enemy {
 	pub stats: Entity,
 	movement: Movement,
-	attacks: Vec<Attack>
+	attacks: Vec<Attack>,
+	current_attack: usize,
+	attack_cooldown: usize
 }
 
 impl Enemy {
@@ -31,8 +33,10 @@ impl Enemy {
 	pub fn new(pos: Vec2, enemytype: EnemyType) -> Self {
 		return Self {
 			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize),
-			attacks: enemytype.attacks,
 			movement: enemytype.movement,
+			attacks: enemytype.attacks,
+			current_attack: 0,
+			attack_cooldown: 32
 		}
 	}
 
@@ -40,8 +44,12 @@ impl Enemy {
 	pub fn update(&mut self, player: &mut Player, map: &Vec<Vec2>) {
 		self.movement(player, map);
 
-		for i in &self.attacks {
-			todo!()
+		if self.attack_cooldown == 0
+		&& self.attacks[self.current_attack].clone().read_script(self, player, map) {
+			self.current_attack += 1;
+			self.attack_cooldown = 64;
+		} else {
+			self.attack_cooldown -= 1;
 		}
 	}
 

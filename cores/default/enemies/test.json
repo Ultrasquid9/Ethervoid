@@ -4,6 +4,6 @@
 	"Size": 15,
 	"Movement": "MoveTowardsPlayer",
 	"Attacks": [
-		"ContactDamage"
+		"test"
 	]
 }

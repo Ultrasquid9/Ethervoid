@@ -33,8 +33,6 @@ pub async fn gameplay() -> State {
 	}
 
 	loop {
-		//println!("{}", tuple_to_vec2(mouse_position()));
-
 		// Updates the player
 		player.update(&get_map(&maps, &current_map));
 
@@ -48,7 +46,7 @@ pub async fn gameplay() -> State {
 			attacks.push(player.attack_gun());
 		}
 
-		// Updates enemies
+		// Updates attacks
 		if attacks.len() > 0 {
 			for i in &mut attacks {
 				i.update(&mut enemies, &mut player, &get_map(&maps, &current_map));

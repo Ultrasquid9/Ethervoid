@@ -30,10 +30,10 @@ impl EnemyType {
 		let attacks = get_attacks();
 
 		for i in input["Attacks"].as_array().unwrap() {
-			let attack = i.as_array().unwrap();
+			let attack = i.as_str().unwrap();
 
 			enemytype.attacks.push(
-				attacks.get(attack[0].as_str().unwrap())
+				attacks.get(attack)
 					.unwrap()
 					.clone()
 			);
