@@ -2,9 +2,9 @@ use std::{collections::HashMap, fs};
 
 use serde_json::Value;
 
-use crate::gameplay::enemy::{Attacks, Movement};
+use crate::gameplay::enemy::Movement;
 
-use super::{get_files, get_name};
+use super::{attack::{get_attacks, Attack}, get_files, get_name};
 
 /// A struct containing the stats of an enemy type
 #[derive(Clone)]
@@ -12,7 +12,7 @@ pub struct EnemyType {
 	pub max_health: usize,
 	pub size: f32,
 	pub movement: Movement,
-	pub attacks: Vec<Attacks>
+	pub attacks: Vec<Attack>
 }
 
 impl EnemyType {
@@ -20,12 +20,24 @@ impl EnemyType {
 	pub fn from(dir: String) -> EnemyType {
 		let input: Value = serde_json::from_str(&fs::read_to_string(dir).expect("File does not exist!")).unwrap();
 
-		let enemytype = EnemyType {
+		let mut enemytype = EnemyType {
 			max_health: input["Max Health"].as_u64().unwrap() as usize,
 			size: input["Size"].as_f64().unwrap() as f32,
 			movement: Movement::from_str(input["Movement"].as_str().unwrap()),
-			attacks: Attacks::from_vec(input["Attacks"].as_array().unwrap())
+			attacks: Vec::new()
 		};
+
+		let attacks = get_attacks();
+
+		for i in input["Attacks"].as_array().unwrap() {
+			let attack = i.as_array().unwrap();
+
+			enemytype.attacks.push(
+				attacks.get(attack[0].as_str().unwrap())
+					.unwrap()
+					.clone()
+			);
+		}
 
 		return enemytype;
 	}

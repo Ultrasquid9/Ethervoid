@@ -1,7 +1,6 @@
 use macroquad::math::Vec2;
-use serde_json::Value;
 
-use super::{player::Player, cores::enemytype::EnemyType, entity::Entity};
+use super::{cores::{attack::Attack, enemytype::EnemyType}, entity::Entity, player::Player};
 
 /// The movement AI used by an enemy
 #[derive(Clone)]
@@ -20,48 +19,11 @@ impl Movement {
 	}
 }
 
-/// The attacks used by an enemy
-#[derive(Clone)]
-pub enum Attacks {
-	ContactDamage
-}
-
-impl Attacks {
-	/// Provides an Attack enum based on the provided Vector
-	pub fn from_vec(input: &Vec<Value>) -> Vec<Attacks> {
-		let mut attacks: Vec<Attacks> = Vec::new();
-
-		for i in input{
-			match i.as_str().unwrap() {
-				"ContactDamage" => attacks.push(Attacks::ContactDamage),
-
-				_ => attacks.push(Attacks::ContactDamage)
-			}
-		}
-
-		return attacks;
-	}
-
-	/// Attacks the player based upon their attacks
-	fn attack(&self, enemy: &Enemy, player: &Player) -> isize {
-		match &self {
-			// Simple attack that damages the player if they are too close
-			Self::ContactDamage => {
-				if enemy.stats.get_pos().distance(player.stats.get_pos()) < 20. {
-					return 1;
-				} else {
-					return 0;
-				}
-			}
-		}
-	}
-}
-
 /// An enemy
 pub struct Enemy {
 	pub stats: Entity,
 	movement: Movement,
-	attacks: Vec<Attacks>
+	attacks: Vec<Attack>
 }
 
 impl Enemy {
@@ -79,7 +41,7 @@ impl Enemy {
 		self.movement(player, map);
 
 		for i in &self.attacks {
-			player.stats.health -= i.attack(&self, &player);
+			todo!()
 		}
 	}
 
