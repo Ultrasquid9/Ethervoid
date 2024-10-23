@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use builders::mapbuilder::{get_mapbuilders, MapBuilder};
+use cores::map::{get_maps, Map};
 use combat::Attack;
 use draw::draw;
 use enemy::Enemy;
@@ -11,7 +11,7 @@ use crate::{input::is_down, State};
 
 mod player;
 mod enemy;
-mod builders;
+mod cores;
 mod draw;
 mod entity;
 mod combat;
@@ -24,12 +24,12 @@ pub async fn gameplay() -> State {
 	let mut attacks: Vec<Attack> = Vec::new(); // Creates a list of attacks 
 	
 	// The maps
-	let maps = get_mapbuilders(); // Creates a list of MapBuilders
+	let maps = get_maps(); // Creates a list of Maps
 	let current_map = String::from("Test"); // Stores the map the player is currently in
 
 	// Populating the enemies with data from the maps
 	for i in maps.get(&current_map).unwrap().enemies.clone() {
-		enemies.push(Enemy::from_builder(i.1, i.0))
+		enemies.push(Enemy::new(i.1, i.0))
 	}
 
 	loop {
@@ -80,7 +80,7 @@ pub async fn gameplay() -> State {
 }
 
 /// Gets the map at the provided String
-fn get_map(maps: &HashMap<String, MapBuilder>, current_map: &str) -> Vec<Vec2> {
+fn get_map(maps: &HashMap<String, Map>, current_map: &str) -> Vec<Vec2> {
 	return maps.get(current_map).unwrap().points.clone();
 }
 

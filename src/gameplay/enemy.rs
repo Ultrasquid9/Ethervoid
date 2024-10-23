@@ -1,7 +1,7 @@
 use macroquad::math::Vec2;
 use serde_json::Value;
 
-use super::{player::Player, builders::enemybuilder::EnemyBuilder, entity::Entity};
+use super::{player::Player, cores::enemytype::EnemyType, entity::Entity};
 
 /// The movement AI used by an enemy
 #[derive(Clone)]
@@ -65,12 +65,12 @@ pub struct Enemy {
 }
 
 impl Enemy {
-	/// Creates a new Enemy using a Vec2 for the pos and an EnemyBuilder for the stats
-	pub fn from_builder(pos: Vec2, builder: EnemyBuilder) -> Self {
+	/// Creates a new Enemy using a Vec2 for the pos and an EnemyType for the stats
+	pub fn new(pos: Vec2, enemytype: EnemyType) -> Self {
 		return Self {
-			stats: Entity::new(pos, builder.size, builder.max_health as isize),
-			attacks: builder.attacks,
-			movement: builder.movement,
+			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize),
+			attacks: enemytype.attacks,
+			movement: enemytype.movement,
 		}
 	}
 
