@@ -1,6 +1,6 @@
 use macroquad::math::Vec2;
 
-use super::{cores::{attackscript::AttackScript, enemytype::EnemyType}, entity::Entity, player::Player};
+use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, entity::Entity, player::Player};
 
 /// The movement AI used by an enemy
 #[derive(Clone)]
@@ -24,6 +24,7 @@ pub struct Enemy {
 	pub stats: Entity,
 	movement: Movement,
 
+	id: usize,
 	attacks: Vec<AttackScript>,
 	current_attack: Option<AttackScript>,
 	attack_index: usize,
@@ -32,11 +33,12 @@ pub struct Enemy {
 
 impl Enemy {
 	/// Creates a new Enemy using a Vec2 for the pos and an EnemyType for the stats
-	pub fn new(pos: Vec2, enemytype: EnemyType) -> Self {
+	pub fn new(pos: Vec2, enemytype: EnemyType, id: usize) -> Self {
 		return Self {
 			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize),
 			movement: enemytype.movement,
 
+			id,
 			attacks: enemytype.attacks,
 			current_attack: None,
 			attack_index: 0,
@@ -45,10 +47,10 @@ impl Enemy {
 	}
 
 	/// Updates the enemy based upon their AI and the Player's stats
-	pub fn update(&mut self, player: &mut Player, map: &Vec<Vec2>) {
+	pub fn update(&mut self, player: &mut Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) {
 		match &self.current_attack {
 			Some(_) => {
-				if self.current_attack.clone().unwrap().read_script(self, player, map) {
+				if self.current_attack.clone().unwrap().read_script(self, player, map, attacks) {
 					self.current_attack = None;
 					self.attack_cooldown = 64;
 				}
@@ -80,5 +82,10 @@ impl Enemy {
 				self.stats.try_move(self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0), map);
 			}
 		}
+	}
+
+	/// Gets the ID of the enemy
+	pub fn get_id(&self) -> usize {
+		return self.id
 	}
 }

@@ -1,9 +1,9 @@
-use std::{borrow::BorrowMut, collections::HashMap, fs};
+use std::{collections::HashMap, fs};
 
 use macroquad::math::{vec2, Vec2};
-use rhai::Engine;
+use rhai::{Engine, Scope};
 
-use crate::gameplay::{enemy::Enemy, player::Player};
+use crate::gameplay::{combat::{Attack, Owner}, enemy::Enemy, player::Player};
 
 use super::get_files;
 
@@ -28,33 +28,35 @@ impl AttackScript {
 	}
 
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
-	pub fn read_script(&mut self, enemy: &mut Enemy, player: &Player, map: &Vec<Vec2>) -> bool {
+	pub fn read_script(&mut self, enemy: &mut Enemy, player: &Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) -> bool {
 		let mut engine = Engine::new(); // Creating the Rhai engine
+		let mut scope = Scope::new(); // Creatig the Rhai scope
 
-		// Cloning data that will be passed to getter methods
-		// No, you can't do so within the method itself, I tried 
-		let player_pos = player.stats.get_pos().clone();
-		let enemy_pos = enemy.stats.get_pos().clone();
-		let target_pos = self.current_target.clone();
+		// Constants available in the scope
+		scope
+			.push_constant("player_pos", player.stats.get_pos().clone())
+			.push_constant("enemy_pos", enemy.stats.get_pos().clone())
+			.push_constant("target_pos", self.current_target.clone());
 
-		// The move_towards method didn't work for some reason so I have to make a shitty copy 
+		// The Vec2 built-in methods don't work, so I have to make shitty copies
 		fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
 			return pos1.move_towards(pos2, distance)
+		}
+		fn distance_between(pos1: Vec2, pos2: Vec2) -> f32 {
+			return pos1.distance(pos2)
 		}
 
 		engine
 			// Registerring the Vec2 and functions related to it
 			.register_type_with_name::<Vec2>("position")
 			.register_fn("move_towards", move_towards)
+			.register_fn("distance_between", distance_between)
 
-			// Getter methods for the player and enemy positions
-			.register_fn("player_pos", move || player_pos)
-			.register_fn("enemy_pos", move || enemy_pos)
-			.register_fn("target_pos", move || target_pos)
+			// Hacky method to end the script
 			.register_fn("end", move || Vec2::new(999999., 999999.));
 
 		// Executing the script
-		let new_pos = match engine.eval::<Vec2>(&self.script) {
+		let new_pos = match engine.eval_with_scope::<Vec2>(&mut scope, &self.script) {
 			Ok(new_pos) => new_pos,
 			Err(e) => panic!("Bad script: {}", e)
 		};

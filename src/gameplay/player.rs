@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::input::{get_config, is_down, is_pressed};
 
-use super::{combat::Attack, entity::Entity, get_mouse_pos};
+use super::{combat::{Attack, Owner}, entity::Entity, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -109,15 +109,15 @@ impl Player {
 		match self.swords[self.current_sword].weapon {
 			Weapon::Sword => {
 				self.swords[self.current_sword].cooldown = 16;
-				Attack::new_physical(self.stats.get_pos(), 1, 36.)
+				Attack::new_physical(self.stats.get_pos(), 1, 36., Owner::Player)
 			},
 			Weapon::Hammer => {
 				self.swords[self.current_sword].cooldown = 32;
-				Attack::new_burst(self.stats.get_pos(), 10, 36.)
+				Attack::new_burst(self.stats.get_pos(), 10, 36., Owner::Player)
 			},
 			Weapon::Boomerang => {
 				self.swords[self.current_sword].cooldown = 48;
-				Attack::new_projectile(self.stats.get_pos(), get_mouse_pos() * 999., 10)
+				Attack::new_projectile(self.stats.get_pos(), get_mouse_pos() * 999., 10, Owner::Player)
 			},
 			
 			_ => panic!("Bad weapon")
@@ -129,15 +129,15 @@ impl Player {
 		match self.guns[self.current_gun].weapon {
 			Weapon::Pistol => {
 				self.guns[self.current_gun].cooldown = 16;
-				Attack::new_projectile(self.stats.get_pos(), get_mouse_pos() * 999., 10)
+				Attack::new_projectile(self.stats.get_pos(), get_mouse_pos() * 999., 10, Owner::Player)
 			},
 			Weapon::Shotgun => {
 				self.guns[self.current_gun].cooldown = 32;
-				Attack::new_burst(self.stats.get_pos(), 10, 36.)
+				Attack::new_burst(self.stats.get_pos(), 10, 36., Owner::Player)
 			},
 			Weapon::RadioCannon => {
 				self.guns[self.current_gun].cooldown = 48;
-				Attack::new_hitscan(self.stats.get_pos(), get_mouse_pos() * 999., 6)
+				Attack::new_hitscan(self.stats.get_pos(), get_mouse_pos() * 999., 6, Owner::Player)
 			},
 			
 			_ => panic!("Bad weapon")

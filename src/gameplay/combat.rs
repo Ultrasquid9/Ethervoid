@@ -6,10 +6,11 @@ use super::{enemy::Enemy, entity::try_move, player::Player, vec2_to_tuple};
 pub struct Attack {
 	pub size: f32,
 	pub pos: Vec2,
+	pub owner: Owner,
 
 	attack_type: AttackType,
 	damage: isize,
-	lifetime: u8,
+	lifetime: u8
 }
 
 pub enum AttackType {
@@ -19,52 +20,65 @@ pub enum AttackType {
 	Hitscan(ProjectileOrHitscan)
 }
 
+pub enum Owner {
+	Player,
+	Enemy(usize)
+}
+
 pub struct ProjectileOrHitscan {
 	target: Vec2
 }
 
 impl Attack {
-	pub fn new_physical(pos: Vec2, damage: isize, size: f32) -> Attack {
+	pub fn new_physical(pos: Vec2, damage: isize, size: f32, owner: Owner) -> Attack {
 		return Attack {
-			attack_type: AttackType::Physical,
-			damage,
 			size,
 			pos,
+			owner,
+
+			attack_type: AttackType::Physical,
+			damage,
 			lifetime: 8,
 		}
 	}
 
-	pub fn new_burst(pos: Vec2, damage: isize, size: f32) -> Attack {
+	pub fn new_burst(pos: Vec2, damage: isize, size: f32, owner: Owner) -> Attack {
 		return Attack {
-			attack_type: AttackType::Burst,
-			damage,
 			size,
 			pos,
-			lifetime: 12
+			owner,
+
+			attack_type: AttackType::Burst,
+			damage,
+			lifetime: 12,
 		}
 	}
 
-	pub fn new_projectile(pos: Vec2, target: Vec2, damage:isize) -> Attack {
+	pub fn new_projectile(pos: Vec2, target: Vec2, damage:isize, owner: Owner) -> Attack {
 		return Attack {
+			size: 10.,
+			pos,
+			owner,
+
 			attack_type: AttackType::Projectile( ProjectileOrHitscan {
 				target
 			}),
 			damage,
-			size: 10.,
-			pos,
 			lifetime: 1,
 		}
 	}
 
-	pub fn new_hitscan(pos: Vec2, target: Vec2, damage: isize) -> Attack {
+	pub fn new_hitscan(pos: Vec2, target: Vec2, damage: isize, owner: Owner) -> Attack {
 		return Attack {
+			size: 10.,
+			pos,
+			owner,
+
 			attack_type: AttackType::Hitscan( ProjectileOrHitscan {
 				target
 			}),
 			damage,
-			size: 10.,
-			pos,
-			lifetime: 8
+			lifetime: 8,
 		}
 	}
 

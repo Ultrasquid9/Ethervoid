@@ -1,1 +1,1 @@
-move_towards(enemy_pos(), target_pos(), 1.0)
+move_towards(enemy_pos, target_pos, 1.0)

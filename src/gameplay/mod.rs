@@ -29,7 +29,7 @@ pub async fn gameplay() -> State {
 
 	// Populating the enemies with data from the maps
 	for i in maps.get(&current_map).unwrap().enemies.clone() {
-		enemies.push(Enemy::new(i.1, i.0))
+		enemies.push(Enemy::new(i.1, i.0, enemies.len()))
 	}
 
 	loop {
@@ -58,7 +58,7 @@ pub async fn gameplay() -> State {
 		// Updates enemies
 		if enemies.len() > 0 {
 			for i in &mut enemies {
-				i.update(&mut player, &get_map(&maps, &current_map));
+				i.update(&mut player, &get_map(&maps, &current_map), &mut attacks);
 			}
 
 			enemies.retain(|x| !x.stats.should_kill());
