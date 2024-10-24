@@ -1,6 +1,6 @@
-use std::{collections::HashMap, fs};
+use std::{borrow::BorrowMut, collections::HashMap, fs};
 
-use macroquad::math::Vec2;
+use macroquad::math::{vec2, Vec2};
 use rhai::Engine;
 
 use crate::gameplay::{enemy::Enemy, player::Player};
@@ -50,7 +50,8 @@ impl AttackScript {
 			// Getter methods for the player and enemy positions
 			.register_fn("player_pos", move || player_pos)
 			.register_fn("enemy_pos", move || enemy_pos)
-			.register_fn("target_pos", move || target_pos);
+			.register_fn("target_pos", move || target_pos)
+			.register_fn("end", move || Vec2::new(999999., 999999.));
 
 		// Executing the script
 		let new_pos = match engine.eval::<Vec2>(&self.script) {
@@ -58,7 +59,12 @@ impl AttackScript {
 			Err(e) => panic!("Bad script: {}", e)
 		};
 
-		enemy.stats.try_move(new_pos, map);
+		// A horrible hacky way of checking if the 'end' keyword was called
+		if new_pos == vec2(999999., 999999.) {
+			return true;
+		} else {
+			enemy.stats.try_move(new_pos, map);
+		}
 
 		// Returns true if the enemy could not move or if the enemy has reached the target
 		// Otherwise, returns false
