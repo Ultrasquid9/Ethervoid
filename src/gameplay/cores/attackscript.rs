@@ -33,9 +33,8 @@ impl AttackScript {
 		let mut scope = Scope::new(); // Creatig the Rhai scope
 
 		// Values available in the scope
-		let new_attacks: Vec<Dynamic> = Vec::new();
 		scope
-			.push("attacks", new_attacks)
+			.push("attacks", Vec::<Dynamic>::new())
 			.push_constant("player_pos", player.stats.get_pos().clone())
 			.push_constant("enemy_pos", enemy.stats.get_pos().clone())
 			.push_constant("target_pos", self.current_target.clone());
@@ -64,6 +63,24 @@ impl AttackScript {
 				enemy_pos, 
 				damage as isize, 
 				size, 
+				Owner::Enemy(enemy_id)
+			))
+			.register_fn("new_burst", move |damage: i64, size| Attack::new_burst(
+				enemy_pos, 
+				damage as isize, 
+				size, 
+				Owner::Enemy(enemy_id)
+			))
+			.register_fn("new_projectile", move |damage: i64, target: Vec2| Attack::new_projectile(
+				enemy_pos, 
+				target,
+				damage as isize, 
+				Owner::Enemy(enemy_id)
+			))
+			.register_fn("new_hitscan", move |damage: i64, target: Vec2| Attack::new_hitscan(
+				enemy_pos, 
+				target,
+				damage as isize, 
 				Owner::Enemy(enemy_id)
 			))
 
