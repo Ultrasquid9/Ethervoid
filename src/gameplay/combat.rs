@@ -1,8 +1,10 @@
 use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
+use rhai::{CustomType, TypeBuilder};
 
 use super::{enemy::Enemy, entity::try_move, player::Player, vec2_to_tuple};
 
+#[derive(Clone)]
 pub struct Attack {
 	pub size: f32,
 	pub pos: Vec2,
@@ -13,6 +15,7 @@ pub struct Attack {
 	lifetime: u8
 }
 
+#[derive(Clone)]
 pub enum AttackType {
 	Physical,
 	Burst,
@@ -20,11 +23,13 @@ pub enum AttackType {
 	Hitscan(ProjectileOrHitscan)
 }
 
+#[derive(Clone)]
 pub enum Owner {
 	Player,
 	Enemy(usize)
 }
 
+#[derive(Clone)]
 pub struct ProjectileOrHitscan {
 	target: Vec2
 }
@@ -154,6 +159,13 @@ impl Attack {
 			return true;
 		}
 		return false;
+	}
+}
+
+impl CustomType for Attack {
+	fn build(mut builder: TypeBuilder<Self>) {
+		builder
+			.with_name("attack");
 	}
 }
 

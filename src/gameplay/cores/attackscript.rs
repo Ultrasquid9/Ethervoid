@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs};
 
 use macroquad::math::{vec2, Vec2};
-use rhai::{Engine, Scope};
+use rhai::{Dynamic, Engine, Scope};
 
 use crate::gameplay::{combat::{Attack, Owner}, enemy::Enemy, player::Player};
 
@@ -32,11 +32,17 @@ impl AttackScript {
 		let mut engine = Engine::new(); // Creating the Rhai engine
 		let mut scope = Scope::new(); // Creatig the Rhai scope
 
-		// Constants available in the scope
+		// Values available in the scope
+		let new_attacks: Vec<Dynamic> = Vec::new();
 		scope
+			.push("attacks", new_attacks)
 			.push_constant("player_pos", player.stats.get_pos().clone())
 			.push_constant("enemy_pos", enemy.stats.get_pos().clone())
 			.push_constant("target_pos", self.current_target.clone());
+
+		// Values needed for the script, but not exposed to it 
+		let enemy_pos = enemy.stats.get_pos();
+		let enemy_id = enemy.get_id();
 
 		// The Vec2 built-in methods don't work, so I have to make shitty copies
 		fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
@@ -46,11 +52,20 @@ impl AttackScript {
 			return pos1.distance(pos2)
 		}
 
+		// Registerring functions for the script
 		engine
 			// Registerring the Vec2 and functions related to it
 			.register_type_with_name::<Vec2>("position")
 			.register_fn("move_towards", move_towards)
 			.register_fn("distance_between", distance_between)
+
+			// Functions for creating attacks
+			.register_fn("new_physical", move |damage: i64, size| Attack::new_physical(
+				enemy_pos, 
+				damage as isize, 
+				size, 
+				Owner::Enemy(enemy_id)
+			))
 
 			// Hacky method to end the script
 			.register_fn("end", move || Vec2::new(999999., 999999.));
@@ -60,6 +75,14 @@ impl AttackScript {
 			Ok(new_pos) => new_pos,
 			Err(e) => panic!("Bad script: {}", e)
 		};
+
+		// Getting attacks out of the scope
+		let new_attacks = scope
+			.get_value_mut::<Vec<Dynamic>>("attacks")
+			.expect("Attacks not found");
+		for i in new_attacks {
+			attacks.push(i.clone_cast())
+		}
 
 		// A horrible hacky way of checking if the 'end' keyword was called
 		if new_pos == vec2(999999., 999999.) {
