@@ -14,6 +14,7 @@ pub struct Attack {
 }
 
 impl Attack {
+	/// Creates an attack with the script at the provided directory
 	pub fn from(dir: String) -> Self {
 		Attack {
 			current_target: Vec2::new(0., 0.),
@@ -21,27 +22,46 @@ impl Attack {
 		}
 	}
 
+	/// Sets the position that the enemy will target
+	pub fn set_target(&mut self, target: Vec2) { 
+		self.current_target = target 
+	}
+
+	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
 	pub fn read_script(&mut self, enemy: &mut Enemy, player: &Player, map: &Vec<Vec2>) -> bool {
 		let mut engine = Engine::new(); // Creating the Rhai engine
 
+		// Cloning data that will be passed to getter methods
+		// No, you can't do so within the method itself, I tried 
 		let player_pos = player.stats.get_pos().clone();
 		let enemy_pos = enemy.stats.get_pos().clone();
-		let current_terget = self.current_target.clone();
+		let target_pos = self.current_target.clone();
+
+		// The move_towards method didn't work for some reason so I have to make a shitty copy 
+		fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
+			return pos1.move_towards(pos2, distance)
+		}
 
 		engine
-			.register_type::<Vec2>()
+			// Registerring the Vec2 and functions related to it
+			.register_type_with_name::<Vec2>("position")
+			.register_fn("move_towards", move_towards)
 
+			// Getter methods for the player and enemy positions
 			.register_fn("player_pos", move || player_pos)
 			.register_fn("enemy_pos", move || enemy_pos)
-			.register_fn("get_target", move || current_terget);
+			.register_fn("target_pos", move || target_pos);
 
+		// Executing the script
 		let new_pos = match engine.eval::<Vec2>(&self.script) {
 			Ok(new_pos) => new_pos,
-			Err(_) => panic!("Bad script")
+			Err(e) => panic!("Bad script: {}", e)
 		};
 
 		enemy.stats.try_move(new_pos, map);
 
+		// Returns true if the enemy could not move or if the enemy has reached the target
+		// Otherwise, returns false
 		if enemy.stats.get_pos() == self.current_target
 		|| enemy.stats.get_pos() != new_pos {
 			return true
@@ -67,7 +87,7 @@ pub fn get_attacks() -> HashMap<String, Attack> {
 
 /// Hacky temporary method to convert a directory into a name
 fn name_from_filename(dir: &str) -> String {
-	let split_slashes: Vec<&str> = dir.split("/").collect();
+	let split_slashes: Vec<&str> = dir.split(&['/', '\\'][..]).collect();
 	let dir_no_slashes = split_slashes[split_slashes.len() - 1];
 
 	let split_period: Vec<&str> = dir_no_slashes.split(".").collect();

@@ -1,7 +1,1 @@
-fn silliness(count) {
-	for i in 0..count {
-		get_silli();
-	}
-}
-
-silliness(10);
+move_towards(enemy_pos(), target_pos(), 1.0)
