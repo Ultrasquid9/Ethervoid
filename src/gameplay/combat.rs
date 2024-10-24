@@ -2,7 +2,7 @@ use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
 
-use super::{enemy::Enemy, entity::try_move, player::Player, vec2_to_tuple};
+use super::{enemy::Enemy, entity::{try_move, Entity}, player::Player, vec2_to_tuple};
 
 #[derive(Clone)]
 pub struct Attack {
@@ -102,30 +102,50 @@ impl Attack {
 		}
 	}
 
-	pub fn update(&mut self, enemies: &mut Vec<Enemy>, _player: &Player, map: &Vec<Vec2>) {
+	pub fn update(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>) {
 		match &self.attack_type {
 			AttackType::Physical => {
-				for i in enemies {
-					if i.stats.get_pos().distance(self.pos) <= i.stats.size + self.size {
-						i.stats.health -= self.damage;
+				match self.owner {
+					Owner::Player => {
+						for i in enemies {
+							self.attack_physical(&mut i.stats);
+						}
 					}
+					Owner::Enemy(_) => self.attack_physical(&mut player.stats)	
 				}
+
 				self.lifetime -= 1;
 			},
 			AttackType::Burst => {
-				for i in enemies {
-					if i.stats.get_pos().distance(self.pos) <= i.stats.size + (self.size * 2.) {
-						i.stats.health -= self.damage * (i.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize;
+				match self.owner {
+					Owner::Player => {
+						for i in enemies {
+							self.attack_burst(&mut i.stats);
+						}
 					}
+					Owner::Enemy(_) => self.attack_burst(&mut player.stats)
 				}
+
 				self.lifetime -= 1;
 			},
 			AttackType::Projectile(attributes) => {
-				for i in enemies {
-					if i.stats.get_pos().distance(self.pos) <= i.stats.size + self.size {
-						i.stats.health -= self.damage;
-						self.lifetime = 0;
-						return;
+				// TODO: functionalize; decrease nesting
+				match self.owner {
+					Owner::Player => {
+						for i in enemies {
+							if i.stats.get_pos().distance(self.pos) <= i.stats.size + self.size {
+								i.stats.health -= self.damage;
+								self.lifetime = 0;
+								return;
+							}
+						}
+					}
+					Owner::Enemy(_) => {
+						if player.stats.get_pos().distance(self.pos) <= player.stats.size + self.size {
+							player.stats.health -= self.damage;
+							self.lifetime = 0;
+							return;
+						}
 					}
 				}
 
@@ -137,18 +157,15 @@ impl Attack {
 				}
 			},
 			AttackType::Hitscan(attributes) => {
-				for i in enemies {
-					match cast_wide(
-						&Ray{
-							position: vec2_to_tuple(&self.pos), 
-							end_position: vec2_to_tuple(&attributes.target)
-						}, 
-						&enemy_to_barriers(i)
-					) {
-						Ok(_) => i.stats.health -= self.damage,
-						_ => ()
+				match self.owner {
+					Owner::Player => {
+						for i in enemies {
+							self.attack_hitscan(&mut i.stats, attributes.target);
+						}
 					}
+					Owner::Enemy(_) => self.attack_hitscan(&mut player.stats, attributes.target),
 				}
+
 				self.lifetime -= 1;
 			}
 		}
@@ -160,6 +177,34 @@ impl Attack {
 		}
 		return false;
 	}
+
+	/// Damages the provided entity with a physical attack
+	fn attack_physical(&self, entity: &mut Entity) {
+		if entity.get_pos().distance(self.pos) <= entity.size + self.size {
+			entity.health -= self.damage;
+		}
+	}
+
+	/// Damages the provided entity with a burst attack 
+	fn attack_burst(&self, entity: &mut Entity) {
+		if entity.get_pos().distance(self.pos) <= entity.size + (self.size * 2.) {
+			entity.health -= self.damage * (entity.get_pos().distance(self.pos) / (self.size * 2.)) as isize;
+		}
+	}
+
+	/// Damages the provided entity with a hitscan attack 
+	fn attack_hitscan(&self, entity: &mut Entity, target: Vec2) {
+		match cast_wide(
+			&Ray{
+				position: vec2_to_tuple(&self.pos), 
+				end_position: vec2_to_tuple(&target)
+			}, 
+			&entity_to_barriers(entity)
+		) {
+			Ok(_) => entity.health -= self.damage,
+			_ => ()
+		}
+	}
 }
 
 impl CustomType for Attack {
@@ -169,19 +214,19 @@ impl CustomType for Attack {
 	}
 }
 
-/// Converts the provided enemy into two barriers, a horizontal and a vertical one 
-fn enemy_to_barriers(enemy: &Enemy) -> Vec<Barrier> {
+/// Converts the provided entity into two barriers, a horizontal and a vertical one 
+fn entity_to_barriers(enemy: &Entity) -> Vec<Barrier> {
 	vec![
 		Barrier {
 			positions: (
-				(enemy.stats.x() + enemy.stats.size, enemy.stats.y()),
-				(enemy.stats.x() - enemy.stats.size, enemy.stats.y())
+				(enemy.x() + enemy.size, enemy.y()),
+				(enemy.x() - enemy.size, enemy.y())
 			)
 		},
 		Barrier {
 			positions: (
-				(enemy.stats.x(), enemy.stats.y() + enemy.stats.size),
-				(enemy.stats.x(), enemy.stats.y() - enemy.stats.size)
+				(enemy.x(), enemy.y() + enemy.size),
+				(enemy.x(), enemy.y() - enemy.size)
 			)
 		}
 	]
