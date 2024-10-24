@@ -5,10 +5,11 @@ use super::vec2_to_tuple;
 
 /// Data used by all entities, including both the player and enemies
 pub struct Entity {
-	pos: Vec2,
-
+	pub i_frames: u8,
 	pub size: f32,
-	pub health: isize
+
+	pos: Vec2,
+	health: isize
 }
 
 impl Entity {
@@ -27,9 +28,15 @@ impl Entity {
 		return self.pos;
 	}
 
+	/// Gets the health
+	pub fn get_health(&self) -> isize {
+		return self.health
+	}
+
 	/// Creates a new Entity
 	pub fn new(pos: Vec2, size: f32, health: isize) -> Self {
 		return Entity {
+			i_frames: 0,
 			pos,
 			size,
 			health
@@ -39,6 +46,13 @@ impl Entity {
 	/// Tries to move the entity to the provided Vec2
 	pub fn try_move(&mut self, new_pos: Vec2, map: &Vec<Vec2>) {
 		try_move(&mut self.pos, new_pos, map);
+	}
+
+	pub fn try_damage(&mut self, damage: isize) {
+		if self.i_frames == 0 {
+			self.health -= damage;
+			self.i_frames = 12;
+		}
 	}
 
 	/// Checks if the entity is dead

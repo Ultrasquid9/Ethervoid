@@ -48,6 +48,10 @@ impl Enemy {
 
 	/// Updates the enemy based upon their AI and the Player's stats
 	pub fn update(&mut self, player: &mut Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) {
+		if self.stats.i_frames != 0 {
+			self.stats.i_frames -= 1
+		}
+
 		match &self.current_attack {
 			Some(_) => {
 				if self.current_attack.clone().unwrap().read_script(self, player, map, attacks) {

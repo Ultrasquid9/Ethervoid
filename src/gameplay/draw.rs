@@ -62,7 +62,7 @@ pub fn draw(player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &
 	set_default_camera();
  
 	// Drawing a temporary UI
-	draw_text(&format!("{}", player.stats.health), 32.0, 64.0, camera_scale() / 10., BLACK);
+	draw_text(&format!("{}", player.stats.get_health()), 32.0, 64.0, camera_scale() / 10., BLACK);
 }
 
 /// Gets the scale that the camera should be rendered at

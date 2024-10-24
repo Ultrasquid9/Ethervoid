@@ -73,6 +73,10 @@ impl Player {
 
 	/// Updates the player
 	pub fn update(&mut self, map: &Vec<Vec2>) -> &Self {
+		if self.stats.i_frames != 0 {
+			self.stats.i_frames -= 1
+		}
+
 		// Death code. WIP. 
 		if self.stats.should_kill() {
 			*self = Self::new();
@@ -109,7 +113,7 @@ impl Player {
 		match self.swords[self.current_sword].weapon {
 			Weapon::Sword => {
 				self.swords[self.current_sword].cooldown = 16;
-				Attack::new_physical(self.stats.get_pos(), 1, 36., Owner::Player)
+				Attack::new_physical(self.stats.get_pos(), 10, 36., Owner::Player)
 			},
 			Weapon::Hammer => {
 				self.swords[self.current_sword].cooldown = 32;

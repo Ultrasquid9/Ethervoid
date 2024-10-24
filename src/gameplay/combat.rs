@@ -43,7 +43,7 @@ impl Attack {
 
 			attack_type: AttackType::Physical,
 			damage,
-			lifetime: 8,
+			lifetime: 1,
 		}
 	}
 
@@ -134,7 +134,7 @@ impl Attack {
 					Owner::Player => {
 						for i in enemies {
 							if i.stats.get_pos().distance(self.pos) <= i.stats.size + self.size {
-								i.stats.health -= self.damage;
+								i.stats.try_damage(self.damage);
 								self.lifetime = 0;
 								return;
 							}
@@ -142,7 +142,7 @@ impl Attack {
 					}
 					Owner::Enemy(_) => {
 						if player.stats.get_pos().distance(self.pos) <= player.stats.size + self.size {
-							player.stats.health -= self.damage;
+							player.stats.try_damage(self.damage);
 							self.lifetime = 0;
 							return;
 						}
@@ -181,14 +181,14 @@ impl Attack {
 	/// Damages the provided entity with a physical attack
 	fn attack_physical(&self, entity: &mut Entity) {
 		if entity.get_pos().distance(self.pos) <= entity.size + self.size {
-			entity.health -= self.damage;
+			entity.try_damage(self.damage);
 		}
 	}
 
 	/// Damages the provided entity with a burst attack 
 	fn attack_burst(&self, entity: &mut Entity) {
 		if entity.get_pos().distance(self.pos) <= entity.size + (self.size * 2.) {
-			entity.health -= self.damage * (entity.get_pos().distance(self.pos) / (self.size * 2.)) as isize;
+			entity.try_damage(self.damage * (entity.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 		}
 	}
 
@@ -201,12 +201,13 @@ impl Attack {
 			}, 
 			&entity_to_barriers(entity)
 		) {
-			Ok(_) => entity.health -= self.damage,
+			Ok(_) => entity.try_damage(self.damage),
 			_ => ()
 		}
 	}
 }
 
+// Allows Attacks to be created by scripts
 impl CustomType for Attack {
 	fn build(mut builder: TypeBuilder<Self>) {
 		builder
@@ -215,18 +216,18 @@ impl CustomType for Attack {
 }
 
 /// Converts the provided entity into two barriers, a horizontal and a vertical one 
-fn entity_to_barriers(enemy: &Entity) -> Vec<Barrier> {
+fn entity_to_barriers(entity: &Entity) -> Vec<Barrier> {
 	vec![
 		Barrier {
 			positions: (
-				(enemy.x() + enemy.size, enemy.y()),
-				(enemy.x() - enemy.size, enemy.y())
+				(entity.x() + entity.size, entity.y()),
+				(entity.x() - entity.size, entity.y())
 			)
 		},
 		Barrier {
 			positions: (
-				(enemy.x(), enemy.y() + enemy.size),
-				(enemy.x(), enemy.y() - enemy.size)
+				(entity.x(), entity.y() + entity.size),
+				(entity.x(), entity.y() - entity.size)
 			)
 		}
 	]
