@@ -1,6 +1,6 @@
 use macroquad::math::Vec2;
 
-use super::{cores::{attack::Attack, enemytype::EnemyType}, entity::Entity, player::Player};
+use super::{cores::{attackscript::AttackScript, enemytype::EnemyType}, entity::Entity, player::Player};
 
 /// The movement AI used by an enemy
 #[derive(Clone)]
@@ -24,8 +24,8 @@ pub struct Enemy {
 	pub stats: Entity,
 	movement: Movement,
 
-	attacks: Vec<Attack>,
-	current_attack: Option<Attack>,
+	attacks: Vec<AttackScript>,
+	current_attack: Option<AttackScript>,
 	attack_index: usize,
 	attack_cooldown: usize
 }

@@ -4,7 +4,7 @@ use serde_json::Value;
 
 pub mod enemytype;
 pub mod map;
-pub mod attack;
+pub mod attackscript;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: String) -> Vec<String> {

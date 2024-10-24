@@ -8,15 +8,15 @@ use crate::gameplay::{enemy::Enemy, player::Player};
 use super::get_files;
 
 #[derive(Clone)]
-pub struct Attack {
+pub struct AttackScript {
 	current_target: Vec2,
 	script: String
 }
 
-impl Attack {
+impl AttackScript {
 	/// Creates an attack with the script at the provided directory
 	pub fn from(dir: String) -> Self {
-		Attack {
+		AttackScript {
 			current_target: Vec2::new(0., 0.),
 			script: fs::read_to_string(dir).unwrap()
 		}
@@ -72,13 +72,13 @@ impl Attack {
 }
 
 /// Provides a HashMap containing all Attacks
-pub fn get_attacks() -> HashMap<String, Attack> {
-	let mut attacks: HashMap<String, Attack> = HashMap::new();
+pub fn get_attacks() -> HashMap<String, AttackScript> {
+	let mut attacks: HashMap<String, AttackScript> = HashMap::new();
 
 	for i in get_files(String::from("attacks")) {
 		attacks.insert(
 			name_from_filename(&i),
-			Attack::from(i)
+			AttackScript::from(i)
 		);
 	}
 
