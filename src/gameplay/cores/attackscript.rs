@@ -42,8 +42,6 @@ impl AttackScript<'_> {
 
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
 	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) -> bool {
-		let mut engine = Engine::new(); // Creating the Rhai engine
-
 		// Values available in the scope
 		self.scope
 			.push("attacks", Vec::<Dynamic>::new())
@@ -64,7 +62,7 @@ impl AttackScript<'_> {
 		}
 
 		// Registerring functions for the script
-		engine
+		self.engine
 			// Registerring the Vec2 and functions related to it
 			.register_type_with_name::<Vec2>("position")
 			.register_fn("move_towards", move_towards)
@@ -100,7 +98,7 @@ impl AttackScript<'_> {
 			.register_fn("end", move || Vec2::new(999999., 999999.));
 
 		// Executing the script
-		let new_pos = match engine.eval_with_scope::<Vec2>(&mut self.scope, &self.script) {
+		let new_pos = match self.engine.eval_with_scope::<Vec2>(&mut self.scope, &self.script) {
 			Ok(new_pos) => new_pos,
 			Err(e) => panic!("Bad script: {}", e)
 		};

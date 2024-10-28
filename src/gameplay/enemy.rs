@@ -68,35 +68,10 @@ impl Enemy<'_> {
 			}
 		} else {
 			self.movement(player, map);
+
+			self.attacks[self.attack_index].set_target(player.stats.get_pos());
 			self.attack_cooldown -= 1;
 		}
-
-		/*
-		match &self.current_attack {
-			Some(_) => {
-				if self.current_attack.clone().unwrap().read_script(self, player, map, attacks) {
-					self.current_attack = None;
-					self.attack_cooldown = 64;
-				}
-			}
-			None => {
-				if self.attack_cooldown == 0 {
-					self.current_attack = Some(self.attacks[self.attack_index].clone());
-					self.current_attack.as_mut().unwrap().set_target(player.stats.get_pos());
-					
-					if self.attack_index == self.attacks.len() - 1 {
-						self.attack_index = 0;
-					} else {
-						self.attack_index += 1;
-					}
-					self.attack_cooldown = 64;
-				} else {
-					self.movement(player, map);
-					self.attack_cooldown -= 1;
-				}
-			}
-		}
-		*/
 	}
 
 	/// Moves the enemy based upon their Movement
