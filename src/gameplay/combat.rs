@@ -87,6 +87,7 @@ impl Attack {
 		}
 	}
 
+	/// Checks if the attack is a hitscan attack
 	pub fn is_hitscan(&self) -> bool {
 		match self.attack_type {
 			AttackType::Hitscan(_) => true,
@@ -94,6 +95,8 @@ impl Attack {
 		}
 	}
 
+	/// Gets the target of the attack
+	/// Panics if the attack is not a Projectile or Hitscan
 	pub fn get_target(&self) -> Vec2 {
 		match &self.attack_type {
 			AttackType::Projectile(attributes) => attributes.target,
@@ -102,75 +105,7 @@ impl Attack {
 		}
 	}
 
-	pub fn update(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>) {
-		match &self.attack_type {
-			AttackType::Physical => {
-				match self.owner {
-					Owner::Player => {
-						for i in enemies {
-							self.attack_physical(&mut i.stats);
-						}
-					}
-					Owner::Enemy(_) => self.attack_physical(&mut player.stats)	
-				}
-
-				self.lifetime -= 1;
-			},
-			AttackType::Burst => {
-				match self.owner {
-					Owner::Player => {
-						for i in enemies {
-							self.attack_burst(&mut i.stats);
-						}
-					}
-					Owner::Enemy(_) => self.attack_burst(&mut player.stats)
-				}
-
-				self.lifetime -= 1;
-			},
-			AttackType::Projectile(attributes) => {
-				// TODO: functionalize; decrease nesting
-				match self.owner {
-					Owner::Player => {
-						for i in enemies {
-							if i.stats.get_pos().distance(self.pos) <= i.stats.size + self.size {
-								i.stats.try_damage(self.damage);
-								self.lifetime = 0;
-								return;
-							}
-						}
-					}
-					Owner::Enemy(_) => {
-						if player.stats.get_pos().distance(self.pos) <= player.stats.size + self.size {
-							player.stats.try_damage(self.damage);
-							self.lifetime = 0;
-							return;
-						}
-					}
-				}
-
-				let new_pos = self.pos.move_towards(attributes.target, 3.0);
-				try_move(&mut self.pos, new_pos, map);
-
-				if self.pos != new_pos || self.pos == attributes.target {
-					self.lifetime = 0;
-				}
-			},
-			AttackType::Hitscan(attributes) => {
-				match self.owner {
-					Owner::Player => {
-						for i in enemies {
-							self.attack_hitscan(&mut i.stats, attributes.target);
-						}
-					}
-					Owner::Enemy(_) => self.attack_hitscan(&mut player.stats, attributes.target),
-				}
-
-				self.lifetime -= 1;
-			}
-		}
-	}
-
+	/// Checks if the attack should be removed
 	pub fn should_rm(&self) -> bool {
 		if self.lifetime == 0 {
 			return true;
@@ -178,22 +113,91 @@ impl Attack {
 		return false;
 	}
 
-	/// Damages the provided entity with a physical attack
-	fn attack_physical(&self, entity: &mut Entity) {
-		if entity.get_pos().distance(self.pos) <= entity.size + self.size {
-			entity.try_damage(self.damage);
+	// The following code is for updating attacks
+	// Be warned: expect horrors beyond human comprehension
+
+	/// Updates the attack based upon its type
+	pub fn update(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>) {
+		match &self.attack_type {
+			AttackType::Physical => self.update_physical(enemies, player), 
+			AttackType::Burst => self.attack_burst(enemies, player),
+			AttackType::Projectile(attributes) => self.attack_projectile(enemies, player, map, attributes.clone()),
+			AttackType::Hitscan(attributes) => self.attack_hitscan(enemies, player, attributes.clone()),
 		}
 	}
 
-	/// Damages the provided entity with a burst attack 
-	fn attack_burst(&self, entity: &mut Entity) {
-		if entity.get_pos().distance(self.pos) <= entity.size + (self.size * 2.) {
-			entity.try_damage(self.damage * (entity.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
+	/// Updates the provided Physical attack
+	fn update_physical(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
+		match self.owner {
+			Owner::Player => for i in enemies {
+				if i.stats.is_touching(self.size) {
+					i.stats.try_damage(self.damage);
+				}
+			}
+			Owner::Enemy(_) => if player.stats.is_touching(self.size) {
+				player.stats.try_damage(self.damage);
+			}
+		}
+
+		self.lifetime -= 1;
+	}
+
+	/// Updates the provided Burst attack
+	fn attack_burst(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
+		match self.owner {
+			Owner::Player => for i in enemies {
+				if i.stats.is_touching(self.size * 2.) {
+					i.stats.try_damage(self.damage * (i.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
+				}
+			}
+			Owner::Enemy(_) => if player.stats.is_touching(self.size * 2.) {
+				player.stats.try_damage(self.damage * (player.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
+			}
+		}
+
+		self.lifetime -= 1;
+	}
+
+	/// Updates the provided Projectile attack
+	fn attack_projectile(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>, attributes: ProjectileOrHitscan) {
+		match self.owner {
+			Owner::Player => for i in enemies {
+				if i.stats.get_pos().distance(self.pos) <= i.stats.size + self.size {
+					i.stats.try_damage(self.damage);
+					self.lifetime = 0;
+					return;
+				}
+			}
+			Owner::Enemy(_) => if player.stats.get_pos().distance(self.pos) <= player.stats.size + self.size {
+				player.stats.try_damage(self.damage);
+				self.lifetime = 0;
+				return;
+			}
+		}
+
+		let new_pos = self.pos.move_towards(attributes.target, 3.0);
+		try_move(&mut self.pos, new_pos, map);
+
+		if self.pos != new_pos || self.pos == attributes.target {
+			self.lifetime = 0;
 		}
 	}
 
-	/// Damages the provided entity with a hitscan attack 
-	fn attack_hitscan(&self, entity: &mut Entity, target: Vec2) {
+	/// Updates the provided Hitscan attack
+	fn attack_hitscan(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, attributes: ProjectileOrHitscan) {
+		match self.owner {
+			Owner::Player => for i in enemies {
+				self.damage_with_raycast(&mut i.stats, attributes.target);
+			}
+			Owner::Enemy(_) => self.damage_with_raycast(&mut player.stats, attributes.target),
+		}
+
+		self.lifetime -= 1;
+	}
+
+	/// Attempts to damage the provided entity with a raycast
+	/// Should probably be refactored at some point
+	fn damage_with_raycast(&self, entity: &mut Entity, target: Vec2) {
 		match cast_wide(
 			&Ray{
 				position: vec2_to_tuple(&self.pos), 

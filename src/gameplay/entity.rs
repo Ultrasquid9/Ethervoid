@@ -52,6 +52,15 @@ impl Entity {
 			id
 		}
 	}
+	
+	/// Checks if the entity is touching another thing with the provided radius
+	pub fn is_touching(&self, radius: f32) -> bool {
+		if self.get_pos().distance(self.pos) <= radius + self.size {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/// Tries to move the entity to the provided Vec2
 	pub fn try_move(&mut self, new_pos: Vec2, map: &Vec<Vec2>) {
