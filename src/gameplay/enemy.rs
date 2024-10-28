@@ -20,6 +20,7 @@ impl Movement {
 }
 
 /// An enemy
+/// The lifetime annotation allows the compiler to know that the Enemy lives as long as the AttackScript does
 pub struct Enemy<'a> {
 	pub stats: Entity,
 	movement: Movement,

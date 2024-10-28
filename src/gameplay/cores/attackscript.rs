@@ -27,6 +27,8 @@ impl AttackScriptBuilder {
 	}
 }
 
+/// An Attack that can be configured via a script
+/// The lifetime annotation allows the compiler to know that the AttackScript lives as long as the Enemy does
 pub struct AttackScript<'a> {
 	current_target: Vec2,
 	script: String,
