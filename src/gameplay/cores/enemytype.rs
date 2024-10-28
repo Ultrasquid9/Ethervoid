@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use crate::gameplay::enemy::Movement;
 
-use super::{attackscript::{get_attacks, AttackScriptBuilder}, get_files, get_name};
+use super::{attackscript::{get_attacks, AttackScriptBuilder}, gen_name, get_files};
 
 /// A struct containing the stats of an enemy type
 #[derive(Clone)]
@@ -49,7 +49,7 @@ pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 
 	for i in get_files(String::from("enemies")) {
 		enemytypes.insert(
-			get_name(&i),
+			gen_name(&i),
 			EnemyType::from(i)
 		);
 	}

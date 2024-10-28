@@ -1,7 +1,5 @@
 use std::fs;
 
-use serde_json::Value;
-
 pub mod enemytype;
 pub mod map;
 pub mod attackscript;
@@ -28,7 +26,9 @@ pub fn get_files(file_type: String) -> Vec<String> {
 	return files;
 }
 
-pub fn get_name(dir: &str) -> String {
-	let input: Value = serde_json::from_str(&fs::read_to_string(dir).expect("File does not exist!")).unwrap();
-	return input["Name"].as_str().unwrap().to_owned();
+/// Turns the provided directory into a name
+fn gen_name(dir: &str) -> String {
+	let split: Vec<&str> = dir.split(&['/', '\\', '.'][..]).collect();
+
+	return format!("{}:{}", split[3], split[5]);
 }

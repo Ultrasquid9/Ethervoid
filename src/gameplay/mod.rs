@@ -25,7 +25,7 @@ pub async fn gameplay() -> State {
 	
 	// The maps
 	let maps = get_maps(); // Creates a list of Maps
-	let current_map = String::from("Test"); // Stores the map the player is currently in
+	let current_map = String::from("default:test"); // Stores the map the player is currently in
 
 	// Populating the enemies with data from the maps
 	for i in maps.get(&current_map).unwrap().enemies.clone() {

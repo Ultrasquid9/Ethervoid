@@ -5,7 +5,7 @@ use rhai::{Dynamic, Engine, Scope};
 
 use crate::gameplay::{combat::{Attack, Owner}, entity::Entity, player::Player};
 
-use super::get_files;
+use super::{gen_name, get_files};
 
 #[derive(Clone)]
 pub struct AttackScriptBuilder (String);
@@ -137,21 +137,10 @@ pub fn get_attacks() -> HashMap<String, AttackScriptBuilder> {
 
 	for i in get_files(String::from("attacks")) {
 		attacks.insert(
-			name_from_filename(&i),
+			gen_name(&i),
 			AttackScriptBuilder::from(i)
 		);
 	}
 
 	return attacks;
-}
-
-/// Hacky temporary method to convert a directory into a name
-fn name_from_filename(dir: &str) -> String {
-	let split_slashes: Vec<&str> = dir.split(&['/', '\\'][..]).collect();
-	let dir_no_slashes = split_slashes[split_slashes.len() - 1];
-
-	let split_period: Vec<&str> = dir_no_slashes.split(".").collect();
-	let dir_no_period = split_period[0];
-	
-	return dir_no_period.to_owned();
 }

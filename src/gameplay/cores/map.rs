@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs};
 use macroquad::math::Vec2;
 use serde_json::Value;
 
-use super::{enemytype::{get_enemytypes, EnemyType}, get_files, get_name};
+use super::{enemytype::{get_enemytypes, EnemyType}, gen_name, get_files};
 
 pub struct Map {
 	pub points: Vec<Vec2>,
@@ -54,7 +54,7 @@ pub fn get_maps() -> HashMap<String, Map> {
 
 	for i in get_files(String::from("maps")) {
 		maps.insert(
-			get_name(&i),
+			gen_name(&i),
 			Map::from(i)
 		);
 	}
