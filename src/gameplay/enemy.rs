@@ -37,15 +37,10 @@ impl Enemy<'_> {
 			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize, Some(id)),
 			movement: enemytype.movement,
 
-			attacks: (|| {
-				let mut attacks = Vec::new();
-
-				for i in enemytype.attacks {
-					attacks.push(i.clone().build());
-				}
-
-				return attacks;
-			})(),
+			attacks: enemytype.attacks
+				.iter()
+				.map(|attack| attack.clone().build())
+				.collect(),
 			attack_index: 0,
 			attack_cooldown: 32
 		}
