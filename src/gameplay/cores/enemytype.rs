@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use crate::gameplay::enemy::Movement;
 
-use super::{attackscript::{get_attacks, AttackScript}, get_files, get_name};
+use super::{attackscript::{get_attacks, AttackScriptBuilder}, get_files, get_name};
 
 /// A struct containing the stats of an enemy type
 #[derive(Clone)]
@@ -12,7 +12,7 @@ pub struct EnemyType {
 	pub max_health: usize,
 	pub size: f32,
 	pub movement: Movement,
-	pub attacks: Vec<AttackScript>
+	pub attacks: Vec<AttackScriptBuilder>
 }
 
 impl EnemyType {

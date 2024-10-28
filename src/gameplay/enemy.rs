@@ -20,38 +20,58 @@ impl Movement {
 }
 
 /// An enemy
-pub struct Enemy {
+pub struct Enemy<'a> {
 	pub stats: Entity,
 	movement: Movement,
 
-	id: usize,
-	attacks: Vec<AttackScript>,
-	current_attack: Option<AttackScript>,
+	attacks: Vec<AttackScript<'a>>,
 	attack_index: usize,
 	attack_cooldown: usize
 }
 
-impl Enemy {
+impl Enemy<'_> {
 	/// Creates a new Enemy using a Vec2 for the pos and an EnemyType for the stats
 	pub fn new(pos: Vec2, enemytype: EnemyType, id: usize) -> Self {
 		return Self {
-			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize),
+			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize, Some(id)),
 			movement: enemytype.movement,
 
-			id,
-			attacks: enemytype.attacks,
-			current_attack: None,
+			attacks: (|| {
+				let mut attacks = Vec::new();
+
+				for i in enemytype.attacks {
+					attacks.push(i.clone().build());
+				}
+
+				return attacks;
+			})(),
 			attack_index: 0,
 			attack_cooldown: 32
 		}
 	}
 
 	/// Updates the enemy based upon their AI and the Player's stats
-	pub fn update(&mut self, player: &mut Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) {
+	pub fn update<'a>(&'a mut self, player: &mut Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) {
 		if self.stats.i_frames != 0 {
 			self.stats.i_frames -= 1
 		}
 
+		if self.attack_cooldown == 0 {
+			if self.attacks[self.attack_index].read_script(&mut self.stats, player, map, attacks) {
+				self.attack_cooldown = 64;
+
+				if self.attack_index == self.attacks.len() - 1 {
+					self.attack_index = 0;
+				} else {
+					self.attack_index += 1;
+				}
+			}
+		} else {
+			self.movement(player, map);
+			self.attack_cooldown -= 1;
+		}
+
+		/*
 		match &self.current_attack {
 			Some(_) => {
 				if self.current_attack.clone().unwrap().read_script(self, player, map, attacks) {
@@ -76,6 +96,7 @@ impl Enemy {
 				}
 			}
 		}
+		*/
 	}
 
 	/// Moves the enemy based upon their Movement
@@ -86,10 +107,5 @@ impl Enemy {
 				self.stats.try_move(self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0), map);
 			}
 		}
-	}
-
-	/// Gets the ID of the enemy
-	pub fn get_id(&self) -> usize {
-		return self.id
 	}
 }

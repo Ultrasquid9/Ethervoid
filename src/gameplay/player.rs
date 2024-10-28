@@ -49,7 +49,7 @@ pub enum Weapon {
 impl Player {
 	pub fn new() -> Self {
 		return Player {
-			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100),
+			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100, None),
 			config: get_config("./config.json"),
 
 			swords: [

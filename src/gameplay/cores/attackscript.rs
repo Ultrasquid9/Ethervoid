@@ -3,46 +3,57 @@ use std::{collections::HashMap, fs};
 use macroquad::math::{vec2, Vec2};
 use rhai::{Dynamic, Engine, Scope};
 
-use crate::gameplay::{combat::{Attack, Owner}, enemy::Enemy, player::Player};
+use crate::gameplay::{combat::{Attack, Owner}, entity::Entity, player::Player};
 
 use super::get_files;
 
 #[derive(Clone)]
-pub struct AttackScript {
-	current_target: Vec2,
-	script: String,
-	scope: Scope<'static>
-}
+pub struct AttackScriptBuilder (String);
 
-impl AttackScript {
+impl AttackScriptBuilder {
 	/// Creates an attack with the script at the provided directory
 	pub fn from(dir: String) -> Self {
-		AttackScript {
-			current_target: Vec2::new(0., 0.),
-			script: fs::read_to_string(dir).unwrap(),
-			scope: Scope::new()
-		}
+		Self(fs::read_to_string(dir).unwrap())
 	}
 
+	/// Creates an attack with the script at the provided directory
+	pub fn build<'a>(self) -> AttackScript<'a> {
+		AttackScript {
+			current_target: Vec2::new(0., 0.),
+			script: self.0,
+			scope: Scope::new(),
+			engine: Engine::new()
+		}
+	}
+}
+
+pub struct AttackScript<'a> {
+	current_target: Vec2,
+	script: String,
+	scope: Scope<'a>,
+	engine: Engine
+}
+
+impl AttackScript<'_> {
 	/// Sets the position that the enemy will target
 	pub fn set_target(&mut self, target: Vec2) { 
 		self.current_target = target 
 	}
 
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
-	pub fn read_script(&mut self, enemy: &mut Enemy, player: &Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) -> bool {
+	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) -> bool {
 		let mut engine = Engine::new(); // Creating the Rhai engine
 
 		// Values available in the scope
 		self.scope
 			.push("attacks", Vec::<Dynamic>::new())
 			.push_constant("player_pos", player.stats.get_pos().clone())
-			.push_constant("enemy_pos", enemy.stats.get_pos().clone())
+			.push_constant("enemy_pos", entity.get_pos().clone())
 			.push_constant("target_pos", self.current_target.clone());
 
 		// Values needed for the script, but not exposed to it 
-		let enemy_pos = enemy.stats.get_pos();
-		let enemy_id = enemy.get_id();
+		let entity_pos = entity.get_pos();
+		let entity_id = entity.get_id();
 
 		// The Vec2 built-in methods don't work, so I have to make shitty copies
 		fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
@@ -61,28 +72,28 @@ impl AttackScript {
 
 			// Functions for creating attacks
 			.register_fn("new_physical", move |damage: i64, size| Attack::new_physical(
-				enemy_pos, 
+				entity_pos, 
 				damage as isize, 
 				size, 
-				Owner::Enemy(enemy_id)
+				Owner::Enemy(entity_id)
 			))
 			.register_fn("new_burst", move |damage: i64, size| Attack::new_burst(
-				enemy_pos, 
+				entity_pos, 
 				damage as isize, 
 				size, 
-				Owner::Enemy(enemy_id)
+				Owner::Enemy(entity_id)
 			))
 			.register_fn("new_projectile", move |damage: i64, target: Vec2| Attack::new_projectile(
-				enemy_pos, 
+				entity_pos, 
 				target,
 				damage as isize, 
-				Owner::Enemy(enemy_id)
+				Owner::Enemy(entity_id)
 			))
 			.register_fn("new_hitscan", move |damage: i64, target: Vec2| Attack::new_hitscan(
-				enemy_pos, 
+				entity_pos, 
 				target,
 				damage as isize, 
-				Owner::Enemy(enemy_id)
+				Owner::Enemy(entity_id)
 			))
 
 			// Hacky method to end the script
@@ -106,13 +117,13 @@ impl AttackScript {
 		if new_pos == vec2(999999., 999999.) {
 			return true;
 		} else {
-			enemy.stats.try_move(new_pos, map);
+			entity.try_move(new_pos, map);
 		}
 
 		// Returns true if the enemy could not move or if the enemy has reached the target
 		// Otherwise, returns false
-		if enemy.stats.get_pos() == self.current_target
-		|| enemy.stats.get_pos() != new_pos {
+		if entity.get_pos() == self.current_target
+		|| entity.get_pos() != new_pos {
 			return true
 		} else {
 			return false
@@ -121,13 +132,13 @@ impl AttackScript {
 }
 
 /// Provides a HashMap containing all Attacks
-pub fn get_attacks() -> HashMap<String, AttackScript> {
-	let mut attacks: HashMap<String, AttackScript> = HashMap::new();
+pub fn get_attacks() -> HashMap<String, AttackScriptBuilder> {
+	let mut attacks: HashMap<String, AttackScriptBuilder> = HashMap::new();
 
 	for i in get_files(String::from("attacks")) {
 		attacks.insert(
 			name_from_filename(&i),
-			AttackScript::from(i)
+			AttackScriptBuilder::from(i)
 		);
 	}
 
