@@ -1,6 +1,6 @@
 use macroquad::math::Vec2;
 
-use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, entity::Entity, player::Player};
+use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, entity::{Entity, MovableObj}, player::Player};
 
 /// The movement AI used by an enemy
 #[derive(Clone)]

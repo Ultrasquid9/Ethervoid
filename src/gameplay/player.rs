@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::input::{get_config, is_down, is_pressed};
 
-use super::{combat::{Attack, Owner}, entity::Entity, get_mouse_pos};
+use super::{combat::{Attack, Owner}, entity::{Entity, MovableObj}, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -216,7 +216,8 @@ impl Player {
 		if new_pos == Vec2::new(0., 0.) {
 			self.speed = 1.0;
 		} else {
-			self.stats.try_move((new_pos.normalize() * self.speed) + self.stats.get_pos(), map);
+			let current_pos = self.stats.get_pos();
+			self.stats.try_move((new_pos.normalize() * self.speed) + current_pos, map);
 		}
 	}
 }

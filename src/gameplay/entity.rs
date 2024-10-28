@@ -3,6 +3,48 @@ use raylite::{cast_wide, Barrier, Ray};
 
 use super::vec2_to_tuple;
 
+/// Trait for an object that has a size and can be moved
+pub trait MovableObj {
+	fn get_size(&self) -> &f32;
+	fn get_pos(&self) -> Vec2;
+	fn edit_pos(&mut self) -> &mut Vec2;
+
+	/// Attempts to move the object to the provided Vec2
+	fn try_move(&mut self, target: Vec2, map: &Vec<Vec2>) {
+		match cast_wide(
+			&Ray {
+				position: (self.get_pos().x, self.get_pos().y),
+				end_position: (target.x, self.get_pos().y)
+			}, 
+			&create_barriers(map)
+		) {
+			Ok(_) => (),
+			_ => self.edit_pos().x = target.x
+		}
+	
+		match cast_wide(
+			&Ray {
+				position: (self.get_pos().x, self.get_pos().y),
+				end_position: (self.get_pos().x, target.y)
+			}, 
+			&create_barriers(map)
+		) {
+			Ok(_) => (),
+			_ => self.edit_pos().y = target.y
+		}
+	}
+
+	/// Checks if the object is touching another object
+	fn is_touching(&mut self, other: &mut dyn MovableObj,) -> bool {
+		if self.get_pos().distance(*other.edit_pos()) <= *self.get_size() + *other.get_size() {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+
 /// Data used by all entities, including both the player and enemies
 pub struct Entity {
 	pub i_frames: u8,
@@ -22,11 +64,6 @@ impl Entity {
 	/// Returns the y position
 	pub fn y(&self) -> f32 {
 		return self.pos.y;
-	}
-
-	/// Returns the position
-	pub fn get_pos(&self) -> Vec2 {
-		return self.pos;
 	}
 
 	/// Gets the health
@@ -52,20 +89,6 @@ impl Entity {
 			id
 		}
 	}
-	
-	/// Checks if the entity is touching another thing with the provided radius
-	pub fn is_touching(&self, radius: f32) -> bool {
-		if self.get_pos().distance(self.pos) <= radius + self.size {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/// Tries to move the entity to the provided Vec2
-	pub fn try_move(&mut self, new_pos: Vec2, map: &Vec<Vec2>) {
-		try_move(&mut self.pos, new_pos, map);
-	}
 
 	pub fn try_damage(&mut self, damage: isize) {
 		if self.i_frames == 0 {
@@ -84,31 +107,21 @@ impl Entity {
 	}
 }
 
-/// Tries to move the provided position to the provided target
-pub fn try_move(pos: &mut Vec2, target: Vec2, map: &Vec<Vec2>) {
-	match cast_wide(
-		&Ray {
-			position: (pos.x, pos.y),
-			end_position: (target.x, pos.y)
-		}, 
-		&create_barriers(map)
-	) {
-		Ok(_) => (),
-		_ => pos.x = target.x
+// Allows the entity to be moved 
+impl MovableObj for Entity {
+	fn get_size(&self) -> &f32 {
+		&self.size
 	}
 
-	match cast_wide(
-		&Ray {
-			position: (pos.x, pos.y),
-			end_position: (pos.x, target.y)
-		}, 
-		&create_barriers(map)
-	) {
-		Ok(_) => (),
-		_ => pos.y = target.y
+	fn get_pos(&self) -> Vec2 {
+		return self.pos
+	}
+
+	fn edit_pos(&mut self) -> &mut Vec2 {
+		&mut self.pos
 	}
 }
-	
+
 fn create_barriers(map: &Vec<Vec2>) -> Vec<Barrier> {
 	let mut barriers: Vec<Barrier> = Vec::new();
 

@@ -2,7 +2,7 @@ use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
 
-use super::{enemy::Enemy, entity::{try_move, Entity}, player::Player, vec2_to_tuple};
+use super::{enemy::Enemy, entity::{Entity, MovableObj}, player::Player, vec2_to_tuple};
 
 #[derive(Clone)]
 pub struct Attack {
@@ -130,11 +130,11 @@ impl Attack {
 	fn update_physical(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
 		match self.owner {
 			Owner::Player => for i in enemies {
-				if i.stats.is_touching(self.size) {
+				if i.stats.is_touching(self) {
 					i.stats.try_damage(self.damage);
 				}
 			}
-			Owner::Enemy(_) => if player.stats.is_touching(self.size) {
+			Owner::Enemy(_) => if player.stats.is_touching(self) {
 				player.stats.try_damage(self.damage);
 			}
 		}
@@ -146,11 +146,21 @@ impl Attack {
 	fn attack_burst(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
 		match self.owner {
 			Owner::Player => for i in enemies {
-				if i.stats.is_touching(self.size * 2.) {
+				if i.stats.is_touching(&mut (|| {
+					let mut to_return = self.clone();
+					to_return.size *= 2.;
+
+					return to_return;
+				})()) {
 					i.stats.try_damage(self.damage * (i.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 				}
 			}
-			Owner::Enemy(_) => if player.stats.is_touching(self.size * 2.) {
+			Owner::Enemy(_) => if player.stats.is_touching(&mut (|| {
+				let mut to_return = self.clone();
+				to_return.size *= 2.;
+
+				return to_return;
+			})()) {
 				player.stats.try_damage(self.damage * (player.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 			}
 		}
@@ -176,7 +186,7 @@ impl Attack {
 		}
 
 		let new_pos = self.pos.move_towards(attributes.target, 3.0);
-		try_move(&mut self.pos, new_pos, map);
+		self.try_move(new_pos, map);
 
 		if self.pos != new_pos || self.pos == attributes.target {
 			self.lifetime = 0;
@@ -216,6 +226,21 @@ impl CustomType for Attack {
 	fn build(mut builder: TypeBuilder<Self>) {
 		builder
 			.with_name("attack");
+	}
+}
+
+// Allows Attacks to be moved
+impl MovableObj for Attack {
+	fn get_size(&self) -> &f32 {
+		&self.size
+	}
+
+	fn get_pos(&self) -> Vec2 {
+		return self.pos
+	}
+
+	fn edit_pos(&mut self) -> &mut Vec2 {
+		&mut self.pos
 	}
 }
 

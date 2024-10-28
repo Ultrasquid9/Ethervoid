@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use super::{combat::Attack, enemy::Enemy, player::Player};
+use super::{combat::Attack, enemy::Enemy, entity::MovableObj, player::Player};
 
 /// Draws the content of the game
 pub fn draw(player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &Vec<Vec2>) {

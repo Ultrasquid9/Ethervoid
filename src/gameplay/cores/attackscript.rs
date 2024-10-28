@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs};
 use macroquad::math::{vec2, Vec2};
 use rhai::{Dynamic, Engine, Scope};
 
-use crate::gameplay::{combat::{Attack, Owner}, entity::Entity, player::Player};
+use crate::gameplay::{combat::{Attack, Owner}, entity::{Entity, MovableObj}, player::Player};
 
 use super::{gen_name, get_files};
 
