@@ -144,23 +144,21 @@ impl Attack {
 
 	/// Updates the provided Burst attack
 	fn attack_burst(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
+		// Returns the attack but with double the size
+		let double_size = || {
+			let mut to_return = self.clone();
+			to_return.size *= 2.;
+
+			return to_return;
+		};
+
 		match self.owner {
 			Owner::Player => for i in enemies {
-				if i.stats.is_touching(&mut (|| {
-					let mut to_return = self.clone();
-					to_return.size *= 2.;
-
-					return to_return;
-				})()) {
+				if i.stats.is_touching(&mut double_size()) {
 					i.stats.try_damage(self.damage * (i.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 				}
 			}
-			Owner::Enemy(_) => if player.stats.is_touching(&mut (|| {
-				let mut to_return = self.clone();
-				to_return.size *= 2.;
-
-				return to_return;
-			})()) {
+			Owner::Enemy(_) => if player.stats.is_touching(&mut double_size()) {
 				player.stats.try_damage(self.damage * (player.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 			}
 		}
@@ -172,13 +170,13 @@ impl Attack {
 	fn attack_projectile(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>, attributes: ProjectileOrHitscan) {
 		match self.owner {
 			Owner::Player => for i in enemies {
-				if i.stats.get_pos().distance(self.pos) <= i.stats.size + self.size {
+				if self.is_touching(&i.stats) {
 					i.stats.try_damage(self.damage);
 					self.lifetime = 0;
 					return;
 				}
 			}
-			Owner::Enemy(_) => if player.stats.get_pos().distance(self.pos) <= player.stats.size + self.size {
+			Owner::Enemy(_) => if self.is_touching(&player.stats) {
 				player.stats.try_damage(self.damage);
 				self.lifetime = 0;
 				return;
@@ -195,29 +193,28 @@ impl Attack {
 
 	/// Updates the provided Hitscan attack
 	fn attack_hitscan(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, attributes: ProjectileOrHitscan) {
-		match self.owner {
-			Owner::Player => for i in enemies {
-				self.damage_with_raycast(&mut i.stats, attributes.target);
+		// Damages the provided entity with a raycast
+		let damage_with_raycast = |entity: &mut Entity| {
+			match cast_wide(
+				&Ray{
+					position: vec2_to_tuple(&self.pos), 
+					end_position: vec2_to_tuple(&attributes.target)
+				}, 
+				&entity_to_barriers(entity)
+			) {
+				Ok(_) => entity.try_damage(self.damage),
+				_ => ()
 			}
-			Owner::Enemy(_) => self.damage_with_raycast(&mut player.stats, attributes.target),
+		};
+		
+		match self.owner {
+			Owner::Player => enemies
+				.iter_mut()
+				.for_each(|i| damage_with_raycast(&mut i.stats)),
+			Owner::Enemy(_) => damage_with_raycast(&mut player.stats),
 		}
 
 		self.lifetime -= 1;
-	}
-
-	/// Attempts to damage the provided entity with a raycast
-	/// Should probably be refactored at some point
-	fn damage_with_raycast(&self, entity: &mut Entity, target: Vec2) {
-		match cast_wide(
-			&Ray{
-				position: vec2_to_tuple(&self.pos), 
-				end_position: vec2_to_tuple(&target)
-			}, 
-			&entity_to_barriers(entity)
-		) {
-			Ok(_) => entity.try_damage(self.damage),
-			_ => ()
-		}
 	}
 }
 

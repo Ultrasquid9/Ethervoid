@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use cores::map::{get_maps, Map};
+use cores::map::get_maps;
 use combat::Attack;
 use draw::draw;
 use enemy::Enemy;
@@ -27,6 +25,11 @@ pub async fn gameplay() -> State {
 	let maps = get_maps(); // Creates a list of Maps
 	let current_map = String::from("default:test"); // Stores the map the player is currently in
 
+	// Returns the current map 
+	let get_map = || -> Vec<Vec2> {
+		return maps.get(&current_map).unwrap().points.clone();
+	};
+
 	// Populating the enemies with data from the maps
 	for i in maps.get(&current_map).unwrap().enemies.clone() {
 		enemies.push(Enemy::new(i.1, i.0, enemies.len()))
@@ -34,7 +37,7 @@ pub async fn gameplay() -> State {
 
 	loop {
 		// Updates the player
-		player.update(&get_map(&maps, &current_map));
+		player.update(&get_map());
 
 		// Attacking
 		if is_down("Sword", &player.config) && player.swords[0].cooldown == 0 {
@@ -49,7 +52,7 @@ pub async fn gameplay() -> State {
 		// Updates attacks
 		if attacks.len() > 0 {
 			for i in &mut attacks {
-				i.update(&mut enemies, &mut player, &get_map(&maps, &current_map));
+				i.update(&mut enemies, &mut player, &get_map());
 			}
 
 			attacks.retain(|x| !x.should_rm());
@@ -58,14 +61,14 @@ pub async fn gameplay() -> State {
 		// Updates enemies
 		if enemies.len() > 0 {
 			for i in &mut enemies {
-				i.update(&mut player, &get_map(&maps, &current_map), &mut attacks);
+				i.update(&mut attacks, &mut player, &get_map());
 			}
 
 			enemies.retain(|x| !x.stats.should_kill());
 		}
 
 		// Draws the player and enemies
-		draw(&player, &enemies, &attacks, &get_map(&maps, &current_map));
+		draw(&player, &enemies, &attacks, &get_map());
 
 		// Quits the game
 		if is_down("Quit", &player.config) {
@@ -75,11 +78,6 @@ pub async fn gameplay() -> State {
 
 		next_frame().await;
 	}
-}
-
-/// Gets the map at the provided String
-fn get_map(maps: &HashMap<String, Map>, current_map: &str) -> Vec<Vec2> {
-	return maps.get(current_map).unwrap().points.clone();
 }
 
 /// Converts inputted Vec2 into a tuple of f32

@@ -47,7 +47,7 @@ impl Enemy<'_> {
 	}
 
 	/// Updates the enemy based upon their AI and the Player's stats
-	pub fn update<'a>(&'a mut self, player: &mut Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) {
+	pub fn update<'a>(&'a mut self, attacks: &mut Vec<Attack>, player: &mut Player, map: &Vec<Vec2>) {
 		if self.stats.i_frames != 0 {
 			self.stats.i_frames -= 1
 		}

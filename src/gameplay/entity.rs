@@ -35,8 +35,8 @@ pub trait MovableObj {
 	}
 
 	/// Checks if the object is touching another object
-	fn is_touching(&mut self, other: &mut dyn MovableObj,) -> bool {
-		if self.get_pos().distance(*other.edit_pos()) <= *self.get_size() + *other.get_size() {
+	fn is_touching(&self, other: &dyn MovableObj,) -> bool {
+		if self.get_pos().distance(other.get_pos()) <= *self.get_size() + *other.get_size() {
 			return true;
 		} else {
 			return false;
