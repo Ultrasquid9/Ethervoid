@@ -1,3 +1,5 @@
+use std::fs;
+
 use macroquad::prelude::*;
 
 use super::{combat::Attack, enemy::Enemy, entity::MovableObj, player::Player};
@@ -52,7 +54,19 @@ pub fn draw(player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &
 			}
 		}
 	}
-    draw_circle(player.stats.x(), player.stats.y(), player.stats.size as f32, YELLOW); // Player
+
+	// The player
+	draw_texture_ex(
+		&load_pic("".to_string()), 
+		player.stats.x() - 64.,
+		player.stats.y() - 64., 
+		WHITE, 
+		DrawTextureParams {
+			dest_size: Some(Vec2::new(128., 128.)),
+			..Default::default()
+		}
+	);
+
 	if enemies.len() > 0 {
 		for i in enemies {
 			draw_circle(i.stats.x(), i.stats.y(), i.stats.size as f32, GREEN); // Enemies
@@ -68,4 +82,14 @@ pub fn draw(player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &
 /// Gets the scale that the camera should be rendered at
 fn camera_scale() -> f32 {
 	return screen_width() / screen_height() * 512.
+}
+
+/// Loads a picture from the provided directory (NOTE: WIP)
+fn load_pic(_dir: String) -> Texture2D {
+	let texture = Texture2D::from_file_with_format(
+		fs::read("./assets/textures/entity/player/player-indev.png").unwrap().as_slice(), 
+		None
+	);
+	texture.set_filter(FilterMode::Nearest);
+	return texture;
 }
