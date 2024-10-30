@@ -2,6 +2,7 @@ use cores::map::get_maps;
 use combat::Attack;
 use draw::draw;
 use enemy::Enemy;
+use entity::MovableObj;
 use player::Player;
 use macroquad::prelude::*;
 
@@ -16,6 +17,9 @@ mod combat;
 
 /// The gameplay loop of the game
 pub async fn gameplay() -> State {
+	// The camera
+	let mut camera = Vec2::new(0., 0.);
+
 	// The player, enemies, and attacks
 	let mut player = Player::new(); // Creates a player
 	let mut enemies = Vec::new(); // Creates a list of enemies
@@ -67,8 +71,14 @@ pub async fn gameplay() -> State {
 			enemies.retain(|x| !x.stats.should_kill());
 		}
 
+		// Updates the camera
+		// TODO: Attempt to replace with .lerp()
+		camera = camera.move_towards(
+			player.stats.get_pos(), 
+			camera.distance(player.stats.get_pos()) / 6.
+		);
 		// Draws the player and enemies
-		draw(&player, &enemies, &attacks, &get_map());
+		draw(&mut camera, &player, &enemies, &attacks, &get_map());
 
 		// Quits the game
 		if is_down("Quit", &player.config) {

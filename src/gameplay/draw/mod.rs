@@ -1,19 +1,30 @@
 use std::fs;
 
 use macroquad::prelude::*;
+use textures::{draw_tilemap, pixel_offset, render_texture};
 
 use super::{combat::Attack, enemy::Enemy, entity::MovableObj, player::Player};
 
+mod textures;
+
+const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
+
 /// Draws the content of the game
-pub fn draw(player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &Vec<Vec2>) {
+pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &Vec<Vec2>) {
 	clear_background(RED); // Draws the background
+
+	let camera = Vec2::new(
+		pixel_offset(camera.x),
+		pixel_offset(camera.y),
+	);
 
 	// Creates a camera targetting the player
 	set_camera(&Camera2D {
 		zoom: vec2(1. / camera_scale(), screen_width() / screen_height() / camera_scale()),
-		target: player.stats.get_pos(),
+		target: camera,
 		..Default::default()
 	});
+	draw_tilemap();
 
 	// Draws the map
 	for i in 0..map.len() {
@@ -56,15 +67,9 @@ pub fn draw(player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &
 	}
 
 	// The player
-	draw_texture_ex(
+	render_texture(
 		&load_pic("".to_string()), 
-		player.stats.x() - 64.,
-		player.stats.y() - 64., 
-		WHITE, 
-		DrawTextureParams {
-			dest_size: Some(Vec2::new(128., 128.)),
-			..Default::default()
-		}
+		player.stats.get_pos()
 	);
 
 	if enemies.len() > 0 {
