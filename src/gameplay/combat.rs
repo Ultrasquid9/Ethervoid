@@ -26,7 +26,7 @@ pub enum AttackType {
 #[derive(Clone)]
 pub enum Owner {
 	Player,
-	Enemy(usize)
+	Enemy
 }
 
 #[derive(Clone)]
@@ -134,7 +134,7 @@ impl Attack {
 					i.stats.try_damage(self.damage);
 				}
 			}
-			Owner::Enemy(_) => if player.stats.is_touching(self) {
+			Owner::Enemy => if player.stats.is_touching(self) {
 				player.stats.try_damage(self.damage);
 			}
 		}
@@ -158,7 +158,7 @@ impl Attack {
 					i.stats.try_damage(self.damage * (i.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 				}
 			}
-			Owner::Enemy(_) => if player.stats.is_touching(&mut double_size()) {
+			Owner::Enemy => if player.stats.is_touching(&mut double_size()) {
 				player.stats.try_damage(self.damage * (player.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 			}
 		}
@@ -176,7 +176,7 @@ impl Attack {
 					return;
 				}
 			}
-			Owner::Enemy(_) => if self.is_touching(&player.stats) {
+			Owner::Enemy => if self.is_touching(&player.stats) {
 				player.stats.try_damage(self.damage);
 				self.lifetime = 0;
 				return;
@@ -211,7 +211,7 @@ impl Attack {
 			Owner::Player => enemies
 				.iter_mut()
 				.for_each(|i| damage_with_raycast(&mut i.stats)),
-			Owner::Enemy(_) => damage_with_raycast(&mut player.stats),
+			Owner::Enemy => damage_with_raycast(&mut player.stats),
 		}
 
 		self.lifetime -= 1;

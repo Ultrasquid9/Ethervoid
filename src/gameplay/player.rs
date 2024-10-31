@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::input::{get_config, is_down, is_pressed};
 
-use super::{combat::{Attack, Owner}, entity::{Entity, MovableObj}, get_mouse_pos};
+use super::{combat::{Attack, Owner}, draw::textures::load_texture, entity::{Entity, MovableObj}, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -49,7 +49,7 @@ pub enum Weapon {
 impl Player {
 	pub fn new() -> Self {
 		return Player {
-			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100, None),
+			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100, load_texture("./assets/textures/entity/player/player-indev.png")),
 			config: get_config("./config.json"),
 
 			swords: [

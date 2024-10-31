@@ -1,16 +1,14 @@
-use std::fs;
-
 use macroquad::prelude::*;
 use textures::{draw_tilemap, pixel_offset, render_texture};
 
 use super::{combat::Attack, enemy::Enemy, entity::MovableObj, player::Player};
 
-mod textures;
+pub mod textures;
 
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, map: &Vec<Vec2>) {
+pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, texture: &Texture2D, map: &Vec<Vec2>) {
 	clear_background(RED); // Draws the background
 
 	let camera = Vec2::new(
@@ -24,7 +22,7 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 		target: camera,
 		..Default::default()
 	});
-	draw_tilemap();
+	draw_tilemap(texture);
 
 	// Draws the map
 	for i in 0..map.len() {
@@ -68,7 +66,7 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 
 	// The player
 	render_texture(
-		&load_pic("".to_string()), 
+		&player.stats.texture, 
 		player.stats.get_pos()
 	);
 
@@ -87,14 +85,4 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 /// Gets the scale that the camera should be rendered at
 fn camera_scale() -> f32 {
 	return screen_width() / screen_height() * 512.
-}
-
-/// Loads a picture from the provided directory (NOTE: WIP)
-fn load_pic(_dir: String) -> Texture2D {
-	let texture = Texture2D::from_file_with_format(
-		fs::read("./assets/textures/entity/player/player-indev.png").unwrap().as_slice(), 
-		None
-	);
-	texture.set_filter(FilterMode::Nearest);
-	return texture;
 }

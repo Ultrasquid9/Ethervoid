@@ -1,6 +1,6 @@
 use cores::map::get_maps;
 use combat::Attack;
-use draw::draw;
+use draw::{draw, textures::load_texture};
 use enemy::Enemy;
 use entity::MovableObj;
 use player::Player;
@@ -24,6 +24,9 @@ pub async fn gameplay() -> State {
 	let mut player = Player::new(); // Creates a player
 	let mut enemies = Vec::new(); // Creates a list of enemies
 	let mut attacks: Vec<Attack> = Vec::new(); // Creates a list of attacks 
+
+	// Textures
+	let texture = load_texture("./assets/textures/tiles/grass-test.png");
 	
 	// The maps
 	let maps = get_maps(); // Creates a list of Maps
@@ -36,7 +39,7 @@ pub async fn gameplay() -> State {
 
 	// Populating the enemies with data from the maps
 	for i in maps.get(&current_map).unwrap().enemies.clone() {
-		enemies.push(Enemy::new(i.1, i.0, enemies.len()))
+		enemies.push(Enemy::new(i.1, i.0, load_texture("./assets/textures/tiles/grass-test.png")))
 	}
 
 	loop {
@@ -78,7 +81,7 @@ pub async fn gameplay() -> State {
 			camera.distance(player.stats.get_pos()) / 6.
 		);
 		// Draws the player and enemies
-		draw(&mut camera, &player, &enemies, &attacks, &get_map());
+		draw(&mut camera, &player, &enemies, &attacks, &texture, &get_map());
 
 		// Quits the game
 		if is_down("Quit", &player.config) {

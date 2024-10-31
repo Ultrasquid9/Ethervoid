@@ -1,4 +1,4 @@
-use macroquad::math::Vec2;
+use macroquad::{math::Vec2, texture::Texture2D};
 use raylite::{cast_wide, Barrier, Ray};
 
 use super::vec2_to_tuple;
@@ -52,7 +52,8 @@ pub struct Entity {
 
 	pos: Vec2,
 	health: isize,
-	id: Option<usize>,
+
+	pub texture: Texture2D
 }
 
 impl Entity {
@@ -71,22 +72,14 @@ impl Entity {
 		return self.health
 	}
 
-	/// Gets the ID
-	pub fn get_id(&self) -> usize {
-		match self.id {
-			Some(id) => return id,
-			_ => panic!("Tried to get ID of entity without ID. This was either a messed-up enemy or the player, either way this should never happen and if you're seeing this then something has gone very wrong")
-		}
-	}
-
 	/// Creates a new Entity
-	pub fn new(pos: Vec2, size: f32, health: isize, id: Option<usize>) -> Self {
+	pub fn new(pos: Vec2, size: f32, health: isize, texture: Texture2D) -> Self {
 		return Entity {
 			i_frames: 0,
 			pos,
 			size,
 			health,
-			id
+			texture
 		}
 	}
 

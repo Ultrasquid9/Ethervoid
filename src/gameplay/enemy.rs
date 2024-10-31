@@ -1,4 +1,4 @@
-use macroquad::math::Vec2;
+use macroquad::{math::Vec2, texture::Texture2D};
 
 use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, entity::{Entity, MovableObj}, player::Player};
 
@@ -32,11 +32,10 @@ pub struct Enemy<'a> {
 
 impl Enemy<'_> {
 	/// Creates a new Enemy using a Vec2 for the pos and an EnemyType for the stats
-	pub fn new(pos: Vec2, enemytype: EnemyType, id: usize) -> Self {
+	pub fn new(pos: Vec2, enemytype: EnemyType, texture: Texture2D) -> Self {
 		return Self {
-			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize, Some(id)),
+			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize, texture),
 			movement: enemytype.movement,
-
 			attacks: enemytype.attacks
 				.iter()
 				.map(|attack| attack.clone().build())

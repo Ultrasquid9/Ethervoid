@@ -53,7 +53,6 @@ impl AttackScript<'_> {
 
 		// Values needed for the script, but not exposed to it 
 		let entity_pos = entity.get_pos();
-		let entity_id = entity.get_id();
 
 		// The Vec2 built-in methods don't work, so I have to make shitty copies
 		fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
@@ -75,25 +74,25 @@ impl AttackScript<'_> {
 				entity_pos, 
 				damage as isize, 
 				size, 
-				Owner::Enemy(entity_id)
+				Owner::Enemy
 			))
 			.register_fn("new_burst", move |damage: i64, size| Attack::new_burst(
 				entity_pos, 
 				damage as isize, 
 				size, 
-				Owner::Enemy(entity_id)
+				Owner::Enemy
 			))
 			.register_fn("new_projectile", move |damage: i64, target: Vec2| Attack::new_projectile(
 				entity_pos, 
 				target,
 				damage as isize, 
-				Owner::Enemy(entity_id)
+				Owner::Enemy
 			))
 			.register_fn("new_hitscan", move |damage: i64, target: Vec2| Attack::new_hitscan(
 				entity_pos, 
 				target,
 				damage as isize, 
-				Owner::Enemy(entity_id)
+				Owner::Enemy
 			))
 
 			// Hacky method to end the script
