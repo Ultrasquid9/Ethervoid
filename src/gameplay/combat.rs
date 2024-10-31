@@ -262,15 +262,20 @@ pub fn try_parry(attacks: &mut Vec<Attack>) {
 				continue;
 			}
 
+			// Coming up next: more nesting than the average bird
+
 			// Checking if j is touching i and if j has not already been parried
 			if attacks[j].is_touching(&attacks[i])
 			&& !attacks[j].is_parried {
-
 				// Checking the attack type of j
-				match attacks[j].attack_type {
+				match &attacks[j].attack_type {
+
+					// Physical attacks
 					AttackType::Physical => {
 						if attacks[j].owner != attacks[i].owner {
 							attacks[j].owner = attacks[i].owner.clone();
+
+							attacks[j].damage += attacks[i].damage;
 							
 							attacks[i].lifetime += 1;
 							attacks[j].lifetime += 1;
@@ -279,9 +284,16 @@ pub fn try_parry(attacks: &mut Vec<Attack>) {
 							attacks[j].is_parried = true;
 						}
 					}
-					AttackType::Projectile(_) => {
-						todo!()
+
+					// Projectile attacks
+					AttackType::Projectile(attributes) => {
+						attacks[j].attack_type = AttackType::Hitscan(attributes.clone());
+
+						attacks[j].damage += attacks[i].damage;
+
+						// Since hitscan attacks cannot be parried, the is_parried bool is unneccessary
 					}
+
 					// Burst and Hitscan attacks cannot be parried
 					_ => ()
 				}
