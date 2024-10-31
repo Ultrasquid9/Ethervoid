@@ -9,6 +9,7 @@ pub struct Attack {
 	pub size: f32,
 	pub pos: Vec2,
 	pub owner: Owner,
+	pub is_parried: bool,
 
 	attack_type: AttackType,
 	damage: isize,
@@ -40,10 +41,11 @@ impl Attack {
 			size,
 			pos,
 			owner,
+			is_parried: false,
 
 			attack_type: AttackType::Physical,
 			damage,
-			lifetime: 1,
+			lifetime: 2,
 		}
 	}
 
@@ -52,6 +54,7 @@ impl Attack {
 			size,
 			pos,
 			owner,
+			is_parried: false,
 
 			attack_type: AttackType::Burst,
 			damage,
@@ -64,6 +67,7 @@ impl Attack {
 			size: 10.,
 			pos,
 			owner,
+			is_parried: false,
 
 			attack_type: AttackType::Projectile( ProjectileOrHitscan {
 				target
@@ -78,6 +82,7 @@ impl Attack {
 			size: 10.,
 			pos,
 			owner,
+			is_parried: false,
 
 			attack_type: AttackType::Hitscan( ProjectileOrHitscan {
 				target
@@ -241,29 +246,45 @@ impl MovableObj for Attack {
 	}
 }
 
+/// Attempts to parry attacks 
 pub fn try_parry(attacks: &mut Vec<Attack>) {
 	// i is the index of the attack that is trying to parry other attacks
-	for i in 0..attacks.len() {
-		// Checking if i is physical, and continuing the loop if it isn't
-		if attacks[i].attack_type != AttackType::Physical {
+	for i in (0..attacks.len()).rev() {
+		// Checking if i is not physical or has been parried, and continuing the loop if either is true
+		if attacks[i].attack_type != AttackType::Physical
+		|| attacks[i].is_parried {
 			continue;
 		}
 
-		// Cloning the attack at i because borrow checker moment
-		let attack = attacks[i].clone();
-
 		// Looping through all the other attacks
-		for j in attacks.iter_mut() {
-			// Checking if the attack can be parried, and continuing the loop if it can't
-			match j.attack_type {
-				AttackType::Burst => continue,
-				AttackType::Hitscan(_) => continue,
-				_ => ()
+		for j in (0..attacks.len()).rev() {
+			if i == j {
+				continue;
 			}
 
-			// Changing attack ownership
-			if j.is_touching(&attack) {
-				j.owner = attack.owner.clone();
+			// Checking if j is touching i and if j has not already been parried
+			if attacks[j].is_touching(&attacks[i])
+			&& !attacks[j].is_parried {
+
+				// Checking the attack type of j
+				match attacks[j].attack_type {
+					AttackType::Physical => {
+						if attacks[j].owner != attacks[i].owner {
+							attacks[j].owner = attacks[i].owner.clone();
+							
+							attacks[i].lifetime += 1;
+							attacks[j].lifetime += 1;
+
+							attacks[i].is_parried = true;
+							attacks[j].is_parried = true;
+						}
+					}
+					AttackType::Projectile(_) => {
+						todo!()
+					}
+					// Burst and Hitscan attacks cannot be parried
+					_ => ()
+				}
 			}
 		}
 	}

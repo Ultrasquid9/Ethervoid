@@ -51,7 +51,16 @@ impl Enemy<'_> {
 			self.stats.i_frames -= 1
 		}
 
-		if self.attack_cooldown == 0 {
+		for attack in &mut *attacks {
+			if attack.is_parried
+			&& self.stats.is_touching(attack) {
+				self.stats.stunned = 32;
+				self.attack_cooldown = 64;
+			}
+		}
+
+		if self.attack_cooldown == 0 
+		&& self.stats.stunned == 0 {
 			if self.attacks[self.attack_index].read_script(&mut self.stats, player, map, attacks) {
 				self.attack_cooldown = 64;
 
@@ -71,6 +80,11 @@ impl Enemy<'_> {
 
 	/// Moves the enemy based upon their Movement
 	fn movement(&mut self, player: &Player, map: &Vec<Vec2>){
+		if self.stats.stunned > 0 {
+			self.stats.stunned -= 1;
+			return;
+		}
+
 		match self.movement {
 			// Simple movement AI that tracks the player and moves towards them
 			Movement::MoveTowardsPlayer => {

@@ -48,6 +48,7 @@ pub trait MovableObj {
 /// Data used by all entities, including both the player and enemies
 pub struct Entity {
 	pub i_frames: u8,
+	pub stunned: u8,
 	pub size: f32,
 
 	pos: Vec2,
@@ -76,6 +77,7 @@ impl Entity {
 	pub fn new(pos: Vec2, size: f32, health: isize, texture: Texture2D) -> Self {
 		return Entity {
 			i_frames: 0,
+			stunned: 0,
 			pos,
 			size,
 			health,
