@@ -15,7 +15,13 @@ pub struct Attack {
 	lifetime: u8
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
+pub enum Owner {
+	Player,
+	Enemy
+}
+
+#[derive(Clone, PartialEq)]
 pub enum AttackType {
 	Physical,
 	Burst,
@@ -23,13 +29,7 @@ pub enum AttackType {
 	Hitscan(ProjectileOrHitscan)
 }
 
-#[derive(Clone)]
-pub enum Owner {
-	Player,
-	Enemy
-}
-
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ProjectileOrHitscan {
 	target: Vec2
 }
@@ -238,6 +238,34 @@ impl MovableObj for Attack {
 
 	fn edit_pos(&mut self) -> &mut Vec2 {
 		&mut self.pos
+	}
+}
+
+pub fn try_parry(attacks: &mut Vec<Attack>) {
+	// i is the index of the attack that is trying to parry other attacks
+	for i in 0..attacks.len() {
+		// Checking if i is physical, and continuing the loop if it isn't
+		if attacks[i].attack_type != AttackType::Physical {
+			continue;
+		}
+
+		// Cloning the attack at i because borrow checker moment
+		let attack = attacks[i].clone();
+
+		// Looping through all the other attacks
+		for j in attacks.iter_mut() {
+			// Checking if the attack can be parried, and continuing the loop if it can't
+			match j.attack_type {
+				AttackType::Burst => continue,
+				AttackType::Hitscan(_) => continue,
+				_ => ()
+			}
+
+			// Changing attack ownership
+			if j.is_touching(&attack) {
+				j.owner = attack.owner.clone();
+			}
+		}
 	}
 }
 

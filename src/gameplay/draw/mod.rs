@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 use textures::{draw_tilemap, pixel_offset, render_texture};
 
-use super::{combat::Attack, enemy::Enemy, entity::MovableObj, player::Player};
+use super::{combat::{Attack, Owner}, enemy::Enemy, entity::MovableObj, player::Player};
 
 pub mod textures;
 
@@ -59,7 +59,11 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 					PURPLE
 				); 
 			} else {
-				draw_circle(i.pos.x, i.pos.y, i.size, PURPLE); 
+				draw_circle(i.pos.x, i.pos.y, i.size, if i.owner == Owner::Player {
+					PURPLE
+				} else {
+					ORANGE
+				}); 
 			}
 		}
 	}

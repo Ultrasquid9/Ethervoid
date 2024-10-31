@@ -1,5 +1,5 @@
 use cores::map::get_maps;
-use combat::Attack;
+use combat::{try_parry, Attack};
 use draw::{draw, textures::load_texture};
 use enemy::Enemy;
 use entity::MovableObj;
@@ -61,6 +61,8 @@ pub async fn gameplay() -> State {
 			for i in &mut attacks {
 				i.update(&mut enemies, &mut player, &get_map());
 			}
+
+			try_parry(&mut attacks);
 
 			attacks.retain(|x| !x.should_rm());
 		}
