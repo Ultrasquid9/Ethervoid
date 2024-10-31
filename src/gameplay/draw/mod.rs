@@ -74,9 +74,13 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 		player.stats.get_pos()
 	);
 
+	// Enemies
 	if enemies.len() > 0 {
 		for i in enemies {
-			draw_circle(i.stats.x(), i.stats.y(), i.stats.size as f32, GREEN); // Enemies
+			render_texture(
+				&i.stats.texture, 
+				i.stats.get_pos()
+			);
 		}
 	}
 
