@@ -1,4 +1,4 @@
-use macroquad::{math::Vec2, texture::{DrawTextureParams, Texture2D}};
+use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
@@ -22,6 +22,7 @@ impl Texture {
 		Self {
 			sprite,
 			pos: Vec2::new(0., 0.),
+
 			moving: false,
 			dir_horizontal: Axis::None,
 			dir_vertical: Axis::None
@@ -56,10 +57,19 @@ impl Texture {
 
 	/// Renders the texture with the current texture data
 	pub fn render(&self) {
+		let size = self.sprite.height() / 5.;
+
 		render_texture(
 			&self.sprite, 
 			self.pos, 
 			Some(DrawTextureParams {
+				source: Some(
+					if !self.moving {
+						Rect::new(0., 0., size, size)
+					} else {
+						todo!()
+					}
+				),
 				..Default::default()
 			})
 		);
