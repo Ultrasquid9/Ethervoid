@@ -1,7 +1,7 @@
-use macroquad::{math::Vec2, texture::Texture2D};
+use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 
-use super::vec2_to_tuple;
+use super::{draw::texturedentity::Texture, vec2_to_tuple};
 
 /// Trait for an object that has a size and can be moved
 pub trait MovableObj {
@@ -54,7 +54,7 @@ pub struct Entity {
 	pos: Vec2,
 	health: isize,
 
-	pub texture: Texture2D
+	pub texture: Texture
 }
 
 impl Entity {
@@ -74,7 +74,7 @@ impl Entity {
 	}
 
 	/// Creates a new Entity
-	pub fn new(pos: Vec2, size: f32, health: isize, texture: Texture2D) -> Self {
+	pub fn new(pos: Vec2, size: f32, health: isize, texture: Texture) -> Self {
 		return Entity {
 			i_frames: 0,
 			stunned: 0,

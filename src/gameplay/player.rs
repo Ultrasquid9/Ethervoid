@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::input::{get_config, is_down, is_pressed};
 
-use super::{combat::{Attack, Owner}, draw::textures::load_texture, entity::{Entity, MovableObj}, get_mouse_pos};
+use super::{combat::{Attack, Owner}, draw::{texturedentity::{Texture, TexturedEntity}, textures::load_texture}, entity::{Entity, MovableObj}, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -27,8 +27,8 @@ pub struct WeaponInfo {
 	pub cooldown: u8
 }
 
-#[derive(PartialEq)]
-enum Axis {
+#[derive(PartialEq, Clone)]
+pub enum Axis {
 	Positive,
 	Negative,
 	None
@@ -49,7 +49,12 @@ pub enum Weapon {
 impl Player {
 	pub fn new() -> Self {
 		return Player {
-			stats: Entity::new(Vec2::new(0.0, 0.0), 15., 100, load_texture("./assets/textures/entity/player/player-indev.png")),
+			stats: Entity::new(
+				Vec2::new(0.0, 0.0), 
+				15., 
+				100, 
+				Texture::new(load_texture("./assets/textures/entity/player/player-indev.png"))
+			),
 			config: get_config("./config.json"),
 
 			swords: [
@@ -73,6 +78,7 @@ impl Player {
 
 	/// Updates the player
 	pub fn update(&mut self, map: &Vec<Vec2>) -> &Self {
+		// Handling i-frames
 		if self.stats.i_frames != 0 {
 			self.stats.i_frames -= 1
 		}
@@ -103,6 +109,7 @@ impl Player {
 			self.current_gun = swap_weapons(&self.current_gun, &self.guns);
 		}
 
+		self.update_texture();
 		self.movement(map);
 
 		return self;
@@ -221,6 +228,23 @@ impl Player {
 		}
 	}
 }
+
+impl TexturedEntity for Player {
+	fn update_texture(&mut self) {
+		self.stats.texture.update(
+			self.stats.get_pos(),
+			self.axis_horizontal, 
+			self.axis_vertical, 
+			if self.speed == 0. {
+				true
+			} else {
+				false
+			}
+		);
+	}
+}
+
+impl Copy for Axis {} // Apparently I dont even need to do anything
 
 fn swap_weapons(current_weapon: &usize, weapons: &[WeaponInfo; 3]) -> usize {
 	let mut to_return: usize = *current_weapon;

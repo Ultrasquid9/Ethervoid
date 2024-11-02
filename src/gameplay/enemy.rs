@@ -1,6 +1,6 @@
 use macroquad::{math::Vec2, texture::Texture2D};
 
-use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, entity::{Entity, MovableObj}, player::Player};
+use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, draw::texturedentity::{Texture, TexturedEntity}, entity::{Entity, MovableObj}, player::Player};
 
 /// The movement AI used by an enemy
 #[derive(Clone)]
@@ -34,7 +34,7 @@ impl Enemy<'_> {
 	/// Creates a new Enemy using a Vec2 for the pos and an EnemyType for the stats
 	pub fn new(pos: Vec2, enemytype: EnemyType, texture: Texture2D) -> Self {
 		return Self {
-			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize, texture),
+			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize, Texture::new(texture)),
 			movement: enemytype.movement,
 			attacks: enemytype.attacks
 				.iter()
@@ -91,5 +91,11 @@ impl Enemy<'_> {
 				self.stats.try_move(self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0), map);
 			}
 		}
+	}
+}
+
+impl TexturedEntity for Enemy<'_> {
+	fn update_texture(&mut self) {
+		
 	}
 }

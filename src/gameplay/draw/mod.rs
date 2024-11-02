@@ -1,9 +1,10 @@
 use macroquad::prelude::*;
-use textures::{draw_tilemap, pixel_offset, render_texture};
+use textures::{draw_tilemap, pixel_offset};
 
-use super::{combat::{Attack, Owner}, enemy::Enemy, entity::MovableObj, player::Player};
+use super::{combat::{Attack, Owner}, enemy::Enemy, player::Player};
 
 pub mod textures;
+pub mod texturedentity;
 
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
@@ -69,18 +70,12 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 	}
 
 	// The player
-	render_texture(
-		&player.stats.texture, 
-		player.stats.get_pos()
-	);
+	player.stats.texture.render();
 
 	// Enemies
 	if enemies.len() > 0 {
 		for i in enemies {
-			render_texture(
-				&i.stats.texture, 
-				i.stats.get_pos()
-			);
+			i.stats.texture.render();
 		}
 	}
 
