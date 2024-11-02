@@ -36,6 +36,24 @@ impl Texture {
 		self.moving = moving;
 	}
 
+	pub fn update_axis(&mut self, old_pos: &Vec2, new_pos: &Vec2) {
+		if old_pos.x > new_pos.x {
+			self.dir_horizontal = Axis::Positive
+		} else if old_pos.x < new_pos.x {
+			self.dir_horizontal = Axis::Negative
+		} else {
+			self.dir_horizontal = Axis::None
+		}
+
+		if old_pos.y > new_pos.y {
+			self.dir_horizontal = Axis::Positive
+		} else if old_pos.y < new_pos.y {
+			self.dir_horizontal = Axis::Negative
+		} else {
+			self.dir_horizontal = Axis::None
+		}	
+	}
+
 	/// Renders the texture with the current texture data
 	pub fn render(&self) {
 		render_texture(

@@ -88,7 +88,10 @@ impl Enemy<'_> {
 		match self.movement {
 			// Simple movement AI that tracks the player and moves towards them
 			Movement::MoveTowardsPlayer => {
-				self.stats.try_move(self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0), map);
+				let new_pos = self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0);
+
+				self.stats.texture.update_axis(&self.stats.get_pos(), &new_pos);
+				self.stats.try_move(new_pos, map);
 			}
 		}
 	}
@@ -96,6 +99,11 @@ impl Enemy<'_> {
 
 impl TexturedEntity for Enemy<'_> {
 	fn update_texture(&mut self) {
-		
+		self.stats.texture.update(
+			self.stats.get_pos(), 
+			self.stats.dir_horizontal, 
+			self.stats.dir_vertical, 
+			true
+		);
 	}
 }
