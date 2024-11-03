@@ -77,6 +77,13 @@ impl Entity {
 
 	/// Updates the current directions based upon an old and new position 
 	pub fn update_axis(&mut self, new_pos: &Vec2) {
+		if self.pos == *new_pos {
+			self.texture.moving = false;
+			return
+		} else {
+			self.texture.moving = true;
+		}
+
 		let x_val = (self.pos.x - new_pos.x) / self.pos.distance(*new_pos);
 		let y_val = (self.pos.y - new_pos.y) / self.pos.distance(*new_pos);
 

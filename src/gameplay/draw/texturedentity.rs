@@ -12,7 +12,10 @@ pub struct Texture {
 	pub sprite: Texture2D,
 
 	pos: Vec2,
-	moving: bool,
+
+	pub moving: bool,
+	anim_time: u8,
+
 	dir_horizontal: Axis,
 	dir_vertical: Axis
 }
@@ -21,9 +24,12 @@ impl Texture {
 	pub fn new(sprite: Texture2D) -> Self {
 		Self {
 			sprite,
+
 			pos: Vec2::new(0., 0.),
 
 			moving: false,
+			anim_time: 0,
+
 			dir_horizontal: Axis::None,
 			dir_vertical: Axis::None
 		}
@@ -32,9 +38,18 @@ impl Texture {
 	/// Updates the texture with the provided texture data
 	pub fn update(&mut self, pos: Vec2, dir_horizontal: Axis, dir_vertical: Axis, moving: bool) {
 		self.pos = pos;
-		self.dir_horizontal = dir_horizontal;
-		self.dir_vertical = dir_vertical;
 		self.moving = moving;
+
+		if self.moving {
+			self.dir_horizontal = dir_horizontal;
+			self.dir_vertical = dir_vertical;
+		}
+
+		if self.moving && self.anim_time < 64 {
+			self.anim_time += 1;
+		} else {
+			self.anim_time = 0;
+		}
 	}
 
 	/// Renders the texture with the current texture data
@@ -59,6 +74,13 @@ impl Texture {
 			}
 		};
 
+		println!("{}", self.anim_time / 16);
+		let x_pos = match self.anim_time / 16 {
+			1 => size,
+			3 => size * 2.,
+			_ => 0.
+		};
+
 		render_texture(
 			&self.sprite, 
 			Vec2::new(
@@ -68,7 +90,7 @@ impl Texture {
 			Some(DrawTextureParams {
 				source: Some(
 					Rect::new(
-						0.,
+						x_pos,
 						y_pos,
 						size,
 						size
