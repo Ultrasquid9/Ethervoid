@@ -105,7 +105,11 @@ impl TexturedEntity for Enemy<'_> {
 			self.stats.get_pos(), 
 			self.stats.dir_horizontal, 
 			self.stats.dir_vertical, 
-			true
+			if self.stats.stunned == 0 {
+				true
+			} else {
+				false
+			}
 		);
 	}
 }

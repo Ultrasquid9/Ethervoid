@@ -74,7 +74,6 @@ impl Texture {
 			}
 		};
 
-		println!("{}", self.anim_time / 16);
 		let x_pos = match self.anim_time / 16 {
 			1 => size,
 			3 => size * 2.,

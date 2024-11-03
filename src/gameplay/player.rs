@@ -235,7 +235,7 @@ impl TexturedEntity for Player {
 			self.stats.get_pos(),
 			self.axis_horizontal, 
 			self.axis_vertical, 
-			if self.speed != 0. {
+			if self.speed > 1.0 {
 				true
 			} else {
 				false
