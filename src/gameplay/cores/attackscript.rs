@@ -116,7 +116,7 @@ impl AttackScript<'_> {
 		if new_pos == vec2(999999., 999999.) {
 			return true;
 		} else {
-			entity.texture.update_axis(&entity.get_pos(), &new_pos);
+			entity.update_axis(&new_pos);
 			entity.try_move(new_pos, map);
 		}
 

@@ -53,7 +53,7 @@ impl Player {
 				Vec2::new(0.0, 0.0), 
 				15., 
 				100, 
-				Texture::new(load_texture("./assets/textures/entity/player/player-indev.png"))
+				Texture::new(load_texture("./assets/textures/entity/player/player_spritesheet_wip.png"))
 			),
 			config: get_config("./config.json"),
 

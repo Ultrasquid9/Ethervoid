@@ -90,7 +90,7 @@ impl Enemy<'_> {
 			Movement::MoveTowardsPlayer => {
 				let new_pos = self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0);
 
-				self.stats.texture.update_axis(&self.stats.get_pos(), &new_pos);
+				self.stats.update_axis(&new_pos);
 				self.stats.try_move(new_pos, map);
 			}
 		}

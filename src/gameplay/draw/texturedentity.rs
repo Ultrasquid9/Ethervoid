@@ -2,7 +2,7 @@ use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
-use super::textures::render_texture;
+use super::{textures::render_texture, SCREEN_SCALE};
 
 pub trait TexturedEntity {
 	fn update_texture(&mut self);
@@ -37,42 +37,51 @@ impl Texture {
 		self.moving = moving;
 	}
 
-	pub fn update_axis(&mut self, old_pos: &Vec2, new_pos: &Vec2) {
-		if old_pos.x > new_pos.x {
-			self.dir_horizontal = Axis::Positive
-		} else if old_pos.x < new_pos.x {
-			self.dir_horizontal = Axis::Negative
-		} else {
-			self.dir_horizontal = Axis::None
-		}
-
-		if old_pos.y > new_pos.y {
-			self.dir_horizontal = Axis::Positive
-		} else if old_pos.y < new_pos.y {
-			self.dir_horizontal = Axis::Negative
-		} else {
-			self.dir_horizontal = Axis::None
-		}	
-	}
-
 	/// Renders the texture with the current texture data
 	pub fn render(&self) {
 		let size = self.sprite.height() / 5.;
 
+		// There is definitely a far better way to do this
+		// I apologize to whoever has to deal with this in the future 
+		let y_pos = if self.dir_horizontal != Axis::None && self.dir_vertical != Axis::None {
+			if self.dir_vertical == Axis::Positive {
+				size       // Diagonal up
+			} else {
+				size * 3.  // Diagonal down
+			}
+		} else if self.dir_horizontal != Axis::None {
+			size * 2.      // Left/right
+		} else {
+			if self.dir_vertical == Axis::Positive {
+				0.         // Down
+			} else {
+				size * 4.  // Up
+			}
+		};
+
 		render_texture(
 			&self.sprite, 
-			self.pos, 
+			Vec2::new(
+				self.pos.x + self.sprite.width(), 
+				self.pos.y + self.sprite.height()
+			), 
 			Some(DrawTextureParams {
 				source: Some(
-					if !self.moving {
-						Rect::new(0., 0., size, size)
-					} else {
-						todo!()
-					}
+					Rect::new(
+						0.,
+						y_pos,
+						size,
+						size
+					)
 				),
+				flip_x: if self.dir_horizontal == Axis::Negative {
+					true
+				} else {
+					false
+				},
+				dest_size: Some(Vec2::new(size * SCREEN_SCALE, size * SCREEN_SCALE)),
 				..Default::default()
 			})
 		);
 	}
 }
-

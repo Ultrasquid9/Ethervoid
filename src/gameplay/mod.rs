@@ -39,7 +39,7 @@ pub async fn gameplay() -> State {
 
 	// Populating the enemies with data from the maps
 	for i in maps.get(&current_map).unwrap().enemies.clone() {
-		enemies.push(Enemy::new(i.1, i.0, load_texture("./assets/textures/entity/enemies/test.png")))
+		enemies.push(Enemy::new(i.1, i.0, load_texture("./assets/textures/entity/player/player_spritesheet_wip.png")))
 	}
 
 	loop {

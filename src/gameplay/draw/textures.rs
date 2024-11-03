@@ -35,11 +35,7 @@ pub fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawTexture
 		pixel_offset(pos.y - scale.y / 2.),
 		WHITE, 
 		match params {
-			Some(params) => {
-				let mut sized_params = params.clone();
-				sized_params.dest_size = Some(scale);
-				sized_params
-			},
+			Some(params) => params,
 			None => DrawTextureParams {
 				dest_size: Some(scale),
 				..Default::default()

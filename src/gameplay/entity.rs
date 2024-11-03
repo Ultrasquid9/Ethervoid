@@ -75,6 +75,25 @@ impl Entity {
 		return self.health
 	}
 
+	/// Updates the current directions based upon an old and new position 
+	pub fn update_axis(&mut self, new_pos: &Vec2) {
+		if self.pos.x > new_pos.x {
+			self.dir_horizontal = Axis::Positive
+		} else if self.pos.x < new_pos.x {
+			self.dir_horizontal = Axis::Negative
+		} else {
+			self.dir_horizontal = Axis::None
+		}
+
+		if self.pos.y > new_pos.y {
+			self.dir_horizontal = Axis::Positive
+		} else if self.pos.y < new_pos.y {
+			self.dir_horizontal = Axis::Negative
+		} else {
+			self.dir_horizontal = Axis::None
+		}	
+	}
+
 	/// Creates a new Entity
 	pub fn new(pos: Vec2, size: f32, health: isize, texture: Texture) -> Self {
 		return Entity {
