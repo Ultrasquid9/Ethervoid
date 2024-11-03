@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::input::{get_config, is_down, is_pressed};
 
-use super::{combat::{Attack, Owner}, draw::{texturedentity::{Texture, TexturedEntity}, textures::load_texture}, entity::{Entity, MovableObj}, get_mouse_pos};
+use super::{combat::{Attack, Owner}, draw::{texturedentity::{Texture, TexturedEntity}, textures::load_texture}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -224,7 +224,7 @@ impl Player {
 			self.speed = 1.0;
 		} else {
 			let current_pos = self.stats.get_pos();
-			self.stats.try_move((new_pos.normalize() * self.speed) + current_pos, map);
+			self.stats.try_move((new_pos.normalize() * self.speed * get_delta_time()) + current_pos, map);
 		}
 	}
 }

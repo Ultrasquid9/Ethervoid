@@ -109,3 +109,8 @@ pub fn tuple_to_vec2(tup: (f32, f32)) -> Vec2 {
 pub fn get_mouse_pos() -> Vec2 {
 	tuple_to_vec2(mouse_position()) - Vec2::new(screen_width() / 2., screen_height() / 2.)
 }
+
+/// Gets the delta time
+pub fn get_delta_time() -> f32 {
+	get_frame_time() * 100. * (2./3.)
+}
