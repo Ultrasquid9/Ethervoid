@@ -77,21 +77,21 @@ impl Entity {
 
 	/// Updates the current directions based upon an old and new position 
 	pub fn update_axis(&mut self, new_pos: &Vec2) {
-		if self.pos.x > new_pos.x {
-			self.dir_horizontal = Axis::Positive
-		} else if self.pos.x < new_pos.x {
-			self.dir_horizontal = Axis::Negative
-		} else {
-			self.dir_horizontal = Axis::None
+		let angle = todo!()
+
+		match angle.x.round() {
+			1. => self.dir_horizontal = Axis::Positive,
+			0. => self.dir_horizontal = Axis::None,
+			-1. => self.dir_horizontal = Axis::Negative,
+			_ => ()
 		}
 
-		if self.pos.y > new_pos.y {
-			self.dir_horizontal = Axis::Positive
-		} else if self.pos.y < new_pos.y {
-			self.dir_horizontal = Axis::Negative
-		} else {
-			self.dir_horizontal = Axis::None
-		}	
+		match angle.y.round() {
+			1. => self.dir_vertical = Axis::Positive,
+			0. => self.dir_vertical = Axis::None,
+			-1. => self.dir_vertical = Axis::Negative,
+			_ => ()
+		}
 	}
 
 	/// Creates a new Entity

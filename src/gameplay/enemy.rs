@@ -76,6 +76,8 @@ impl Enemy<'_> {
 			self.attacks[self.attack_index].set_target(player.stats.get_pos());
 			self.attack_cooldown -= 1;
 		}
+
+		self.update_texture();
 	}
 
 	/// Moves the enemy based upon their Movement
