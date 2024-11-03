@@ -77,19 +77,20 @@ impl Entity {
 
 	/// Updates the current directions based upon an old and new position 
 	pub fn update_axis(&mut self, new_pos: &Vec2) {
-		let angle = todo!()
+		let x_val = (self.pos.x - new_pos.x) / self.pos.distance(*new_pos);
+		let y_val = (self.pos.y - new_pos.y) / self.pos.distance(*new_pos);
 
-		match angle.x.round() {
-			1. => self.dir_horizontal = Axis::Positive,
-			0. => self.dir_horizontal = Axis::None,
-			-1. => self.dir_horizontal = Axis::Negative,
+		match x_val.round() as i8 {
+			-1 => self.dir_horizontal = Axis::Positive,
+			0 => self.dir_horizontal = Axis::None,
+			1 => self.dir_horizontal = Axis::Negative,
 			_ => ()
 		}
 
-		match angle.y.round() {
-			1. => self.dir_vertical = Axis::Positive,
-			0. => self.dir_vertical = Axis::None,
-			-1. => self.dir_vertical = Axis::Negative,
+		match y_val.round() as i8 {
+			-1 => self.dir_vertical = Axis::Positive,
+			0 => self.dir_vertical = Axis::None,
+			1 => self.dir_vertical = Axis::Negative,
 			_ => ()
 		}
 	}
