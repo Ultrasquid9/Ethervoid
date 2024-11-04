@@ -1,5 +1,5 @@
 use downscale::{downscale, to_texture};
-use image::DynamicImage;
+use imageproc::image::DynamicImage;
 use macroquad::prelude::*;
 use textures::{draw_tilemap, pixel_offset, render_texture};
 
@@ -29,7 +29,11 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 	draw_tilemap(&to_texture(textures[0].clone()));
 
 	// Appl 
-	render_texture(&downscale(&textures[1], 16), Vec2::new(200., 200.), None);
+	render_texture(
+		&downscale(&textures[1], 16, 45.), 
+		Vec2::new(200., 200.), 
+		None
+	);
 
 	// Draws the map
 	for i in 0..map.len() {

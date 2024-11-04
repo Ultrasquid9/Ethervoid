@@ -3,7 +3,7 @@ use combat::{try_parry, Attack};
 use draw::{draw, textures::load_texture};
 use enemy::Enemy;
 use entity::MovableObj;
-use image::{DynamicImage, ImageReader};
+use imageproc::image::{DynamicImage, ImageReader};
 use player::Player;
 use macroquad::prelude::*;
 

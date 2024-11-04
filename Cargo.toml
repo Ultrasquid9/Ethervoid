@@ -7,5 +7,5 @@ edition = "2021"
 macroquad = "0.4"
 serde_json = "1.0"
 raylite = "0.1.7"
-image = "0.25.4"
+imageproc = "0.25.0"
 rhai = { version = "1.19.0", features = ["f32_float", "sync"] }
