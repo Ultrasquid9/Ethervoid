@@ -74,7 +74,7 @@ impl Enemy<'_> {
 		} else {
 			self.movement(player, map);
 
-			self.attacks[self.attack_index].set_target(player.stats.get_pos());
+			self.attacks[self.attack_index].current_target = player.stats.get_pos();
 			self.attack_cooldown -= 1;
 		}
 

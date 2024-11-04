@@ -31,18 +31,13 @@ impl AttackScriptBuilder {
 /// An Attack that can be configured via a script
 /// The lifetime annotation allows the compiler to know that the AttackScript lives as long as the Enemy does
 pub struct AttackScript<'a> {
-	current_target: Vec2,
+	pub current_target: Vec2,
 	script: String,
 	scope: Scope<'a>,
 	engine: Engine
 }
 
 impl AttackScript<'_> {
-	/// Sets the position that the enemy will target
-	pub fn set_target(&mut self, target: Vec2) { 
-		self.current_target = target 
-	}
-
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
 	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) -> bool {
 		// Values available in the scope

@@ -2,7 +2,7 @@ use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
 
-use super::{enemy::Enemy, entity::{Entity, MovableObj}, player::Player, vec2_to_tuple};
+use super::{enemy::Enemy, entity::{Entity, MovableObj}, get_mouse_pos, player::Player, vec2_to_tuple};
 
 #[derive(Clone)]
 pub struct Attack {
@@ -286,8 +286,17 @@ pub fn try_parry(attacks: &mut Vec<Attack>) {
 					}
 
 					// Projectile attacks
-					AttackType::Projectile(attributes) => {
-						attacks[j].attack_type = AttackType::Hitscan(attributes.clone());
+					AttackType::Projectile(_attributes) => {
+						if attacks[j].owner != attacks[i].owner {
+							attacks[j].owner = attacks[i].owner.clone();
+						}
+
+						attacks[j].attack_type = AttackType::Hitscan(ProjectileOrHitscan {
+							target: match attacks[j].owner {
+								Owner::Player => get_mouse_pos() * 999.,
+								Owner::Enemy => Vec2::new(0., 0.) // TODO - Get target of the enemy who owns this attack 
+							}
+						});
 
 						attacks[j].damage += attacks[i].damage;
 
