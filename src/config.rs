@@ -1,22 +1,79 @@
 use macroquad::input::{is_key_down, is_key_pressed, is_mouse_button_down, is_mouse_button_pressed, KeyCode, MouseButton};
-use serde_json::Value;
-use std::fs;
+use serde::{Deserialize, Serialize};
+use std::{fs, ops::Deref};
 
-/// Reads the config file
-pub fn get_config(input: &str) -> Value {
-	let try_config = serde_json::from_str(&fs::read_to_string(input).expect("Config does not exist!"));
-	let config: Value = match try_config {
-		Ok(config) => config,
-		Err(error) => panic!("Error reading config: {}", error)
-	};
+const MOUSE_KEYS: [&str; 3] = ["Left Click", "Right Click", "Middle Click"];
 
-	return config;
+#[derive(Serialize, Deserialize)]
+pub struct Config {
+	pub keymap: KeyMap
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct KeyMap {
+	pub up: Key,
+	pub down: Key,
+	pub left: Key,
+	pub right: Key,
+
+	pub sword: Key,
+	pub gun: Key,
+	pub change_sword: Key,
+	pub change_gun: Key,
+
+	pub quit: Key
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Key (String);
+
+impl Config {
+	/// Reads the config file 
+	pub fn read(dir: &str) -> Self {
+		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+	}
+}
+
+impl Key {
+	/// Checks if the key is down
+	pub fn is_down(&self) -> bool {
+		if MOUSE_KEYS.contains(&&*self.as_str()) {
+			if is_mouse_button_down(get_mousebutton(Some(self))) {
+				return true
+			}
+		} else {
+			if is_key_down(get_keycode(Some(self))) {
+				return true
+			}
+		}
+		return false
+	}
+
+	/// Checks if the key is pressed
+	pub fn is_pressed(&self) -> bool {
+		if MOUSE_KEYS.contains(&&*self.as_str()) {
+			if is_mouse_button_pressed(get_mousebutton(Some(self))) {
+				return true
+			}
+		} else {
+			if is_key_pressed(get_keycode(Some(self))) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+impl Deref for Key {
+	type Target = String;
+
+	fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Gets the KeyCode with the value of the key passed in
-fn get_keycode(config: &Value, key: &str) -> KeyCode {
+fn get_keycode(key: Option<&str>) -> KeyCode {
 	// There has to be a better way to do this
-	match config[&key].as_str() {
+	match key {
 		Some("Escape") => return KeyCode::Escape,
 		Some("Up") => return KeyCode::Up,
 		Some("Down") => return KeyCode::Down,
@@ -61,46 +118,17 @@ fn get_keycode(config: &Value, key: &str) -> KeyCode {
 		Some("LeftControl") => return KeyCode::LeftControl,
 		Some("LeftAlt") => return KeyCode::LeftControl,
 
-		_ => panic!("Bad keycode: {} is not a valid value for {}", config[&key], key)
+		_ => panic!("Bad keycode: {} is not a valid value", key.unwrap())
 	}
 }
 
-fn get_mousebutton(config: &Value, key: &str) -> MouseButton {
-	match config[&key].as_str() {
+/// Gets the MouseButton of the key passed to it 
+fn get_mousebutton(key: Option<&str>) -> MouseButton {
+	match key {
 		Some("Left Click") => return MouseButton::Left,
 		Some("Right Click") => return MouseButton::Right,
 		Some("Middle Click") => return MouseButton::Middle,
 
-		_ => panic!("Bad keycode: {} is not a valid value for {}", config[&key], key)
+		_ => panic!("Bad keycode: {} is not a valid value", key.unwrap())
 	}
-}
-
-/// Checks if the provided input is down, based upon what it is set to in the config
-pub fn is_down(key: &str, config: &Value) -> bool {
-	let mouse_keys = ["Left Click", "Right Click", "Middle Click"];
-	if mouse_keys.contains(&config[&key].as_str().unwrap()) {
-		if is_mouse_button_down(get_mousebutton(config, key)) {
-			return true
-		}
-	} else {
-		if is_key_down(get_keycode(config, key)) {
-			return true
-		}
-	}
-	return false
-}
-
-/// Checks if the provided input was pressed this frame, based upon what it is set to in the config
-pub fn is_pressed(key: &str, config: &Value) -> bool {
-	let mouse_keys = ["Left Click", "Right Click", "Middle Click"];
-	if mouse_keys.contains(&config[&key].as_str().unwrap()) {
-		if is_mouse_button_pressed(get_mousebutton(config, key)) {
-			return true
-		}
-	} else {
-		if is_key_pressed(get_keycode(config, key)) {
-			return true
-		}
-	}
-	return false
 }

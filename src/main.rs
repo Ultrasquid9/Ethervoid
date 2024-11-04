@@ -2,7 +2,7 @@ use gameplay::gameplay;
 use macroquad::prelude::*;
 use menu::menu;
 
-mod input;
+mod config;
 mod gameplay;
 mod menu;
 

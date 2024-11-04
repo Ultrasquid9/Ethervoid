@@ -1,14 +1,13 @@
 use macroquad::math::Vec2;
-use serde_json::Value;
 
-use crate::input::{get_config, is_down, is_pressed};
+use crate::config::Config;
 
 use super::{combat::{Attack, Owner}, draw::{texturedentity::{Texture, TexturedEntity}, textures::load_texture}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
 	pub stats: Entity,
-	pub config: Value,
+	pub config: Config,
 
 	pub swords: [WeaponInfo; 3],
 	pub guns: [WeaponInfo; 3],
@@ -55,7 +54,7 @@ impl Player {
 				100, 
 				Texture::new(load_texture("./assets/textures/entity/player/player_spritesheet_wip.png"))
 			),
-			config: get_config("./config.json"),
+			config: Config::read("./config.ron"),
 
 			swords: [
 				WeaponInfo {weapon: Weapon::Sword, unlocked: true, cooldown: 0},
@@ -102,10 +101,10 @@ impl Player {
 		}
 
 		// Changing weapons
-		if is_pressed("Change Sword", &self.config) {
+		if self.config.keymap.change_sword.is_pressed() {
 			self.current_sword = swap_weapons(&self.current_sword, &self.swords);
 		}
-		if is_pressed("Change Gun", &self.config) {
+		if self.config.keymap.change_gun.is_pressed() {
 			self.current_gun = swap_weapons(&self.current_gun, &self.guns);
 		}
 
@@ -160,19 +159,19 @@ impl Player {
 		// Checks to see if both Up and Down are being held at the same time.
 		// If they are, sets the direction to move based upon the most recently pressed key. 
 		// Otherwise, sets the direction to move based upon the currently pressed key.
-		if is_down("Up", &self.config)
-		&& is_down("Down", &self.config) {
-			if is_pressed("Up", &self.config)
+		if self.config.keymap.up.is_down()
+		&& self.config.keymap.down.is_down() {
+			if self.config.keymap.up.is_pressed()
 			&& self.axis_vertical != Axis::Negative {
 				self.axis_vertical = Axis::Negative;
 			} 
-			if is_pressed("Down", &self.config)
+			if self.config.keymap.down.is_pressed()
 			&& self.axis_vertical != Axis::Positive {
 				self.axis_vertical = Axis::Positive;
 			} 
-		} else if is_down("Up", &self.config) {
+		} else if self.config.keymap.up.is_down() {
 			self.axis_vertical = Axis::Negative;
-		} else if is_down("Down", &self.config) {
+		} else if self.config.keymap.down.is_down() {
 			self.axis_vertical = Axis::Positive;
 		} else {
 			self.axis_vertical = Axis::None;
@@ -181,19 +180,19 @@ impl Player {
 		// Checks to see if both Left and Right are being held at the same time.
 		// If they are, sets the direction to move based upon the most recently pressed key. 
 		// Otherwise, sets the direction to move based upon the currently pressed key.
-		if is_down("Left", &self.config)
-		&& is_down("Right", &self.config) {
-			if is_pressed("Left", &self.config)
+		if self.config.keymap.left.is_down()
+		&& self.config.keymap.right.is_down() {
+			if self.config.keymap.left.is_pressed()
 			&& self.axis_vertical != Axis::Negative {
 				self.axis_horizontal = Axis::Negative;
 			} 
-			if is_pressed("Right", &self.config)
+			if self.config.keymap.right.is_pressed()
 			&& self.axis_vertical != Axis::Positive {
 				self.axis_horizontal = Axis::Positive;
 			} 
-		} else if is_down("Left", &self.config) {
+		} else if self.config.keymap.left.is_down() {
 			self.axis_horizontal = Axis::Negative;
-		} else if is_down("Right", &self.config) {
+		} else if self.config.keymap.right.is_down() {
 			self.axis_horizontal = Axis::Positive;
 		} else {
 			self.axis_horizontal = Axis::None;

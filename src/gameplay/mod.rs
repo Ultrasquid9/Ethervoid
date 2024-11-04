@@ -7,7 +7,7 @@ use imageproc::image::{DynamicImage, ImageReader};
 use player::Player;
 use macroquad::prelude::*;
 
-use crate::{input::is_down, State};
+use crate::State;
 
 mod player;
 mod enemy;
@@ -52,11 +52,11 @@ pub async fn gameplay() -> State {
 		player.update(&get_map());
 
 		// Attacking
-		if is_down("Sword", &player.config) && player.swords[0].cooldown == 0 {
+		if player.config.keymap.sword.is_down() && player.swords[0].cooldown == 0 {
 			player.swords[0].cooldown = 16;
 			attacks.push(player.attack_sword());
 		}
-		if is_down("Gun", &player.config) && player.guns[0].cooldown == 0 {
+		if player.config.keymap.gun.is_down() && player.guns[0].cooldown == 0 {
 			player.guns[0].cooldown = 16;
 			attacks.push(player.attack_gun());
 		}
@@ -91,7 +91,7 @@ pub async fn gameplay() -> State {
 		draw(&mut camera, &player, &enemies, &attacks, &textures, &get_map());
 
 		// Quits the game
-		if is_down("Quit", &player.config) {
+		if player.config.keymap.quit.is_pressed() {
 			println!("Returning to the main menu");
 			return State::Menu;
 		}

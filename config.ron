@@ -1,0 +1,15 @@
+(
+	keymap: (
+		up: ("W"),
+		left: ("A"),
+		down: ("S"),
+		right: ("D"),
+
+		sword: ("Left Click"),
+		gun: ("Right Click"),
+		change_sword: ("R"),
+		change_gun: ("F"),
+
+		quit: ("Escape")
+	)
+)
