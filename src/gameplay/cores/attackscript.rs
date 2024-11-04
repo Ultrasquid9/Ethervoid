@@ -2,12 +2,13 @@ use std::{collections::HashMap, fs};
 
 use macroquad::math::{vec2, Vec2};
 use rhai::{Dynamic, Engine, Scope};
+use serde::Deserialize;
 
 use crate::gameplay::{combat::{Attack, Owner}, entity::{Entity, MovableObj}, player::Player};
 
 use super::{gen_name, get_files};
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub struct AttackScriptBuilder (String);
 
 impl AttackScriptBuilder {

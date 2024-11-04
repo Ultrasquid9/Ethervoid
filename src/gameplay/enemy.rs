@@ -1,9 +1,10 @@
 use macroquad::{math::Vec2, texture::Texture2D};
+use serde::Deserialize;
 
 use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, draw::texturedentity::{Texture, TexturedEntity}, entity::{Entity, MovableObj}, player::Player};
 
 /// The movement AI used by an enemy
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub enum Movement {
 	MoveTowardsPlayer
 }

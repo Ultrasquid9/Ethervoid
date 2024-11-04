@@ -1,5 +1,6 @@
 use std::{collections::HashMap, fs};
 
+use serde::Deserialize;
 use serde_json::Value;
 
 use crate::gameplay::enemy::Movement;
@@ -7,7 +8,7 @@ use crate::gameplay::enemy::Movement;
 use super::{attackscript::{get_attacks, AttackScriptBuilder}, gen_name, get_files};
 
 /// A struct containing the stats of an enemy type
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub struct EnemyType {
 	pub max_health: usize,
 	pub size: f32,

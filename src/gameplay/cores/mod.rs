@@ -1,8 +1,20 @@
 use std::fs;
 
+use macroquad::math::Vec2;
+use serde::Deserialize;
+
 pub mod enemytype;
 pub mod map;
 pub mod attackscript;
+
+#[derive(Clone, Deserialize)]
+pub struct Point(f32, f32);
+
+impl Point {
+	pub fn to_vec2(&self) -> Vec2 {
+		Vec2::new(self.0, self.1)
+	}
+}
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: String) -> Vec<String> {
