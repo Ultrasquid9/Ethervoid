@@ -1,0 +1,8 @@
+(
+	max_health: 128,
+	size: 15,
+	movement: "MoveTowardsPlayer",
+	attacks: [
+		"default:test"
+	]
+)

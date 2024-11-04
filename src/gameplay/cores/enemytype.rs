@@ -1,47 +1,46 @@
 use std::{collections::HashMap, fs};
 
 use serde::Deserialize;
-use serde_json::Value;
 
 use crate::gameplay::enemy::Movement;
 
 use super::{attackscript::{get_attacks, AttackScriptBuilder}, gen_name, get_files};
 
-/// A struct containing the stats of an enemy type
 #[derive(Clone, Deserialize)]
+struct EnemyTypeBuilder {
+	max_health: usize,
+	size: f32,
+	movement: String,
+	attacks: Vec<String>
+}
+
+impl EnemyTypeBuilder {
+	pub fn read(dir: String) -> Self {
+		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+	}
+
+	pub fn build(self) -> EnemyType {
+		let attacks = get_attacks();
+
+		EnemyType {
+			max_health: self.max_health,
+			size: self.size,
+			movement: Movement::from_str(&self.movement), 
+			attacks: self.attacks
+				.iter()
+				.map(|attack| attacks.get(attack.as_str()).unwrap().clone())
+				.collect()
+		}
+	}
+}
+
+/// A struct containing the stats of an enemy type
+#[derive(Clone)]
 pub struct EnemyType {
 	pub max_health: usize,
 	pub size: f32,
 	pub movement: Movement,
 	pub attacks: Vec<AttackScriptBuilder>
-}
-
-impl EnemyType {
-	/// Creates an EnemyType from the directory of the given string
-	pub fn from(dir: String) -> EnemyType {
-		let input: Value = serde_json::from_str(&fs::read_to_string(dir).expect("File does not exist!")).unwrap();
-
-		let mut enemytype = EnemyType {
-			max_health: input["Max Health"].as_u64().unwrap() as usize,
-			size: input["Size"].as_f64().unwrap() as f32,
-			movement: Movement::from_str(input["Movement"].as_str().unwrap()),
-			attacks: Vec::new()
-		};
-
-		let attacks = get_attacks();
-
-		for i in input["Attacks"].as_array().unwrap() {
-			let attack = i.as_str().unwrap();
-
-			enemytype.attacks.push(
-				attacks.get(attack)
-					.unwrap()
-					.clone()
-			);
-		}
-
-		return enemytype;
-	}
 }
 
 /// Provides a HashMap containing all EnemyTypes
@@ -51,7 +50,7 @@ pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 	for i in get_files(String::from("enemies")) {
 		enemytypes.insert(
 			gen_name(&i),
-			EnemyType::from(i)
+			EnemyTypeBuilder::read(i).build()
 		);
 	}
 

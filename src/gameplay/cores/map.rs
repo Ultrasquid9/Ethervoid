@@ -31,14 +31,10 @@ impl MapBuilder {
 				.collect(),
 			enemies: self.enemies
 				.iter()
-				.map(|enemy| ({
-						enemytypes.get(enemy.0.as_str())
-							.unwrap()
-							.clone()
-					},
+				.map(|enemy| (
+					enemytypes.get(enemy.0.as_str()).unwrap().clone(),
 					enemy.1.to_vec2()
-				)
-				)
+				))
 				.collect()
 		}
 	}
