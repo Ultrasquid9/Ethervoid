@@ -3,6 +3,7 @@
 	size: 15,
 	movement: "MoveTowardsPlayer",
 	attacks: [
-		"default:test"
+		"default:test",
+		"default:test2"
 	]
 )
