@@ -3,6 +3,7 @@ use combat::{try_parry, Attack};
 use draw::{draw, textures::load_texture};
 use enemy::Enemy;
 use entity::MovableObj;
+use image::{DynamicImage, ImageReader};
 use player::Player;
 use macroquad::prelude::*;
 
@@ -25,8 +26,12 @@ pub async fn gameplay() -> State {
 	let mut enemies = Vec::new(); // Creates a list of enemies
 	let mut attacks: Vec<Attack> = Vec::new(); // Creates a list of attacks 
 
-	// Textures
-	let texture = load_texture("./assets/textures/tiles/grass-test.png");
+	// Very temporary solution
+	// If this is still around when the game releases present day me will be very dissapointed with future me
+	let textures: Vec<DynamicImage> = vec![
+		ImageReader::open("./assets/textures/tiles/grass-test.png").unwrap().decode().unwrap(),
+		ImageReader::open("./assets/appl.webp").unwrap().decode().unwrap()
+	];
 	
 	// The maps
 	let maps = get_maps(); // Creates a list of Maps
@@ -83,7 +88,7 @@ pub async fn gameplay() -> State {
 			camera.distance(player.stats.get_pos()) / 6.
 		);
 		// Draws the player and enemies
-		draw(&mut camera, &player, &enemies, &attacks, &texture, &get_map());
+		draw(&mut camera, &player, &enemies, &attacks, &textures, &get_map());
 
 		// Quits the game
 		if is_down("Quit", &player.config) {

@@ -1,15 +1,18 @@
+use downscale::{downscale, to_texture};
+use image::DynamicImage;
 use macroquad::prelude::*;
-use textures::{draw_tilemap, pixel_offset};
+use textures::{draw_tilemap, pixel_offset, render_texture};
 
 use super::{combat::{Attack, Owner}, enemy::Enemy, player::Player};
 
 pub mod textures;
 pub mod texturedentity;
+pub mod downscale;
 
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, texture: &Texture2D, map: &Vec<Vec2>) {
+pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &Vec<Attack>, textures: &Vec<DynamicImage>, map: &Vec<Vec2>) {
 	clear_background(RED); // Draws the background
 
 	let camera = Vec2::new(
@@ -23,7 +26,10 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 		target: camera,
 		..Default::default()
 	});
-	draw_tilemap(texture);
+	draw_tilemap(&to_texture(textures[0].clone()));
+
+	// Appl 
+	render_texture(&downscale(&textures[1], 16), Vec2::new(200., 200.), None);
 
 	// Draws the map
 	for i in 0..map.len() {
