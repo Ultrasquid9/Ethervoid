@@ -3,7 +3,7 @@ use imageproc::image::DynamicImage;
 use macroquad::prelude::*;
 use textures::{draw_tilemap, pixel_offset, render_texture};
 
-use super::{combat::{Attack, Owner}, enemy::Enemy, player::Player};
+use super::{combat::Attack, enemy::Enemy, player::Player};
 
 pub mod textures;
 pub mod texturedobj;

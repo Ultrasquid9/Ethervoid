@@ -1,8 +1,9 @@
+use imageproc::image::ImageReader;
 use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
-use super::{textures::{load_texture, render_texture}, SCREEN_SCALE};
+use super::{downscale::downscale, textures::{load_texture, render_texture}, SCREEN_SCALE};
 
 pub trait TexturedObj {
 	fn update_texture(&mut self);
@@ -118,6 +119,24 @@ pub struct AttackTexture {
 }
 
 impl AttackTexture {
+	pub fn new_physical(pos: Vec2, angle: f32) -> Self {
+		Self {
+			sprite: downscale(&ImageReader::open(
+				"./assets/textures/attacks/physical-slash-bad.png")
+					.unwrap()
+					.decode()
+					.unwrap(), 
+				24, 
+				angle
+			),
+
+			pos,
+			angle,
+
+			anim_time: 12
+		}
+	}
+
 	pub fn new() -> Self {
 		Self {
 			sprite: load_texture("./assets/textures/attacks/projectile-player.png"),

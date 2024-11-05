@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
@@ -38,11 +40,11 @@ pub enum AttackType {
 pub struct ProjectileOrHitscan {}
 
 impl Attack {
-	pub fn new_physical(pos: Vec2, damage: isize, size: f32, owner: Owner) -> Attack {
+	pub fn new_physical(pos: Vec2, target: Vec2, damage: isize, size: f32, owner: Owner) -> Attack {
 		return Attack {
 			size,
 			pos,
-			target: pos,
+			target,
 
 			owner,
 			is_parried: false,
@@ -51,7 +53,7 @@ impl Attack {
 			damage,
 			lifetime: 2,
 
-			texture: AttackTexture::new()
+			texture: AttackTexture::new_physical(pos, pos.angle_between(target) + PI)
 		}
 	}
 

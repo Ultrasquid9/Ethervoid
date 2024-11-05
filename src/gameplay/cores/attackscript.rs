@@ -66,8 +66,9 @@ impl AttackScript<'_> {
 			.register_fn("distance_between", distance_between)
 
 			// Functions for creating attacks
-			.register_fn("new_physical", move |damage: i64, size| Attack::new_physical(
+			.register_fn("new_physical", move |damage: i64, size, target: Vec2,| Attack::new_physical(
 				entity_pos, 
+				target,
 				damage as isize, 
 				size, 
 				Owner::Enemy

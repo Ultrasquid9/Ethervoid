@@ -119,7 +119,7 @@ impl Player {
 		match self.swords[self.current_sword].weapon {
 			Weapon::Sword => {
 				self.swords[self.current_sword].cooldown = 16;
-				Attack::new_physical(self.stats.get_pos(), 10, 36., Owner::Player)
+				Attack::new_physical(self.stats.get_pos(), get_mouse_pos() * 999., 10, 36., Owner::Player)
 			},
 			Weapon::Hammer => {
 				self.swords[self.current_sword].cooldown = 32;
