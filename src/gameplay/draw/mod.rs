@@ -6,7 +6,7 @@ use textures::{draw_tilemap, pixel_offset, render_texture};
 use super::{combat::{Attack, Owner}, enemy::Enemy, player::Player};
 
 pub mod textures;
-pub mod texturedentity;
+pub mod texturedobj;
 pub mod downscale;
 
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
@@ -70,11 +70,7 @@ pub fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, attacks: &
 					PURPLE
 				); 
 			} else {
-				draw_circle(i.pos.x, i.pos.y, i.size, if i.owner == Owner::Player {
-					PURPLE
-				} else {
-					ORANGE
-				}); 
+				i.texture.render();
 			}
 		}
 	}

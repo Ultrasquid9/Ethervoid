@@ -1,7 +1,7 @@
 use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 
-use super::{draw::texturedentity::Texture, player::Axis, vec2_to_tuple};
+use super::{draw::texturedobj::EntityTexture, player::Axis, vec2_to_tuple};
 
 /// Trait for an object that has a size and can be moved
 pub trait MovableObj {
@@ -56,7 +56,7 @@ pub struct Entity {
 	pub dir_vertical: Axis,
 	pos: Vec2,
 
-	pub texture: Texture
+	pub texture: EntityTexture
 }
 
 impl Entity {
@@ -103,7 +103,7 @@ impl Entity {
 	}
 
 	/// Creates a new Entity
-	pub fn new(pos: Vec2, size: f32, health: isize, texture: Texture) -> Self {
+	pub fn new(pos: Vec2, size: f32, health: isize, texture: EntityTexture) -> Self {
 		return Entity {
 			i_frames: 0,
 			stunned: 0,

@@ -2,13 +2,13 @@ use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
-use super::{textures::render_texture, SCREEN_SCALE};
+use super::{textures::{load_texture, render_texture}, SCREEN_SCALE};
 
-pub trait TexturedEntity {
+pub trait TexturedObj {
 	fn update_texture(&mut self);
 }
 
-pub struct Texture {
+pub struct EntityTexture {
 	pub sprite: Texture2D,
 
 	pos: Vec2,
@@ -20,7 +20,7 @@ pub struct Texture {
 	dir_vertical: Axis
 }
 
-impl Texture {
+impl EntityTexture {
 	pub fn new(sprite: Texture2D) -> Self {
 		Self {
 			sprite,
@@ -104,5 +104,37 @@ impl Texture {
 				..Default::default()
 			})
 		);
+	}
+}
+
+#[derive(Clone)]
+pub struct AttackTexture {
+	pub sprite: Texture2D,
+
+	pos: Vec2,
+	angle: f32,
+
+	anim_time: u8,
+}
+
+impl AttackTexture {
+	pub fn new() -> Self {
+		Self {
+			sprite: load_texture("./assets/textures/attacks/projectile-player.png"),
+
+			pos: Vec2::new(0., 0.),
+			angle: 0.,
+
+			anim_time: 10
+		}
+	}
+
+	pub fn update(&mut self, pos: Vec2, angle: f32) {
+		self.pos = pos;
+		self.angle = angle;
+	}
+
+	pub fn render(&self) {
+		render_texture(&self.sprite, self.pos, None);
 	}
 }

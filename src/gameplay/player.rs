@@ -2,7 +2,7 @@ use macroquad::math::Vec2;
 
 use crate::config::Config;
 
-use super::{combat::{Attack, Owner}, draw::{texturedentity::{Texture, TexturedEntity}, textures::load_texture}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
+use super::{combat::{Attack, Owner}, draw::{texturedobj::{EntityTexture, TexturedObj}, textures::load_texture}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -52,7 +52,7 @@ impl Player {
 				Vec2::new(0.0, 0.0), 
 				15., 
 				100, 
-				Texture::new(load_texture("./assets/textures/entity/player/player_spritesheet_wip.png"))
+				EntityTexture::new(load_texture("./assets/textures/entity/player/player_spritesheet_wip.png"))
 			),
 			config: Config::read("./config.ron"),
 
@@ -228,7 +228,7 @@ impl Player {
 	}
 }
 
-impl TexturedEntity for Player {
+impl TexturedObj for Player {
 	fn update_texture(&mut self) {
 		self.stats.texture.update(
 			self.stats.get_pos(),

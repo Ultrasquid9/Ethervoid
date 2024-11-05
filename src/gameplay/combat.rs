@@ -2,18 +2,22 @@ use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
 
-use super::{enemy::Enemy, entity::{Entity, MovableObj}, get_mouse_pos, player::Player, vec2_to_tuple};
+use super::{draw::texturedobj::{AttackTexture, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_mouse_pos, player::Player, vec2_to_tuple};
 
 #[derive(Clone)]
 pub struct Attack {
 	pub size: f32,
 	pub pos: Vec2,
+	target: Vec2,
+
 	pub owner: Owner,
 	pub is_parried: bool,
 
 	attack_type: AttackType,
 	damage: isize,
-	lifetime: u8
+	lifetime: u8,
+
+	pub texture: AttackTexture
 }
 
 #[derive(Clone, PartialEq)]
@@ -31,21 +35,23 @@ pub enum AttackType {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct ProjectileOrHitscan {
-	target: Vec2
-}
+pub struct ProjectileOrHitscan {}
 
 impl Attack {
 	pub fn new_physical(pos: Vec2, damage: isize, size: f32, owner: Owner) -> Attack {
 		return Attack {
 			size,
 			pos,
+			target: pos,
+
 			owner,
 			is_parried: false,
 
 			attack_type: AttackType::Physical,
 			damage,
 			lifetime: 2,
+
+			texture: AttackTexture::new()
 		}
 	}
 
@@ -53,12 +59,16 @@ impl Attack {
 		return Attack {
 			size,
 			pos,
+			target: pos,
+
 			owner,
 			is_parried: false,
 
 			attack_type: AttackType::Burst,
 			damage,
 			lifetime: 12,
+
+			texture: AttackTexture::new()
 		}
 	}
 
@@ -66,14 +76,16 @@ impl Attack {
 		return Attack {
 			size: 10.,
 			pos,
+			target,
+
 			owner,
 			is_parried: false,
 
-			attack_type: AttackType::Projectile( ProjectileOrHitscan {
-				target
-			}),
+			attack_type: AttackType::Projectile( ProjectileOrHitscan {}),
 			damage,
 			lifetime: 1,
+
+			texture: AttackTexture::new()
 		}
 	}
 
@@ -81,14 +93,16 @@ impl Attack {
 		return Attack {
 			size: 10.,
 			pos,
+			target,
+
 			owner,
 			is_parried: false,
 
-			attack_type: AttackType::Hitscan( ProjectileOrHitscan {
-				target
-			}),
+			attack_type: AttackType::Hitscan( ProjectileOrHitscan {}),
 			damage,
 			lifetime: 8,
+
+			texture: AttackTexture::new()
 		}
 	}
 
@@ -101,13 +115,8 @@ impl Attack {
 	}
 
 	/// Gets the target of the attack
-	/// Panics if the attack is not a Projectile or Hitscan
 	pub fn get_target(&self) -> Vec2 {
-		match &self.attack_type {
-			AttackType::Projectile(attributes) => attributes.target,
-			AttackType::Hitscan(attributes) => attributes.target,
-			_ => panic!("Attack does not have a target")
-		}
+		self.target
 	}
 
 	/// Checks if the attack should be removed
@@ -123,11 +132,13 @@ impl Attack {
 
 	/// Updates the attack based upon its type
 	pub fn update(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>) {
+		self.update_texture();
+
 		match &self.attack_type {
 			AttackType::Physical => self.update_physical(enemies, player), 
 			AttackType::Burst => self.attack_burst(enemies, player),
-			AttackType::Projectile(attributes) => self.attack_projectile(enemies, player, map, attributes.clone()),
-			AttackType::Hitscan(attributes) => self.attack_hitscan(enemies, player, attributes.clone()),
+			AttackType::Projectile(_) => self.attack_projectile(enemies, player, map),
+			AttackType::Hitscan(_) => self.attack_hitscan(enemies, player),
 		}
 	}
 
@@ -172,7 +183,7 @@ impl Attack {
 	}
 
 	/// Updates the provided Projectile attack
-	fn attack_projectile(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>, attributes: ProjectileOrHitscan) {
+	fn attack_projectile(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>) {
 		match self.owner {
 			Owner::Player => for i in enemies {
 				if self.is_touching(&i.stats) {
@@ -188,22 +199,22 @@ impl Attack {
 			}
 		}
 
-		let new_pos = self.pos.move_towards(attributes.target, 3.0);
+		let new_pos = self.pos.move_towards(self.target, 3.0);
 		self.try_move(new_pos, map);
 
-		if self.pos != new_pos || self.pos == attributes.target {
+		if self.pos != new_pos || self.pos == self.target {
 			self.lifetime = 0;
 		}
 	}
 
 	/// Updates the provided Hitscan attack
-	fn attack_hitscan(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, attributes: ProjectileOrHitscan) {
+	fn attack_hitscan(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
 		// Damages the provided entity with a raycast
 		let damage_with_raycast = |entity: &mut Entity| {
 			match cast_wide(
 				&Ray{
 					position: vec2_to_tuple(&self.pos), 
-					end_position: vec2_to_tuple(&attributes.target)
+					end_position: vec2_to_tuple(&self.target)
 				}, 
 				&entity_to_barriers(entity)
 			) {
@@ -243,6 +254,12 @@ impl MovableObj for Attack {
 
 	fn edit_pos(&mut self) -> &mut Vec2 {
 		&mut self.pos
+	}
+}
+
+impl TexturedObj for Attack {
+	fn update_texture(&mut self) {
+		self.texture.update(self.pos, self.pos.angle_between(self.target));
 	}
 }
 
@@ -291,14 +308,13 @@ pub fn try_parry(attacks: &mut Vec<Attack>) {
 							attacks[j].owner = attacks[i].owner.clone();
 						}
 
-						attacks[j].attack_type = AttackType::Hitscan(ProjectileOrHitscan {
-							target: match attacks[j].owner {
-								Owner::Player => get_mouse_pos() * 999.,
-								Owner::Enemy => Vec2::new(0., 0.) // TODO - Get target of the enemy who owns this attack 
-							}
-						});
-
+						attacks[j].attack_type = AttackType::Hitscan(ProjectileOrHitscan {});
 						attacks[j].damage += attacks[i].damage;
+
+						attacks[j].target = match attacks[j].owner {
+							Owner::Player => get_mouse_pos() * 999.,
+							Owner::Enemy => Vec2::new(0., 0.) // TODO - Get target of the enemy who owns this attack 
+						};
 
 						// Since hitscan attacks cannot be parried, the is_parried bool is unneccessary
 					}
