@@ -1,14 +1,14 @@
 use macroquad::input::{is_key_down, is_key_pressed, is_mouse_button_down, is_mouse_button_pressed, KeyCode, MouseButton};
 use serde::{Deserialize, Serialize};
-use std::{fs, ops::Deref};
+use std::fs;
 
-const MOUSE_KEYS: [&str; 3] = ["Left Click", "Right Click", "Middle Click"];
-
+/// The config for the game
 #[derive(Serialize, Deserialize)]
 pub struct Config {
 	pub keymap: KeyMap
 }
 
+/// The different possible inputs for the player
 #[derive(Serialize, Deserialize)]
 pub struct KeyMap {
 	pub up: Key,
@@ -24,8 +24,15 @@ pub struct KeyMap {
 	pub quit: Key
 }
 
+/// Contains both keyboard and mouse buttons
 #[derive(Serialize, Deserialize)]
-pub struct Key (String);
+pub enum Key{
+	#[serde(with = "KeyCodeSerialize")]
+	KeyCode(KeyCode),
+
+	#[serde(with = "MouseButtonSerialize")]
+	MouseButton(MouseButton)
+}
 
 impl Config {
 	/// Reads the config file 
@@ -37,13 +44,12 @@ impl Config {
 impl Key {
 	/// Checks if the key is down
 	pub fn is_down(&self) -> bool {
-		if MOUSE_KEYS.contains(&&*self.as_str()) {
-			if is_mouse_button_down(get_mousebutton(Some(self))) {
-				return true
-			}
-		} else {
-			if is_key_down(get_keycode(Some(self))) {
-				return true
+		match self {
+			Self::KeyCode(button) => {
+				if is_key_down(*button) {return true}
+			},
+			Self::MouseButton(button) => {
+				if is_mouse_button_down(*button) {return true}
 			}
 		}
 		return false
@@ -51,84 +57,153 @@ impl Key {
 
 	/// Checks if the key is pressed
 	pub fn is_pressed(&self) -> bool {
-		if MOUSE_KEYS.contains(&&*self.as_str()) {
-			if is_mouse_button_pressed(get_mousebutton(Some(self))) {
-				return true
-			}
-		} else {
-			if is_key_pressed(get_keycode(Some(self))) {
-				return true
+		match self {
+			Self::KeyCode(button) => {
+				if is_key_pressed(*button) {return true}
+			},
+			Self::MouseButton(button) => {
+				if is_mouse_button_pressed(*button) {return true}
 			}
 		}
 		return false
 	}
 }
 
-impl Deref for Key {
-	type Target = String;
+// Gaze upon this in horror, 
+// and see what orphan rules
+// make one do.
 
-	fn deref(&self) -> &Self::Target { &self.0 }
+#[derive(Serialize, Deserialize)]
+#[serde(remote = "MouseButton")]
+enum MouseButtonSerialize {
+    Left = 0,
+    Middle = 1,
+    Right = 2,
+    Unknown = 255,
 }
 
-/// Gets the KeyCode with the value of the key passed in
-fn get_keycode(key: Option<&str>) -> KeyCode {
-	// There has to be a better way to do this
-	match key {
-		Some("Escape") => return KeyCode::Escape,
-		Some("Up") => return KeyCode::Up,
-		Some("Down") => return KeyCode::Down,
-		Some("Left") => return KeyCode::Left,
-		Some("Right") => return KeyCode::Right,
-		Some("Q") => return KeyCode::Q,
-		Some("W") => return KeyCode::W,
-		Some("E") => return KeyCode::E,
-		Some("R") => return KeyCode::R,
-		Some("T") => return KeyCode::T,
-		Some("Y") => return KeyCode::Y,
-		Some("U") => return KeyCode::U,
-		Some("I") => return KeyCode::I,
-		Some("O") => return KeyCode::O,
-		Some("P") => return KeyCode::P,
-		Some("LeftBracket") => return KeyCode::LeftBracket,
-		Some("RightBracket") => return KeyCode::RightBracket,
-		Some("Backslash") => return KeyCode::Backslash,
-		Some("A") => return KeyCode::A,
-		Some("S") => return KeyCode::S,
-		Some("D") => return KeyCode::D,
-		Some("F") => return KeyCode::G,
-		Some("H") => return KeyCode::H,
-		Some("J") => return KeyCode::J,
-		Some("K") => return KeyCode::K,
-		Some("L") => return KeyCode::L,
-		Some("Semicolon") => return KeyCode::Semicolon,
-		Some("Apostrophe") => return KeyCode::Apostrophe,
-		Some("Enter") => return KeyCode::Enter,
-		Some("LeftShift") => return KeyCode::LeftShift,
-		Some("Z") => return KeyCode::Z,
-		Some("X") => return KeyCode::X,
-		Some("C") => return KeyCode::C,
-		Some("V") => return KeyCode::V,
-		Some("B") => return KeyCode::B,
-		Some("N") => return KeyCode::N,
-		Some("M") => return KeyCode::M,
-		Some("Comma") => return KeyCode::Comma,
-		Some("Period") => return KeyCode::Period,
-		Some("Slash") => return KeyCode::Slash,
-		Some("RightShift") => return KeyCode::RightShift,
-		Some("LeftControl") => return KeyCode::LeftControl,
-		Some("LeftAlt") => return KeyCode::LeftControl,
-
-		_ => panic!("Bad keycode: {} is not a valid value", key.unwrap())
-	}
-}
-
-/// Gets the MouseButton of the key passed to it 
-fn get_mousebutton(key: Option<&str>) -> MouseButton {
-	match key {
-		Some("Left Click") => return MouseButton::Left,
-		Some("Right Click") => return MouseButton::Right,
-		Some("Middle Click") => return MouseButton::Middle,
-
-		_ => panic!("Bad keycode: {} is not a valid value", key.unwrap())
-	}
+#[derive(Serialize, Deserialize)]
+#[serde(remote = "KeyCode")]
+enum KeyCodeSerialize {
+    Space = 32,
+    Apostrophe = 39,
+    Comma = 44,
+    Minus = 45,
+    Period = 46,
+    Slash = 47,
+    Key0 = 48,
+    Key1 = 49,
+    Key2 = 50,
+    Key3 = 51,
+    Key4 = 52,
+    Key5 = 53,
+    Key6 = 54,
+    Key7 = 55,
+    Key8 = 56,
+    Key9 = 57,
+    Semicolon = 59,
+    Equal = 61,
+    A = 65,
+    B = 66,
+    C = 67,
+    D = 68,
+    E = 69,
+    F = 70,
+    G = 71,
+    H = 72,
+    I = 73,
+    J = 74,
+    K = 75,
+    L = 76,
+    M = 77,
+    N = 78,
+    O = 79,
+    P = 80,
+    Q = 81,
+    R = 82,
+    S = 83,
+    T = 84,
+    U = 85,
+    V = 86,
+    W = 87,
+    X = 88,
+    Y = 89,
+    Z = 90,
+    LeftBracket = 91,
+    Backslash = 92,
+    RightBracket = 93,
+    GraveAccent = 96,
+    World1 = 256,
+    World2 = 257,
+    Escape = 65_307,
+    Enter = 65_293,
+    Tab = 65_289,
+    Backspace = 65_288,
+    Insert = 65_379,
+    Delete = 65_535,
+    Right = 65_363,
+    Left = 65_361,
+    Down = 65_364,
+    Up = 65_362,
+    PageUp = 65_365,
+    PageDown = 65_366,
+    Home = 65_360,
+    End = 65_367,
+    CapsLock = 65_509,
+    ScrollLock = 65_300,
+    NumLock = 65_407,
+    PrintScreen = 64_797,
+    Pause = 65_299,
+    F1 = 65_470,
+    F2 = 65_471,
+    F3 = 65_472,
+    F4 = 65_473,
+    F5 = 65_474,
+    F6 = 65_475,
+    F7 = 65_476,
+    F8 = 65_477,
+    F9 = 65_478,
+    F10 = 65_479,
+    F11 = 65_480,
+    F12 = 65_481,
+    F13 = 65_482,
+    F14 = 65_483,
+    F15 = 65_484,
+    F16 = 65_485,
+    F17 = 65_486,
+    F18 = 65_487,
+    F19 = 65_488,
+    F20 = 65_489,
+    F21 = 65_490,
+    F22 = 65_491,
+    F23 = 65_492,
+    F24 = 65_493,
+    F25 = 65_494,
+    Kp0 = 65_456,
+    Kp1 = 65_457,
+    Kp2 = 65_458,
+    Kp3 = 65_459,
+    Kp4 = 65_460,
+    Kp5 = 65_461,
+    Kp6 = 65_462,
+    Kp7 = 65_463,
+    Kp8 = 65_464,
+    Kp9 = 65_465,
+    KpDecimal = 65_454,
+    KpDivide = 65_455,
+    KpMultiply = 65_450,
+    KpSubtract = 65_453,
+    KpAdd = 65_451,
+    KpEnter = 65_421,
+    KpEqual = 65_469,
+    LeftShift = 65_505,
+    LeftControl = 65_507,
+    LeftAlt = 65_513,
+    LeftSuper = 65_515,
+    RightShift = 65_506,
+    RightControl = 65_508,
+    RightAlt = 65_514,
+    RightSuper = 65_516,
+    Menu = 65_383,
+    Unknown = 511,
 }

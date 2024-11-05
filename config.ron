@@ -1,15 +1,15 @@
 (
 	keymap: (
-		up: ("W"),
-		left: ("A"),
-		down: ("S"),
-		right: ("D"),
+		up: KeyCode(W),
+		left: KeyCode(A),
+		down: KeyCode(S),
+		right: KeyCode(D),
 
-		sword: ("Left Click"),
-		gun: ("Right Click"),
-		change_sword: ("R"),
-		change_gun: ("F"),
+		sword: MouseButton(Left),
+		gun: MouseButton(Right),
+		change_sword: KeyCode(R),
+		change_gun: KeyCode(F),
 
-		quit: ("Escape")
+		quit: KeyCode(Escape)
 	)
 )
