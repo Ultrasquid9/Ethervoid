@@ -87,8 +87,16 @@ pub async fn gameplay() -> State {
 			player.stats.get_pos(), 
 			camera.distance(player.stats.get_pos()) / 6.
 		);
+
 		// Draws the player and enemies
-		draw(&mut camera, &player, &enemies, &attacks, &textures, &get_map());
+		draw(
+			&mut camera, 
+			&player, 
+			&enemies, 
+			&attacks, 
+			&textures, 
+			&get_map()
+		).await;
 
 		// Quits the game
 		if player.config.keymap.quit.is_pressed() {

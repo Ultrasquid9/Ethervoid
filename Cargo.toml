@@ -6,7 +6,8 @@ edition = "2021"
 [dependencies]
 macroquad = { version = "0.4", features = ["glam-serde"] }
 raylite = "0.1.7"
-imageproc = "0.25.0"
+futures = "0.3.*"
+imageproc = "0.25.*"
 glam = "*"
 
 ron = "0.8.*"

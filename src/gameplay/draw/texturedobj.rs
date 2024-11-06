@@ -54,7 +54,7 @@ impl EntityTexture {
 	}
 
 	/// Renders the texture with the current texture data
-	pub fn render(&self) {
+	pub async fn render(&self) {
 		let size = self.sprite.height() / 5.;
 
 		// There is definitely a far better way to do this
@@ -104,7 +104,7 @@ impl EntityTexture {
 				dest_size: Some(Vec2::new(size * SCREEN_SCALE, size * SCREEN_SCALE)),
 				..Default::default()
 			})
-		);
+		).await;
 	}
 }
 
@@ -115,7 +115,7 @@ pub struct AttackTexture {
 	pos: Vec2,
 	angle: f32,
 
-	anim_time: u8,
+	//anim_time: u8,
 }
 
 impl AttackTexture {
@@ -133,7 +133,7 @@ impl AttackTexture {
 			pos,
 			angle,
 
-			anim_time: 12
+			//anim_time: 12
 		}
 	}
 
@@ -144,7 +144,7 @@ impl AttackTexture {
 			pos: Vec2::new(0., 0.),
 			angle: 0.,
 
-			anim_time: 10
+			//anim_time: 10
 		}
 	}
 
@@ -153,7 +153,7 @@ impl AttackTexture {
 		self.angle = angle;
 	}
 
-	pub fn render(&self) {
-		render_texture(&self.sprite, self.pos, None);
+	pub async fn render(&self) {
+		render_texture(&self.sprite, self.pos, None).await;
 	}
 }

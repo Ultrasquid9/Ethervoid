@@ -1,15 +1,20 @@
 use std::fs;
 
+use futures::future::join_all;
 use macroquad::{color::WHITE, math::Vec2, texture::{draw_texture_ex, DrawTextureParams, FilterMode, Texture2D}, window::{screen_height, screen_width}};
 
 use super::SCREEN_SCALE;
 
-pub fn draw_tilemap(texture: &Texture2D) {
+pub async fn draw_tilemap(texture: Texture2D) {
+	let mut futures = Vec::new();
+
 	for y in (0..screen_height() as isize).step_by(16 * SCREEN_SCALE as usize) {
 		for x in (0..screen_width() as isize).step_by(16 * SCREEN_SCALE as usize) {
-			render_texture(&texture, Vec2::new(x as f32, y as f32), None);
+			futures.push(render_texture(&texture, Vec2::new(x as f32, y as f32), None));
 		}
 	}
+
+	join_all(futures).await;
 }
 
 /// Loads a picture from the provided directory (NOTE: WIP)
@@ -23,7 +28,7 @@ pub fn load_texture(dir: &str) -> Texture2D {
 }
 
 /// Renders a texture based upon the screen scale
-pub fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawTextureParams>) {
+pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawTextureParams>) {
 	let scale = Vec2::new(
 		texture.width() * SCREEN_SCALE, 
 		texture.height() * SCREEN_SCALE
