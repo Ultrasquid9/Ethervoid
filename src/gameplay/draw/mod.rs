@@ -1,8 +1,10 @@
 use downscale::{downscale, to_texture};
-use futures::future::join_all;
+use futures::{future::join_all, join};
 use imageproc::image::DynamicImage;
 use macroquad::prelude::*;
 use textures::{draw_tilemap, pixel_offset, render_texture};
+
+use crate::gameplay::entity::MovableObj;
 
 use super::{combat::Attack, enemy::Enemy, player::Player};
 
@@ -33,7 +35,10 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 		target: camera,
 		..Default::default()
 	});
-	let mut futures = Vec::new();
+
+	// Futures containing operations to perform
+	let mut attack_futures = Vec::new();
+	let mut entity_futures = Vec::new();
 
 	// Tilemap
 	draw_tilemap(to_texture(textures[0].clone())).await;
@@ -45,7 +50,7 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 		None
 	).await;
 
-	// Draws the map
+	// The map
 	for i in 0..map.len() {
 		match map.get(i + 1) {
 			Some(_) => draw_line(
@@ -67,7 +72,7 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 		}
 	}
 
-	// Drawing the Player, enemies, and attacks
+	// Attacks
 	if attacks.len() > 0 {
 		for i in attacks {
 			if i.is_hitscan() {
@@ -80,22 +85,47 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 					PURPLE
 				); 
 			} else {
-				i.texture.render().await;
+				attack_futures.push(i.texture.render());
 			}
 		}
 	}
 
-	// The player
-	futures.push(player.stats.texture.render());
-
-	// Enemies
+	// Enemies and the player
 	if enemies.len() > 0 {
-		for i in enemies {
-			futures.push(i.stats.texture.render());
+		// This reminds me of that one time I went to Italy,
+		// because this is a giant mass of spaghetti 
+
+		for i in enemies.iter().enumerate() {
+			if i.0 == enemies.len() - 1 {
+				if player.stats.get_pos().y >= i.1.stats.get_pos().y {
+					entity_futures.push(i.1.stats.texture.render());
+					entity_futures.push(player.stats.texture.render());
+				} else {
+					entity_futures.push(player.stats.texture.render());
+					entity_futures.push(i.1.stats.texture.render());
+				}
+
+				break
+			}
+
+			if enemies[i.0 + 1].stats.get_pos().y >= player.stats.get_pos().y
+			&& i.1.stats.get_pos().y >= player.stats.get_pos().y {
+				entity_futures.push(player.stats.texture.render());
+			}
+
+			entity_futures.push(i.1.stats.texture.render());
 		}
+	} else {
+		entity_futures.push(player.stats.texture.render());
 	}
 
-	join_all(futures).await;
+	// Performing operations pushed to the futures
+	join!(
+		join_all(entity_futures),
+		join_all(attack_futures)
+	);
+
+	// Returning to the default camera, any future textures are UI-based
 	set_default_camera();
  
 	// Drawing a temporary UI

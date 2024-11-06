@@ -1,10 +1,12 @@
+use std::cmp::Ordering;
+
 use macroquad::{math::Vec2, texture::Texture2D};
 use serde::Deserialize;
 
 use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, draw::texturedobj::{EntityTexture, TexturedObj}, entity::{Entity, MovableObj}, player::Player};
 
 /// The movement AI used by an enemy
-#[derive(Clone, Deserialize)]
+#[derive(PartialEq, Clone, Deserialize)]
 pub enum Movement {
 	MoveTowardsPlayer
 }
@@ -96,6 +98,44 @@ impl Enemy<'_> {
 				self.stats.update_axis(&new_pos);
 				self.stats.try_move(new_pos, map);
 			}
+		}
+	}
+}
+
+impl Eq for Enemy<'_> {}
+
+impl PartialEq for Enemy<'_> {
+	fn eq(&self, other: &Self) -> bool {
+		if self.stats == other.stats 
+		&& self.movement == other.movement
+		&& self.attack_cooldown == other.attack_cooldown
+		&& self.attack_index == other.attack_index {
+			return true
+		}
+		return false
+	}
+}
+
+impl PartialOrd for Enemy<'_> {
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		if self.stats.get_pos().y > other.stats.get_pos().y {
+			return Some(Ordering::Greater)
+		} else if self.stats.get_pos().y < other.stats.get_pos().y {
+			return Some(Ordering::Less)
+		} else {
+			return Some(Ordering::Equal)
+		}
+	}
+}
+
+impl Ord for Enemy<'_> {
+	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+		if self.stats.get_pos().y > other.stats.get_pos().y {
+			return Ordering::Greater
+		} else if self.stats.get_pos().y < other.stats.get_pos().y {
+			return Ordering::Less
+		} else {
+			return Ordering::Equal
 		}
 	}
 }

@@ -78,6 +78,8 @@ pub async fn gameplay() -> State {
 				i.update(&mut attacks, &mut player, &get_map());
 			}
 
+			enemies.sort();
+
 			enemies.retain(|x| !x.stats.should_kill());
 		}
 

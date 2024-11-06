@@ -44,8 +44,8 @@ pub trait MovableObj {
 	}
 }
 
-
 /// Data used by all entities, including both the player and enemies
+#[derive(PartialEq)]
 pub struct Entity {
 	pub i_frames: u8,
 	pub stunned: u8,

@@ -9,6 +9,7 @@ pub trait TexturedObj {
 	fn update_texture(&mut self);
 }
 
+#[derive(PartialEq)]
 pub struct EntityTexture {
 	pub sprite: Texture2D,
 
