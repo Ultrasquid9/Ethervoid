@@ -110,11 +110,13 @@ impl EntityTexture {
 	}
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 #[allow(dead_code)]
 pub enum AttackTextureType {
 	Slash,
 	Dash,
+
+	Burst,
 
 	ProjectilePlayer,
 	ProjectileEnemy,
@@ -145,6 +147,12 @@ impl AttackTexture {
 					.decode()
 					.unwrap()),
 				AttackTextureType::Dash => Some(ImageReader::open("./assets/textures/attacks/dash.png")
+					.unwrap()
+					.decode()
+					.unwrap()),
+
+				// Burst
+				AttackTextureType::Burst => Some(ImageReader::open("./assets/textures/attacks/burst.png")
 					.unwrap()
 					.decode()
 					.unwrap()),
@@ -187,11 +195,16 @@ impl AttackTexture {
 			return
 		}
 
-		let x_pos = match self.anim_time / 3 {
-			2 => self.size * 2.,
+		let mut x_pos = match self.anim_time / 3 {
+			2 => 0.,
 			1 => self.size,
-			_ => 0.,
+			_ => self.size * 2.,
 		};
+
+		if self.texturetype == AttackTextureType::ProjectileEnemy
+		|| self.texturetype == AttackTextureType::ProjectilePlayer {
+			x_pos = 0.
+		}
 
 		render_texture(
 			&downscale(

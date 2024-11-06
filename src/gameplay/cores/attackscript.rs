@@ -78,7 +78,8 @@ impl AttackScript<'_> {
 				entity_pos, 
 				damage as isize, 
 				size, 
-				Owner::Enemy
+				Owner::Enemy,
+				AttackTextureType::Burst
 			))
 			.register_fn("new_projectile", move |damage: i64, target: Vec2| Attack::new_projectile(
 				entity_pos, 

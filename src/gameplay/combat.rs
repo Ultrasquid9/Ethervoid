@@ -62,7 +62,7 @@ impl Attack {
 		}
 	}
 
-	pub fn new_burst(pos: Vec2, damage: isize, size: f32, owner: Owner) -> Attack {
+	pub fn new_burst(pos: Vec2, damage: isize, size: f32, owner: Owner, texturetype: AttackTextureType) -> Attack {
 		return Attack {
 			size,
 			pos,
@@ -79,7 +79,7 @@ impl Attack {
 				pos, 
 				size, 
 				0., 
-				super::draw::texturedobj::AttackTextureType::Slash
+				texturetype
 			)
 		}
 	}
@@ -302,14 +302,13 @@ impl TexturedObj for Attack {
 		self.texture.update(
 			self.pos, 
 			match self.attack_type {
-				AttackType::Physical | AttackType::Burst => {
+				AttackType::Physical => {
 					(self.target.y).atan2(self.target.x)
 				},
-				AttackType::Projectile(_) | AttackType::Hitscan(_) => {
+				_ => {
 					0.
 				}
 			}
-			
 		);
 	}
 }

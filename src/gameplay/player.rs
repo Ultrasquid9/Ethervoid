@@ -130,7 +130,13 @@ impl Player {
 			},
 			Weapon::Hammer => {
 				self.swords[self.current_sword].cooldown = 32;
-				Attack::new_burst(self.stats.get_pos(), 10, 36., Owner::Player)
+				Attack::new_burst(
+					self.stats.get_pos(), 
+					10, 
+					36., 
+					Owner::Player,
+					AttackTextureType::Burst
+				)
 			},
 			Weapon::Boomerang => {
 				self.swords[self.current_sword].cooldown = 48;
@@ -162,7 +168,13 @@ impl Player {
 			},
 			Weapon::Shotgun => {
 				self.guns[self.current_gun].cooldown = 32;
-				Attack::new_burst(self.stats.get_pos(), 10, 36., Owner::Player)
+				Attack::new_burst(
+					self.stats.get_pos(), 
+					10, 
+					36., 
+					Owner::Player,
+					AttackTextureType::Burst
+				)
 			},
 			Weapon::RadioCannon => {
 				self.guns[self.current_gun].cooldown = 48;
