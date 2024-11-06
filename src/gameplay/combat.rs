@@ -15,7 +15,7 @@ pub struct Attack {
 
 	attack_type: AttackType,
 	damage: isize,
-	lifetime: u8,
+	lifetime: i8,
 
 	pub texture: AttackTexture
 }
@@ -53,7 +53,12 @@ impl Attack {
 
 			// After angle_between led to wierd-ass bugs, I added atan2 and it worked.
 			// I have as such concluded that atan2 is magical, and fixes every problem. 
-			texture: AttackTexture::new_physical(pos, (target.y).atan2(target.x))
+			texture: AttackTexture::new(
+				pos, 
+				size, 
+				(target.y).atan2(target.x), 
+				super::draw::texturedobj::AttackTextureType::Slash
+			)
 		}
 	}
 
@@ -70,7 +75,12 @@ impl Attack {
 			damage,
 			lifetime: 12,
 
-			texture: AttackTexture::new()
+			texture: AttackTexture::new(
+				pos, 
+				size, 
+				0., 
+				super::draw::texturedobj::AttackTextureType::Slash
+			)
 		}
 	}
 
@@ -87,7 +97,12 @@ impl Attack {
 			damage,
 			lifetime: 1,
 
-			texture: AttackTexture::new()
+			texture: AttackTexture::new(
+				pos, 
+				16., 
+				0., 
+				super::draw::texturedobj::AttackTextureType::ProjectilePlayer
+			)
 		}
 	}
 
@@ -104,7 +119,12 @@ impl Attack {
 			damage,
 			lifetime: 8,
 
-			texture: AttackTexture::new()
+			texture: AttackTexture::new(
+				pos, 
+				16., 
+				0., 
+				super::draw::texturedobj::AttackTextureType::Slash
+			)
 		}
 	}
 
@@ -123,9 +143,19 @@ impl Attack {
 
 	/// Checks if the attack should be removed
 	pub fn should_rm(&self) -> bool {
-		if self.lifetime == 0 {
-			return true;
+		match self.attack_type {
+			AttackType::Physical | AttackType::Burst => {
+				if self.texture.anim_time == 0 {
+					return true;
+				}
+			},
+			AttackType::Projectile(_) | AttackType::Hitscan(_) => {
+				if self.lifetime == 0 {
+					return true;
+				}
+			}
 		}
+
 		return false;
 	}
 
@@ -137,15 +167,23 @@ impl Attack {
 		self.update_texture();
 
 		match &self.attack_type {
-			AttackType::Physical => self.update_physical(enemies, player), 
-			AttackType::Burst => self.attack_burst(enemies, player),
+			AttackType::Physical => {
+				if self.lifetime > 0 {
+					self.attack_physical(enemies, player);
+				}
+			} 
+			AttackType::Burst => {
+				if self.lifetime > 0 {
+					self.attack_burst(enemies, player);
+				}
+			}
 			AttackType::Projectile(_) => self.attack_projectile(enemies, player, map),
 			AttackType::Hitscan(_) => self.attack_hitscan(enemies, player),
 		}
 	}
 
 	/// Updates the provided Physical attack
-	fn update_physical(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
+	fn attack_physical(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
 		match self.owner {
 			Owner::Player => for i in enemies {
 				if i.stats.is_touching(self) {
@@ -261,7 +299,18 @@ impl MovableObj for Attack {
 
 impl TexturedObj for Attack {
 	fn update_texture(&mut self) {
-		self.texture.update(self.pos, self.pos.angle_between(self.target));
+		self.texture.update(
+			self.pos, 
+			match self.attack_type {
+				AttackType::Physical | AttackType::Burst => {
+					(self.target.y).atan2(self.target.x)
+				},
+				AttackType::Projectile(_) | AttackType::Hitscan(_) => {
+					0.
+				}
+			}
+			
+		);
 	}
 }
 

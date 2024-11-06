@@ -1,9 +1,10 @@
+use image::DynamicImage;
 use imageproc::image::ImageReader;
 use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
-use super::{downscale::downscale, textures::{load_texture, render_texture}, SCREEN_SCALE};
+use super::{downscale::downscale, textures::render_texture, SCREEN_SCALE};
 
 pub trait TexturedObj {
 	fn update_texture(&mut self);
@@ -110,51 +111,83 @@ impl EntityTexture {
 }
 
 #[derive(Clone)]
+pub enum AttackTextureType {
+	Slash,
+
+	ProjectilePlayer,
+	ProjectileEnemy
+}
+
+#[derive(Clone)]
 pub struct AttackTexture {
-	pub sprite: Texture2D,
+	pub sprite: DynamicImage,
+	pub anim_time: i8,
 
 	pos: Vec2,
 	angle: f32,
+	size: f32,
 
-	//anim_time: u8,
+	texturetype: AttackTextureType
 }
 
 impl AttackTexture {
-	pub fn new_physical(pos: Vec2, angle: f32) -> Self {
+	/// Creates an attack texture with a "slash" sprite
+	pub fn new(pos: Vec2, size: f32, angle: f32, texturetype: AttackTextureType) -> Self {
 		Self {
-			sprite: downscale(&ImageReader::open(
-				"./assets/textures/attacks/physical-slash-bad.png")
+			sprite: match texturetype {
+				AttackTextureType::Slash => ImageReader::open("./assets/textures/attacks/slash.png")
 					.unwrap()
 					.decode()
-					.unwrap(), 
-				24, 
-				angle
-			),
+					.unwrap(),
+				AttackTextureType::ProjectilePlayer => ImageReader::open("./assets/textures/attacks/projectile-player.png")
+					.unwrap()
+					.decode()
+					.unwrap(),
+				AttackTextureType::ProjectileEnemy => ImageReader::open("./assets/textures/attacks/projectile-enemy.png")
+					.unwrap()
+					.decode()
+					.unwrap(),
+			},
+			anim_time: 9,
 
 			pos,
 			angle,
+			size,
 
-			//anim_time: 12
-		}
-	}
-
-	pub fn new() -> Self {
-		Self {
-			sprite: load_texture("./assets/textures/attacks/projectile-player.png"),
-
-			pos: Vec2::new(0., 0.),
-			angle: 0.,
-
-			//anim_time: 10
+			texturetype
 		}
 	}
 
 	pub fn update(&mut self, pos: Vec2, angle: f32) {
 		self.pos = pos;
 		self.angle = angle;
+
+		match self.texturetype {
+			AttackTextureType::ProjectileEnemy | AttackTextureType::ProjectilePlayer => (),
+			_ => self.anim_time -= 1
+		}
 	}
 
 	pub async fn render(&self) {
-		render_texture(&self.sprite, self.pos, None).await;
+		let x_pos = match self.anim_time / 3 {
+			2 => self.size * 2.,
+			1 => self.size,
+			_ => 0.,
+		};
+
+		render_texture(
+			&downscale(
+				&self.sprite.crop_imm(
+					(x_pos / self.size) as u32 * self.sprite.height(), 
+					0, 
+					self.sprite.height(), 
+					self.sprite.height()
+				), 
+				self.size as u32, 
+				self.angle
+			), 
+			self.pos, 
+			None
+		).await;
 	}
 }
