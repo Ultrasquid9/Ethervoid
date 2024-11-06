@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
@@ -53,7 +51,9 @@ impl Attack {
 			damage,
 			lifetime: 2,
 
-			texture: AttackTexture::new_physical(pos, pos.angle_between(target) + PI)
+			// After angle_between led to wierd-ass bugs, I added atan2 and it worked.
+			// I have as such concluded that atan2 is magical, and fixes every problem. 
+			texture: AttackTexture::new_physical(pos, (target.y).atan2(target.x))
 		}
 	}
 
