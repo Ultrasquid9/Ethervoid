@@ -4,7 +4,7 @@ use macroquad::math::{vec2, Vec2};
 use rhai::{Dynamic, Engine, Scope};
 use serde::Deserialize;
 
-use crate::gameplay::{combat::{Attack, Owner}, entity::{Entity, MovableObj}, player::Player};
+use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, entity::{Entity, MovableObj}, player::Player};
 
 use super::{gen_name, get_files};
 
@@ -71,7 +71,8 @@ impl AttackScript<'_> {
 				target,
 				damage as isize, 
 				size, 
-				Owner::Enemy
+				Owner::Enemy,
+				AttackTextureType::Dash
 			))
 			.register_fn("new_burst", move |damage: i64, size| Attack::new_burst(
 				entity_pos, 
@@ -83,7 +84,8 @@ impl AttackScript<'_> {
 				entity_pos, 
 				target,
 				damage as isize, 
-				Owner::Enemy
+				Owner::Enemy,
+				AttackTextureType::ProjectileEnemy
 			))
 			.register_fn("new_hitscan", move |damage: i64, target: Vec2| Attack::new_hitscan(
 				entity_pos, 

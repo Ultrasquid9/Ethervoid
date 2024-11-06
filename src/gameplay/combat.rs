@@ -2,7 +2,7 @@ use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
 
-use super::{draw::texturedobj::{AttackTexture, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_mouse_pos, player::Player, vec2_to_tuple};
+use super::{draw::texturedobj::{AttackTexture, AttackTextureType, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_mouse_pos, player::Player, vec2_to_tuple};
 
 #[derive(Clone)]
 pub struct Attack {
@@ -38,7 +38,7 @@ pub enum AttackType {
 pub struct ProjectileOrHitscan {}
 
 impl Attack {
-	pub fn new_physical(pos: Vec2, target: Vec2, damage: isize, size: f32, owner: Owner) -> Attack {
+	pub fn new_physical(pos: Vec2, target: Vec2, damage: isize, size: f32, owner: Owner, texturetype: AttackTextureType) -> Attack {
 		return Attack {
 			size,
 			pos,
@@ -57,7 +57,7 @@ impl Attack {
 				pos, 
 				size, 
 				(target.y).atan2(target.x), 
-				super::draw::texturedobj::AttackTextureType::Slash
+				texturetype
 			)
 		}
 	}
@@ -84,7 +84,7 @@ impl Attack {
 		}
 	}
 
-	pub fn new_projectile(pos: Vec2, target: Vec2, damage:isize, owner: Owner) -> Attack {
+	pub fn new_projectile(pos: Vec2, target: Vec2, damage:isize, owner: Owner, texturetype: AttackTextureType) -> Attack {
 		return Attack {
 			size: 10.,
 			pos,
@@ -101,7 +101,7 @@ impl Attack {
 				pos, 
 				16., 
 				0., 
-				super::draw::texturedobj::AttackTextureType::ProjectilePlayer
+				texturetype
 			)
 		}
 	}

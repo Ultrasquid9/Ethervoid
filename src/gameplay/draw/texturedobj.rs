@@ -111,16 +111,20 @@ impl EntityTexture {
 }
 
 #[derive(Clone)]
+#[allow(dead_code)]
 pub enum AttackTextureType {
 	Slash,
+	Dash,
 
 	ProjectilePlayer,
-	ProjectileEnemy
+	ProjectileEnemy,
+
+	None
 }
 
 #[derive(Clone)]
 pub struct AttackTexture {
-	pub sprite: DynamicImage,
+	pub sprite: Option<DynamicImage>,
 	pub anim_time: i8,
 
 	pos: Vec2,
@@ -135,18 +139,28 @@ impl AttackTexture {
 	pub fn new(pos: Vec2, size: f32, angle: f32, texturetype: AttackTextureType) -> Self {
 		Self {
 			sprite: match texturetype {
-				AttackTextureType::Slash => ImageReader::open("./assets/textures/attacks/slash.png")
+				// Physical
+				AttackTextureType::Slash => Some(ImageReader::open("./assets/textures/attacks/slash.png")
 					.unwrap()
 					.decode()
-					.unwrap(),
-				AttackTextureType::ProjectilePlayer => ImageReader::open("./assets/textures/attacks/projectile-player.png")
+					.unwrap()),
+				AttackTextureType::Dash => Some(ImageReader::open("./assets/textures/attacks/dash.png")
 					.unwrap()
 					.decode()
-					.unwrap(),
-				AttackTextureType::ProjectileEnemy => ImageReader::open("./assets/textures/attacks/projectile-enemy.png")
+					.unwrap()),
+				
+				// Projectile
+				AttackTextureType::ProjectilePlayer => Some(ImageReader::open("./assets/textures/attacks/projectile-player.png")
 					.unwrap()
 					.decode()
-					.unwrap(),
+					.unwrap()),
+				AttackTextureType::ProjectileEnemy => Some(ImageReader::open("./assets/textures/attacks/projectile-enemy.png")
+					.unwrap()
+					.decode()
+					.unwrap()),
+
+				// None
+				AttackTextureType::None => None
 			},
 			anim_time: 9,
 
@@ -169,6 +183,10 @@ impl AttackTexture {
 	}
 
 	pub async fn render(&self) {
+		if self.sprite == None {
+			return
+		}
+
 		let x_pos = match self.anim_time / 3 {
 			2 => self.size * 2.,
 			1 => self.size,
@@ -177,11 +195,11 @@ impl AttackTexture {
 
 		render_texture(
 			&downscale(
-				&self.sprite.crop_imm(
-					(x_pos / self.size) as u32 * self.sprite.height(), 
+				&self.sprite.as_ref().unwrap().crop_imm(
+					(x_pos / self.size) as u32 * self.sprite.as_ref().unwrap().height(), 
 					0, 
-					self.sprite.height(), 
-					self.sprite.height()
+					self.sprite.as_ref().unwrap().height(), 
+					self.sprite.as_ref().unwrap().height()
 				), 
 				self.size as u32, 
 				self.angle

@@ -2,7 +2,7 @@ use macroquad::{input::mouse_position_local, math::Vec2};
 
 use crate::config::Config;
 
-use super::{combat::{Attack, Owner}, draw::{texturedobj::{EntityTexture, TexturedObj}, textures::load_texture}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
+use super::{combat::{Attack, Owner}, draw::{texturedobj::{AttackTextureType, EntityTexture, TexturedObj}, textures::load_texture}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -119,7 +119,14 @@ impl Player {
 		match self.swords[self.current_sword].weapon {
 			Weapon::Sword => {
 				self.swords[self.current_sword].cooldown = 16;
-				Attack::new_physical(self.stats.get_pos(), mouse_position_local(), 10, 36., Owner::Player)
+				Attack::new_physical(
+					self.stats.get_pos(), 
+					mouse_position_local(), 
+					10, 
+					36., 
+					Owner::Player, 
+					AttackTextureType::Slash
+				)
 			},
 			Weapon::Hammer => {
 				self.swords[self.current_sword].cooldown = 32;
@@ -127,7 +134,13 @@ impl Player {
 			},
 			Weapon::Boomerang => {
 				self.swords[self.current_sword].cooldown = 48;
-				Attack::new_projectile(self.stats.get_pos(), get_mouse_pos() * 999., 10, Owner::Player)
+				Attack::new_projectile(
+					self.stats.get_pos(), 
+					get_mouse_pos() * 999., 
+					10, 
+					Owner::Player, 
+					AttackTextureType::ProjectilePlayer
+				)
 			},
 			
 			_ => panic!("Bad weapon")
@@ -139,7 +152,13 @@ impl Player {
 		match self.guns[self.current_gun].weapon {
 			Weapon::Pistol => {
 				self.guns[self.current_gun].cooldown = 16;
-				Attack::new_projectile(self.stats.get_pos(), get_mouse_pos() * 999., 10, Owner::Player)
+				Attack::new_projectile(
+					self.stats.get_pos(), 
+					get_mouse_pos() * 999., 
+					10, 
+					Owner::Player,
+					AttackTextureType::ProjectilePlayer
+				)
 			},
 			Weapon::Shotgun => {
 				self.guns[self.current_gun].cooldown = 32;
