@@ -160,6 +160,7 @@ dependencies = [
  "image 0.25.5",
  "imageproc",
  "macroquad",
+ "once_cell",
  "raylite",
  "rhai",
  "ron",

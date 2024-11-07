@@ -1,6 +1,6 @@
 use cores::map::get_maps;
 use combat::{try_parry, Attack};
-use draw::{draw, textures::load_texture};
+use draw::{clean_textures, create_textures, draw, textures::load_texture};
 use enemy::Enemy;
 use entity::MovableObj;
 use imageproc::image::{DynamicImage, ImageReader};
@@ -32,6 +32,7 @@ pub async fn gameplay() -> State {
 		ImageReader::open("./assets/textures/tiles/grass-test.png").unwrap().decode().unwrap(),
 		ImageReader::open("./assets/appl.webp").unwrap().decode().unwrap()
 	];
+	create_textures(); // NOTE: populates a static HashMap. Ensure you call the `clean_attack_textures` function when quitting the game. 
 	
 	// The maps
 	let maps = get_maps(); // Creates a list of Maps
@@ -102,6 +103,8 @@ pub async fn gameplay() -> State {
 
 		// Quits the game
 		if player.config.keymap.quit.is_pressed() {
+			clean_textures();
+
 			println!("Returning to the main menu");
 			return State::Menu;
 		}

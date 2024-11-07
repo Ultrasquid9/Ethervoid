@@ -1,7 +1,11 @@
+use std::collections::HashMap;
+
 use downscale::{downscale, to_texture};
 use futures::{future::join_all, join};
+use image::ImageReader;
 use imageproc::image::DynamicImage;
 use macroquad::prelude::*;
+use once_cell::sync::Lazy;
 use textures::{draw_tilemap, pixel_offset, render_texture};
 
 use crate::gameplay::entity::MovableObj;
@@ -11,6 +15,10 @@ use super::{combat::Attack, enemy::Enemy, player::Player};
 pub mod textures;
 pub mod texturedobj;
 pub mod downscale;
+
+// HashMap containing all the textures in the game 
+// Everyone always says "don't do this" so fuck you I did
+pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage>> = Lazy::new(|| HashMap::default());
 
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
@@ -130,6 +138,51 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
  
 	// Drawing a temporary UI
 	draw_text(&format!("{}", player.stats.get_health()), 32.0, 64.0, camera_scale() / 10., BLACK);
+}
+
+/// Populates the texture HashMap
+/// NOTE: Please ensure you call `clean_attack_textures()` when quitting the game.
+/// TODO: Populate via cores
+pub fn create_textures() {
+	unsafe {
+		// Physical attacks
+		TEXTURES.insert(String::from("slash"), ImageReader::open("./assets/textures/attacks/slash.png")
+			.unwrap()
+			.decode()
+			.unwrap());
+		TEXTURES.insert(String::from("dash"), ImageReader::open("./assets/textures/attacks/dash.png")
+			.unwrap()
+			.decode()
+			.unwrap());
+
+		// Burst attacks
+		TEXTURES.insert(String::from("burst"), ImageReader::open("./assets/textures/attacks/burst.png")
+			.unwrap()
+			.decode()
+			.unwrap());
+
+		// Projectile attacks
+		TEXTURES.insert(String::from("projectile-player"), ImageReader::open("./assets/textures/attacks/projectile-player.png")
+			.unwrap()
+			.decode()
+			.unwrap());
+		TEXTURES.insert(String::from("projectile-enemy"), ImageReader::open("./assets/textures/attacks/projectile-enemy.png")
+			.unwrap()
+			.decode()
+			.unwrap());
+	}
+}
+
+/// Gets the texture at the provided key
+pub fn get_textures(key: &str) -> DynamicImage {
+	unsafe {
+		TEXTURES.get(key).unwrap().clone()
+	}
+}
+
+/// Clears the texture HashMap
+pub fn clean_textures() {
+	unsafe { TEXTURES.clear() }
 }
 
 /// Gets the scale that the camera should be rendered at

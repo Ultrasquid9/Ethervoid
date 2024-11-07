@@ -1,10 +1,9 @@
 use image::DynamicImage;
-use imageproc::image::ImageReader;
 use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
-use super::{downscale::downscale, textures::render_texture, SCREEN_SCALE};
+use super::{downscale::downscale, get_textures, textures::render_texture, SCREEN_SCALE};
 
 pub trait TexturedObj {
 	fn update_texture(&mut self);
@@ -142,30 +141,15 @@ impl AttackTexture {
 		Self {
 			sprite: match texturetype {
 				// Physical
-				AttackTextureType::Slash => Some(ImageReader::open("./assets/textures/attacks/slash.png")
-					.unwrap()
-					.decode()
-					.unwrap()),
-				AttackTextureType::Dash => Some(ImageReader::open("./assets/textures/attacks/dash.png")
-					.unwrap()
-					.decode()
-					.unwrap()),
+				AttackTextureType::Slash => Some(get_textures("slash")),
+				AttackTextureType::Dash => Some(get_textures("dash")),
 
 				// Burst
-				AttackTextureType::Burst => Some(ImageReader::open("./assets/textures/attacks/burst.png")
-					.unwrap()
-					.decode()
-					.unwrap()),
+				AttackTextureType::Burst => Some(get_textures("burst")),
 				
 				// Projectile
-				AttackTextureType::ProjectilePlayer => Some(ImageReader::open("./assets/textures/attacks/projectile-player.png")
-					.unwrap()
-					.decode()
-					.unwrap()),
-				AttackTextureType::ProjectileEnemy => Some(ImageReader::open("./assets/textures/attacks/projectile-enemy.png")
-					.unwrap()
-					.decode()
-					.unwrap()),
+				AttackTextureType::ProjectilePlayer => Some(get_textures("projectile-player")),
+				AttackTextureType::ProjectileEnemy => Some(get_textures("projectile-enemy")),
 
 				// None
 				AttackTextureType::None => None
