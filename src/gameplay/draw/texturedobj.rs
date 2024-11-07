@@ -141,15 +141,15 @@ impl AttackTexture {
 		Self {
 			sprite: match texturetype {
 				// Physical
-				AttackTextureType::Slash => Some(access_texture("default:slash")),
-				AttackTextureType::Dash => Some(access_texture("default:dash")),
+				AttackTextureType::Slash => Some(access_texture("default:attacks/slash")),
+				AttackTextureType::Dash => Some(access_texture("default:attacks/dash")),
 
 				// Burst
-				AttackTextureType::Burst => Some(access_texture("default:burst")),
+				AttackTextureType::Burst => Some(access_texture("default:attacks/burst")),
 				
 				// Projectile
-				AttackTextureType::ProjectilePlayer => Some(access_texture("default:projectile-player")),
-				AttackTextureType::ProjectileEnemy => Some(access_texture("default:projectile-enemy")),
+				AttackTextureType::ProjectilePlayer => Some(access_texture("default:attacks/projectile-player")),
+				AttackTextureType::ProjectileEnemy => Some(access_texture("default:attacks/projectile-enemy")),
 
 				// None
 				AttackTextureType::None => None

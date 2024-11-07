@@ -24,6 +24,37 @@ pub fn get_files(file_type: String) -> Vec<String> {
 		}
 	}
 
+	// Handling subdirectories
+	loop {
+		let mut subdirs = false; // Checks if there could be further subdirectories
+
+		for i in files.clone().iter().enumerate() {
+			let dir = fs::read_dir(&i.1);
+
+			// Checks if the directory is currently pointing to a file
+			if let Err(_) = dir {
+				continue
+			}
+
+			for j in dir.unwrap() {
+				match j {
+					Ok(dir) => {
+						files.push(i.1.clone().to_owned() + "/" + dir.file_name().to_str().unwrap());
+						subdirs = true;
+					},
+					_ => ()
+				}
+			}
+
+			if subdirs {
+				// The path at this index leads to a directory, so we do not want it. 
+				files.remove(i.0);
+			}
+		}
+
+		if !subdirs { break }
+	}
+
 	return files;
 }
 
@@ -34,7 +65,11 @@ fn gen_name(dir: &str) -> String {
 	return format!("{}:{}", split[3], {
 		let mut str = String::new();
 
-		for i in 3..split.len() - 1 {
+		for i in 5..split.len() - 1 {
+			// Adds slashes in between subdirectories
+			if i > 5 && i < split.len() - 1 {
+				str.push('/');
+			}
 			str.push_str(split[i]);
 		}
 
