@@ -1,8 +1,9 @@
 use std::fs;
 
+pub mod attackscript;
 pub mod enemytype;
 pub mod map;
-pub mod attackscript;
+pub mod textures;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: String) -> Vec<String> {

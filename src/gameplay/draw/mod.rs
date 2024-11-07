@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use downscale::{downscale, to_texture};
 use futures::{future::join_all, join};
-use image::ImageReader;
 use imageproc::image::DynamicImage;
 use macroquad::prelude::*;
 use once_cell::sync::Lazy;
@@ -10,7 +9,7 @@ use textures::{draw_tilemap, pixel_offset, render_texture};
 
 use crate::gameplay::entity::MovableObj;
 
-use super::{combat::Attack, enemy::Enemy, player::Player};
+use super::{combat::Attack, cores::textures::get_textures, enemy::Enemy, player::Player};
 
 pub mod textures;
 pub mod texturedobj;
@@ -142,39 +141,18 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 
 /// Populates the texture HashMap
 /// NOTE: Please ensure you call `clean_attack_textures()` when quitting the game.
-/// TODO: Populate via cores
 pub fn create_textures() {
+	let textures = get_textures();
+
 	unsafe {
-		// Physical attacks
-		TEXTURES.insert(String::from("slash"), ImageReader::open("./assets/textures/attacks/slash.png")
-			.unwrap()
-			.decode()
-			.unwrap());
-		TEXTURES.insert(String::from("dash"), ImageReader::open("./assets/textures/attacks/dash.png")
-			.unwrap()
-			.decode()
-			.unwrap());
-
-		// Burst attacks
-		TEXTURES.insert(String::from("burst"), ImageReader::open("./assets/textures/attacks/burst.png")
-			.unwrap()
-			.decode()
-			.unwrap());
-
-		// Projectile attacks
-		TEXTURES.insert(String::from("projectile-player"), ImageReader::open("./assets/textures/attacks/projectile-player.png")
-			.unwrap()
-			.decode()
-			.unwrap());
-		TEXTURES.insert(String::from("projectile-enemy"), ImageReader::open("./assets/textures/attacks/projectile-enemy.png")
-			.unwrap()
-			.decode()
-			.unwrap());
+		for i in textures {
+			TEXTURES.insert(i.0, i.1);
+		}
 	}
 }
 
 /// Gets the texture at the provided key
-pub fn get_textures(key: &str) -> DynamicImage {
+pub fn access_texture(key: &str) -> DynamicImage {
 	unsafe {
 		TEXTURES.get(key).unwrap().clone()
 	}
