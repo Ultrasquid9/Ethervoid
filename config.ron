@@ -4,6 +4,7 @@
 		left: KeyCode(A),
 		down: KeyCode(S),
 		right: KeyCode(D),
+		dash: KeyCode(LeftShift),
 
 		sword: MouseButton(Left),
 		gun: MouseButton(Right),

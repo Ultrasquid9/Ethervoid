@@ -15,6 +15,7 @@ pub struct KeyMap {
 	pub down: Key,
 	pub left: Key,
 	pub right: Key,
+    pub dash: Key,
 
 	pub sword: Key,
 	pub gun: Key,

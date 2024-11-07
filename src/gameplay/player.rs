@@ -15,6 +15,9 @@ pub struct Player {
 	pub current_gun: usize, 
 
 	speed: f32,
+	dash_cooldown: f32,
+	pub is_dashing: bool,
+
 	axis_horizontal: Axis,
 	axis_vertical: Axis
 }
@@ -70,6 +73,9 @@ impl Player {
 			current_gun: 0,
 
 			speed: 1.,
+			dash_cooldown: 0.,
+			is_dashing: false,
+
 			axis_horizontal: Axis::None,
 			axis_vertical: Axis::None
 		}
@@ -242,9 +248,28 @@ impl Player {
 			Axis::None => ()
 		}
 
+		// Dashing
+		if self.config.keymap.dash.is_down() && self.dash_cooldown <= 0.{
+			self.speed += 10.;
+			self.dash_cooldown += 70.;
+		} else if self.dash_cooldown > 0. {
+			if self.dash_cooldown > 55. {
+				self.is_dashing = true;
+				self.speed = 10.;
+			} else {
+				self.is_dashing = false;
+			}
+			self.dash_cooldown -= get_delta_time();
+		}
+
 		// Makes the player build up speed over time, rather than instantly starting at max speed
-		if self.speed < 3.0 && new_pos != Vec2::new(0., 0.) {
-			self.speed = self.speed + (self.speed / 6.0);
+		if self.speed < 3. && new_pos != Vec2::new(0., 0.) {
+			self.speed += self.speed / 6.;
+		}
+
+		// Makes the player slow down if their speed is high
+		if self.speed > 3.5 {
+			self.speed = self.speed / 1.5;
 		}
 
 		// Checks to see if the player has moved. 
