@@ -22,30 +22,27 @@ pub fn get_files(file_type: String) -> Vec<String> {
 
 	for i in paths {
 		for j in fs::read_dir(format!("./cores/{}/{}", i, file_type).as_str()).unwrap() {
+
+			// The directory to be scanned
 			let dir = format!("./cores/{}/{}/{}", i, file_type, j.unwrap().file_name().to_string_lossy().into_owned());
+			// Directories that will be appended to `files` and returned
+			let mut dirs = Vec::new();
 
-			// Checking whether `dir` is a directory or a file
-			if let Err(_) = fs::read_dir(&dir) {
-				files.push(dir);
-			} else { // Handling subdirectories
-				let mut dirs = Vec::new();
-
-				for entry in WalkDir::new(&dir) {
-					dirs.push(entry.as_ref().unwrap().path().to_string_lossy().into_owned());
-				}
-
-				// Removing "leftover" entries
-				dirs.retain(|dir| {
-					if let Err(_) = read_dir(dir) {
-						 if fs::exists(dir).unwrap() {
-							return true
-						}
-					}
-					return false
-				});
-
-				files.append(&mut dirs);
+			for entry in WalkDir::new(&dir) {
+				dirs.push(entry.as_ref().unwrap().path().to_string_lossy().into_owned());
 			}
+
+			// Removing "leftover" entries
+			dirs.retain(|dir| {
+				if let Err(_) = read_dir(dir) {
+						if fs::exists(dir).unwrap() {
+						return true
+					}
+				}
+				return false
+			});
+
+			files.append(&mut dirs);
 		}
 	}
 
