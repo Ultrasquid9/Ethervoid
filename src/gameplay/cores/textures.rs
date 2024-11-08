@@ -1,6 +1,6 @@
 use std::{collections::HashMap, thread};
 
-use image::{DynamicImage, ImageReader};
+use image::{ColorType, DynamicImage, ImageReader};
 
 use super::{gen_name, get_files};
 
@@ -15,10 +15,18 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 		names.push(gen_name(&i));
 
 		texture_handles.push(thread::spawn(move || -> DynamicImage {
-			ImageReader::open(&i)
+			let img = ImageReader::open(&i)
 				.unwrap()
 				.decode()
-				.unwrap()
+				.unwrap();
+
+			let img = if img.color() == ColorType::Rgba8 {
+				img
+			} else {
+				DynamicImage::ImageRgba8(img.to_rgba8())
+			};
+
+			img
 		}));
 	}
 

@@ -1,5 +1,6 @@
+use fast_image_resize::{ResizeOptions, Resizer};
 use futures::future::join_all;
-use image::{imageops::{resize, FilterType::Nearest}, DynamicImage};
+use image::DynamicImage;
 use macroquad::{color::WHITE, math::Vec2, texture::{draw_texture_ex, DrawTextureParams, Texture2D}, window::{screen_height, screen_width}};
 
 use super::SCREEN_SCALE;
@@ -50,14 +51,22 @@ pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
 		img.height()
 	};
 
-	let image = resize(
-		&img, 
+	let mut downscaled_img = DynamicImage::new_rgba8(
 		(img.width() / smallest_side) * size, 
-		(img.height() / smallest_side) * size, 
-		Nearest
+		(img.height() / smallest_side) * size
 	);
 
-	return DynamicImage::ImageRgba8(image);
+	let mut resizer =  Resizer::new();
+	resizer.resize(
+		&img, 
+		&mut downscaled_img, 
+		&Some(ResizeOptions {
+			algorithm: fast_image_resize::ResizeAlg::Nearest,
+			..Default::default()
+		})
+	).unwrap();
+
+	return downscaled_img;
 }
 
 /// Transforms a `DynamicImage` into a `Texture2D`
