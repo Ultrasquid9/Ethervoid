@@ -1,8 +1,9 @@
+use ahash::HashMap;
 use macroquad::{input::mouse_position_local, math::Vec2};
 
 use crate::config::Config;
 
-use super::{combat::{Attack, Owner}, draw::{access_texture, texturedobj::{AttackTextureType, EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
+use super::{combat::{Attack, Owner}, cores::map::Map, draw::{access_texture, texturedobj::{AttackTextureType, EntityTexture, TexturedObj}}, enemy::Enemy, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -82,7 +83,16 @@ impl Player {
 	}
 
 	/// Updates the player
-	pub fn update(&mut self, map: &Vec<Vec2>) -> &Self {
+	pub fn update(
+		&mut self, 
+		camera: &mut Vec2, 
+
+		enemies: &mut Vec<Enemy>, 
+		attacks: &mut Vec<Attack>, 
+
+		current_map: &mut String, 
+		maps: &HashMap<String, Map>
+	) -> &Self {
 		// Handling i-frames
 		if self.stats.i_frames != 0 {
 			self.stats.i_frames -= 1
@@ -115,7 +125,13 @@ impl Player {
 		}
 
 		self.update_texture();
-		self.movement(map);
+		self.movement(
+			camera, 
+			enemies, 
+			attacks, 
+			current_map, 
+			maps
+		);
 
 		return self;
 	}
@@ -192,7 +208,16 @@ impl Player {
 	}
 
 	/// Handles player movement
-	fn movement(&mut self, map: &Vec<Vec2>) {
+	fn movement(
+		&mut self, 
+		camera: &mut Vec2, 
+
+		enemies: &mut Vec<Enemy>, 
+		attacks: &mut Vec<Attack>, 
+
+		current_map: &mut String, 
+		maps: &HashMap<String, Map>
+	) {
 		// Checks to see if both Up and Down are being held at the same time.
 		// If they are, sets the direction to move based upon the most recently pressed key. 
 		// Otherwise, sets the direction to move based upon the currently pressed key.
@@ -275,11 +300,34 @@ impl Player {
 		// Checks to see if the player has moved. 
 		// If they have not, resets the speed. 
 		// If they have, attempts to move to the new position. 
+		let old_pos = self.stats.get_pos();
+
 		if new_pos == Vec2::new(0., 0.) {
 			self.speed = 1.0;
 		} else {
 			let current_pos = self.stats.get_pos();
-			self.stats.try_move((new_pos.normalize() * self.speed * get_delta_time()) + current_pos, map);
+			self.stats.try_move(
+				(new_pos.normalize() * self.speed * get_delta_time()) + current_pos, 
+				&maps.get(current_map).unwrap().points
+			);
+
+			// The player has moved, and the function can return
+			if self.stats.get_pos() != old_pos {
+				return
+			} 
+
+			// The player has not moved, so check if there is a door in the way
+			for i in &maps.get(current_map).unwrap().doors {
+				i.try_change_map(
+					self, 
+					&new_pos,
+					camera, 
+					enemies, 
+					attacks, 
+					current_map, 
+					maps
+				);
+			}
 		}
 	}
 }

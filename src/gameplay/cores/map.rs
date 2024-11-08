@@ -1,18 +1,23 @@
-use std::{collections::HashMap, fs};
+use std::fs;
 
+use ahash::HashMap;
 use macroquad::math::Vec2;
 use serde::Deserialize;
+
+use crate::gameplay::doors::Door;
 
 use super::{enemytype::{get_enemytypes, EnemyType}, gen_name, get_files};
 
 #[derive(Deserialize)]
 struct MapBuilder {
 	pub points: Vec<Vec2>,
+	pub doors: Vec<Door>,
 	pub enemies: Vec<(String, Vec2)>
 }
 
 pub struct Map {
 	pub points: Vec<Vec2>,
+	pub doors: Vec<Door>,
 	pub enemies: Vec<(EnemyType, Vec2)>
 }
 
@@ -26,6 +31,7 @@ impl MapBuilder {
 
 		Map {
 			points: self.points,
+			doors: self.doors,
 			enemies: self.enemies
 				.iter()
 				.map(|enemy| (
@@ -39,7 +45,7 @@ impl MapBuilder {
 
 /// Provides a HashMap containing all Maps
 pub fn get_maps() -> HashMap<String, Map> {
-	let mut maps: HashMap<String, Map> = HashMap::new();
+	let mut maps: HashMap<String, Map> = HashMap::default();
 
 	for i in get_files(String::from("maps")) {
 		maps.insert(

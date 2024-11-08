@@ -1,4 +1,4 @@
-use cores::map::get_maps;
+use cores::map::{get_maps, Map};
 use combat::{try_parry, Attack};
 use draw::{access_texture, clean_textures, create_textures, draw};
 use enemy::Enemy;
@@ -8,12 +8,13 @@ use macroquad::prelude::*;
 
 use crate::State;
 
-mod player;
-mod enemy;
-mod cores;
-mod draw;
-mod entity;
 mod combat;
+mod cores;
+mod doors;
+mod draw;
+mod enemy;
+mod entity;
+mod player;
 
 /// The gameplay loop of the game
 pub async fn gameplay() -> State {
@@ -31,21 +32,14 @@ pub async fn gameplay() -> State {
 	
 	// The maps
 	let maps = get_maps(); // Creates a list of Maps
-	let current_map = String::from("default:test"); // Stores the map the player is currently in
-
-	// Returns the current map 
-	let get_map = || -> Vec<Vec2> {
-		return maps.get(&current_map).unwrap().points.clone();
-	};
+	let mut current_map = String::from("default:test"); // Stores the map the player is currently in
 
 	// Populating the enemies with data from the maps
-	for i in maps.get(&current_map).unwrap().enemies.clone() {
-		enemies.push(Enemy::new(i.1, i.0, access_texture("default:entity/player/player_spritesheet_wip")))
-	}
+	populate_enemies(&mut enemies, maps.get(&current_map).unwrap());
 
 	loop {
 		// Updates the player
-		player.update(&get_map());
+		player.update(&mut camera, &mut enemies, &mut attacks, &mut current_map, &maps);
 
 		// Attacking
 		if player.config.keymap.sword.is_down() && player.swords[0].cooldown == 0 {
@@ -60,7 +54,7 @@ pub async fn gameplay() -> State {
 		// Updates attacks
 		if attacks.len() > 0 {
 			for i in &mut attacks {
-				i.update(&mut enemies, &mut player, &get_map());
+				i.update(&mut enemies, &mut player, &maps.get(&current_map).unwrap().points.clone());
 			}
 
 			try_parry(&mut attacks);
@@ -71,7 +65,7 @@ pub async fn gameplay() -> State {
 		// Updates enemies
 		if enemies.len() > 0 {
 			for i in &mut enemies {
-				i.update(&mut attacks, &mut player, &get_map());
+				i.update(&mut attacks, &mut player, &maps.get(&current_map).unwrap().points.clone());
 			}
 
 			enemies.sort();
@@ -92,7 +86,7 @@ pub async fn gameplay() -> State {
 			&player, 
 			&enemies, 
 			&attacks, 
-			&get_map()
+			&maps.get(&current_map).unwrap().points.clone()
 		).await;
 
 		// Quits the game
@@ -104,6 +98,14 @@ pub async fn gameplay() -> State {
 		}
 
 		next_frame().await;
+	}
+}
+
+pub fn populate_enemies(enemies: &mut Vec<Enemy>, map: &Map) {
+	enemies.clear();
+
+	for i in map.enemies.clone() {
+		enemies.push(Enemy::new(i.1, i.0, access_texture("default:entity/player/player_spritesheet_wip")))
 	}
 }
 

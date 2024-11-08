@@ -1,0 +1,87 @@
+use ahash::HashMap;
+use macroquad::math::Vec2;
+use raylite::{cast, Barrier, Ray};
+use serde::{Deserialize, Serialize};
+
+use crate::gameplay::populate_enemies;
+
+use super::{combat::Attack, cores::map::Map, enemy::Enemy, entity::MovableObj, player::Player, vec2_to_tuple};
+
+#[derive(Serialize, Deserialize, PartialEq, Clone)]
+pub enum Direction {
+	North, 
+	South,
+	East, 
+	West
+}
+
+impl Direction {
+	/// Checks if the provided direction is opposite of the current one 
+	fn is_opposing(&self, other: &Self) -> bool {
+		let dirs = [self, other];
+
+		if dirs.contains(&&Self::North) && dirs.contains(&&Self::South) {
+			return true
+		}
+		if dirs.contains(&&Self::East) && dirs.contains(&&Self::West) {
+			return true
+		}
+
+		return false
+	}
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Clone)]
+pub struct Door {
+	direction: Direction,
+	pos: Vec2,
+	dest: String
+}
+
+impl Door {
+	pub fn try_change_map(
+		&self, 
+		player: &mut Player, 
+		new_pos: &Vec2, 
+		camera: &mut Vec2, 
+
+		enemies: &mut Vec<Enemy>, 
+		attacks: &mut Vec<Attack>, 
+
+		current_map: &mut String, 
+		maps: &HashMap<String, Map>
+	) {
+		let ray = Ray {
+			position: vec2_to_tuple(&player.stats.get_pos()),
+			end_position: vec2_to_tuple(&new_pos)
+		};
+
+		let barrier = Barrier {
+			positions: (
+				vec2_to_tuple(&self.pos), 
+				vec2_to_tuple(&Vec2::new(self.pos.x, self.pos.y + 20.))
+			)
+		};
+
+		// The player has not touched the door, so the map should not be changed
+		if let Err(_) = cast(&ray, &barrier) {
+			return
+		}
+
+		for i in &maps.get(&self.dest).unwrap().doors {
+			if i.dest != *current_map { continue }
+
+			if !i.direction.is_opposing(&self.direction) {
+				panic!("Door in {current_map} does not match direction of door in {}", self.dest)
+			}
+
+			*player.stats.edit_pos() = *new_pos - self.pos + i.pos;
+			*camera = *camera - self.pos + i.pos;
+
+			*current_map = i.dest.clone();
+
+			attacks.clear();
+			populate_enemies(enemies, maps.get(current_map).unwrap());
+		}
+	}
+}

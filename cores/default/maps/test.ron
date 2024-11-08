@@ -8,5 +8,12 @@
 	enemies: [
 		("default:test", (30, 30)),
 		("default:test", (-30, -30))
+	],
+	doors: [
+		(
+			direction: North,
+			pos: (80, 80),
+			dest: "default:test2"
+		)
 	]
 )
