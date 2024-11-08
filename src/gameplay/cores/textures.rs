@@ -23,7 +23,6 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 	}
 
 	for i in texture_handles.into_iter().enumerate() {
-		println!("{}", names[i.0]);
 		textures.insert(names[i.0].clone(), i.1.join().unwrap());
 	}
 

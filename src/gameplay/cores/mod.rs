@@ -1,4 +1,6 @@
-use std::fs;
+use std::fs::{self, read_dir};
+
+use walkdir::WalkDir;
 
 pub mod attackscript;
 pub mod enemytype;
@@ -20,47 +22,30 @@ pub fn get_files(file_type: String) -> Vec<String> {
 
 	for i in paths {
 		for j in fs::read_dir(format!("./cores/{}/{}", i, file_type).as_str()).unwrap() {
-			files.push(format!("./cores/{}/{}/{}", i, file_type, j.unwrap().file_name().to_string_lossy().into_owned()));
-		}
-	}
+			let dir = format!("./cores/{}/{}/{}", i, file_type, j.unwrap().file_name().to_string_lossy().into_owned());
 
-	// Handling subdirectories
-	loop {
-		let mut subdirs = false; // Checks if there could be further subdirectories
+			// Checking whether `dir` is a directory or a file
+			if let Err(_) = fs::read_dir(&dir) {
+				files.push(dir);
+			} else { // Handling subdirectories
+				let mut dirs = Vec::new();
 
-		for i in files.clone().iter().enumerate() {
-			let dir = fs::read_dir(&i.1);
-
-			// Checks if the directory is currently pointing to a file
-			if let Err(_) = dir { continue }
-
-			for j in dir.unwrap() {
-				// I have no clue what kind of error could occur here.
-				// If there is one, then that is a problem for future me. 
-				let dir = j.ok().unwrap(); 
-
-				files.push(i.1.clone().to_owned() + "/" + dir.file_name().to_str().unwrap());
-						
-				if let Ok(_) = fs::read_dir(files[files.len() - 1].clone()) {
-					subdirs = true;
+				for entry in WalkDir::new(&dir) {
+					dirs.push(dir.clone() + "/" + entry.unwrap().file_name().to_string_lossy().into_owned().as_str());
 				}
-			}
 
-			// The directory at the index has already been scanned, so it is no longer needed
-			println!("Removing {}", i.1);
-			files.remove(i.0);
-		}
+				// Removing "leftover" entries
+				dirs.retain(|dir| {
+					if let Err(_) = read_dir(dir) {
+						 if fs::exists(dir).unwrap() {
+							return true
+						}
+					}
+					return false
+				});
 
-		if !subdirs { 
-			for i in files.clone().iter().enumerate() {
-				if let Ok(_) = fs::read_dir(i.1) {
-					// Apparently not all directories are removed from the files list so I have to do an extra check
-					files.remove(i.0);
-				} else {
-					println!("{}", i.1);
-				}
+				files.append(&mut dirs);
 			}
-			break 
 		}
 	}
 
