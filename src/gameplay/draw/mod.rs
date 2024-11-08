@@ -49,7 +49,7 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 	let mut entity_futures = Vec::new();
 
 	// Tilemap
-	draw_tilemap(access_texture("default:tiles/grass-test")).await;
+	draw_tilemap(access_texture("default:tiles/grass_test")).await;
 
 	// Appl 
 	render_texture(
@@ -154,6 +154,7 @@ pub fn create_textures() {
 
 /// Gets the image at the provided key
 pub fn access_image(key: &str) -> DynamicImage {
+	println!("Accessing {} ...", key);
 	unsafe {
 		TEXTURES.get(key).unwrap().clone()
 	}

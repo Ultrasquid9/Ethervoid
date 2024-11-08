@@ -47,6 +47,7 @@ pub fn get_files(file_type: String) -> Vec<String> {
 			}
 
 			// The directory at the index has already been scanned, so it is no longer needed
+			println!("Removing {}", i.1);
 			files.remove(i.0);
 		}
 
@@ -55,6 +56,8 @@ pub fn get_files(file_type: String) -> Vec<String> {
 				if let Ok(_) = fs::read_dir(i.1) {
 					// Apparently not all directories are removed from the files list so I have to do an extra check
 					files.remove(i.0);
+				} else {
+					println!("{}", i.1);
 				}
 			}
 			break 
