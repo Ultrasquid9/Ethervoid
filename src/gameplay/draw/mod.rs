@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use ahash::RandomState;
 use downscale::{downscale, to_texture};
 use futures::{future::join_all, join};
 use imageproc::image::DynamicImage;
@@ -17,7 +18,7 @@ pub mod downscale;
 
 // HashMap containing all the textures in the game 
 // Everyone always says "don't do this" so fuck you I did
-pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage>> = Lazy::new(|| HashMap::default());
+pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage, RandomState>> = Lazy::new(|| HashMap::default());
 
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
@@ -52,7 +53,7 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 
 	// Appl 
 	render_texture(
-		&downscale(&access_image("default:appl"), 16, 45.), 
+		&to_texture(downscale(access_image("default:appl"), 16, 45.)), 
 		Vec2::new(200., 200.), 
 		None
 	).await;

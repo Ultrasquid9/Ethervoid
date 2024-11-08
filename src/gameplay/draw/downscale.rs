@@ -2,11 +2,17 @@ use imageproc::{geometric_transformations::rotate_about_center, image::{imageops
 use macroquad::texture::Texture2D;
 
 /// Downscales and rotates the provided image
-pub fn downscale(img: &DynamicImage, size: u32, rotation: f32) -> Texture2D {
+pub fn downscale(img: DynamicImage, size: u32, rotation: f32) -> DynamicImage {
+	let smallest_side = if img.width() < img.height() {
+		img.width()
+	} else {
+		img.height()
+	};
+
 	let image = resize(
-		img, 
-		size, 
-		size, 
+		&img, 
+		(img.width() / smallest_side) * size, 
+		(img.height() / smallest_side) * size, 
 		Nearest
 	);
 
@@ -19,7 +25,7 @@ pub fn downscale(img: &DynamicImage, size: u32, rotation: f32) -> Texture2D {
 		}
 	);
 
-	return to_texture(DynamicImage::ImageRgba8(image));
+	return DynamicImage::ImageRgba8(image);
 }
 
 /// Transforms a `DynamicImage` into a `Texture2D`

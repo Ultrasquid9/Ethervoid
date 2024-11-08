@@ -1,9 +1,10 @@
-use image::DynamicImage;
+use image::{DynamicImage, Rgba};
+use imageproc::geometric_transformations::rotate_about_center;
 use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
-use super::{downscale::downscale, access_image, textures::render_texture, SCREEN_SCALE};
+use super::{access_image, downscale::{downscale, to_texture}, textures::render_texture, SCREEN_SCALE};
 
 pub trait TexturedObj {
 	fn update_texture(&mut self);
@@ -118,14 +119,12 @@ pub enum AttackTextureType {
 	Burst,
 
 	ProjectilePlayer,
-	ProjectileEnemy,
-
-	None
+	ProjectileEnemy
 }
 
 #[derive(Clone)]
 pub struct AttackTexture {
-	pub sprite: Option<DynamicImage>,
+	pub sprite: DynamicImage,
 	pub anim_time: i8,
 
 	pos: Vec2,
@@ -139,21 +138,22 @@ impl AttackTexture {
 	/// Creates an attack texture with a "slash" sprite
 	pub fn new(pos: Vec2, size: f32, angle: f32, texturetype: AttackTextureType) -> Self {
 		Self {
-			sprite: match texturetype {
-				// Physical
-				AttackTextureType::Slash => Some(access_image("default:attacks/slash")),
-				AttackTextureType::Dash => Some(access_image("default:attacks/dash")),
+			sprite: downscale(
+				match texturetype {
+					// Physical
+					AttackTextureType::Slash => access_image("default:attacks/slash"),
+					AttackTextureType::Dash => access_image("default:attacks/dash"),
 
-				// Burst
-				AttackTextureType::Burst => Some(access_image("default:attacks/burst")),
-				
-				// Projectile
-				AttackTextureType::ProjectilePlayer => Some(access_image("default:attacks/projectile-player")),
-				AttackTextureType::ProjectileEnemy => Some(access_image("default:attacks/projectile-enemy")),
-
-				// None
-				AttackTextureType::None => None
-			},
+					// Burst
+					AttackTextureType::Burst => access_image("default:attacks/burst"),
+					
+					// Projectile
+					AttackTextureType::ProjectilePlayer => access_image("default:attacks/projectile-player"),
+					AttackTextureType::ProjectileEnemy => access_image("default:attacks/projectile-enemy"),
+				},
+				size as u32,
+				0.
+			),
 			anim_time: 9,
 
 			pos,
@@ -175,10 +175,6 @@ impl AttackTexture {
 	}
 
 	pub async fn render(&self) {
-		if self.sprite == None {
-			return
-		}
-
 		let mut x_pos = match self.anim_time / 3 {
 			2 => 0.,
 			1 => self.size,
@@ -191,16 +187,21 @@ impl AttackTexture {
 		}
 
 		render_texture(
-			&downscale(
-				&self.sprite.as_ref().unwrap().crop_imm(
-					(x_pos / self.size) as u32 * self.sprite.as_ref().unwrap().height(), 
-					0, 
-					self.sprite.as_ref().unwrap().height(), 
-					self.sprite.as_ref().unwrap().height()
-				), 
-				self.size as u32, 
-				self.angle
-			), 
+			&to_texture(
+				DynamicImage::ImageRgba8(rotate_about_center(
+					self.sprite.crop_imm(
+						x_pos as u32, 
+						0, 
+						self.size as u32, 
+						self.size as u32
+					).as_rgba8().unwrap(), 
+					self.angle,
+					imageproc::geometric_transformations::Interpolation::Nearest, 
+					Rgba {
+						0: [0, 0, 0, 0] // Clear
+					}
+				))
+			),
 			self.pos, 
 			None
 		).await;
