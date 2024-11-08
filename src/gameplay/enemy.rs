@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use macroquad::{math::Vec2, texture::Texture2D};
 use serde::Deserialize;
 
-use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType}, draw::texturedobj::{EntityTexture, TexturedObj}, entity::{Entity, MovableObj}, player::Player};
+use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType, map::Map}, draw::texturedobj::{EntityTexture, TexturedObj}, entity::{Entity, MovableObj}, player::Player};
 
 /// The movement AI used by an enemy
 #[derive(PartialEq, Clone, Deserialize)]
@@ -54,7 +54,7 @@ impl Enemy<'_> {
 	}
 
 	/// Updates the enemy based upon their AI and the Player's stats
-	pub fn update<'a>(&'a mut self, attacks: &mut Vec<Attack>, player: &mut Player, map: &Vec<Vec2>) {
+	pub fn update<'a>(&'a mut self, attacks: &mut Vec<Attack>, player: &mut Player, map: &Map) {
 		if self.stats.i_frames != 0 {
 			self.stats.i_frames -= 1
 		}
@@ -89,7 +89,7 @@ impl Enemy<'_> {
 	}
 
 	/// Moves the enemy based upon their Movement
-	fn movement(&mut self, player: &Player, map: &Vec<Vec2>){
+	fn movement(&mut self, player: &Player, map: &Map){
 		if self.stats.stunned > 0 {
 			self.stats.stunned -= 1;
 			return;

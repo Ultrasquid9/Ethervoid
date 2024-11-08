@@ -54,7 +54,7 @@ pub async fn gameplay() -> State {
 		// Updates attacks
 		if attacks.len() > 0 {
 			for i in &mut attacks {
-				i.update(&mut enemies, &mut player, &maps.get(&current_map).unwrap().points.clone());
+				i.update(&mut enemies, &mut player, &maps.get(&current_map).unwrap());
 			}
 
 			try_parry(&mut attacks);
@@ -65,7 +65,7 @@ pub async fn gameplay() -> State {
 		// Updates enemies
 		if enemies.len() > 0 {
 			for i in &mut enemies {
-				i.update(&mut attacks, &mut player, &maps.get(&current_map).unwrap().points.clone());
+				i.update(&mut attacks, &mut player, &maps.get(&current_map).unwrap());
 			}
 
 			enemies.sort();
@@ -86,7 +86,7 @@ pub async fn gameplay() -> State {
 			&player, 
 			&enemies, 
 			&attacks, 
-			&maps.get(&current_map).unwrap().points.clone()
+			&maps.get(&current_map).unwrap()
 		).await;
 
 		// Quits the game

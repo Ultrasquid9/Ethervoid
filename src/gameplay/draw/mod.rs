@@ -9,7 +9,7 @@ use textures::{downscale, draw_tilemap, pixel_offset, render_texture, to_texture
 
 use crate::gameplay::entity::MovableObj;
 
-use super::{combat::Attack, cores::textures::get_textures, enemy::Enemy, player::Player};
+use super::{combat::Attack, cores::{map::Map, textures::get_textures}, enemy::Enemy, player::Player};
 
 pub mod textures;
 pub mod texturedobj;
@@ -21,7 +21,7 @@ pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage, RandomState>> = Lazy
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, attacks: &Vec<Attack>, map: &Vec<Vec2>) {
+pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, attacks: &Vec<Attack>, map: &Map) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -57,6 +57,20 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 	).await;
 
 	// The map
+	for i in &map.doors {
+		let barrier = i.to_barrier();
+
+		draw_line(
+			barrier.positions.0.0, 
+			barrier.positions.0.1, 
+			barrier.positions.1.0, 
+			barrier.positions.1.1, 
+			4., 
+			RED
+		);
+	}
+
+	let map = map.points.clone();
 	for i in 0..map.len() {
 		match map.get(i + 1) {
 			Some(_) => draw_line(

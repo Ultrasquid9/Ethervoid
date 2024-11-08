@@ -1,7 +1,7 @@
 use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 
-use super::{draw::texturedobj::EntityTexture, player::Axis, vec2_to_tuple};
+use super::{cores::map::Map, draw::texturedobj::EntityTexture, player::Axis, vec2_to_tuple};
 
 /// Trait for an object that has a size and can be moved
 pub trait MovableObj {
@@ -10,13 +10,18 @@ pub trait MovableObj {
 	fn edit_pos(&mut self) -> &mut Vec2;
 
 	/// Attempts to move the object to the provided Vec2
-	fn try_move(&mut self, target: Vec2, map: &Vec<Vec2>) {
+	fn try_move(&mut self, target: Vec2, map: &Map) {
+		let mut barriers = create_barriers(&map.points);
+		for i in &map.doors {
+			barriers.push(i.to_barrier())
+		}
+
 		match cast_wide(
 			&Ray {
 				position: (self.get_pos().x, self.get_pos().y),
 				end_position: (target.x, self.get_pos().y)
 			}, 
-			&create_barriers(map)
+			&barriers
 		) {
 			Ok(_) => (),
 			_ => self.edit_pos().x = target.x
@@ -27,7 +32,7 @@ pub trait MovableObj {
 				position: (self.get_pos().x, self.get_pos().y),
 				end_position: (self.get_pos().x, target.y)
 			}, 
-			&create_barriers(map)
+			&barriers
 		) {
 			Ok(_) => (),
 			_ => self.edit_pos().y = target.y

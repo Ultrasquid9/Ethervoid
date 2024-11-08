@@ -1,5 +1,5 @@
 (
-	max_health: 128,
+	max_health: 32,
 	size: 15,
 	movement: "MoveTowardsPlayer",
 	attacks: [

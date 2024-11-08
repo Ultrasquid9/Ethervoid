@@ -308,7 +308,7 @@ impl Player {
 			let current_pos = self.stats.get_pos();
 			self.stats.try_move(
 				(new_pos.normalize() * self.speed * get_delta_time()) + current_pos, 
-				&maps.get(current_map).unwrap().points
+				&maps.get(current_map).unwrap()
 			);
 
 			// The player has moved, and the function can return
@@ -320,7 +320,7 @@ impl Player {
 			for i in &maps.get(current_map).unwrap().doors {
 				i.try_change_map(
 					self, 
-					&new_pos,
+					(new_pos.normalize() * self.speed * get_delta_time()) + current_pos,
 					camera, 
 					enemies, 
 					attacks, 

@@ -2,7 +2,7 @@ use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
 
-use super::{draw::texturedobj::{AttackTexture, AttackTextureType, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_mouse_pos, player::Player, vec2_to_tuple};
+use super::{cores::map::Map, draw::texturedobj::{AttackTexture, AttackTextureType, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_mouse_pos, player::Player, vec2_to_tuple};
 
 #[derive(Clone)]
 pub struct Attack {
@@ -163,7 +163,7 @@ impl Attack {
 	// Be warned: expect horrors beyond human comprehension
 
 	/// Updates the attack based upon its type
-	pub fn update(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>) {
+	pub fn update(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Map) {
 		self.update_texture();
 
 		match &self.attack_type {
@@ -223,7 +223,7 @@ impl Attack {
 	}
 
 	/// Updates the provided Projectile attack
-	fn attack_projectile(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Vec<Vec2>) {
+	fn attack_projectile(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Map) {
 		match self.owner {
 			Owner::Player => for i in enemies {
 				if self.is_touching(&i.stats) {

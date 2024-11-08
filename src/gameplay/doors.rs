@@ -39,10 +39,29 @@ pub struct Door {
 }
 
 impl Door {
+	/// Converts the door into a barrier
+	pub fn to_barrier(&self) -> Barrier {
+		match self.direction {
+			Direction::North | Direction::South => Barrier {
+				positions: (
+					(self.pos.x + 32., self.pos.y),
+					(self.pos.x - 32., self.pos.y)
+				)
+			},
+			Direction::East | Direction::West => Barrier {
+				positions: (
+					(self.pos.x, self.pos.y + 32.),
+					(self.pos.x, self.pos.y - 32.)
+				)
+			}
+		}
+	}
+
+	/// Checks if the map should be changed, and changes it if it should
 	pub fn try_change_map(
 		&self, 
 		player: &mut Player, 
-		new_pos: &Vec2, 
+		new_pos: Vec2, 
 		camera: &mut Vec2, 
 
 		enemies: &mut Vec<Enemy>, 
@@ -56,15 +75,8 @@ impl Door {
 			end_position: vec2_to_tuple(&new_pos)
 		};
 
-		let barrier = Barrier {
-			positions: (
-				vec2_to_tuple(&self.pos), 
-				vec2_to_tuple(&Vec2::new(self.pos.x, self.pos.y + 20.))
-			)
-		};
-
 		// The player has not touched the door, so the map should not be changed
-		if let Err(_) = cast(&ray, &barrier) {
+		if let Err(_) = cast(&ray, &self.to_barrier()) {
 			return
 		}
 
@@ -75,10 +87,10 @@ impl Door {
 				panic!("Door in {current_map} does not match direction of door in {}", self.dest)
 			}
 
-			*player.stats.edit_pos() = *new_pos - self.pos + i.pos;
+			*player.stats.edit_pos() = new_pos - self.pos + i.pos;
 			*camera = *camera - self.pos + i.pos;
 
-			*current_map = i.dest.clone();
+			*current_map = self.dest.clone();
 
 			attacks.clear();
 			populate_enemies(enemies, maps.get(current_map).unwrap());

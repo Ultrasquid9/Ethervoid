@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, entity::{Entity, MovableObj}, player::Player};
 
-use super::{gen_name, get_files};
+use super::{gen_name, get_files, map::Map};
 
 #[derive(Clone, Deserialize)]
 pub struct AttackScriptBuilder (String);
@@ -39,7 +39,7 @@ pub struct AttackScript<'a> {
 
 impl AttackScript<'_> {
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
-	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Vec<Vec2>, attacks: &mut Vec<Attack>) -> bool {
+	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Map, attacks: &mut Vec<Attack>) -> bool {
 		// Values available in the scope
 		self.scope
 			.push("attacks", Vec::<Dynamic>::new())

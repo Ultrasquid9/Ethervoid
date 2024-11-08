@@ -11,7 +11,7 @@
 	],
 	doors: [
 		(
-			direction: North,
+			direction: South,
 			pos: (80, 80),
 			dest: "default:test2"
 		)
