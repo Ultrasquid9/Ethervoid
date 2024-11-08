@@ -154,7 +154,6 @@ pub fn create_textures() {
 
 /// Gets the image at the provided key
 pub fn access_image(key: &str) -> DynamicImage {
-	println!("Accessing {} ...", key);
 	unsafe {
 		TEXTURES.get(key).unwrap().clone()
 	}

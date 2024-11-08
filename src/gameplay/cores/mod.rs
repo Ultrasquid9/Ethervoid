@@ -31,7 +31,7 @@ pub fn get_files(file_type: String) -> Vec<String> {
 				let mut dirs = Vec::new();
 
 				for entry in WalkDir::new(&dir) {
-					dirs.push(dir.clone() + "/" + entry.unwrap().file_name().to_string_lossy().into_owned().as_str());
+					dirs.push(entry.as_ref().unwrap().path().to_string_lossy().into_owned());
 				}
 
 				// Removing "leftover" entries
