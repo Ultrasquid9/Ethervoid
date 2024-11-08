@@ -1,4 +1,5 @@
 use futures::future::join_all;
+use image::{imageops::{resize, FilterType::Nearest}, DynamicImage};
 use macroquad::{color::WHITE, math::Vec2, texture::{draw_texture_ex, DrawTextureParams, Texture2D}, window::{screen_height, screen_width}};
 
 use super::SCREEN_SCALE;
@@ -39,4 +40,29 @@ pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawT
 
 pub fn pixel_offset(base: f32) -> f32 {
 	return (base / SCREEN_SCALE).round() * SCREEN_SCALE;
+}
+
+/// Downscales the provided image
+pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
+	let smallest_side = if img.width() < img.height() {
+		img.width()
+	} else {
+		img.height()
+	};
+
+	let image = resize(
+		&img, 
+		(img.width() / smallest_side) * size, 
+		(img.height() / smallest_side) * size, 
+		Nearest
+	);
+
+	return DynamicImage::ImageRgba8(image);
+}
+
+/// Transforms a `DynamicImage` into a `Texture2D`
+pub fn to_texture(img: DynamicImage) -> Texture2D {
+	let texture = Texture2D::from_rgba8(img.width() as u16, img.height() as u16, img.as_bytes());
+	texture.set_filter(macroquad::texture::FilterMode::Nearest);
+	return texture
 }

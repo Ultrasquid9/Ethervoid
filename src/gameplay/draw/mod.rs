@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 
 use ahash::RandomState;
-use downscale::{downscale, to_texture};
 use futures::{future::join_all, join};
 use imageproc::image::DynamicImage;
 use macroquad::prelude::*;
 use once_cell::sync::Lazy;
-use textures::{draw_tilemap, pixel_offset, render_texture};
+use textures::{downscale, draw_tilemap, pixel_offset, render_texture, to_texture};
 
 use crate::gameplay::entity::MovableObj;
 
@@ -14,7 +13,6 @@ use super::{combat::Attack, cores::textures::get_textures, enemy::Enemy, player:
 
 pub mod textures;
 pub mod texturedobj;
-pub mod downscale;
 
 // HashMap containing all the textures in the game 
 // Everyone always says "don't do this" so fuck you I did
@@ -53,7 +51,7 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 
 	// Appl 
 	render_texture(
-		&to_texture(downscale(access_image("default:appl"), 16, 45.)), 
+		&to_texture(downscale(access_image("default:appl"), 16)), 
 		Vec2::new(200., 200.), 
 		None
 	).await;

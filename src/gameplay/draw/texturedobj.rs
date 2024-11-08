@@ -4,7 +4,7 @@ use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
-use super::{access_image, downscale::{downscale, to_texture}, textures::render_texture, SCREEN_SCALE};
+use super::{access_image, textures::{downscale, render_texture, to_texture}, SCREEN_SCALE};
 
 pub trait TexturedObj {
 	fn update_texture(&mut self);
@@ -129,7 +129,7 @@ pub struct AttackTexture {
 
 	pos: Vec2,
 	angle: f32,
-	size: f32,
+	size: u32,
 
 	texturetype: AttackTextureType
 }
@@ -137,6 +137,7 @@ pub struct AttackTexture {
 impl AttackTexture {
 	/// Creates an attack texture with a "slash" sprite
 	pub fn new(pos: Vec2, size: f32, angle: f32, texturetype: AttackTextureType) -> Self {
+		let size = size as u32;
 		Self {
 			sprite: downscale(
 				match texturetype {
@@ -151,8 +152,7 @@ impl AttackTexture {
 					AttackTextureType::ProjectilePlayer => access_image("default:attacks/projectile-player"),
 					AttackTextureType::ProjectileEnemy => access_image("default:attacks/projectile-enemy"),
 				},
-				size as u32,
-				0.
+				size,
 			),
 			anim_time: 9,
 
@@ -176,24 +176,24 @@ impl AttackTexture {
 
 	pub async fn render(&self) {
 		let mut x_pos = match self.anim_time / 3 {
-			2 => 0.,
+			2 => 0,
 			1 => self.size,
-			_ => self.size * 2.,
+			_ => self.size * 2,
 		};
 
 		if self.texturetype == AttackTextureType::ProjectileEnemy
 		|| self.texturetype == AttackTextureType::ProjectilePlayer {
-			x_pos = 0.
+			x_pos = 0
 		}
 
 		render_texture(
 			&to_texture(
 				DynamicImage::ImageRgba8(rotate_about_center(
 					self.sprite.crop_imm(
-						x_pos as u32, 
+						x_pos, 
 						0, 
-						self.size as u32, 
-						self.size as u32
+						self.size, 
+						self.size
 					).as_rgba8().unwrap(), 
 					self.angle,
 					imageproc::geometric_transformations::Interpolation::Nearest, 
