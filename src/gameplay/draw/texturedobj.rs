@@ -3,7 +3,7 @@ use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
 use crate::gameplay::player::Axis;
 
-use super::{downscale::downscale, access_texture, textures::render_texture, SCREEN_SCALE};
+use super::{downscale::downscale, access_image, textures::render_texture, SCREEN_SCALE};
 
 pub trait TexturedObj {
 	fn update_texture(&mut self);
@@ -141,15 +141,15 @@ impl AttackTexture {
 		Self {
 			sprite: match texturetype {
 				// Physical
-				AttackTextureType::Slash => Some(access_texture("default:attacks/slash")),
-				AttackTextureType::Dash => Some(access_texture("default:attacks/dash")),
+				AttackTextureType::Slash => Some(access_image("default:attacks/slash")),
+				AttackTextureType::Dash => Some(access_image("default:attacks/dash")),
 
 				// Burst
-				AttackTextureType::Burst => Some(access_texture("default:attacks/burst")),
+				AttackTextureType::Burst => Some(access_image("default:attacks/burst")),
 				
 				// Projectile
-				AttackTextureType::ProjectilePlayer => Some(access_texture("default:attacks/projectile-player")),
-				AttackTextureType::ProjectileEnemy => Some(access_texture("default:attacks/projectile-enemy")),
+				AttackTextureType::ProjectilePlayer => Some(access_image("default:attacks/projectile-player")),
+				AttackTextureType::ProjectileEnemy => Some(access_image("default:attacks/projectile-enemy")),
 
 				// None
 				AttackTextureType::None => None

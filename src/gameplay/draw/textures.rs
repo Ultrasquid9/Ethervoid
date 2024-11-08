@@ -1,7 +1,5 @@
-use std::fs;
-
 use futures::future::join_all;
-use macroquad::{color::WHITE, math::Vec2, texture::{draw_texture_ex, DrawTextureParams, FilterMode, Texture2D}, window::{screen_height, screen_width}};
+use macroquad::{color::WHITE, math::Vec2, texture::{draw_texture_ex, DrawTextureParams, Texture2D}, window::{screen_height, screen_width}};
 
 use super::SCREEN_SCALE;
 
@@ -15,16 +13,6 @@ pub async fn draw_tilemap(texture: Texture2D) {
 	}
 
 	join_all(futures).await;
-}
-
-/// Loads a picture from the provided directory (NOTE: WIP)
-pub fn load_texture(dir: &str) -> Texture2D {
-	let texture = Texture2D::from_file_with_format(
-		fs::read(dir).unwrap().as_slice(), 
-		None
-	);
-	texture.set_filter(FilterMode::Nearest);
-	return texture;
 }
 
 /// Renders a texture based upon the screen scale

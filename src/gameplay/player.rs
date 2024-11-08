@@ -2,7 +2,7 @@ use macroquad::{input::mouse_position_local, math::Vec2};
 
 use crate::config::Config;
 
-use super::{combat::{Attack, Owner}, draw::{texturedobj::{AttackTextureType, EntityTexture, TexturedObj}, textures::load_texture}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
+use super::{combat::{Attack, Owner}, draw::{access_texture, texturedobj::{AttackTextureType, EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
 
 /// Contains info about the player
 pub struct Player {
@@ -55,7 +55,7 @@ impl Player {
 				Vec2::new(0.0, 0.0), 
 				15., 
 				100, 
-				EntityTexture::new(load_texture("./assets/textures/entity/player/player_spritesheet_wip.png"))
+				EntityTexture::new(access_texture("default:entity/player/player_spritesheet_wip"))
 			),
 			config: Config::read("./config.ron"),
 

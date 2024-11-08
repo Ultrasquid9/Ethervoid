@@ -37,7 +37,12 @@ impl Enemy<'_> {
 	/// Creates a new Enemy using a Vec2 for the pos and an EnemyType for the stats
 	pub fn new(pos: Vec2, enemytype: EnemyType, texture: Texture2D) -> Self {
 		return Self {
-			stats: Entity::new(pos, enemytype.size, enemytype.max_health as isize, EntityTexture::new(texture)),
+			stats: Entity::new(
+				pos, 
+				enemytype.size, 
+				enemytype.max_health as isize, 
+				EntityTexture::new(texture)
+			),
 			movement: enemytype.movement,
 			attacks: enemytype.attacks
 				.iter()

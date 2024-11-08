@@ -1,9 +1,8 @@
 use cores::map::get_maps;
 use combat::{try_parry, Attack};
-use draw::{clean_textures, create_textures, draw, textures::load_texture};
+use draw::{access_texture, clean_textures, create_textures, draw};
 use enemy::Enemy;
 use entity::MovableObj;
-use imageproc::image::{DynamicImage, ImageReader};
 use player::Player;
 use macroquad::prelude::*;
 
@@ -21,18 +20,14 @@ pub async fn gameplay() -> State {
 	// The camera
 	let mut camera = Vec2::new(0., 0.);
 
+	// Textures
+	// NOTE: populates a static HashMap. Ensure you call the `clean_attack_textures` function when quitting the game. 
+	create_textures();
+
 	// The player, enemies, and attacks
 	let mut player = Player::new(); // Creates a player
 	let mut enemies = Vec::new(); // Creates a list of enemies
 	let mut attacks: Vec<Attack> = Vec::new(); // Creates a list of attacks 
-
-	// Very temporary solution
-	// If this is still around when the game releases present day me will be very dissapointed with future me
-	let textures: Vec<DynamicImage> = vec![
-		ImageReader::open("./assets/textures/tiles/grass-test.png").unwrap().decode().unwrap(),
-		ImageReader::open("./assets/appl.webp").unwrap().decode().unwrap()
-	];
-	create_textures(); // NOTE: populates a static HashMap. Ensure you call the `clean_attack_textures` function when quitting the game. 
 	
 	// The maps
 	let maps = get_maps(); // Creates a list of Maps
@@ -45,7 +40,7 @@ pub async fn gameplay() -> State {
 
 	// Populating the enemies with data from the maps
 	for i in maps.get(&current_map).unwrap().enemies.clone() {
-		enemies.push(Enemy::new(i.1, i.0, load_texture("./assets/textures/entity/player/player_spritesheet_wip.png")))
+		enemies.push(Enemy::new(i.1, i.0, access_texture("default:entity/player/player_spritesheet_wip")))
 	}
 
 	loop {
@@ -97,7 +92,6 @@ pub async fn gameplay() -> State {
 			&player, 
 			&enemies, 
 			&attacks, 
-			&textures, 
 			&get_map()
 		).await;
 

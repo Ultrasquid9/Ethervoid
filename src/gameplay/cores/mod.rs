@@ -32,27 +32,33 @@ pub fn get_files(file_type: String) -> Vec<String> {
 			let dir = fs::read_dir(&i.1);
 
 			// Checks if the directory is currently pointing to a file
-			if let Err(_) = dir {
-				continue
-			}
+			if let Err(_) = dir { continue }
 
 			for j in dir.unwrap() {
-				match j {
-					Ok(dir) => {
-						files.push(i.1.clone().to_owned() + "/" + dir.file_name().to_str().unwrap());
-						subdirs = true;
-					},
-					_ => ()
+				// I have no clue what kind of error could occur here.
+				// If there is one, then that is a problem for future me. 
+				let dir = j.ok().unwrap(); 
+
+				files.push(i.1.clone().to_owned() + "/" + dir.file_name().to_str().unwrap());
+						
+				if let Ok(_) = fs::read_dir(files[files.len() - 1].clone()) {
+					subdirs = true;
 				}
 			}
 
-			if subdirs {
-				// The path at this index leads to a directory, so we do not want it. 
-				files.remove(i.0);
-			}
+			// The directory at the index has already been scanned, so it is no longer needed
+			files.remove(i.0);
 		}
 
-		if !subdirs { break }
+		if !subdirs { 
+			for i in files.clone().iter().enumerate() {
+				if let Ok(_) = fs::read_dir(i.1) {
+					// Apparently not all directories are removed from the files list so I have to do an extra check
+					files.remove(i.0);
+				}
+			}
+			break 
+		}
 	}
 
 	return files;

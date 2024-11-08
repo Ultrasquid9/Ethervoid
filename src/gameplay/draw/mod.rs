@@ -22,7 +22,7 @@ pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage>> = Lazy::new(|| Hash
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, attacks: &Vec<Attack>, textures: &Vec<DynamicImage>, map: &Vec<Vec2>) {
+pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, attacks: &Vec<Attack>, map: &Vec<Vec2>) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -48,11 +48,11 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 	let mut entity_futures = Vec::new();
 
 	// Tilemap
-	draw_tilemap(to_texture(textures[0].clone())).await;
+	draw_tilemap(access_texture("default:tiles/grass-test")).await;
 
 	// Appl 
 	render_texture(
-		&downscale(&textures[1], 16, 45.), 
+		&downscale(&access_image("default:appl"), 16, 45.), 
 		Vec2::new(200., 200.), 
 		None
 	).await;
@@ -151,11 +151,16 @@ pub fn create_textures() {
 	}
 }
 
-/// Gets the texture at the provided key
-pub fn access_texture(key: &str) -> DynamicImage {
+/// Gets the image at the provided key
+pub fn access_image(key: &str) -> DynamicImage {
 	unsafe {
 		TEXTURES.get(key).unwrap().clone()
 	}
+}
+
+/// Gets the texture at the provided key
+pub fn access_texture(key: &str) -> Texture2D {
+	to_texture(access_image(key))
 }
 
 /// Clears the texture HashMap
