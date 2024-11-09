@@ -1,6 +1,6 @@
 use cores::map::{get_maps, Map};
 use combat::{try_parry, Attack};
-use draw::{access_texture, clean_textures, create_textures, draw};
+use draw::{clean_textures, create_textures, draw};
 use enemy::Enemy;
 use entity::MovableObj;
 use npc::NPC;
@@ -127,7 +127,7 @@ pub fn populate(enemies: &mut Vec<Enemy>, npcs: &mut Vec<NPC>, map: &Map) {
 	npcs.clear();
 
 	for i in map.enemies.clone() {
-		enemies.push(Enemy::new(i.1, i.0, access_texture("default:entity/player/player_spritesheet_wip")))
+		enemies.push(Enemy::new(i.1, i.0))
 	}
 
 	for i in map.npcs.clone() {

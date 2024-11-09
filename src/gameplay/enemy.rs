@@ -1,9 +1,9 @@
 use std::cmp::Ordering;
 
-use macroquad::{math::Vec2, texture::Texture2D};
+use macroquad::math::Vec2;
 use serde::Deserialize;
 
-use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType, map::Map}, draw::texturedobj::{EntityTexture, TexturedObj}, entity::{Entity, MovableObj}, get_delta_time, player::Player};
+use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType, map::Map}, draw::{access_texture, texturedobj::{EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, player::Player};
 
 /// The movement AI used by an enemy
 #[derive(PartialEq, Clone, Deserialize)]
@@ -35,13 +35,13 @@ pub struct Enemy<'a> {
 
 impl Enemy<'_> {
 	/// Creates a new Enemy using a Vec2 for the pos and an EnemyType for the stats
-	pub fn new(pos: Vec2, enemytype: EnemyType, texture: Texture2D) -> Self {
+	pub fn new(pos: Vec2, enemytype: EnemyType) -> Self {
 		return Self {
 			stats: Entity::new(
 				pos, 
 				enemytype.size, 
 				enemytype.max_health as isize, 
-				EntityTexture::new(texture)
+				EntityTexture::new(access_texture(&enemytype.sprite))
 			),
 			movement: enemytype.movement,
 			attacks: enemytype.attacks

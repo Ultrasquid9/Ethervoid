@@ -10,6 +10,7 @@ use super::{attackscript::{get_attacks, AttackScriptBuilder}, gen_name, get_file
 struct EnemyTypeBuilder {
 	max_health: usize,
 	size: f32,
+	sprite: String,
 	movement: String,
 	attacks: Vec<String>
 }
@@ -25,6 +26,7 @@ impl EnemyTypeBuilder {
 		EnemyType {
 			max_health: self.max_health,
 			size: self.size,
+			sprite: self.sprite,
 			movement: Movement::from_str(&self.movement), 
 			attacks: self.attacks
 				.iter()
@@ -39,6 +41,7 @@ impl EnemyTypeBuilder {
 pub struct EnemyType {
 	pub max_health: usize,
 	pub size: f32,
+	pub sprite: String,
 	pub movement: Movement,
 	pub attacks: Vec<AttackScriptBuilder>
 }

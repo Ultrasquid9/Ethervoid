@@ -1,6 +1,7 @@
 (
 	max_health: 32,
 	size: 15,
+	sprite: "default:entity/player/player_spritesheet_wip",
 	movement: "MoveTowardsPlayer",
 	attacks: [
 		"default:test",
