@@ -68,7 +68,7 @@ impl AttackScript<'_> {
 			// Functions for creating attacks
 			.register_fn("new_physical", move |damage: i64, size, target: Vec2,| Attack::new_physical(
 				entity_pos, 
-				target,
+				target - entity_pos,
 				damage as isize, 
 				size, 
 				Owner::Enemy,

@@ -275,12 +275,12 @@ impl Player {
 
 		// Dashing
 		if self.config.keymap.dash.is_down() && self.dash_cooldown <= 0.{
-			self.speed += 10.;
+			self.speed += 12.;
 			self.dash_cooldown += 70.;
 		} else if self.dash_cooldown > 0. {
 			if self.dash_cooldown > 55. {
 				self.is_dashing = true;
-				self.speed = 10.;
+				self.speed = 12.;
 			} else {
 				self.is_dashing = false;
 			}
@@ -288,12 +288,12 @@ impl Player {
 		}
 
 		// Makes the player build up speed over time, rather than instantly starting at max speed
-		if self.speed < 3. && new_pos != Vec2::new(0., 0.) {
+		if self.speed < 3.5 && new_pos != Vec2::new(0., 0.) {
 			self.speed += self.speed / 6.;
 		}
 
 		// Makes the player slow down if their speed is high
-		if self.speed > 3.5 {
+		if self.speed > 4.5 {
 			self.speed = self.speed / 1.5;
 		}
 

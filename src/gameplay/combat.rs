@@ -239,7 +239,7 @@ impl Attack {
 			}
 		}
 
-		let new_pos = self.pos.move_towards(self.target, 3.0);
+		let new_pos = self.pos.move_towards(self.target, 5.0);
 		let new_pos = ((new_pos - self.get_pos()) * get_delta_time()) + self.get_pos();
 		self.try_move(new_pos, map);
 
