@@ -15,5 +15,6 @@
 			pos: (-80, -80),
 			dest: "default:test"
 		)
-	]
+	],
+	npcs: []
 )

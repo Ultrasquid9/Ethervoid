@@ -5,6 +5,7 @@ use walkdir::WalkDir;
 pub mod attackscript;
 pub mod enemytype;
 pub mod map;
+pub mod npctype;
 pub mod textures;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
@@ -21,10 +22,15 @@ pub fn get_files(file_type: String) -> Vec<String> {
 	}
 
 	for i in paths {
+		if fs::read_dir(format!("./cores/{}/{}", i, file_type).as_str()).is_err() {
+			continue
+		} 
+
 		for j in fs::read_dir(format!("./cores/{}/{}", i, file_type).as_str()).unwrap() {
 
 			// The directory to be scanned
-			let dir = format!("./cores/{}/{}/{}", i, file_type, j.unwrap().file_name().to_string_lossy().into_owned());
+			//let dir = format!("./cores/{}/{}/{}", i, file_type, j.unwrap().file_name().to_string_lossy().into_owned());
+			let dir = j.unwrap().path().to_string_lossy().into_owned();
 			// Directories that will be appended to `files` and returned
 			let mut dirs = Vec::new();
 

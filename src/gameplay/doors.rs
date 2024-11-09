@@ -3,9 +3,9 @@ use macroquad::math::Vec2;
 use raylite::{cast, Barrier, Ray};
 use serde::{Deserialize, Serialize};
 
-use crate::gameplay::populate_enemies;
+use crate::gameplay::populate;
 
-use super::{combat::Attack, cores::map::Map, enemy::Enemy, entity::MovableObj, player::Player, vec2_to_tuple};
+use super::{combat::Attack, cores::map::Map, enemy::Enemy, entity::MovableObj, npc::NPC, player::Player, vec2_to_tuple};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Direction {
@@ -65,6 +65,7 @@ impl Door {
 		camera: &mut Vec2, 
 
 		enemies: &mut Vec<Enemy>, 
+		npcs: &mut Vec<NPC>,
 		attacks: &mut Vec<Attack>, 
 
 		current_map: &mut String, 
@@ -93,7 +94,7 @@ impl Door {
 			*current_map = self.dest.clone();
 
 			attacks.clear();
-			populate_enemies(enemies, maps.get(current_map).unwrap());
+			populate(enemies, npcs, maps.get(current_map).unwrap());
 		}
 	}
 }

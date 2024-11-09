@@ -3,6 +3,7 @@ use combat::{try_parry, Attack};
 use draw::{access_texture, clean_textures, create_textures, draw};
 use enemy::Enemy;
 use entity::MovableObj;
+use npc::NPC;
 use player::Player;
 use macroquad::prelude::*;
 
@@ -14,6 +15,7 @@ mod doors;
 mod draw;
 mod enemy;
 mod entity;
+mod npc;
 mod player;
 
 /// The gameplay loop of the game
@@ -29,17 +31,27 @@ pub async fn gameplay() -> State {
 	let mut player = Player::new(); // Creates a player
 	let mut enemies = Vec::new(); // Creates a list of enemies
 	let mut attacks: Vec<Attack> = Vec::new(); // Creates a list of attacks 
+	let mut npcs: Vec<NPC> = Vec::new();
 	
 	// The maps
 	let maps = get_maps(); // Creates a list of Maps
 	let mut current_map = String::from("default:test"); // Stores the map the player is currently in
 
 	// Populating the enemies with data from the maps
-	populate_enemies(&mut enemies, maps.get(&current_map).unwrap());
+	populate(&mut enemies, &mut npcs, maps.get(&current_map).unwrap());
 
 	loop {
 		// Updates the player
-		player.update(&mut camera, &mut enemies, &mut attacks, &mut current_map, &maps);
+		player.update(
+			&mut camera, 
+			
+			&mut enemies, 
+			&mut npcs, 
+			&mut attacks, 
+			
+			&mut current_map,
+			&maps
+		);
 
 		// Attacking
 		if player.config.keymap.sword.is_down() && player.swords[0].cooldown == 0 {
@@ -73,6 +85,14 @@ pub async fn gameplay() -> State {
 			enemies.retain(|x| !x.stats.should_kill());
 		}
 
+		// Updates NPCs
+		// WIP
+		if npcs.len() > 0 {
+			for i in &mut npcs {
+				i.update(&maps.get(&current_map).unwrap());
+			}
+		}
+
 		// Updates the camera
 		// TODO: Attempt to replace with .lerp()
 		camera = camera.move_towards(
@@ -85,6 +105,7 @@ pub async fn gameplay() -> State {
 			&mut camera, 
 			&player, 
 			&enemies, 
+			&npcs,
 			&attacks, 
 			&maps.get(&current_map).unwrap()
 		).await;
@@ -101,11 +122,16 @@ pub async fn gameplay() -> State {
 	}
 }
 
-pub fn populate_enemies(enemies: &mut Vec<Enemy>, map: &Map) {
+pub fn populate(enemies: &mut Vec<Enemy>, npcs: &mut Vec<NPC>, map: &Map) {
 	enemies.clear();
+	npcs.clear();
 
 	for i in map.enemies.clone() {
 		enemies.push(Enemy::new(i.1, i.0, access_texture("default:entity/player/player_spritesheet_wip")))
+	}
+
+	for i in map.npcs.clone() {
+		npcs.push(NPC::new(i.0, i.1));
 	}
 }
 

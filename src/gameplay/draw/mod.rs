@@ -9,7 +9,7 @@ use textures::{downscale, draw_tilemap, pixel_offset, render_texture, to_texture
 
 use crate::gameplay::entity::MovableObj;
 
-use super::{combat::Attack, cores::{map::Map, textures::get_textures}, enemy::Enemy, player::Player};
+use super::{combat::Attack, cores::{map::Map, textures::get_textures}, enemy::Enemy, npc::NPC, player::Player};
 
 pub mod textures;
 pub mod texturedobj;
@@ -21,7 +21,7 @@ pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage, RandomState>> = Lazy
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, attacks: &Vec<Attack>, map: &Map) {
+pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, npcs: &Vec<NPC>, attacks: &Vec<Attack>, map: &Map) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -137,6 +137,11 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, 
 		}
 	} else {
 		entity_futures.push(player.stats.texture.render());
+	}
+
+	// NPCs. WIP!
+	for i in npcs {
+		entity_futures.push(i.texture.render())
 	}
 
 	// Performing operations pushed to the futures
