@@ -2,7 +2,7 @@ use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
 
-use super::{cores::map::Map, draw::texturedobj::{AttackTexture, AttackTextureType, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_mouse_pos, player::Player, vec2_to_tuple};
+use super::{cores::map::Map, draw::texturedobj::{AttackTexture, AttackTextureType, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos, player::Player, vec2_to_tuple};
 
 #[derive(Clone)]
 pub struct Attack {
@@ -15,7 +15,7 @@ pub struct Attack {
 
 	attack_type: AttackType,
 	damage: isize,
-	lifetime: i8,
+	lifetime: f32,
 
 	pub texture: AttackTexture
 }
@@ -49,7 +49,7 @@ impl Attack {
 
 			attack_type: AttackType::Physical,
 			damage,
-			lifetime: 2,
+			lifetime: 2.,
 
 			// After angle_between led to wierd-ass bugs, I added atan2 and it worked.
 			// I have as such concluded that atan2 is magical, and fixes every problem. 
@@ -73,7 +73,7 @@ impl Attack {
 
 			attack_type: AttackType::Burst,
 			damage,
-			lifetime: 12,
+			lifetime: 12.,
 
 			texture: AttackTexture::new(
 				pos, 
@@ -88,14 +88,14 @@ impl Attack {
 		return Attack {
 			size: 10.,
 			pos,
-			target,
+			target: ((target - pos) * 999.) + pos,
 
 			owner,
 			is_parried: false,
 
 			attack_type: AttackType::Projectile( ProjectileOrHitscan {}),
 			damage,
-			lifetime: 1,
+			lifetime: 1.,
 
 			texture: AttackTexture::new(
 				pos, 
@@ -117,7 +117,7 @@ impl Attack {
 
 			attack_type: AttackType::Hitscan( ProjectileOrHitscan {}),
 			damage,
-			lifetime: 8,
+			lifetime: 8.,
 
 			texture: AttackTexture::new(
 				pos, 
@@ -145,12 +145,12 @@ impl Attack {
 	pub fn should_rm(&self) -> bool {
 		match self.attack_type {
 			AttackType::Physical | AttackType::Burst => {
-				if self.texture.anim_time == 0 {
+				if self.texture.anim_time <= 0. {
 					return true;
 				}
 			},
 			AttackType::Projectile(_) | AttackType::Hitscan(_) => {
-				if self.lifetime == 0 {
+				if self.lifetime <= 0. {
 					return true;
 				}
 			}
@@ -168,12 +168,12 @@ impl Attack {
 
 		match &self.attack_type {
 			AttackType::Physical => {
-				if self.lifetime > 0 {
+				if self.lifetime > 0. {
 					self.attack_physical(enemies, player);
 				}
 			} 
 			AttackType::Burst => {
-				if self.lifetime > 0 {
+				if self.lifetime > 0. {
 					self.attack_burst(enemies, player);
 				}
 			}
@@ -195,7 +195,7 @@ impl Attack {
 			}
 		}
 
-		self.lifetime -= 1;
+		self.lifetime -= get_delta_time();
 	}
 
 	/// Updates the provided Burst attack
@@ -219,7 +219,7 @@ impl Attack {
 			}
 		}
 
-		self.lifetime -= 1;
+		self.lifetime -= get_delta_time();
 	}
 
 	/// Updates the provided Projectile attack
@@ -228,22 +228,23 @@ impl Attack {
 			Owner::Player => for i in enemies {
 				if self.is_touching(&i.stats) {
 					i.stats.try_damage(self.damage);
-					self.lifetime = 0;
+					self.lifetime = 0.;
 					return;
 				}
 			}
 			Owner::Enemy => if self.is_touching(&player.stats) {
 				player.stats.try_damage(self.damage);
-				self.lifetime = 0;
+				self.lifetime = 0.;
 				return;
 			}
 		}
 
 		let new_pos = self.pos.move_towards(self.target, 3.0);
+		let new_pos = ((new_pos - self.get_pos()) * get_delta_time()) + self.get_pos();
 		self.try_move(new_pos, map);
 
-		if self.pos != new_pos || self.pos == self.target {
-			self.lifetime = 0;
+		if self.pos != new_pos || self.pos.round() == self.target.round() {
+			self.lifetime = 0.;
 		}
 	}
 
@@ -270,7 +271,7 @@ impl Attack {
 			Owner::Enemy => damage_with_raycast(&mut player.stats),
 		}
 
-		self.lifetime -= 1;
+		self.lifetime -= get_delta_time();
 	}
 }
 
@@ -344,8 +345,8 @@ pub fn try_parry(attacks: &mut Vec<Attack>) {
 
 							attacks[j].damage += attacks[i].damage;
 							
-							attacks[i].lifetime += 1;
-							attacks[j].lifetime += 1;
+							attacks[i].lifetime += get_delta_time();
+							attacks[j].lifetime += get_delta_time();
 
 							attacks[i].is_parried = true;
 							attacks[j].is_parried = true;

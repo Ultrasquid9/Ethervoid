@@ -2,7 +2,7 @@ use image::{DynamicImage, Rgba};
 use imageproc::geometric_transformations::rotate_about_center;
 use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
-use crate::gameplay::player::Axis;
+use crate::gameplay::{get_delta_time, player::Axis};
 
 use super::{access_image, textures::{downscale, render_texture, to_texture}, SCREEN_SCALE};
 
@@ -17,7 +17,7 @@ pub struct EntityTexture {
 	pos: Vec2,
 
 	pub moving: bool,
-	anim_time: u8,
+	anim_time: f32,
 
 	dir_horizontal: Axis,
 	dir_vertical: Axis
@@ -31,7 +31,7 @@ impl EntityTexture {
 			pos: Vec2::new(0., 0.),
 
 			moving: false,
-			anim_time: 0,
+			anim_time: 0.,
 
 			dir_horizontal: Axis::None,
 			dir_vertical: Axis::None
@@ -48,10 +48,10 @@ impl EntityTexture {
 			self.dir_vertical = dir_vertical;
 		}
 
-		if self.moving && self.anim_time < 64 {
-			self.anim_time += 1;
+		if self.moving && self.anim_time < 64. {
+			self.anim_time += get_delta_time();
 		} else {
-			self.anim_time = 0;
+			self.anim_time = 0.;
 		}
 	}
 
@@ -77,7 +77,7 @@ impl EntityTexture {
 			}
 		};
 
-		let x_pos = match self.anim_time / 16 {
+		let x_pos = match self.anim_time as isize / 16 {
 			1 => size,
 			3 => size * 2.,
 			_ => 0.
@@ -125,7 +125,7 @@ pub enum AttackTextureType {
 #[derive(Clone)]
 pub struct AttackTexture {
 	pub sprite: DynamicImage,
-	pub anim_time: i8,
+	pub anim_time: f32,
 
 	pos: Vec2,
 	angle: f32,
@@ -154,7 +154,7 @@ impl AttackTexture {
 				},
 				size,
 			),
-			anim_time: 9,
+			anim_time: 9.,
 
 			pos,
 			angle,
@@ -170,12 +170,12 @@ impl AttackTexture {
 
 		match self.texturetype {
 			AttackTextureType::ProjectileEnemy | AttackTextureType::ProjectilePlayer => (),
-			_ => self.anim_time -= 1
+			_ => self.anim_time -= get_delta_time()
 		}
 	}
 
 	pub async fn render(&self) {
-		let mut x_pos = match self.anim_time / 3 {
+		let mut x_pos = match self.anim_time as isize / 3 {
 			2 => 0,
 			1 => self.size,
 			_ => self.size * 2,

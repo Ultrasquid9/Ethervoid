@@ -4,7 +4,7 @@ use macroquad::math::{vec2, Vec2};
 use rhai::{Dynamic, Engine, Scope};
 use serde::Deserialize;
 
-use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, entity::{Entity, MovableObj}, player::Player};
+use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, entity::{Entity, MovableObj}, get_delta_time, player::Player};
 
 use super::{gen_name, get_files, map::Map};
 
@@ -112,6 +112,9 @@ impl AttackScript<'_> {
 			attacks.push(i.clone_cast())
 		}
 
+		// Taking delta time into consideration
+		let new_pos = ((new_pos - entity.get_pos()) * get_delta_time()) + entity.get_pos();
+
 		// A horrible hacky way of checking if the 'end' keyword was called
 		if new_pos == vec2(999999., 999999.) {
 			return true;
@@ -122,7 +125,7 @@ impl AttackScript<'_> {
 
 		// Returns true if the enemy could not move or if the enemy has reached the target
 		// Otherwise, returns false
-		if entity.get_pos() == self.current_target
+		if entity.get_pos().round() == self.current_target.round()
 		|| entity.get_pos() != new_pos {
 			return true
 		} else {

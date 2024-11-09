@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use macroquad::{math::Vec2, texture::Texture2D};
 use serde::Deserialize;
 
-use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType, map::Map}, draw::texturedobj::{EntityTexture, TexturedObj}, entity::{Entity, MovableObj}, player::Player};
+use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType, map::Map}, draw::texturedobj::{EntityTexture, TexturedObj}, entity::{Entity, MovableObj}, get_delta_time, player::Player};
 
 /// The movement AI used by an enemy
 #[derive(PartialEq, Clone, Deserialize)]
@@ -99,6 +99,7 @@ impl Enemy<'_> {
 			// Simple movement AI that tracks the player and moves towards them
 			Movement::MoveTowardsPlayer => {
 				let new_pos = self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0);
+				let new_pos = ((new_pos - self.stats.get_pos()) * get_delta_time()) + self.stats.get_pos();
 
 				self.stats.update_axis(&new_pos);
 				self.stats.try_move(new_pos, map);
