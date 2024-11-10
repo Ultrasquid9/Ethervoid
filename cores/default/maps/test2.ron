@@ -5,10 +5,7 @@
 		(160, 160),
 		(100, -100)
 	],
-	enemies: [
-		("default:test", (30, 30)),
-		("default:test", (-30, -30))
-	],
+	enemies: [],
 	doors: [
 		(
 			direction: North,
@@ -16,5 +13,7 @@
 			dest: "default:test"
 		)
 	],
-	npcs: []
+	npcs: [
+		("default:test", (30, 30))
+	]
 )
