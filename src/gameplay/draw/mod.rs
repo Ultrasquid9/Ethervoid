@@ -21,7 +21,7 @@ pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage, RandomState>> = Lazy
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy<'_>>, npcs: &Vec<NPC>, attacks: &Vec<Attack>, map: &Map) {
+pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, npcs: &Vec<NPC>, attacks: &Vec<Attack>, map: &Map) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 

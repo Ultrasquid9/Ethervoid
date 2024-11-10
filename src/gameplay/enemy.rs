@@ -23,17 +23,16 @@ impl Movement {
 }
 
 /// An enemy
-/// The lifetime annotation allows the compiler to know that the Enemy lives as long as the AttackScript does
-pub struct Enemy<'a> {
+pub struct Enemy {
 	pub stats: Entity,
 	movement: Movement,
 
-	attacks: Vec<AttackScript<'a>>,
+	attacks: Vec<AttackScript<'static>>,
 	attack_index: usize,
 	attack_cooldown: usize
 }
 
-impl Enemy<'_> {
+impl Enemy {
 	/// Creates a new Enemy using a Vec2 for the pos and an EnemyType for the stats
 	pub fn new(pos: Vec2, enemytype: EnemyType) -> Self {
 		return Self {
@@ -108,9 +107,9 @@ impl Enemy<'_> {
 	}
 }
 
-impl Eq for Enemy<'_> {}
+impl Eq for Enemy {}
 
-impl PartialEq for Enemy<'_> {
+impl PartialEq for Enemy {
 	fn eq(&self, other: &Self) -> bool {
 		if self.stats == other.stats 
 		&& self.movement == other.movement
@@ -122,7 +121,7 @@ impl PartialEq for Enemy<'_> {
 	}
 }
 
-impl PartialOrd for Enemy<'_> {
+impl PartialOrd for Enemy {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
 		if self.stats.get_pos().y > other.stats.get_pos().y {
 			return Some(Ordering::Greater)
@@ -134,7 +133,7 @@ impl PartialOrd for Enemy<'_> {
 	}
 }
 
-impl Ord for Enemy<'_> {
+impl Ord for Enemy {
 	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
 		if self.stats.get_pos().y > other.stats.get_pos().y {
 			return Ordering::Greater
@@ -146,7 +145,7 @@ impl Ord for Enemy<'_> {
 	}
 }
 
-impl TexturedObj for Enemy<'_> {
+impl TexturedObj for Enemy {
 	fn update_texture(&mut self) {
 		self.stats.texture.update(
 			self.stats.get_pos(), 

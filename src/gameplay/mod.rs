@@ -24,7 +24,7 @@ pub async fn gameplay() -> State {
 	let mut camera = Vec2::new(0., 0.);
 
 	// Textures
-	// NOTE: populates a static HashMap. Ensure you call the `clean_attack_textures` function when quitting the game. 
+	// NOTE: populates a static HashMap. Ensure you call the `clean_textures` function when quitting the game. 
 	create_textures();
 
 	// The player, enemies, and attacks
