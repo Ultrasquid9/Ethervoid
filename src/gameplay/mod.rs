@@ -70,30 +70,40 @@ pub async fn gameplay() -> State {
 		}
 
 		// Updates attacks
-		let mut to_remove: Vec<usize> = Vec::new();
-		for (index, attack) in world.attacks.iter_mut() {
+		for (_, attack) in world.attacks.iter_mut() {
 			attack.io.update(&mut world.enemies.io, &mut player, &maps.get(&current_map).unwrap());
-
-			if attack.io.should_rm() {
-				to_remove.push(index);
-			}
 		}
 		try_parry(&mut world);
-		for i in to_remove {
-			world.attacks.remove(i);
+		// Removing old attacks
+		let mut to_remove: usize = 0;
+		while (|| {
+			for (index, attack) in world.attacks.iter() {
+				if attack.io.should_rm() {
+					to_remove = index;
+					return true
+				}
+			}
+			return false
+		})() {
+			world.attacks.remove(to_remove);
 		}
 
 		// Updates enemies
-		let mut to_remove: Vec<usize> = Vec::new();
-		for (index, enemy) in world.enemies.iter_mut() {
+		for (_, enemy) in world.enemies.iter_mut() {
 			enemy.io.update(&mut world.attacks, &mut player, &maps.get(&current_map).unwrap());
-
-			if enemy.io.stats.should_kill() {
-				to_remove.push(index);
-			}
 		}
-		for i in to_remove {
-			world.enemies.remove(i);
+		// Removing dead enemies
+		let mut to_remove: usize = 0;
+		while (|| {
+			for (index, enemy) in world.enemies.iter() {
+				if enemy.io.stats.should_kill() {
+					to_remove = index;
+					return true
+				}
+			}
+			return false
+		})() {
+			world.enemies.remove(to_remove);
 		}
 
 		// Updates NPCs
@@ -131,42 +141,27 @@ pub async fn gameplay() -> State {
 
 pub fn populate(world: &mut World, map: &Map) {
 	// Removing all the old content of the world 
-	// This is a lot more wordy than I would like,
-	// But oh well. 
 
 	// Enemies
-	let mut enemy_ids: Vec<usize> = Vec::new();
-	for i in world.enemies.ids() {
-		enemy_ids.push(i);
+	while world.enemies.io.len() > 0 {
+		world.enemies.remove(0);
 	}
-	for i in enemy_ids {
-		world.enemies.remove(i);
-	}
-
 	// NPCs
-	let mut npc_ids: Vec<usize> = Vec::new();
-	for i in world.npcs.ids() {
-		npc_ids.push(i);
+	while world.npcs.io.len() > 0 {
+		world.npcs.remove(0);
 	}
-	for i in npc_ids {
-		world.npcs.remove(i);
-	}
-
 	// Attacks
-	let mut attack_ids: Vec<usize> = Vec::new();
-	for i in world.attacks.ids() {
-		attack_ids.push(i);
-	}
-	for i in attack_ids {
-		world.attacks.remove(i);
+	while world.attacks.io.len() > 0 {
+		world.attacks.remove(0);
 	}
 
-	// Adding the new enemies
+	// Adding the new content
+
+	// Enemies
 	for i in map.enemies.clone() {
 		world.enemies.insert(EnemyArch { io: Enemy::new(i.1, i.0.clone())});
 	}
-
-	// Adding the new NPCs
+	// NPCs
 	for i in map.npcs.clone() {
 		world.npcs.insert(NPCArch { io: NPC::new(i.0, i.1)});
 	}
