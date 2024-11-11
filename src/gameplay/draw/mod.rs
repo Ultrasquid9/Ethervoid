@@ -91,18 +91,18 @@ pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, map: &Map) 
 	}
 
 	// Attacks
-	for (_, attack) in world.attacks.iter() {
-		if attack.io.is_hitscan() {
+	for attack in world.attacks.io.iter() {
+		if attack.is_hitscan() {
 			draw_line(
-				attack.io.pos.x, 
-				attack.io.pos.y, 
-				attack.io.get_target().x, 
-				attack.io.get_target().y, 
+				attack.pos.x, 
+				attack.pos.y, 
+				attack.get_target().x, 
+				attack.get_target().y, 
 				6., 
 				PURPLE
 			); 
 		} else {
-			attack_futures.push(attack.io.texture.render());
+			attack_futures.push(attack.texture.render());
 		}	
 	}
 
@@ -110,13 +110,13 @@ pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, map: &Map) 
 	entity_futures.push(player.stats.texture.render());
 
 	// Enemies
-	for (_, enemy) in world.enemies.iter() {
-		entity_futures.push(enemy.io.stats.texture.render());
+	for enemy in world.enemies.io.iter() {
+		entity_futures.push(enemy.stats.texture.render());
 	}
 
 	// NPCs
-	for (_, npc) in world.npcs.iter() {
-		entity_futures.push(npc.io.texture.render());
+	for npc in world.npcs.io.iter() {
+		entity_futures.push(npc.texture.render());
 	}
 
 	// Performing operations pushed to the futures

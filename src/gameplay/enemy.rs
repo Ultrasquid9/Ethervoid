@@ -2,8 +2,9 @@ use std::cmp::Ordering;
 
 use macroquad::math::Vec2;
 use serde::Deserialize;
+use stecs::{prelude::*, storage::vec::VecFamily};
 
-use super::{combat::Attack, cores::{attackscript::AttackScript, enemytype::EnemyType, map::Map}, draw::{access_texture, texturedobj::{EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, player::Player};
+use super::{cores::{attackscript::AttackScript, enemytype::EnemyType, map::Map}, draw::{access_texture, texturedobj::{EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, player::Player, AttackArchStructOf};
 
 /// The movement AI used by an enemy
 #[derive(PartialEq, Clone, Deserialize)]
@@ -53,12 +54,12 @@ impl Enemy {
 	}
 
 	/// Updates the enemy based upon their AI and the Player's stats
-	pub fn update<'a>(&'a mut self, attacks: &mut Vec<Attack>, player: &mut Player, map: &Map) {
+	pub fn update(&mut self, attacks: &mut AttackArchStructOf<VecFamily>, player: &mut Player, map: &Map) {
 		if self.stats.i_frames != 0 {
 			self.stats.i_frames -= 1
 		}
-
-		for attack in &mut *attacks {
+		
+		for attack in query!(attacks, (&io)) {
 			if attack.is_parried
 			&& self.stats.is_touching(attack) {
 				self.stats.stunned = 32;

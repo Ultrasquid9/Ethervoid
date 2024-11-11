@@ -2,7 +2,6 @@ use ahash::HashMap;
 use macroquad::math::Vec2;
 use raylite::{cast, Barrier, Ray};
 use serde::{Deserialize, Serialize};
-use stecs::prelude::Archetype;
 
 use crate::gameplay::populate;
 
@@ -91,15 +90,6 @@ impl Door {
 			*camera = *camera - self.pos + i.pos;
 
 			*current_map = self.dest.clone();
-
-			// Removing attacks 
-			let mut attack_ids: Vec<usize> = Vec::new();
-			for i in world.attacks.ids() {
-				attack_ids.push(i);
-			}
-			for i in attack_ids {
-				world.enemies.remove(i);
-			}
 
 			populate(world, maps.get(current_map).unwrap());
 		}

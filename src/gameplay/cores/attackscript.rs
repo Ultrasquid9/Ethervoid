@@ -3,8 +3,9 @@ use std::{collections::HashMap, fs};
 use macroquad::math::{vec2, Vec2};
 use rhai::{Dynamic, Engine, Scope};
 use serde::Deserialize;
+use stecs::{prelude::Archetype, storage::vec::VecFamily};
 
-use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, entity::{Entity, MovableObj}, get_delta_time, player::Player};
+use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, entity::{Entity, MovableObj}, get_delta_time, player::Player, AttackArch, AttackArchStructOf};
 
 use super::{gen_name, get_files, map::Map};
 
@@ -39,7 +40,7 @@ pub struct AttackScript<'a> {
 
 impl AttackScript<'_> {
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
-	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Map, attacks: &mut Vec<Attack>) -> bool {
+	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Map, attacks: &mut AttackArchStructOf<VecFamily>) -> bool {
 		// Values available in the scope
 		self.scope
 			.push("attacks", Vec::<Dynamic>::new())
@@ -109,7 +110,7 @@ impl AttackScript<'_> {
 			.get_value_mut::<Vec<Dynamic>>("attacks")
 			.expect("Attacks not found");
 		for i in new_attacks {
-			attacks.push(i.clone_cast())
+			attacks.insert( AttackArch { io: i.clone_cast()});
 		}
 
 		// Taking delta time into consideration

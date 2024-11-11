@@ -105,7 +105,7 @@ pub async fn gameplay() -> State {
 		// Updates enemies
 		let mut to_remove: Vec<usize> = Vec::new();
 		for (index, enemy) in world.enemies.iter_mut() {
-			enemy.io.update(&mut world.attacks.io, &mut player, &maps.get(&current_map).unwrap());
+			enemy.io.update(&mut world.attacks, &mut player, &maps.get(&current_map).unwrap());
 
 			if enemy.io.stats.should_kill() {
 				to_remove.push(index);
@@ -164,11 +164,20 @@ pub fn populate(world: &mut World, map: &Map) {
 
 	// NPCs
 	let mut npc_ids: Vec<usize> = Vec::new();
-	for i in world.enemies.ids() {
+	for i in world.npcs.ids() {
 		npc_ids.push(i);
 	}
 	for i in npc_ids {
-		world.enemies.remove(i);
+		world.npcs.remove(i);
+	}
+
+	// Attacks
+	let mut attack_ids: Vec<usize> = Vec::new();
+	for i in world.attacks.ids() {
+		attack_ids.push(i);
+	}
+	for i in attack_ids {
+		world.attacks.remove(i);
 	}
 
 	// Adding the new enemies
