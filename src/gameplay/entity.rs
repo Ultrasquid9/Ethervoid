@@ -1,7 +1,10 @@
 use macroquad::math::Vec2;
-use raylite::{cast_wide, Barrier, Ray};
+use raylite::{cast, cast_wide, Barrier, Ray};
 
-use super::{cores::map::Map, draw::texturedobj::EntityTexture, player::Axis, vec2_to_tuple};
+use super::{cores::map::Map, draw::texturedobj::EntityTexture, player::Axis, tuple_to_vec2, vec2_to_tuple};
+
+// For keeping track of the recursion in `try_move`
+static mut DEPTH: u8 = 0;
 
 /// Trait for an object that has a size and can be moved
 pub trait MovableObj {
@@ -16,6 +19,9 @@ pub trait MovableObj {
 			barriers.push(i.to_barrier())
 		}
 
+		let old_pos = self.get_pos();
+		let mut try_slope_movement = false;
+
 		match cast_wide(
 			&Ray {
 				position: (self.get_pos().x, self.get_pos().y),
@@ -23,7 +29,7 @@ pub trait MovableObj {
 			}, 
 			&barriers
 		) {
-			Ok(_) => (),
+			Ok(_) => try_slope_movement = true,
 			_ => self.edit_pos().x = target.x
 		}
 	
@@ -34,8 +40,58 @@ pub trait MovableObj {
 			}, 
 			&barriers
 		) {
-			Ok(_) => (),
+			Ok(_) => try_slope_movement = true,
 			_ => self.edit_pos().y = target.y
+		}
+
+		// Everything beyond this point is for handling slopes
+		if !try_slope_movement { return }
+
+		// Checking recursion
+		unsafe {
+			if DEPTH > 1 {
+				DEPTH = 0;
+				return 
+			} else {
+				DEPTH += 1
+			}
+		}
+
+		let mut wall_to_check = Barrier {
+			// Rust assumes that this variable could possibly be uninitialized,
+			// so I have to set a burner value that is never read. 
+			positions: ((0., 0.), (0., 0.)) 
+		};
+
+		for i in barriers {
+			match cast(
+				&Ray {
+					position: (self.get_pos().x, self.get_pos().y),
+					end_position: (target.x, target.y)
+				}, 
+				&i
+			) {
+				Ok(_) => (),
+				_ => wall_to_check = i
+			}
+		}
+
+		if wall_to_check.positions.0.0 != wall_to_check.positions.1.0
+		&& wall_to_check.positions.0.1 != wall_to_check.positions.1.1 {
+			return;
+		}
+		
+		let angle = tuple_to_vec2(wall_to_check.positions.0).angle_between(tuple_to_vec2(wall_to_check.positions.1));
+
+		let new_pos = Vec2::new(
+			old_pos.distance(target) * angle.cos(), 
+			old_pos.distance(target) * angle.cos()
+		);
+
+		if (old_pos + new_pos).distance(target) > old_pos.distance(target) {
+			self.try_move(old_pos + new_pos, map);
+		} else {
+			self.try_move(old_pos - new_pos, map);
 		}
 	}
 
