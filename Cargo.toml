@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 macroquad = { version = "0.4", features = ["glam-serde"] }
+stecs = "0.1.*"
 once_cell = "1.20.*"
 walkdir = "2.5.*"
 ahash = "0.8.*"

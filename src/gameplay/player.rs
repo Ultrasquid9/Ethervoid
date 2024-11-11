@@ -3,7 +3,7 @@ use macroquad::{input::mouse_position_local, math::Vec2};
 
 use crate::config::Config;
 
-use super::{combat::{Attack, Owner}, cores::map::Map, draw::{access_texture, texturedobj::{AttackTextureType, EntityTexture, TexturedObj}}, enemy::Enemy, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos, npc::NPC};
+use super::{combat::{Attack, Owner}, cores::map::Map, draw::{access_texture, texturedobj::{AttackTextureType, EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos, World};
 
 /// Contains info about the player
 pub struct Player {
@@ -87,8 +87,7 @@ impl Player {
 		&mut self, 
 		camera: &mut Vec2, 
 
-		enemies: &mut Vec<Enemy>, 
-		npcs: &mut Vec<NPC>,
+		world: &mut World,
 		attacks: &mut Vec<Attack>, 
 
 		current_map: &mut String, 
@@ -128,8 +127,7 @@ impl Player {
 		self.update_texture();
 		self.movement(
 			camera, 
-			enemies, 
-			npcs,
+			world,
 			attacks, 
 			current_map, 
 			maps
@@ -214,8 +212,7 @@ impl Player {
 		&mut self, 
 		camera: &mut Vec2, 
 
-		enemies: &mut Vec<Enemy>, 
-		npcs: &mut Vec<NPC>,
+		world: &mut World,
 		attacks: &mut Vec<Attack>, 
 
 		current_map: &mut String, 
@@ -325,8 +322,7 @@ impl Player {
 					self, 
 					(new_pos.normalize() * self.speed * get_delta_time()) + current_pos,
 					camera, 
-					enemies, 
-					npcs,
+					world,
 					attacks, 
 					current_map, 
 					maps

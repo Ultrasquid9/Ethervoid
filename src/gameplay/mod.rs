@@ -6,6 +6,7 @@ use entity::MovableObj;
 use npc::NPC;
 use player::Player;
 use macroquad::prelude::*;
+use stecs::prelude::*;
 
 use crate::State;
 
@@ -18,6 +19,21 @@ mod entity;
 mod npc;
 mod player;
 
+#[derive(SplitFields)]
+pub struct EnemyArch{
+	io: Enemy	
+}
+
+#[derive(SplitFields)]
+pub struct NPCArch{
+	io: NPC	
+}
+
+pub struct World {
+	enemies: StructOf<Vec<EnemyArch>>,
+	npcs: StructOf<Vec<NPCArch>>
+}
+
 /// The gameplay loop of the game
 pub async fn gameplay() -> State {
 	// The camera
@@ -27,9 +43,15 @@ pub async fn gameplay() -> State {
 	// NOTE: populates a static HashMap. Ensure you call the `clean_textures` function when quitting the game. 
 	create_textures();
 
+	// The world 
+	// Contains Enemies, Attacks, ETC.
+	let mut world = World {
+		enemies: Default::default(),
+		npcs: Default::default()
+	};
+
 	// The player, enemies, and attacks
 	let mut player = Player::new(); // Creates a player
-	let mut enemies = Vec::new(); // Creates a list of enemies
 	let mut attacks: Vec<Attack> = Vec::new(); // Creates a list of attacks 
 	let mut npcs: Vec<NPC> = Vec::new();
 	
@@ -38,15 +60,18 @@ pub async fn gameplay() -> State {
 	let mut current_map = String::from("default:test"); // Stores the map the player is currently in
 
 	// Populating the enemies with data from the maps
-	populate(&mut enemies, &mut npcs, maps.get(&current_map).unwrap());
+	populate(&mut world, maps.get(&current_map).unwrap());
+
+	for i in &maps.get(&current_map).unwrap().enemies {
+		world.enemies.insert(EnemyArch { io: Enemy::new(i.1, i.0.clone())});
+	}
 
 	loop {
 		// Updates the player
 		player.update(
 			&mut camera, 
 			
-			&mut enemies, 
-			&mut npcs, 
+			&mut world,
 			&mut attacks, 
 			
 			&mut current_map,
@@ -75,14 +100,16 @@ pub async fn gameplay() -> State {
 		}
 
 		// Updates enemies
-		if enemies.len() > 0 {
-			for i in &mut enemies {
-				i.update(&mut attacks, &mut player, &maps.get(&current_map).unwrap());
+		let mut to_remove: Vec<usize> = Vec::new();
+		for (index, enemy) in world.enemies.iter_mut() {
+			enemy.io.update(&mut attacks, &mut player, &maps.get(&current_map).unwrap());
+
+			if enemy.io.stats.should_kill() {
+				to_remove.push(index);
 			}
-
-			enemies.sort();
-
-			enemies.retain(|x| !x.stats.should_kill());
+		}
+		for i in to_remove {
+			world.enemies.remove(i);
 		}
 
 		// Updates NPCs
@@ -104,8 +131,7 @@ pub async fn gameplay() -> State {
 		draw(
 			&mut camera, 
 			&player, 
-			&enemies, 
-			&npcs,
+			&world, 
 			&attacks, 
 			&maps.get(&current_map).unwrap()
 		).await;
@@ -122,16 +148,37 @@ pub async fn gameplay() -> State {
 	}
 }
 
-pub fn populate(enemies: &mut Vec<Enemy>, npcs: &mut Vec<NPC>, map: &Map) {
-	enemies.clear();
-	npcs.clear();
+pub fn populate(world: &mut World, map: &Map) {
+	// Removing all the old content of the world 
+	// This is a lot more wordy than I would like,
+	// But oh well. 
 
-	for i in map.enemies.clone() {
-		enemies.push(Enemy::new(i.1, i.0))
+	// Enemies
+	let mut enemy_ids: Vec<usize> = Vec::new();
+	for i in world.enemies.ids() {
+		enemy_ids.push(i);
+	}
+	for i in enemy_ids {
+		world.enemies.remove(i);
 	}
 
+	// NPCs
+	let mut npc_ids: Vec<usize> = Vec::new();
+	for i in world.enemies.ids() {
+		npc_ids.push(i);
+	}
+	for i in npc_ids {
+		world.enemies.remove(i);
+	}
+
+	// Adding the new enemies
+	for i in map.enemies.clone() {
+		world.enemies.insert(EnemyArch { io: Enemy::new(i.1, i.0.clone())});
+	}
+
+	// Adding the new NPCs
 	for i in map.npcs.clone() {
-		npcs.push(NPC::new(i.0, i.1));
+		world.npcs.insert(NPCArch { io: NPC::new(i.0, i.1)});
 	}
 }
 

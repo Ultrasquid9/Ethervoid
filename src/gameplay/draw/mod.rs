@@ -7,9 +7,7 @@ use macroquad::prelude::*;
 use once_cell::sync::Lazy;
 use textures::{downscale, draw_tilemap, pixel_offset, render_texture, to_texture};
 
-use crate::gameplay::entity::MovableObj;
-
-use super::{combat::Attack, cores::{map::Map, textures::get_textures}, enemy::Enemy, npc::NPC, player::Player};
+use super::{combat::Attack, cores::{map::Map, textures::get_textures}, player::Player, World};
 
 pub mod textures;
 pub mod texturedobj;
@@ -21,7 +19,7 @@ pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage, RandomState>> = Lazy
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, npcs: &Vec<NPC>, attacks: &Vec<Attack>, map: &Map) {
+pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, attacks: &Vec<Attack>, map: &Map) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -110,38 +108,17 @@ pub async fn draw(camera: &mut Vec2, player: &Player, enemies: &Vec<Enemy>, npcs
 		}
 	}
 
-	// Enemies and the player
-	if enemies.len() > 0 {
-		// This reminds me of that one time I went to Italy,
-		// because this is a giant mass of spaghetti 
+	// The player
+	entity_futures.push(player.stats.texture.render());
 
-		for i in enemies.iter().enumerate() {
-			if i.0 == enemies.len() - 1 {
-				if player.stats.get_pos().y >= i.1.stats.get_pos().y {
-					entity_futures.push(i.1.stats.texture.render());
-					entity_futures.push(player.stats.texture.render());
-				} else {
-					entity_futures.push(player.stats.texture.render());
-					entity_futures.push(i.1.stats.texture.render());
-				}
-
-				break
-			}
-
-			if enemies[i.0 + 1].stats.get_pos().y >= player.stats.get_pos().y
-			&& i.1.stats.get_pos().y >= player.stats.get_pos().y {
-				entity_futures.push(player.stats.texture.render());
-			}
-
-			entity_futures.push(i.1.stats.texture.render());
-		}
-	} else {
-		entity_futures.push(player.stats.texture.render());
+	// Enemies
+	for (_, enemy) in world.enemies.iter() {
+		entity_futures.push(enemy.io.stats.texture.render());
 	}
 
-	// NPCs. WIP!
-	for i in npcs {
-		entity_futures.push(i.texture.render())
+	// NPCs
+	for (_, npc) in world.npcs.iter() {
+		entity_futures.push(npc.io.texture.render());
 	}
 
 	// Performing operations pushed to the futures

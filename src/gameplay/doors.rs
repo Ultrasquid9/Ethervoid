@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::gameplay::populate;
 
-use super::{combat::Attack, cores::map::Map, enemy::Enemy, entity::MovableObj, npc::NPC, player::Player, vec2_to_tuple};
+use super::{combat::Attack, cores::map::Map, entity::MovableObj, player::Player, vec2_to_tuple, World};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Direction {
@@ -64,8 +64,7 @@ impl Door {
 		new_pos: Vec2, 
 		camera: &mut Vec2, 
 
-		enemies: &mut Vec<Enemy>, 
-		npcs: &mut Vec<NPC>,
+		world: &mut World,
 		attacks: &mut Vec<Attack>, 
 
 		current_map: &mut String, 
@@ -94,7 +93,7 @@ impl Door {
 			*current_map = self.dest.clone();
 
 			attacks.clear();
-			populate(enemies, npcs, maps.get(current_map).unwrap());
+			populate(world, maps.get(current_map).unwrap());
 		}
 	}
 }
