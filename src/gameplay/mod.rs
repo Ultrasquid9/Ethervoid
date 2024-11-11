@@ -29,9 +29,15 @@ pub struct NPCArch{
 	io: NPC	
 }
 
+#[derive(SplitFields)]
+pub struct AttackArch{
+	io: Attack	
+}
+
 pub struct World {
 	enemies: StructOf<Vec<EnemyArch>>,
-	npcs: StructOf<Vec<NPCArch>>
+	npcs: StructOf<Vec<NPCArch>>,
+	attacks: StructOf<Vec<AttackArch>>
 }
 
 /// The gameplay loop of the game
@@ -47,13 +53,12 @@ pub async fn gameplay() -> State {
 	// Contains Enemies, Attacks, ETC.
 	let mut world = World {
 		enemies: Default::default(),
-		npcs: Default::default()
+		npcs: Default::default(),
+		attacks: Default::default()
 	};
 
-	// The player, enemies, and attacks
+	// The player
 	let mut player = Player::new(); // Creates a player
-	let mut attacks: Vec<Attack> = Vec::new(); // Creates a list of attacks 
-	let mut npcs: Vec<NPC> = Vec::new();
 	
 	// The maps
 	let maps = get_maps(); // Creates a list of Maps
@@ -62,17 +67,12 @@ pub async fn gameplay() -> State {
 	// Populating the enemies with data from the maps
 	populate(&mut world, maps.get(&current_map).unwrap());
 
-	for i in &maps.get(&current_map).unwrap().enemies {
-		world.enemies.insert(EnemyArch { io: Enemy::new(i.1, i.0.clone())});
-	}
-
 	loop {
 		// Updates the player
 		player.update(
 			&mut camera, 
 			
 			&mut world,
-			&mut attacks, 
 			
 			&mut current_map,
 			&maps
@@ -81,28 +81,31 @@ pub async fn gameplay() -> State {
 		// Attacking
 		if player.config.keymap.sword.is_down() && player.swords[0].cooldown == 0 {
 			player.swords[0].cooldown = 16;
-			attacks.push(player.attack_sword());
+			world.attacks.insert( AttackArch { io: player.attack_sword() });
 		}
 		if player.config.keymap.gun.is_down() && player.guns[0].cooldown == 0 {
 			player.guns[0].cooldown = 16;
-			attacks.push(player.attack_gun());
+			world.attacks.insert( AttackArch { io: player.attack_gun() });
 		}
 
 		// Updates attacks
-		if attacks.len() > 0 {
-			for i in &mut attacks {
-				i.update(&mut enemies, &mut player, &maps.get(&current_map).unwrap());
+		let mut to_remove: Vec<usize> = Vec::new();
+		for (index, attack) in world.attacks.iter_mut() {
+			attack.io.update(&mut world.enemies.io, &mut player, &maps.get(&current_map).unwrap());
+
+			if attack.io.should_rm() {
+				to_remove.push(index);
 			}
-
-			try_parry(&mut attacks);
-
-			attacks.retain(|x| !x.should_rm());
+		}
+		try_parry(&mut world);
+		for i in to_remove {
+			world.attacks.remove(i);
 		}
 
 		// Updates enemies
 		let mut to_remove: Vec<usize> = Vec::new();
 		for (index, enemy) in world.enemies.iter_mut() {
-			enemy.io.update(&mut attacks, &mut player, &maps.get(&current_map).unwrap());
+			enemy.io.update(&mut world.attacks.io, &mut player, &maps.get(&current_map).unwrap());
 
 			if enemy.io.stats.should_kill() {
 				to_remove.push(index);
@@ -114,10 +117,8 @@ pub async fn gameplay() -> State {
 
 		// Updates NPCs
 		// WIP
-		if npcs.len() > 0 {
-			for i in &mut npcs {
-				i.update(&maps.get(&current_map).unwrap());
-			}
+		for (_, npc) in world.npcs.iter_mut() {
+			npc.io.update(&maps.get(&current_map).unwrap());
 		}
 
 		// Updates the camera
@@ -132,7 +133,6 @@ pub async fn gameplay() -> State {
 			&mut camera, 
 			&player, 
 			&world, 
-			&attacks, 
 			&maps.get(&current_map).unwrap()
 		).await;
 

@@ -88,7 +88,6 @@ impl Player {
 		camera: &mut Vec2, 
 
 		world: &mut World,
-		attacks: &mut Vec<Attack>, 
 
 		current_map: &mut String, 
 		maps: &HashMap<String, Map>
@@ -128,7 +127,6 @@ impl Player {
 		self.movement(
 			camera, 
 			world,
-			attacks, 
 			current_map, 
 			maps
 		);
@@ -213,7 +211,6 @@ impl Player {
 		camera: &mut Vec2, 
 
 		world: &mut World,
-		attacks: &mut Vec<Attack>, 
 
 		current_map: &mut String, 
 		maps: &HashMap<String, Map>
@@ -323,7 +320,6 @@ impl Player {
 					(new_pos.normalize() * self.speed * get_delta_time()) + current_pos,
 					camera, 
 					world,
-					attacks, 
 					current_map, 
 					maps
 				);

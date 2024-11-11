@@ -2,10 +2,11 @@ use ahash::HashMap;
 use macroquad::math::Vec2;
 use raylite::{cast, Barrier, Ray};
 use serde::{Deserialize, Serialize};
+use stecs::prelude::Archetype;
 
 use crate::gameplay::populate;
 
-use super::{combat::Attack, cores::map::Map, entity::MovableObj, player::Player, vec2_to_tuple, World};
+use super::{cores::map::Map, entity::MovableObj, player::Player, vec2_to_tuple, World};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Direction {
@@ -65,7 +66,6 @@ impl Door {
 		camera: &mut Vec2, 
 
 		world: &mut World,
-		attacks: &mut Vec<Attack>, 
 
 		current_map: &mut String, 
 		maps: &HashMap<String, Map>
@@ -92,7 +92,15 @@ impl Door {
 
 			*current_map = self.dest.clone();
 
-			attacks.clear();
+			// Removing attacks 
+			let mut attack_ids: Vec<usize> = Vec::new();
+			for i in world.attacks.ids() {
+				attack_ids.push(i);
+			}
+			for i in attack_ids {
+				world.enemies.remove(i);
+			}
+
 			populate(world, maps.get(current_map).unwrap());
 		}
 	}

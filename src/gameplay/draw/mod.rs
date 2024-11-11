@@ -7,7 +7,7 @@ use macroquad::prelude::*;
 use once_cell::sync::Lazy;
 use textures::{downscale, draw_tilemap, pixel_offset, render_texture, to_texture};
 
-use super::{combat::Attack, cores::{map::Map, textures::get_textures}, player::Player, World};
+use super::{cores::{map::Map, textures::get_textures}, player::Player, World};
 
 pub mod textures;
 pub mod texturedobj;
@@ -19,7 +19,7 @@ pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage, RandomState>> = Lazy
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, attacks: &Vec<Attack>, map: &Map) {
+pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, map: &Map) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -91,21 +91,19 @@ pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, attacks: &V
 	}
 
 	// Attacks
-	if attacks.len() > 0 {
-		for i in attacks {
-			if i.is_hitscan() {
-				draw_line(
-					i.pos.x, 
-					i.pos.y, 
-					i.get_target().x, 
-					i.get_target().y, 
-					6., 
-					PURPLE
-				); 
-			} else {
-				attack_futures.push(i.texture.render());
-			}
-		}
+	for (_, attack) in world.attacks.iter() {
+		if attack.io.is_hitscan() {
+			draw_line(
+				attack.io.pos.x, 
+				attack.io.pos.y, 
+				attack.io.get_target().x, 
+				attack.io.get_target().y, 
+				6., 
+				PURPLE
+			); 
+		} else {
+			attack_futures.push(attack.io.texture.render());
+		}	
 	}
 
 	// The player
