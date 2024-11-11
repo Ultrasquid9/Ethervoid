@@ -1,12 +1,13 @@
 use cores::map::{get_maps, Map};
-use combat::{try_parry, Attack};
+use combat::try_parry;
 use draw::{clean_textures, create_textures, draw};
+use ecs::{AttackArch, EnemyArch, NPCArch, World};
 use enemy::Enemy;
 use entity::MovableObj;
 use npc::NPC;
 use player::Player;
 use macroquad::prelude::*;
-use stecs::prelude::*;
+use stecs::prelude::Archetype;
 
 use crate::State;
 
@@ -14,31 +15,11 @@ mod combat;
 mod cores;
 mod doors;
 mod draw;
+mod ecs;
 mod enemy;
 mod entity;
 mod npc;
 mod player;
-
-#[derive(SplitFields)]
-pub struct EnemyArch{
-	io: Enemy	
-}
-
-#[derive(SplitFields)]
-pub struct NPCArch{
-	io: NPC	
-}
-
-#[derive(SplitFields)]
-pub struct AttackArch{
-	io: Attack	
-}
-
-pub struct World {
-	enemies: StructOf<Vec<EnemyArch>>,
-	npcs: StructOf<Vec<NPCArch>>,
-	attacks: StructOf<Vec<AttackArch>>
-}
 
 /// The gameplay loop of the game
 pub async fn gameplay() -> State {
