@@ -366,7 +366,7 @@ pub fn try_parry(world: &mut World) {
 
 						attacks[j].target = match attacks[j].owner {
 							Owner::Player => get_mouse_pos() * 999.,
-							Owner::Enemy => Vec2::new(0., 0.) // TODO - Get target of the enemy who owns this attack 
+							Owner::Enemy => attacks[i].target * 999.
 						};
 
 						// Since hitscan attacks cannot be parried, the is_parried bool is unneccessary
