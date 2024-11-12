@@ -2,7 +2,7 @@ use std::fs::{self, read_dir};
 
 use walkdir::WalkDir;
 
-pub mod attackscript;
+pub mod behavior;
 pub mod enemytype;
 pub mod map;
 pub mod npctype;

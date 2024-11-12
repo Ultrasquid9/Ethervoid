@@ -10,17 +10,17 @@ use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureT
 use super::{gen_name, get_files, map::Map};
 
 #[derive(Clone, Deserialize)]
-pub struct AttackScriptBuilder (String);
+pub struct BehaviorBuilder (String);
 
-impl AttackScriptBuilder {
+impl BehaviorBuilder {
 	/// Creates an attack with the script at the provided directory
 	pub fn from(dir: String) -> Self {
 		Self(fs::read_to_string(dir).unwrap())
 	}
 
 	/// Creates an attack with the script at the provided directory
-	pub fn build<'a>(self) -> AttackScript<'a> {
-		AttackScript {
+	pub fn build<'a>(self) -> Behavior<'a> {
+		Behavior {
 			current_target: Vec2::new(0., 0.),
 			script: self.0,
 			scope: Scope::new(),
@@ -30,15 +30,15 @@ impl AttackScriptBuilder {
 }
 
 /// An Attack that can be configured via a script
-/// The lifetime annotation allows the compiler to know that the AttackScript lives as long as the Enemy does
-pub struct AttackScript<'a> {
+/// The lifetime annotation allows the compiler to know that the Behavior lives as long as the Enemy does
+pub struct Behavior<'a> {
 	pub current_target: Vec2,
 	script: String,
 	scope: Scope<'a>,
 	engine: Engine
 }
 
-impl AttackScript<'_> {
+impl Behavior<'_> {
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
 	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Map, attacks: &mut Attacks) -> bool {
 		// Values available in the scope
@@ -136,13 +136,13 @@ impl AttackScript<'_> {
 }
 
 /// Provides a HashMap containing all Attacks
-pub fn get_attacks() -> HashMap<String, AttackScriptBuilder> {
-	let mut attacks: HashMap<String, AttackScriptBuilder> = HashMap::new();
+pub fn get_attacks() -> HashMap<String, BehaviorBuilder> {
+	let mut attacks: HashMap<String, BehaviorBuilder> = HashMap::new();
 
-	for i in get_files(String::from("attacks")) {
+	for i in get_files(String::from("behavior")) {
 		attacks.insert(
 			gen_name(&i),
-			AttackScriptBuilder::from(i)
+			BehaviorBuilder::from(i)
 		);
 	}
 

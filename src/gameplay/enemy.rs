@@ -1,34 +1,16 @@
 use std::cmp::Ordering;
 
 use macroquad::math::Vec2;
-use serde::Deserialize;
 use stecs::prelude::*;
 
-use super::{cores::{attackscript::AttackScript, enemytype::EnemyType, map::Map}, draw::{access_texture, texturedobj::{EntityTexture, TexturedObj}}, ecs::Attacks, entity::{Entity, MovableObj}, get_delta_time, player::Player};
-
-/// The movement AI used by an enemy
-#[derive(PartialEq, Clone, Deserialize)]
-pub enum Movement {
-	MoveTowardsPlayer
-}
-
-impl Movement {
-	/// Provides a Movement enum based on the provided String
-	pub fn from_str(input: &str) -> Movement {
-		match input {
-			"MoveTowardsPlayer" => Movement::MoveTowardsPlayer,
-
-			_ => Movement::MoveTowardsPlayer
-		}
-	}
-}
+use super::{cores::{behavior::Behavior, enemytype::EnemyType, map::Map}, draw::{access_texture, texturedobj::{EntityTexture, TexturedObj}}, ecs::Attacks, entity::{Entity, MovableObj}, player::Player};
 
 /// An enemy
 pub struct Enemy {
 	pub stats: Entity,
-	movement: Movement,
+	movement: Behavior<'static>,
 
-	attacks: Vec<AttackScript<'static>>,
+	attacks: Vec<Behavior<'static>>,
 	attack_index: usize,
 	attack_cooldown: usize
 }
@@ -43,7 +25,7 @@ impl Enemy {
 				enemytype.max_health as isize, 
 				EntityTexture::new(access_texture(&enemytype.sprite))
 			),
-			movement: enemytype.movement,
+			movement: enemytype.movement.build(),
 			attacks: enemytype.attacks
 				.iter()
 				.map(|attack| attack.clone().build())
@@ -67,6 +49,15 @@ impl Enemy {
 			}
 		}
 
+		self.movement(attacks, player, map);
+
+		self.update_texture();
+	}
+
+	/// Moves the enemy
+	/// 
+	/// Attacks if possible, otherwise just executes a movement script 
+	fn movement(self: &mut Self, attacks: &mut Attacks, player: &mut Player, map: &Map) {
 		if self.attack_cooldown == 0 
 		&& self.stats.stunned == 0 {
 			if self.attacks[self.attack_index].read_script(&mut self.stats, player, map, attacks) {
@@ -79,31 +70,14 @@ impl Enemy {
 				}
 			}
 		} else {
-			self.movement(player, map);
+			if self.stats.stunned > 0 {
+				self.stats.stunned -= 1;
+			} else {
+				self.movement.read_script(&mut self.stats, player, map, attacks);
+			}			
 
 			self.attacks[self.attack_index].current_target = player.stats.get_pos();
 			self.attack_cooldown -= 1;
-		}
-
-		self.update_texture();
-	}
-
-	/// Moves the enemy based upon their Movement
-	fn movement(&mut self, player: &Player, map: &Map){
-		if self.stats.stunned > 0 {
-			self.stats.stunned -= 1;
-			return;
-		}
-
-		match self.movement {
-			// Simple movement AI that tracks the player and moves towards them
-			Movement::MoveTowardsPlayer => {
-				let new_pos = self.stats.get_pos().move_towards(player.stats.get_pos(), 1.0);
-				let new_pos = ((new_pos - self.stats.get_pos()) * get_delta_time()) + self.stats.get_pos();
-
-				self.stats.update_axis(&new_pos);
-				self.stats.try_move(new_pos, map);
-			}
 		}
 	}
 }
@@ -113,7 +87,6 @@ impl Eq for Enemy {}
 impl PartialEq for Enemy {
 	fn eq(&self, other: &Self) -> bool {
 		if self.stats == other.stats 
-		&& self.movement == other.movement
 		&& self.attack_cooldown == other.attack_cooldown
 		&& self.attack_index == other.attack_index {
 			return true

@@ -2,9 +2,7 @@ use std::{collections::HashMap, fs};
 
 use serde::Deserialize;
 
-use crate::gameplay::enemy::Movement;
-
-use super::{attackscript::{get_attacks, AttackScriptBuilder}, gen_name, get_files};
+use super::{behavior::{get_attacks, BehaviorBuilder}, gen_name, get_files};
 
 #[derive(Clone, Deserialize)]
 struct EnemyTypeBuilder {
@@ -21,16 +19,16 @@ impl EnemyTypeBuilder {
 	}
 
 	pub fn build(self) -> EnemyType {
-		let attacks = get_attacks();
+		let behaviors = get_attacks();
 
 		EnemyType {
 			max_health: self.max_health,
 			size: self.size,
 			sprite: self.sprite,
-			movement: Movement::from_str(&self.movement), 
+			movement: behaviors.get(&self.movement).unwrap().clone(), 
 			attacks: self.attacks
 				.iter()
-				.map(|attack| attacks.get(attack.as_str()).unwrap().clone())
+				.map(|attack| behaviors.get(attack.as_str()).unwrap().clone())
 				.collect()
 		}
 	}
@@ -42,8 +40,8 @@ pub struct EnemyType {
 	pub max_health: usize,
 	pub size: f32,
 	pub sprite: String,
-	pub movement: Movement,
-	pub attacks: Vec<AttackScriptBuilder>
+	pub movement: BehaviorBuilder,
+	pub attacks: Vec<BehaviorBuilder>
 }
 
 /// Provides a HashMap containing all EnemyTypes
