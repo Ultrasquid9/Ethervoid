@@ -19,6 +19,7 @@ pub trait MovableObj {
 			barriers.push(i.to_barrier())
 		}
 
+		let old_pos = self.get_pos();
 		let mut try_slope_movement = false;
 
 		match cast_wide(
@@ -80,15 +81,18 @@ pub trait MovableObj {
 			return;
 		}
 		
-		let angle = tuple_to_vec2(wall_to_check.positions.0)
-			.angle_between(tuple_to_vec2(wall_to_check.positions.1));
-		
+		let angle = tuple_to_vec2(wall_to_check.positions.0).angle_between(tuple_to_vec2(wall_to_check.positions.1));
+
 		let new_pos = Vec2::new(
-			self.get_pos().distance(target) * angle.cos(), 
-			self.get_pos().distance(target) * angle.cos()
+			old_pos.distance(target) * angle.cos(), 
+			old_pos.distance(target) * angle.cos()
 		);
 
-		self.try_move(self.get_pos() + new_pos, map);
+		if (old_pos + new_pos).distance(target) > old_pos.distance(target) {
+			self.try_move(old_pos + new_pos, map);
+		} else {
+			self.try_move(old_pos - new_pos, map);
+		}
 	}
 
 	/// Checks if the object is touching another object
