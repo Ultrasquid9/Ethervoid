@@ -41,5 +41,7 @@ pub type Attacks = AttackArchStructOf<VecFamily>;
 pub struct World {
 	pub enemies: StructOf<Vec<EnemyArch>>,
 	pub npcs: StructOf<Vec<NPCArch>>,
-	pub attacks: StructOf<Vec<AttackArch>>
+	pub attacks: StructOf<Vec<AttackArch>>,
+
+	pub hitstop: f32
 }

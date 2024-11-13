@@ -352,6 +352,8 @@ pub fn try_parry(world: &mut World) {
 
 							attacks[i].is_parried = true;
 							attacks[j].is_parried = true;
+
+							world.hitstop = 10.;
 						}
 					}
 
@@ -368,6 +370,8 @@ pub fn try_parry(world: &mut World) {
 							Owner::Player => get_mouse_pos() * 999.,
 							Owner::Enemy => attacks[i].target * 999.
 						};
+
+						world.hitstop = 10.;
 
 						// Since hitscan attacks cannot be parried, the is_parried bool is unneccessary
 					}

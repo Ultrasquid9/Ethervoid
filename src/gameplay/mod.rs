@@ -35,7 +35,9 @@ pub async fn gameplay() -> State {
 	let mut world = World {
 		enemies: Default::default(),
 		npcs: Default::default(),
-		attacks: Default::default()
+		attacks: Default::default(),
+
+		hitstop: 0.
 	};
 
 	// The player
@@ -49,6 +51,15 @@ pub async fn gameplay() -> State {
 	populate(&mut world, maps.get(&current_map).unwrap());
 
 	loop {
+		// Handling hitstop
+		if world.hitstop > 0. {
+			world.hitstop -= get_delta_time();
+			draw(&mut camera, &player, &world, &maps.get(&current_map).unwrap()).await;
+
+			next_frame().await;
+			continue;
+		}
+
 		// Updates the player
 		player.update(
 			&mut camera, 
