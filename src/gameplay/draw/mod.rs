@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::sync::RwLock;
 
-use ahash::RandomState;
+use ahash::HashMap;
 use futures::{future::join_all, join};
 use imageproc::image::DynamicImage;
 use macroquad::prelude::*;
@@ -14,7 +14,7 @@ pub mod texturedobj;
 
 // HashMap containing all the textures in the game 
 // Everyone always says "don't do this" so fuck you I did
-pub static mut TEXTURES: Lazy<HashMap<String, DynamicImage, RandomState>> = Lazy::new(|| HashMap::default());
+static TEXTURES: Lazy<RwLock<HashMap<String, DynamicImage>>> = Lazy::new(|| RwLock::new(HashMap::default()));
 
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
@@ -137,18 +137,14 @@ pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, map: &Map) 
 pub fn create_textures() {
 	let textures = get_textures();
 
-	unsafe {
-		for i in textures {
-			TEXTURES.insert(i.0, i.1);
-		}
+	for i in textures {
+		TEXTURES.write().unwrap().insert(i.0, i.1);
 	}
 }
 
 /// Gets the image at the provided key
 pub fn access_image(key: &str) -> DynamicImage {
-	unsafe {
-		TEXTURES.get(key).unwrap().clone()
-	}
+	TEXTURES.read().unwrap().get(key).unwrap().clone()
 }
 
 /// Gets the texture at the provided key
@@ -158,7 +154,7 @@ pub fn access_texture(key: &str) -> Texture2D {
 
 /// Clears the texture HashMap
 pub fn clean_textures() {
-	unsafe { TEXTURES.clear() }
+	TEXTURES.write().unwrap().clear()
 }
 
 /// Gets the scale that the camera should be rendered at

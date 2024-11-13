@@ -1,10 +1,13 @@
+use std::sync::RwLock;
+
 use macroquad::math::Vec2;
+use once_cell::sync::Lazy;
 use raylite::{cast, cast_wide, Barrier, Ray};
 
 use super::{cores::map::Map, draw::texturedobj::EntityTexture, player::Axis, tuple_to_vec2, vec2_to_tuple};
 
 // For keeping track of the recursion in `try_move`
-static mut DEPTH: u8 = 0;
+static DEPTH: Lazy<RwLock<u8>> = Lazy::new(|| RwLock::new(0));
 
 /// Trait for an object that has a size and can be moved
 pub trait MovableObj {
@@ -48,13 +51,11 @@ pub trait MovableObj {
 		if !try_slope_movement { return }
 
 		// Checking recursion
-		unsafe {
-			if DEPTH > 1 {
-				DEPTH = 0;
-				return 
-			} else {
-				DEPTH += 1
-			}
+		if *DEPTH.read().unwrap() > 1 {
+			*DEPTH.write().unwrap() = 0;
+			return 
+		} else {
+			*DEPTH.write().unwrap() += 1
 		}
 
 		let mut wall_to_check = Barrier {
