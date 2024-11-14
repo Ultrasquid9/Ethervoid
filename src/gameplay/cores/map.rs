@@ -16,6 +16,7 @@ struct MapBuilder {
 	pub npcs: Vec<(String, Vec2)>
 }
 
+#[derive(Clone)]
 pub struct Map {
 	pub points: Vec<Vec2>,
 	pub doors: Vec<Door>,

@@ -1,6 +1,7 @@
+use ahash::HashMap;
 use stecs::{prelude::*, storage::vec::VecFamily};
 
-use super::{combat::Attack, enemy::Enemy, npc::NPC};
+use super::{combat::Attack, cores::map::Map, enemy::Enemy, npc::NPC};
 
 // This module manages the ECS.
 // It is in a folder because I expect there will be submodules for it soon. 
@@ -43,5 +44,16 @@ pub struct World {
 	pub npcs: StructOf<Vec<NPCArch>>,
 	pub attacks: StructOf<Vec<AttackArch>>,
 
-	pub hitstop: f32
+	// Resources 
+	pub hitstop: f32,
+
+	// Maps
+	pub maps: HashMap<String, Map>,
+	pub current_map: String
+}
+
+impl World {
+	pub fn get_current_map(&self) -> Map {
+		return self.maps.get(&self.current_map).unwrap().clone();
+	}
 }

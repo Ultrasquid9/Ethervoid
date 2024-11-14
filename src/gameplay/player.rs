@@ -1,9 +1,8 @@
-use ahash::HashMap;
 use macroquad::{input::mouse_position_local, math::Vec2};
 
 use crate::config::Config;
 
-use super::{combat::{Attack, Owner}, cores::map::Map, draw::{access_texture, texturedobj::{AttackTextureType, EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos, World};
+use super::{combat::{Attack, Owner}, draw::{access_texture, texturedobj::{AttackTextureType, EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos, World};
 
 /// Contains info about the player
 pub struct Player {
@@ -87,10 +86,7 @@ impl Player {
 		&mut self, 
 		camera: &mut Vec2, 
 
-		world: &mut World,
-
-		current_map: &mut String, 
-		maps: &HashMap<String, Map>
+		world: &mut World
 	) -> &Self {
 		// Handling i-frames
 		if self.stats.i_frames != 0 {
@@ -126,9 +122,7 @@ impl Player {
 		self.update_texture();
 		self.movement(
 			camera, 
-			world,
-			current_map, 
-			maps
+			world
 		);
 
 		return self;
@@ -210,10 +204,7 @@ impl Player {
 		&mut self, 
 		camera: &mut Vec2, 
 
-		world: &mut World,
-
-		current_map: &mut String, 
-		maps: &HashMap<String, Map>
+		world: &mut World
 	) {
 		// Checks to see if both Up and Down are being held at the same time.
 		// If they are, sets the direction to move based upon the most recently pressed key. 
@@ -305,7 +296,7 @@ impl Player {
 			let current_pos = self.stats.get_pos();
 			self.stats.try_move(
 				(new_pos.normalize() * self.speed * get_delta_time()) + current_pos, 
-				&maps.get(current_map).unwrap()
+				&world.get_current_map()
 			);
 
 			// The player has moved, and the function can return
@@ -314,14 +305,12 @@ impl Player {
 			} 
 
 			// The player has not moved, so check if there is a door in the way
-			for i in &maps.get(current_map).unwrap().doors {
+			for i in world.get_current_map().doors {
 				i.try_change_map(
 					self, 
 					(new_pos.normalize() * self.speed * get_delta_time()) + current_pos,
 					camera, 
-					world,
-					current_map, 
-					maps
+					world
 				);
 			}
 		}

@@ -1,4 +1,4 @@
-use cores::map::{get_maps, Map};
+use cores::map::get_maps;
 use combat::try_parry;
 use draw::{clean_textures, create_textures, draw};
 use ecs::{AttackArch, EnemyArch, NPCArch, World};
@@ -37,24 +37,25 @@ pub async fn gameplay() -> State {
 		npcs: Default::default(),
 		attacks: Default::default(),
 
-		hitstop: 0.
+		// Resources
+		hitstop: 0.,
+
+		// Maps
+		maps: get_maps(),
+		current_map: String::from("default:test") 
 	};
 
 	// The player
 	let mut player = Player::new(); // Creates a player
-	
-	// The maps
-	let maps = get_maps(); // Creates a list of Maps
-	let mut current_map = String::from("default:test"); // Stores the map the player is currently in
 
 	// Populating the enemies with data from the maps
-	populate(&mut world, maps.get(&current_map).unwrap());
+	populate(&mut world);
 
 	loop {
 		// Handling hitstop
 		if world.hitstop > 0. {
 			world.hitstop -= get_delta_time();
-			draw(&mut camera, &player, &world, &maps.get(&current_map).unwrap()).await;
+			draw(&mut camera, &player, &world, &world.get_current_map()).await;
 
 			next_frame().await;
 			continue;
@@ -64,10 +65,7 @@ pub async fn gameplay() -> State {
 		player.update(
 			&mut camera, 
 			
-			&mut world,
-			
-			&mut current_map,
-			&maps
+			&mut world
 		);
 
 		// Attacking
@@ -82,7 +80,7 @@ pub async fn gameplay() -> State {
 
 		// Updates attacks
 		for (_, attack) in world.attacks.iter_mut() {
-			attack.io.update(&mut world.enemies.io, &mut player, &maps.get(&current_map).unwrap());
+			attack.io.update(&mut world.enemies.io, &mut player, world.maps.get(&world.current_map).unwrap());
 		}
 		try_parry(&mut world);
 		// Removing old attacks
@@ -101,7 +99,7 @@ pub async fn gameplay() -> State {
 
 		// Updates enemies
 		for (_, enemy) in world.enemies.iter_mut() {
-			enemy.io.update(&mut world.attacks, &mut player, &maps.get(&current_map).unwrap());
+			enemy.io.update(&mut world.attacks, &mut player, world.maps.get(&world.current_map).unwrap());
 		}
 		// Removing dead enemies
 		let mut to_remove: usize = 0;
@@ -120,7 +118,7 @@ pub async fn gameplay() -> State {
 		// Updates NPCs
 		// WIP
 		for (_, npc) in world.npcs.iter_mut() {
-			npc.io.update(&maps.get(&current_map).unwrap());
+			npc.io.update(world.maps.get(&world.current_map).unwrap());
 		}
 
 		// Updates the camera
@@ -135,7 +133,7 @@ pub async fn gameplay() -> State {
 			&mut camera, 
 			&player, 
 			&world, 
-			&maps.get(&current_map).unwrap()
+			&world.get_current_map()
 		).await;
 
 		// Quits the game
@@ -150,7 +148,7 @@ pub async fn gameplay() -> State {
 	}
 }
 
-pub fn populate(world: &mut World, map: &Map) {
+pub fn populate(world: &mut World) {
 	// Removing all the old content of the world 
 
 	// Enemies
@@ -169,11 +167,11 @@ pub fn populate(world: &mut World, map: &Map) {
 	// Adding the new content
 
 	// Enemies
-	for i in map.enemies.clone() {
+	for i in world.get_current_map().enemies.clone() {
 		world.enemies.insert(EnemyArch { io: Enemy::new(i.1, i.0.clone())});
 	}
 	// NPCs
-	for i in map.npcs.clone() {
+	for i in world.get_current_map().npcs.clone() {
 		world.npcs.insert(NPCArch { io: NPC::new(i.0, i.1)});
 	}
 }
