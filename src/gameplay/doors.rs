@@ -1,10 +1,9 @@
+use ahash::HashMap;
 use macroquad::math::Vec2;
 use raylite::{cast, Barrier, Ray};
 use serde::{Deserialize, Serialize};
 
-use crate::gameplay::populate;
-
-use super::{entity::MovableObj, player::Player, vec2_to_tuple, World};
+use super::{cores::map::Map, entity::MovableObj, player::Player, vec2_to_tuple};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Direction {
@@ -63,7 +62,8 @@ impl Door {
 		new_pos: Vec2, 
 		camera: &mut Vec2, 
 
-		world: &mut World,
+		maps: &HashMap<String, Map>,
+		current_map: &mut String
 	) {
 		let ray = Ray {
 			position: vec2_to_tuple(&player.stats.get_pos()),
@@ -75,19 +75,17 @@ impl Door {
 			return
 		}
 
-		for i in world.maps.get(&self.dest).unwrap().doors.clone() {
-			if i.dest != *world.current_map { continue }
+		for i in maps.get(&self.dest).unwrap().doors.clone() {
+			if i.dest != *current_map { continue }
 
 			if !i.direction.is_opposing(&self.direction) {
-				panic!("Door in {} does not match direction of door in {}", world.current_map, self.dest)
+				panic!("Door in {} does not match direction of door in {}", current_map, self.dest)
 			}
 
 			*player.stats.edit_pos() = new_pos - self.pos + i.pos;
 			*camera = *camera - self.pos + i.pos;
 
-			world.current_map = self.dest.clone();
-
-			populate(world);
+			*current_map = self.dest.clone();
 		}
 	}
 }

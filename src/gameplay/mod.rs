@@ -61,12 +61,22 @@ pub async fn gameplay() -> State {
 			continue;
 		}
 
-		// Updates the player
+		// Updating the player
+		 
+		// Stores the old map, in case it changes
+		let old_map = world.current_map.clone();
+
 		player.update(
 			&mut camera, 
 			
-			&mut world
+			&world.maps,
+			&mut world.current_map
 		);
+
+		// If the current map has changed, repopulate the world
+		if world.current_map != old_map {
+			populate(&mut world);
+		}
 
 		// Attacking
 		if player.config.keymap.sword.is_down() && player.swords[0].cooldown == 0 {
