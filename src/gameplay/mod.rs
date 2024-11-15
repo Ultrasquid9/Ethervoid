@@ -1,8 +1,9 @@
 use cores::map::get_maps;
 use combat::try_parry;
 use draw::{clean_textures, create_textures, draw};
-use ecs::{position::MovableObj, AttackArch, EnemyArch, NPCArch, PlayerArch, World};
+use ecs::{AttackArch, EnemyArch, NPCArch, PlayerArch, World};
 use enemy::Enemy;
+use entity::MovableObj;
 use npc::NPC;
 use player::Player;
 use macroquad::prelude::*;
@@ -46,10 +47,7 @@ pub async fn gameplay() -> State {
 	};
 
 	// The player
-	let player = world.player.insert(PlayerArch {
-		io: Player::new(),
-		pos: MovableObj::new(vec2(0., 0.), 15.)
-	}); // Creates a player
+	let player = world.player.insert(PlayerArch {io: Player::new()}); // Creates a player
 
 	// Populating the enemies with data from the maps
 	populate(&mut world);
@@ -84,21 +82,11 @@ pub async fn gameplay() -> State {
 		// Attacking
 		if world.player.io[player].config.keymap.sword.is_down() && world.player.io[player].swords[0].cooldown == 0 {
 			world.player.io[player].swords[0].cooldown = 16;
-			let attack = world.player.io[player].attack_sword();
-
-			world.attacks.insert( AttackArch { 
-				io: attack.clone(),
-				pos: MovableObj::new(attack.pos, attack.size)
-			});
+			world.attacks.insert( AttackArch { io: world.player.io[player].attack_sword() });
 		}
 		if world.player.io[player].config.keymap.gun.is_down() && world.player.io[player].guns[0].cooldown == 0 {
 			world.player.io[player].guns[0].cooldown = 16;
-			let attack = world.player.io[player].attack_gun();
-
-			world.attacks.insert( AttackArch { 
-				io: attack.clone(),
-				pos: MovableObj::new(attack.pos, attack.size)
-			});
+			world.attacks.insert( AttackArch { io: world.player.io[player].attack_gun() });
 		}
 
 		// Updates attacks
@@ -147,8 +135,8 @@ pub async fn gameplay() -> State {
 		// Updates the camera
 		// TODO: Attempt to replace with .lerp()
 		camera = camera.move_towards(
-			world.player.pos[player].pos, 
-			camera.distance(world.player.pos[player].pos) / 6.
+			world.player.io[player].stats.get_pos(), 
+			camera.distance(world.player.io[player].stats.get_pos()) / 6.
 		);
 
 		// Draws the player and enemies
@@ -190,17 +178,11 @@ pub fn populate(world: &mut World) {
 
 	// Enemies
 	for i in world.get_current_map().enemies.clone() {
-		world.enemies.insert(EnemyArch { 
-			io: Enemy::new(i.1, i.0.clone()),
-			pos: MovableObj::new(i.1, i.0.size)
-		});
+		world.enemies.insert(EnemyArch { io: Enemy::new(i.1, i.0.clone())});
 	}
 	// NPCs
 	for i in world.get_current_map().npcs.clone() {
-		world.npcs.insert(NPCArch { 
-			io: NPC::new(i.0, i.1),
-			pos: MovableObj::new(i.1, 15.)
-		});
+		world.npcs.insert(NPCArch { io: NPC::new(i.0, i.1)});
 	}
 }
 
