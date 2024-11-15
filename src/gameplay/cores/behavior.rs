@@ -5,7 +5,7 @@ use rhai::{Dynamic, Engine, Scope};
 use serde::Deserialize;
 use stecs::prelude::Archetype;
 
-use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, ecs::{AttackArch, Attacks}, entity::{Entity, MovableObj}, get_delta_time, player::Player};
+use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, ecs::{position::MovableObj, AttackArch, Attacks}, get_delta_time};
 
 use super::{gen_name, get_files, map::Map};
 
@@ -40,16 +40,16 @@ pub struct Behavior<'a> {
 
 impl Behavior<'_> {
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
-	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Map, attacks: &mut Attacks) -> bool {
+	pub fn read_script<'a>(&mut self, enemy_pos: &'a mut MovableObj, player_pos: &'a mut MovableObj, map: &Map, attacks: &mut Attacks) -> bool {
 		// Values available in the scope
 		self.scope
 			.push("attacks", Vec::<Dynamic>::new())
-			.push_constant("player_pos", player.stats.get_pos().clone())
-			.push_constant("enemy_pos", entity.get_pos().clone())
+			.push_constant("player_pos", player_pos.pos.clone())
+			.push_constant("enemy_pos", enemy_pos.pos.clone())
 			.push_constant("target_pos", self.current_target.clone());
 
 		// Values needed for the script, but not exposed to it 
-		let entity_pos = entity.get_pos();
+		let entity_pos = enemy_pos.pos;
 
 		// The Vec2 built-in methods don't work, so I have to make shitty copies
 		fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
@@ -110,24 +110,29 @@ impl Behavior<'_> {
 			.get_value_mut::<Vec<Dynamic>>("attacks")
 			.expect("Attacks not found");
 		for i in new_attacks {
-			attacks.insert( AttackArch { io: i.clone_cast()});
+			let attack: Attack = i.clone_cast();
+
+			attacks.insert( AttackArch { 
+				io: attack.clone(),
+				pos: MovableObj::new(attack.pos, attack.size)
+			});
 		}
 
 		// Taking delta time into consideration
-		let new_pos = ((new_pos - entity.get_pos()) * get_delta_time()) + entity.get_pos();
+		let new_pos = ((new_pos - enemy_pos.pos) * get_delta_time()) + enemy_pos.pos;
 
 		// A horrible hacky way of checking if the 'end' keyword was called
 		if new_pos == vec2(999999., 999999.) {
 			return true;
 		} else {
-			entity.update_axis(&new_pos);
-			entity.try_move(new_pos, map);
+			enemy_pos.set_target(new_pos);
+			enemy_pos.try_move(new_pos, map);
 		}
 
 		// Returns true if the enemy could not move or if the enemy has reached the target
 		// Otherwise, returns false
-		if entity.get_pos().round() == self.current_target.round()
-		|| entity.get_pos() != new_pos {
+		if enemy_pos.pos.round() == self.current_target.round()
+		|| enemy_pos.pos != new_pos {
 			return true
 		} else {
 			return false

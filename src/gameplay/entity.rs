@@ -10,6 +10,8 @@ use super::{cores::map::Map, draw::texturedobj::EntityTexture, player::Axis, tup
 static DEPTH: Lazy<RwLock<u8>> = Lazy::new(|| RwLock::new(0));
 
 /// Trait for an object that has a size and can be moved
+/// DEPRECATED: Move to ECS
+#[deprecated]
 pub trait MovableObj {
 	fn get_size(&self) -> &f32;
 	fn get_pos(&self) -> Vec2;
@@ -107,7 +109,9 @@ pub trait MovableObj {
 }
 
 /// Data used by all entities, including both the player and enemies
+/// DEPRECATED: Move to ECS for handling this stuff 
 #[derive(PartialEq)]
+#[deprecated]
 pub struct Entity {
 	pub i_frames: u8,
 	pub stunned: u8,

@@ -1,7 +1,10 @@
 use ahash::HashMap;
+use position::MovableObj;
 use stecs::{prelude::*, storage::vec::VecFamily};
 
 use super::{combat::Attack, cores::map::Map, enemy::Enemy, npc::NPC, player::Player};
+
+pub mod position;
 
 // This module manages the ECS.
 // It is in a folder because I expect there will be submodules for it soon. 
@@ -10,22 +13,26 @@ use super::{combat::Attack, cores::map::Map, enemy::Enemy, npc::NPC, player::Pla
 
 #[derive(SplitFields)]
 pub struct PlayerArch{
-	pub io: Player	
+	pub io: Player,
+	pub pos: MovableObj
 }
 
 #[derive(SplitFields)]
 pub struct EnemyArch{
-	pub io: Enemy	
+	pub io: Enemy,
+	pub pos: MovableObj
 }
 
 #[derive(SplitFields)]
 pub struct NPCArch{
-	pub io: NPC
+	pub io: NPC,
+	pub pos: MovableObj
 }
 
 #[derive(SplitFields)]
 pub struct AttackArch{
-	pub io: Attack
+	pub io: Attack,
+	pub pos: MovableObj
 }
 
 // These types allow for references to parts of the world to be passed around easily.
