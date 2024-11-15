@@ -146,22 +146,10 @@ impl Entity {
 			self.texture.moving = true;
 		}
 
-		let x_val = (self.pos.x - new_pos.x) / self.pos.distance(*new_pos);
-		let y_val = (self.pos.y - new_pos.y) / self.pos.distance(*new_pos);
+		let new_axis = get_axis(self.pos, *new_pos);
 
-		match x_val.round() as i8 {
-			-1 => self.dir_horizontal = Axis::Positive,
-			0 => self.dir_horizontal = Axis::None,
-			1 => self.dir_horizontal = Axis::Negative,
-			_ => ()
-		}
-
-		match y_val.round() as i8 {
-			-1 => self.dir_vertical = Axis::Positive,
-			0 => self.dir_vertical = Axis::None,
-			1 => self.dir_vertical = Axis::Negative,
-			_ => ()
-		}
+		self.dir_horizontal = new_axis.0;
+		self.dir_vertical = new_axis.1;
 	}
 
 	/// Creates a new Entity
@@ -210,6 +198,29 @@ impl MovableObj for Entity {
 	fn edit_pos(&mut self) -> &mut Vec2 {
 		&mut self.pos
 	}
+}
+
+pub fn get_axis(pos: Vec2, target: Vec2) -> (Axis, Axis) {
+	let x_val = (pos.x - target.x) / pos.distance(target);
+	let y_val = (pos.y - target.y) / pos.distance(target);
+
+	let mut to_return = (Axis::None, Axis::None);
+
+	match x_val.round() as i8 {
+		-1 => to_return.0 = Axis::Positive,
+		0 => to_return.0 = Axis::None,
+		1 => to_return.0 = Axis::Negative,
+		_ => ()
+	}
+
+	match y_val.round() as i8 {
+		-1 => to_return.1 = Axis::Positive,
+		0 => to_return.1 = Axis::None,
+		1 => to_return.1 = Axis::Negative,
+		_ => ()
+	}
+
+	return to_return
 }
 
 fn create_barriers(map: &Vec<Vec2>) -> Vec<Barrier> {

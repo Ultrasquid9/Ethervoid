@@ -1,7 +1,7 @@
 use macroquad::{math::Vec2, prelude::rand};
 use serde::{Deserialize, Serialize};
 
-use super::{cores::{map::Map, npctype::{Message, NPCType}}, draw::{access_texture, texturedobj::{EntityTexture, TexturedObj}}, entity::MovableObj};
+use super::{cores::{map::Map, npctype::{Message, NPCType}}, draw::{access_texture, texturedobj::{EntityTexture, TexturedObj}}, entity::{get_axis, MovableObj}, get_delta_time, player::Axis};
 
 pub struct NPC {
 	pos: Vec2,
@@ -57,13 +57,17 @@ impl NPC {
 	fn movement(&mut self, map: &Map) {
 		match self.movement {
 			NPCMovement::Wander(range) => {
-				if self.pos.distance(self.movement_target) < 5. {
+				if self.movement_cooldown > 0. {
+					self.movement_cooldown -= get_delta_time()
+
+				} else if self.pos.distance(self.movement_target) < 5. {
 					self.movement_target = Vec2::new(
 						rand::gen_range(self.center_pos.x - range, self.center_pos.x + range),
 						rand::gen_range(self.center_pos.y - range, self.center_pos.y + range)
 					);
-					self.movement_cooldown = 100.
-				} else if self.movement_cooldown <= 0. {
+					self.movement_cooldown = 120.
+
+				} else {
 					let new_pos = self.pos.move_towards(self.movement_target, 2.);
 
 					self.try_move(new_pos, map);
@@ -71,8 +75,6 @@ impl NPC {
 					if self.pos != new_pos {
 						self.movement_target = self.pos
 					}
-				} else {
-					self.movement_cooldown -= 1.
 				}
 			},
 			NPCMovement::Still => ()
@@ -95,11 +97,23 @@ impl MovableObj for NPC {
 
 impl TexturedObj for NPC {
 	fn update_texture(&mut self) {
+		let moving = if self.movement_cooldown >= 0. {
+			false
+		} else {
+			true
+		};
+
+		let new_axis = if moving {
+			get_axis(self.pos, self.movement_target)
+		} else {
+			(Axis::None, Axis::Negative)
+		};
+
 		self.texture.update(
 			self.pos.clone(), 
-			super::player::Axis::Positive, 
-			super::player::Axis::Positive, 
-			true
+			new_axis.0, 
+			new_axis.1, 
+			moving
 		);
 	}
 }
