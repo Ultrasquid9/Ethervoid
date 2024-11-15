@@ -1,12 +1,17 @@
 use ahash::HashMap;
 use stecs::{prelude::*, storage::vec::VecFamily};
 
-use super::{combat::Attack, cores::map::Map, enemy::Enemy, npc::NPC};
+use super::{combat::Attack, cores::map::Map, enemy::Enemy, npc::NPC, player::Player};
 
 // This module manages the ECS.
 // It is in a folder because I expect there will be submodules for it soon. 
 //
 // TODO - Make entities actually use components
+
+#[derive(SplitFields)]
+pub struct PlayerArch{
+	pub io: Player	
+}
 
 #[derive(SplitFields)]
 pub struct EnemyArch{
@@ -40,6 +45,7 @@ pub type Attacks = AttackArchStructOf<VecFamily>;
 /// 
 /// More will likely be added or migrated to this struct in the future
 pub struct World {
+	pub player: StructOf<Vec<PlayerArch>>,
 	pub enemies: StructOf<Vec<EnemyArch>>,
 	pub npcs: StructOf<Vec<NPCArch>>,
 	pub attacks: StructOf<Vec<AttackArch>>,

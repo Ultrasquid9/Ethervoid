@@ -1,7 +1,7 @@
 use cores::map::get_maps;
 use combat::try_parry;
 use draw::{clean_textures, create_textures, draw};
-use ecs::{AttackArch, EnemyArch, NPCArch, World};
+use ecs::{AttackArch, EnemyArch, NPCArch, PlayerArch, World};
 use enemy::Enemy;
 use entity::MovableObj;
 use npc::NPC;
@@ -33,6 +33,7 @@ pub async fn gameplay() -> State {
 	// The world 
 	// Contains Enemies, Attacks, ETC.
 	let mut world = World {
+		player: Default::default(),
 		enemies: Default::default(),
 		npcs: Default::default(),
 		attacks: Default::default(),
@@ -46,7 +47,7 @@ pub async fn gameplay() -> State {
 	};
 
 	// The player
-	let mut player = Player::new(); // Creates a player
+	let player = world.player.insert(PlayerArch {io: Player::new()}); // Creates a player
 
 	// Populating the enemies with data from the maps
 	populate(&mut world);
@@ -55,7 +56,7 @@ pub async fn gameplay() -> State {
 		// Handling hitstop
 		if world.hitstop > 0. {
 			world.hitstop -= get_delta_time();
-			draw(&mut camera, &player, &world, &world.get_current_map()).await;
+			draw(&mut camera, &world, &world.get_current_map()).await;
 
 			next_frame().await;
 			continue;
@@ -66,7 +67,7 @@ pub async fn gameplay() -> State {
 		// Stores the old map, in case it changes
 		let old_map = world.current_map.clone();
 
-		player.update(
+		world.player.io[player].update(
 			&mut camera, 
 			
 			&world.maps,
@@ -79,18 +80,18 @@ pub async fn gameplay() -> State {
 		}
 
 		// Attacking
-		if player.config.keymap.sword.is_down() && player.swords[0].cooldown == 0 {
-			player.swords[0].cooldown = 16;
-			world.attacks.insert( AttackArch { io: player.attack_sword() });
+		if world.player.io[player].config.keymap.sword.is_down() && world.player.io[player].swords[0].cooldown == 0 {
+			world.player.io[player].swords[0].cooldown = 16;
+			world.attacks.insert( AttackArch { io: world.player.io[player].attack_sword() });
 		}
-		if player.config.keymap.gun.is_down() && player.guns[0].cooldown == 0 {
-			player.guns[0].cooldown = 16;
-			world.attacks.insert( AttackArch { io: player.attack_gun() });
+		if world.player.io[player].config.keymap.gun.is_down() && world.player.io[player].guns[0].cooldown == 0 {
+			world.player.io[player].guns[0].cooldown = 16;
+			world.attacks.insert( AttackArch { io: world.player.io[player].attack_gun() });
 		}
 
 		// Updates attacks
 		for (_, attack) in world.attacks.iter_mut() {
-			attack.io.update(&mut world.enemies.io, &mut player, world.maps.get(&world.current_map).unwrap());
+			attack.io.update(&mut world.enemies.io, &mut world.player.io[player], world.maps.get(&world.current_map).unwrap());
 		}
 		try_parry(&mut world);
 		// Removing old attacks
@@ -109,7 +110,7 @@ pub async fn gameplay() -> State {
 
 		// Updates enemies
 		for (_, enemy) in world.enemies.iter_mut() {
-			enemy.io.update(&mut world.attacks, &mut player, world.maps.get(&world.current_map).unwrap());
+			enemy.io.update(&mut world.attacks, &mut world.player.io[player], world.maps.get(&world.current_map).unwrap());
 		}
 		// Removing dead enemies
 		let mut to_remove: usize = 0;
@@ -134,20 +135,19 @@ pub async fn gameplay() -> State {
 		// Updates the camera
 		// TODO: Attempt to replace with .lerp()
 		camera = camera.move_towards(
-			player.stats.get_pos(), 
-			camera.distance(player.stats.get_pos()) / 6.
+			world.player.io[player].stats.get_pos(), 
+			camera.distance(world.player.io[player].stats.get_pos()) / 6.
 		);
 
 		// Draws the player and enemies
 		draw(
 			&mut camera, 
-			&player, 
 			&world, 
 			&world.get_current_map()
 		).await;
 
 		// Quits the game
-		if player.config.keymap.quit.is_pressed() {
+		if world.player.io[player].config.keymap.quit.is_pressed() {
 			clean_textures();
 
 			println!("Returning to the main menu");

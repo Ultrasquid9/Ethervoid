@@ -7,7 +7,7 @@ use macroquad::prelude::*;
 use once_cell::sync::Lazy;
 use textures::{downscale, draw_tilemap, pixel_offset, render_texture, to_texture};
 
-use super::{cores::{map::Map, textures::get_textures}, player::Player, World};
+use super::{cores::{map::Map, textures::get_textures}, World};
 
 pub mod textures;
 pub mod texturedobj;
@@ -19,7 +19,7 @@ static TEXTURES: Lazy<RwLock<HashMap<String, DynamicImage>>> = Lazy::new(|| RwLo
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 /// Draws the content of the game
-pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, map: &Map) {
+pub async fn draw(camera: &mut Vec2, world: &World, map: &Map) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -107,7 +107,9 @@ pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, map: &Map) 
 	}
 
 	// The player
-	entity_futures.push(player.stats.texture.render());
+	for plaer in world.player.io.iter() {
+		entity_futures.push(plaer.stats.texture.render());
+	}
 
 	// Enemies
 	for enemy in world.enemies.io.iter() {
@@ -129,7 +131,7 @@ pub async fn draw(camera: &mut Vec2, player: &Player, world: &World, map: &Map) 
 	set_default_camera();
  
 	// Drawing a temporary UI
-	draw_text(&format!("{}", player.stats.get_health()), 32.0, 64.0, camera_scale() / 10., BLACK);
+	draw_text(&format!("{}", world.player.io[0].stats.get_health()), 32.0, 64.0, camera_scale() / 10., BLACK);
 }
 
 /// Populates the texture HashMap
