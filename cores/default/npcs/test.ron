@@ -1,6 +1,6 @@
 (
 	name: "Testing Bro",
 	sprite: "default:entity/player/player_spritesheet_wip",
-	movement: Wander(32.),
+	movement: Wander(30),
 	messages: []
 )
