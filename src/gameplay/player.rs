@@ -1,4 +1,5 @@
 use ahash::HashMap;
+use kira::{manager::{AudioManager, AudioManagerSettings, DefaultBackend}, sound::static_sound::StaticSoundData};
 use macroquad::{input::mouse_position_local, math::Vec2};
 
 use crate::config::Config;
@@ -18,6 +19,7 @@ pub struct Player {
 	speed: f32,
 	dash_cooldown: f32,
 	pub is_dashing: bool,
+	footstep_cooldown: f32,
 
 	axis_horizontal: Axis,
 	axis_vertical: Axis
@@ -76,6 +78,7 @@ impl Player {
 			speed: 1.,
 			dash_cooldown: 0.,
 			is_dashing: false,
+			footstep_cooldown: 0.,
 
 			axis_horizontal: Axis::None,
 			axis_vertical: Axis::None
@@ -302,6 +305,16 @@ impl Player {
 				(new_pos.normalize() * self.speed * get_delta_time()) + current_pos, 
 				&maps.get(current_map).unwrap()
 			);
+
+			if self.footstep_cooldown <= 0. {
+				let mut manager = AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap();
+				let sound_data = StaticSoundData::from_file("cores/default/audio/sfx/walk_1.wav").unwrap();
+				manager.play(sound_data.clone()).unwrap();
+
+				self.footstep_cooldown = 20.
+			} else {
+				self.footstep_cooldown -= get_delta_time()
+			}
 
 			// The player has moved, and the function can return
 			if self.stats.get_pos() != old_pos {
