@@ -3,7 +3,9 @@ use macroquad::math::Vec2;
 use raylite::{cast, Barrier, Ray};
 use serde::{Deserialize, Serialize};
 
-use super::{cores::map::Map, entity::MovableObj, player::Player, vec2_to_tuple};
+use crate::utils::vec2_to_tuple;
+
+use super::{cores::map::Map, entity::MovableObj, player::Player};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Direction {

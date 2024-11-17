@@ -2,7 +2,9 @@ use macroquad::math::Vec2;
 use raylite::{cast_wide, Barrier, Ray};
 use rhai::{CustomType, TypeBuilder};
 
-use super::{cores::map::Map, draw::texturedobj::{AttackTexture, AttackTextureType, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos, player::Player, vec2_to_tuple, World};
+use crate::utils::{get_mouse_pos, vec2_to_tuple};
+
+use super::{cores::map::Map, draw::texturedobj::{AttackTexture, AttackTextureType, TexturedObj}, enemy::Enemy, entity::{Entity, MovableObj}, get_delta_time, player::Player, World};
 
 #[derive(Clone)]
 pub struct Attack {

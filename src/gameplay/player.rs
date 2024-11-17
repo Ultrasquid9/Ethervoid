@@ -2,9 +2,9 @@ use ahash::HashMap;
 use kira::{manager::{AudioManager, AudioManagerSettings, DefaultBackend}, sound::static_sound::StaticSoundData};
 use macroquad::{input::mouse_position_local, math::Vec2};
 
-use crate::config::Config;
+use crate::utils::{config::Config, get_delta_time, get_mouse_pos, resources::access_texture};
 
-use super::{combat::{Attack, Owner}, cores::map::Map, draw::{access_texture, texturedobj::{AttackTextureType, EntityTexture, TexturedObj}}, entity::{Entity, MovableObj}, get_delta_time, get_mouse_pos};
+use super::{combat::{Attack, Owner}, cores::map::Map, draw::texturedobj::{AttackTextureType, EntityTexture, TexturedObj}, entity::{Entity, MovableObj}};
 
 /// Contains info about the player
 pub struct Player {

@@ -1,6 +1,6 @@
 use cores::map::get_maps;
 use combat::try_parry;
-use draw::{clean_textures, create_textures, draw};
+use draw::draw;
 use ecs::{AttackArch, EnemyArch, NPCArch, PlayerArch, World};
 use enemy::Enemy;
 use entity::MovableObj;
@@ -9,12 +9,12 @@ use player::Player;
 use macroquad::prelude::*;
 use stecs::prelude::Archetype;
 
-use crate::State;
+use crate::{utils::{get_delta_time, resources::{clean_textures, create_textures}}, State};
 
 mod combat;
-mod cores;
+pub mod cores;
 mod doors;
-mod draw;
+pub mod draw;
 mod ecs;
 mod enemy;
 mod entity;
@@ -184,24 +184,4 @@ pub fn populate(world: &mut World) {
 	for i in world.get_current_map().npcs.clone() {
 		world.npcs.insert(NPCArch { io: NPC::new(i.0, i.1)});
 	}
-}
-
-/// Converts inputted Vec2 into a tuple of f32
-pub fn vec2_to_tuple(vec: &Vec2) -> (f32, f32) {
-	return (vec.x, vec.y);
-}
-
-/// Converts the inputted tuple of f32 into a Vec2
-pub fn tuple_to_vec2(tup: (f32, f32)) -> Vec2 {
-	return Vec2::new(tup.0, tup.1);
-}
-
-/// Gets the current position of the mouse
-pub fn get_mouse_pos() -> Vec2 {
-	tuple_to_vec2(mouse_position()) - Vec2::new(screen_width() / 2., screen_height() / 2.)
-}
-
-/// Gets the delta time
-pub fn get_delta_time() -> f32 {
-	get_frame_time() * 100. * (2./3.)
 }

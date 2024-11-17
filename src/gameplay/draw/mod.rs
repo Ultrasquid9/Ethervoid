@@ -1,20 +1,13 @@
-use std::sync::RwLock;
-
-use ahash::HashMap;
 use futures::{future::join_all, join};
-use imageproc::image::DynamicImage;
 use macroquad::prelude::*;
-use once_cell::sync::Lazy;
 use textures::{downscale, draw_tilemap, pixel_offset, render_texture, to_texture};
 
-use super::{cores::{map::Map, textures::get_textures}, World};
+use crate::utils::resources::{access_image, access_texture};
+
+use super::{cores::map::Map, World};
 
 pub mod textures;
 pub mod texturedobj;
-
-// HashMap containing all the textures in the game 
-// Everyone always says "don't do this" so fuck you I did
-static TEXTURES: Lazy<RwLock<HashMap<String, DynamicImage>>> = Lazy::new(|| RwLock::new(HashMap::default()));
 
 const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
@@ -132,31 +125,6 @@ pub async fn draw(camera: &mut Vec2, world: &World, map: &Map) {
  
 	// Drawing a temporary UI
 	draw_text(&format!("{}", world.player.io[0].stats.get_health()), 32.0, 64.0, camera_scale() / 10., BLACK);
-}
-
-/// Populates the texture HashMap
-/// NOTE: Please ensure you call `clean_attack_textures()` when quitting the game.
-pub fn create_textures() {
-	let textures = get_textures();
-
-	for i in textures {
-		TEXTURES.write().unwrap().insert(i.0, i.1);
-	}
-}
-
-/// Gets the image at the provided key
-pub fn access_image(key: &str) -> DynamicImage {
-	TEXTURES.read().unwrap().get(key).unwrap().clone()
-}
-
-/// Gets the texture at the provided key
-pub fn access_texture(key: &str) -> Texture2D {
-	to_texture(access_image(key))
-}
-
-/// Clears the texture HashMap
-pub fn clean_textures() {
-	TEXTURES.write().unwrap().clear()
 }
 
 /// Gets the scale that the camera should be rendered at
