@@ -21,6 +21,10 @@ use super::{
 		},
 		map::Map
 	}, 
+	combat::{
+		AttackType, 
+		Owner
+	},
 	draw::texturedobj::{
 		EntityTexture, 
 		TexturedObj
@@ -29,17 +33,20 @@ use super::{
 		get_axis, 
 		MovableObj
 	}, 
+	ecs::Attacks, 
 	player::Axis
 };
 
 pub struct NPC {
 	pos: Vec2,
 	center_pos: Vec2,
-	messages: Vec<Message>,
-	movement: NPCMovement,
 	
 	pub texture: EntityTexture,
 
+	messages: Vec<Message>,
+	messages_cooldown: f32,
+
+	movement: NPCMovement,
 	movement_cooldown: f32,
 	movement_target: Vec2
 }
@@ -62,22 +69,46 @@ impl NPC {
 		Self {
 			pos,
 			center_pos: pos,
-			messages: npctype.messages,
-			movement: npctype.movement,
+
 			texture: EntityTexture::new(access_texture(&npctype.sprite)),
 
+			messages: npctype.messages,
+			messages_cooldown: 0.,
+
+			movement: npctype.movement,
 			movement_cooldown: 0.,
 			movement_target: pos
 		}
 	}
 
-	pub fn update(&mut self, map: &Map) {
+	pub fn update(&mut self, map: &Map, attacks: &Attacks) {
 		self.update_texture();
 		self.movement(map);
+
+		if self.messages_cooldown <= 0. {
+			self.read_message(attacks);
+		} else {
+			self.messages_cooldown -= get_delta_time()
+		}
+	}
+
+	pub fn read_message(&mut self, attacks: &Attacks) {
+		let mut should_read = false;
+		for i in &attacks.io {
+			if i.attack_type == AttackType::Physical
+			&& i.owner == Owner::Player
+			&& i.is_touching(self) {
+				should_read = true;
+				break
+			}
+		}
+
+		if !should_read { return }
 
 		for i in &self.messages {
 			if i.should_read() {
 				i.read();
+				self.messages_cooldown = 10.;
 				break
 			}
 		}

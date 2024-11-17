@@ -42,7 +42,7 @@ pub struct Attack {
 	pub owner: Owner,
 	pub is_parried: bool,
 
-	attack_type: AttackType,
+	pub attack_type: AttackType,
 	damage: isize,
 	lifetime: f32,
 
@@ -154,14 +154,6 @@ impl Attack {
 				0., 
 				super::draw::texturedobj::AttackTextureType::Slash
 			)
-		}
-	}
-
-	/// Checks if the attack is a hitscan attack
-	pub fn is_hitscan(&self) -> bool {
-		match self.attack_type {
-			AttackType::Hitscan(_) => true,
-			_ => false
 		}
 	}
 

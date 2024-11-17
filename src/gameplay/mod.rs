@@ -145,7 +145,7 @@ pub async fn gameplay() -> State {
 		// Updates NPCs
 		// WIP
 		for (_, npc) in world.npcs.iter_mut() {
-			npc.io.update(world.maps.get(&world.current_map).unwrap());
+			npc.io.update(world.maps.get(&world.current_map).unwrap(), &world.attacks);
 		}
 
 		// Updates the camera

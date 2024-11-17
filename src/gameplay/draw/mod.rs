@@ -13,10 +13,10 @@ use textures::{
 	to_texture
 };
 
-use crate::utils::resources::{
+use crate::{gameplay::combat::AttackType, utils::resources::{
 	access_image, 
 	access_texture
-};
+}};
 
 use super::{
 	cores::map::Map, 
@@ -102,7 +102,7 @@ pub async fn draw(camera: &mut Vec2, world: &World, map: &Map) {
 
 	// Attacks
 	for attack in world.attacks.io.iter() {
-		if attack.is_hitscan() {
+		if let AttackType::Hitscan(_) = attack.attack_type {
 			draw_line(
 				attack.pos.x, 
 				attack.pos.y, 
