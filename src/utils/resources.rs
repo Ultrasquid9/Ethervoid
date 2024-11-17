@@ -1,7 +1,7 @@
 use std::sync::RwLock;
 use ahash::HashMap;
 use image::DynamicImage;
-use macroquad::texture::Texture2D;
+use macroquad::{rand, texture::Texture2D};
 use once_cell::sync::Lazy;
 
 use kira::{
@@ -91,4 +91,9 @@ fn clean_audio() {
 /// Plays the sound at the provided key
 pub fn play_sound(key: &str) {
 	MANAGER.write().unwrap().play(AUDIO.read().unwrap().get(key).unwrap().clone()).unwrap();
+}
+
+/// Plays a random sound from the provided list of keys 
+pub fn play_random_sound(keys: &Vec<&str>) {
+	play_sound(keys[rand::gen_range(0, keys.len() - 1)]);
 }

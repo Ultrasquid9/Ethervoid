@@ -8,7 +8,7 @@ use macroquad::{
 use crate::utils::{
 	resources::{
 		access_texture, 
-		play_sound
+		play_random_sound
 	}, 
 	get_delta_time, 
 	get_mouse_pos,
@@ -332,8 +332,14 @@ impl Player {
 				&maps.get(current_map).unwrap()
 			);
 
+			// Handling footstep sounds
 			if self.footstep_cooldown <= 0. {
-				play_sound("default:sfx/walk_1");
+				play_random_sound(&vec!(
+					"default:sfx/walk_1",
+					"default:sfx/walk_2",
+					"default:sfx/walk_3",
+					"default:sfx/walk_4"
+				));
 
 				self.footstep_cooldown = 20.
 			} else {
