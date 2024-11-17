@@ -1,8 +1,7 @@
 use ahash::HashMap;
-use kira::{manager::{AudioManager, AudioManagerSettings, DefaultBackend}, sound::static_sound::StaticSoundData};
 use macroquad::{input::mouse_position_local, math::Vec2};
 
-use crate::utils::{config::Config, get_delta_time, get_mouse_pos, resources::access_texture};
+use crate::utils::{config::Config, get_delta_time, get_mouse_pos, resources::{access_texture, play_sound}};
 
 use super::{combat::{Attack, Owner}, cores::map::Map, draw::texturedobj::{AttackTextureType, EntityTexture, TexturedObj}, entity::{Entity, MovableObj}};
 
@@ -307,9 +306,7 @@ impl Player {
 			);
 
 			if self.footstep_cooldown <= 0. {
-				let mut manager = AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap();
-				let sound_data = StaticSoundData::from_file("cores/default/audio/sfx/walk_1.wav").unwrap();
-				manager.play(sound_data.clone()).unwrap();
+				play_sound("default:sfx/walk_1");
 
 				self.footstep_cooldown = 20.
 			} else {

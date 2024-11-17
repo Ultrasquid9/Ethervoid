@@ -9,7 +9,7 @@ use player::Player;
 use macroquad::prelude::*;
 use stecs::prelude::Archetype;
 
-use crate::{utils::{get_delta_time, resources::{clean_textures, create_textures}}, State};
+use crate::{utils::{get_delta_time, resources::{clean_resources, create_resources}}, State};
 
 mod combat;
 pub mod cores;
@@ -26,9 +26,9 @@ pub async fn gameplay() -> State {
 	// The camera
 	let mut camera = Vec2::new(0., 0.);
 
-	// Textures
-	// NOTE: populates a static HashMap. Ensure you call the `clean_textures` function when quitting the game. 
-	create_textures();
+	// Resources
+	// NOTE: This function populates a static HashMap. Ensure you call the `clean_resources()` functions when quitting the game. 
+	create_resources();
 
 	// The world 
 	// Contains Enemies, Attacks, ETC.
@@ -148,7 +148,7 @@ pub async fn gameplay() -> State {
 
 		// Quits the game
 		if world.player.io[player].config.keymap.quit.is_pressed() {
-			clean_textures();
+			clean_resources();
 
 			println!("Returning to the main menu");
 			return State::Menu;

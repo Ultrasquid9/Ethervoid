@@ -2,6 +2,7 @@ use std::fs::{self, read_dir};
 
 use walkdir::WalkDir;
 
+pub mod audio;
 pub mod behavior;
 pub mod enemytype;
 pub mod map;
