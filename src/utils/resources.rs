@@ -1,12 +1,25 @@
 use std::sync::RwLock;
-
 use ahash::HashMap;
 use image::DynamicImage;
-use kira::{manager::{AudioManager, AudioManagerSettings, DefaultBackend}, sound::static_sound::StaticSoundData};
 use macroquad::texture::Texture2D;
 use once_cell::sync::Lazy;
 
-use crate::gameplay::{cores::{audio::get_audio, textures::get_textures}, draw::textures::to_texture};
+use kira::{
+	manager::{
+		AudioManager, 
+		AudioManagerSettings, 
+		DefaultBackend
+	}, 
+	sound::static_sound::StaticSoundData
+};
+
+use crate::gameplay::{
+	cores::{
+		audio::get_audio, 
+		textures::get_textures
+	},
+	draw::textures::to_texture
+};
 
 // This file contains globally available resources
 // Everyone always says "don't do this" so fuck you I did

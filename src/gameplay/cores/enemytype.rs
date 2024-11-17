@@ -1,8 +1,15 @@
-use std::{collections::HashMap, fs};
-
+use std::fs;
+use ahash::HashMap;
 use serde::Deserialize;
 
-use super::{behavior::{get_attacks, BehaviorBuilder}, gen_name, get_files};
+use super::{
+	behavior::{
+		get_attacks, 
+		BehaviorBuilder
+	}, 
+	gen_name, 
+	get_files
+};
 
 #[derive(Clone, Deserialize)]
 struct EnemyTypeBuilder {
@@ -46,7 +53,7 @@ pub struct EnemyType {
 
 /// Provides a HashMap containing all EnemyTypes
 pub fn get_enemytypes() -> HashMap<String, EnemyType> {
-	let mut enemytypes: HashMap<String, EnemyType> = HashMap::new();
+	let mut enemytypes: HashMap<String, EnemyType> = HashMap::default();
 
 	for i in get_files(String::from("enemies")) {
 		enemytypes.insert(

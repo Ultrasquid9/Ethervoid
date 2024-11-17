@@ -1,4 +1,18 @@
-use macroquad::{color::GRAY, math::vec2, ui::{root_ui, widgets, Skin}, window::{clear_background, next_frame, screen_height, screen_width}};
+use macroquad::{
+	ui::{
+		root_ui, 
+		widgets, 
+		Skin
+	}, 
+	window::{
+		clear_background, 
+		next_frame, 
+		screen_height, 
+		screen_width
+	},
+	color::GRAY, 
+	math::vec2
+};
 
 use crate::State;
 

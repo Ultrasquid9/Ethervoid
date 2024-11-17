@@ -1,11 +1,25 @@
 use std::cmp::Ordering;
-
 use macroquad::math::Vec2;
 use stecs::prelude::*;
-
 use crate::utils::resources::access_texture;
 
-use super::{cores::{behavior::Behavior, enemytype::EnemyType, map::Map}, draw::texturedobj::{EntityTexture, TexturedObj}, ecs::Attacks, entity::{Entity, MovableObj}, player::Player};
+use super::{
+	cores::{
+		behavior::Behavior, 
+		enemytype::EnemyType, 
+		map::Map
+	}, 
+	draw::texturedobj::{
+		EntityTexture, 
+		TexturedObj
+	}, 
+	entity::{
+		Entity, 
+		MovableObj
+	}, 
+	ecs::Attacks, 
+	player::Player
+};
 
 /// An enemy
 pub struct Enemy {

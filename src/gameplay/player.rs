@@ -1,9 +1,36 @@
 use ahash::HashMap;
-use macroquad::{input::mouse_position_local, math::Vec2};
 
-use crate::utils::{config::Config, get_delta_time, get_mouse_pos, resources::{access_texture, play_sound}};
+use macroquad::{
+	input::mouse_position_local, 
+	math::Vec2
+};
 
-use super::{combat::{Attack, Owner}, cores::map::Map, draw::texturedobj::{AttackTextureType, EntityTexture, TexturedObj}, entity::{Entity, MovableObj}};
+use crate::utils::{
+	resources::{
+		access_texture, 
+		play_sound
+	}, 
+	get_delta_time, 
+	get_mouse_pos,
+	config::Config
+};
+
+use super::{
+	cores::map::Map, 
+	combat::{
+		Attack, 
+		Owner
+	}, 
+	draw::texturedobj::{
+		AttackTextureType, 
+		EntityTexture, 
+		TexturedObj
+	}, 
+	entity::{
+		Entity, 
+		MovableObj
+	}
+};
 
 /// Contains info about the player
 pub struct Player {

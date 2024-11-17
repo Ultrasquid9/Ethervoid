@@ -1,7 +1,6 @@
 use cores::map::get_maps;
 use combat::try_parry;
 use draw::draw;
-use ecs::{AttackArch, EnemyArch, NPCArch, PlayerArch, World};
 use enemy::Enemy;
 use entity::MovableObj;
 use npc::NPC;
@@ -9,12 +8,29 @@ use player::Player;
 use macroquad::prelude::*;
 use stecs::prelude::Archetype;
 
-use crate::{utils::{get_delta_time, resources::{clean_resources, create_resources}}, State};
+use ecs::{
+	AttackArch, 
+	EnemyArch, 
+	NPCArch, 
+	PlayerArch, 
+	World
+};
 
-mod combat;
+use crate::{
+	utils::{
+		resources::{
+			clean_resources, 
+			create_resources
+		},
+		get_delta_time
+	}, 
+	State
+};
+
 pub mod cores;
-mod doors;
 pub mod draw;
+mod combat;
+mod doors;
 mod ecs;
 mod enemy;
 mod entity;

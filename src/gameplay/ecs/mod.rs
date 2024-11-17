@@ -1,7 +1,17 @@
 use ahash::HashMap;
-use stecs::{prelude::*, storage::vec::VecFamily};
 
-use super::{combat::Attack, cores::map::Map, enemy::Enemy, npc::NPC, player::Player};
+use stecs::{
+	prelude::*, 
+	storage::vec::VecFamily
+};
+
+use super::{
+	combat::Attack, 
+	cores::map::Map, 
+	enemy::Enemy, 
+	npc::NPC, 
+	player::Player
+};
 
 // This module manages the ECS.
 // It is in a folder because I expect there will be submodules for it soon. 

@@ -1,10 +1,35 @@
-use image::{DynamicImage, Rgba};
 use imageproc::geometric_transformations::rotate_about_center;
-use macroquad::{math::{Rect, Vec2}, texture::{DrawTextureParams, Texture2D}};
 
-use crate::gameplay::{get_delta_time, player::Axis};
+use image::{
+	DynamicImage, 
+	Rgba
+};
 
-use super::{access_image, textures::{downscale, render_texture, to_texture}, SCREEN_SCALE};
+use crate::gameplay::{
+	get_delta_time, 
+	player::Axis
+};
+
+use macroquad::{
+	math::{
+		Rect, 
+		Vec2
+	}, 
+	texture::{
+		DrawTextureParams, 
+		Texture2D
+	}
+};
+
+use super::{
+	textures::{
+		downscale, 
+		render_texture, 
+		to_texture
+	}, 
+	access_image, 
+	SCREEN_SCALE
+};
 
 pub trait TexturedObj {
 	fn update_texture(&mut self);

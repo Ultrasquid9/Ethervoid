@@ -1,12 +1,20 @@
-use std::{collections::HashMap, thread};
+use std::thread;
+use ahash::HashMap;
 
-use image::{ColorType, DynamicImage, ImageReader};
+use image::{
+	ColorType, 
+	DynamicImage, 
+	ImageReader
+};
 
-use super::{gen_name, get_files};
+use super::{
+	gen_name, 
+	get_files
+};
 
 /// Provides a HashMap containing all Textures
 pub fn get_textures() -> HashMap<String, DynamicImage> {
-	let mut textures: HashMap<String, DynamicImage> = HashMap::new();
+	let mut textures: HashMap<String, DynamicImage> = HashMap::default();
 
 	let mut texture_handles = Vec::new();
 	let mut names = Vec::new();

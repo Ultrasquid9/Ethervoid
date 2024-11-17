@@ -1,9 +1,26 @@
-use fast_image_resize::{ResizeOptions, Resizer};
 use futures::future::join_all;
 use image::DynamicImage;
-use macroquad::{color::WHITE, math::Vec2, texture::{draw_texture_ex, DrawTextureParams, Texture2D}, window::{screen_height, screen_width}};
-
 use super::SCREEN_SCALE;
+
+use fast_image_resize::{
+	ResizeOptions, 
+	Resizer
+};
+
+use macroquad::{
+	texture::{
+		draw_texture_ex, 
+		DrawTextureParams, 
+		Texture2D
+	}, 
+	window::{
+		screen_height, 
+		screen_width
+	},
+	color::WHITE, 
+	math::Vec2
+};
+
 
 pub async fn draw_tilemap(texture: Texture2D) {
 	let mut futures = Vec::new();

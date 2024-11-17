@@ -1,12 +1,15 @@
-use std::{collections::HashMap, thread};
-
+use std::thread;
+use ahash::HashMap;
 use kira::sound::static_sound::StaticSoundData;
 
-use super::{gen_name, get_files};
+use super::{
+	gen_name, 
+	get_files
+};
 
 /// Provides a HashMap containing all Textures
 pub fn get_audio() -> HashMap<String, StaticSoundData> {
-	let mut audio: HashMap<String, StaticSoundData> = HashMap::new();
+	let mut audio: HashMap<String, StaticSoundData> = HashMap::default();
 
 	let mut audio_handles = Vec::new();
 	let mut names = Vec::new();

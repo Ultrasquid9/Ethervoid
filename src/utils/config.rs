@@ -1,6 +1,18 @@
-use macroquad::input::{is_key_down, is_key_pressed, is_mouse_button_down, is_mouse_button_pressed, KeyCode, MouseButton};
-use serde::{Deserialize, Serialize};
 use std::fs;
+
+use macroquad::input::{
+	is_key_down, 
+	is_key_pressed, 
+	is_mouse_button_down, 
+	is_mouse_button_pressed, 
+	KeyCode, 
+	MouseButton
+};
+
+use serde::{
+	Deserialize, 
+	Serialize
+};
 
 /// The config for the game
 #[derive(Serialize, Deserialize)]

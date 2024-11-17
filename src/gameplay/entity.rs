@@ -1,12 +1,24 @@
 use std::sync::RwLock;
-
 use macroquad::math::Vec2;
 use once_cell::sync::Lazy;
-use raylite::{cast, cast_wide, Barrier, Ray};
 
-use crate::utils::{tuple_to_vec2, vec2_to_tuple};
+use raylite::{
+	cast, 
+	cast_wide, 
+	Barrier, 
+	Ray
+};
 
-use super::{cores::map::Map, draw::texturedobj::EntityTexture, player::Axis};
+use crate::utils::{
+	tuple_to_vec2, 
+	vec2_to_tuple
+};
+
+use super::{
+	cores::map::Map, 
+	draw::texturedobj::EntityTexture, 
+	player::Axis
+};
 
 // For keeping track of the recursion in `try_move`
 static DEPTH: Lazy<RwLock<u8>> = Lazy::new(|| RwLock::new(0));

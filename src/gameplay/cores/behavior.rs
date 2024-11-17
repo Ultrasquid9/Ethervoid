@@ -1,13 +1,42 @@
-use std::{collections::HashMap, fs};
-
-use macroquad::math::{vec2, Vec2};
-use rhai::{Dynamic, Engine, Scope};
+use std::fs;
+use ahash::HashMap;
 use serde::Deserialize;
 use stecs::prelude::Archetype;
 
-use crate::gameplay::{combat::{Attack, Owner}, draw::texturedobj::AttackTextureType, ecs::{AttackArch, Attacks}, entity::{Entity, MovableObj}, get_delta_time, player::Player};
+use macroquad::math::{
+	vec2, 
+	Vec2
+};
 
-use super::{gen_name, get_files, map::Map};
+use rhai::{
+	Dynamic, 
+	Engine, 
+	Scope
+};
+
+use super::{
+	gen_name, 
+	get_files, 
+	map::Map
+};
+
+use crate::gameplay::{
+	combat::{
+		Attack, 
+		Owner
+	}, 
+	ecs::{
+		AttackArch, 
+		Attacks
+	}, 
+	entity::{
+		Entity, 
+		MovableObj
+	}, 
+	get_delta_time, 
+	draw::texturedobj::AttackTextureType, 
+	player::Player
+};
 
 #[derive(Clone, Deserialize)]
 pub struct BehaviorBuilder (String);
@@ -137,7 +166,7 @@ impl Behavior<'_> {
 
 /// Provides a HashMap containing all Attacks
 pub fn get_attacks() -> HashMap<String, BehaviorBuilder> {
-	let mut attacks: HashMap<String, BehaviorBuilder> = HashMap::new();
+	let mut attacks: HashMap<String, BehaviorBuilder> = HashMap::default();
 
 	for i in get_files(String::from("behavior")) {
 		attacks.insert(

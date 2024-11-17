@@ -1,10 +1,27 @@
-use futures::{future::join_all, join};
 use macroquad::prelude::*;
-use textures::{downscale, draw_tilemap, pixel_offset, render_texture, to_texture};
 
-use crate::utils::resources::{access_image, access_texture};
+use futures::{
+	future::join_all, 
+	join
+};
 
-use super::{cores::map::Map, World};
+use textures::{
+	downscale, 
+	draw_tilemap, 
+	pixel_offset, 
+	render_texture, 
+	to_texture
+};
+
+use crate::utils::resources::{
+	access_image, 
+	access_texture
+};
+
+use super::{
+	cores::map::Map, 
+	World
+};
 
 pub mod textures;
 pub mod texturedobj;

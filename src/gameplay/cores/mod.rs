@@ -1,6 +1,9 @@
-use std::fs::{self, read_dir};
-
 use walkdir::WalkDir;
+
+use std::fs::{
+	self, 
+	read_dir
+};
 
 pub mod audio;
 pub mod behavior;

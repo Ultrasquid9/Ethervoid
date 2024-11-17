@@ -1,12 +1,21 @@
 use std::fs;
-
 use ahash::HashMap;
 use macroquad::prelude::rand;
-use serde::{Deserialize, Serialize};
 
-use crate::gameplay::npc::{Dialogue, NPCMovement};
+use serde::{
+	Deserialize, 
+	Serialize
+};
 
-use super::{gen_name, get_files};
+use crate::gameplay::npc::{
+	Dialogue, 
+	NPCMovement
+};
+
+use super::{
+	gen_name, 
+	get_files
+};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Message {

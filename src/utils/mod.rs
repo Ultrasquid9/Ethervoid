@@ -1,4 +1,12 @@
-use macroquad::{input::mouse_position, math::Vec2, time::get_frame_time, window::{screen_height, screen_width}};
+use macroquad::{
+	window::{
+		screen_height, 
+		screen_width
+	},
+	input::mouse_position, 
+	time::get_frame_time,
+	math::Vec2
+};
 
 pub mod config;
 pub mod resources;

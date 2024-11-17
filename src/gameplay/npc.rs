@@ -1,9 +1,36 @@
-use macroquad::{math::Vec2, prelude::rand};
-use serde::{Deserialize, Serialize};
+use macroquad::{
+	math::Vec2, 
+	prelude::rand
+};
 
-use crate::utils::{get_delta_time, resources::access_texture};
+use serde::{
+	Deserialize, 
+	Serialize
+};
 
-use super::{cores::{map::Map, npctype::{Message, NPCType}}, draw::texturedobj::{EntityTexture, TexturedObj}, entity::{get_axis, MovableObj}, player::Axis};
+use crate::utils::{
+	resources::access_texture,
+	get_delta_time
+};
+
+use super::{
+	cores::{ 
+		npctype::{
+			Message,
+			NPCType
+		},
+		map::Map
+	}, 
+	draw::texturedobj::{
+		EntityTexture, 
+		TexturedObj
+	}, 
+	entity::{
+		get_axis, 
+		MovableObj
+	}, 
+	player::Axis
+};
 
 pub struct NPC {
 	pos: Vec2,

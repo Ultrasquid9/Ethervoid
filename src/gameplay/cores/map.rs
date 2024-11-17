@@ -6,7 +6,18 @@ use serde::Deserialize;
 
 use crate::gameplay::doors::Door;
 
-use super::{enemytype::{get_enemytypes, EnemyType}, gen_name, get_files, npctype::{get_npctypes, NPCType}};
+use super::{
+	enemytype::{
+		get_enemytypes, 
+		EnemyType
+	}, 
+	npctype::{
+		get_npctypes, 
+		NPCType
+	},
+	gen_name, 
+	get_files
+};
 
 #[derive(Deserialize)]
 struct MapBuilder {
