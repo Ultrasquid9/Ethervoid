@@ -18,13 +18,13 @@ pub enum State {
 async fn main() {
 	let mut state = State::Menu;
 
-    loop {
+	loop {
 		state = match state {
 			State::Menu => menu().await,
 			State::Gameplay => gameplay().await,
 			State::Quit => return
 		};
 
-        next_frame().await
-    }
+		next_frame().await
+	}
 }
