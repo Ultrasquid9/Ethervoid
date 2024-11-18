@@ -164,6 +164,12 @@ impl Player {
 	pub fn attack_sword(&mut self) -> Attack {
 		match self.swords[self.current_sword].weapon {
 			Weapon::Sword => {
+				play_random_sound(&vec!(
+					"default:sfx/sword_1",
+					"default:sfx/sword_2",
+					"default:sfx/sword_3"
+				));
+
 				self.swords[self.current_sword].cooldown = 16;
 				Attack::new_physical(
 					self.stats.get_pos(), 
