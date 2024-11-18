@@ -31,7 +31,14 @@ pub trait MovableObj {
 
 	/// Attempts to move the object to the provided Vec2
 	fn try_move(&mut self, target: Vec2, map: &Map) {
-		let barriers = create_barriers(&map.points);
+		let mut barriers = create_barriers(&map.points);
+
+		// This block of code is required for slope movement
+		// I do not know why, as doors are ignored regardless 
+		// Please do not touch this code until you know how it works 
+		for i in &map.doors {
+			barriers.push(i.to_barrier())
+		}
 			
 		match cast_wide(
 			&Ray {
