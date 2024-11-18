@@ -31,10 +31,21 @@ pub trait MovableObj {
 
 	/// Attempts to move the object to the provided Vec2
 	fn try_move(&mut self, target: Vec2, map: &Map) {
-		let mut barriers = create_barriers(&map.points);
-		for i in &map.doors {
-			barriers.push(i.to_barrier())
-		}
+		let barriers = create_barriers(&map.points);
+			
+		match cast_wide(
+			&Ray {
+				position: vec2_to_tuple(&self.get_pos()),
+				end_position: vec2_to_tuple(&target)
+			},
+			&map.doors
+				.iter()
+				.map(|door| door.to_barrier())
+				.collect()
+		) {
+			Ok(_) => return,
+			_ => ()
+		}	
 
 		let old_pos = self.get_pos();
 		let mut try_slope_movement = false;
