@@ -1,6 +1,9 @@
 use ahash::HashMap;
-use macroquad::math::Vec2;
 use crate::utils::vec2_to_tuple;
+use macroquad::math::{
+	vec2, 
+	Vec2
+};
 
 use serde::{
 	Deserialize, 
@@ -96,7 +99,14 @@ impl Door {
 				panic!("Door in {} does not match direction of door in {}", current_map, self.dest)
 			}
 
-			*player.stats.edit_pos() = new_pos - self.pos + i.pos;
+			*player.stats.edit_pos() = match self.direction {
+				Direction::North | Direction::South => {
+					vec2(player.stats.x(), new_pos.y) - self.pos + i.pos
+				},
+				Direction::East | Direction::West => {
+					vec2(new_pos.x, player.stats.y()) - self.pos + i.pos
+				}
+			};
 			*camera = *camera - self.pos + i.pos;
 
 			*current_map = self.dest.clone();

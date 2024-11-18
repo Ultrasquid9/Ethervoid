@@ -45,7 +45,7 @@ pub trait MovableObj {
 		) {
 			Ok(_) => return,
 			_ => ()
-		}	
+		}
 
 		let old_pos = self.get_pos();
 		let mut try_slope_movement = false;
