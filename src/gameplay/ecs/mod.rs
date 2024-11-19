@@ -9,7 +9,7 @@ use super::{
 	combat::Attack, 
 	cores::map::Map, 
 	enemy::Enemy, 
-	npc::NPC, 
+	npc::Npc, 
 	player::Player
 };
 
@@ -29,8 +29,8 @@ pub struct EnemyArch{
 }
 
 #[derive(SplitFields)]
-pub struct NPCArch{
-	pub io: NPC
+pub struct NpcArch{
+	pub io: Npc
 }
 
 #[derive(SplitFields)]
@@ -43,21 +43,21 @@ pub struct AttackArch{
 #[allow(dead_code)]
 pub type Enemies = EnemyArchStructOf<VecFamily>;
 #[allow(dead_code)]
-pub type NPCs = NPCArchStructOf<VecFamily>;
+pub type Npcs = NpcArchStructOf<VecFamily>;
 #[allow(dead_code)]
 pub type Attacks = AttackArchStructOf<VecFamily>;
 
 /// Contains the contents of the game
 /// So far, this includes:
 /// - Enemies
-/// - NPCs
+/// - Npcs
 /// - Attacks
 /// 
 /// More will likely be added or migrated to this struct in the future
 pub struct World {
 	pub player: StructOf<Vec<PlayerArch>>,
 	pub enemies: StructOf<Vec<EnemyArch>>,
-	pub npcs: StructOf<Vec<NPCArch>>,
+	pub npcs: StructOf<Vec<NpcArch>>,
 	pub attacks: StructOf<Vec<AttackArch>>,
 
 	// Resources 

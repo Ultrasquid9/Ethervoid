@@ -159,7 +159,7 @@ impl Attack {
 
 	/// Gets the target of the attack
 	pub fn get_target(&self) -> Vec2 {
-		self.target
+		return self.target
 	}
 
 	/// Checks if the attack should be removed
@@ -184,7 +184,7 @@ impl Attack {
 	// Be warned: expect horrors beyond human comprehension
 
 	/// Updates the attack based upon its type
-	pub fn update(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Map) {
+	pub fn update(&mut self, enemies: &mut [Enemy], player: &mut Player, map: &Map) {
 		self.update_texture();
 
 		match &self.attack_type {
@@ -204,7 +204,7 @@ impl Attack {
 	}
 
 	/// Updates the provided Physical attack
-	fn attack_physical(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
+	fn attack_physical(&mut self, enemies: &mut [Enemy], player: &mut Player) {
 		match self.owner {
 			Owner::Player => for i in enemies {
 				if i.stats.is_touching(self) {
@@ -220,7 +220,7 @@ impl Attack {
 	}
 
 	/// Updates the provided Burst attack
-	fn attack_burst(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
+	fn attack_burst(&mut self, enemies: &mut [Enemy], player: &mut Player) {
 		// Returns the attack but with double the size
 		let double_size = || {
 			let mut to_return = self.clone();
@@ -231,11 +231,11 @@ impl Attack {
 
 		match self.owner {
 			Owner::Player => for i in enemies {
-				if i.stats.is_touching(&mut double_size()) {
+				if i.stats.is_touching(&double_size()) {
 					i.stats.try_damage(self.damage * (i.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 				}
 			}
-			Owner::Enemy => if player.stats.is_touching(&mut double_size()) {
+			Owner::Enemy => if player.stats.is_touching(&double_size()) {
 				player.stats.try_damage(self.damage * (player.stats.get_pos().distance(self.pos) / (self.size * 2.)) as isize);
 			}
 		}
@@ -244,7 +244,7 @@ impl Attack {
 	}
 
 	/// Updates the provided Projectile attack
-	fn attack_projectile(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player, map: &Map) {
+	fn attack_projectile(&mut self, enemies: &mut [Enemy], player: &mut Player, map: &Map) {
 		match self.owner {
 			Owner::Player => for i in enemies {
 				if self.is_touching(&i.stats) {
@@ -270,19 +270,16 @@ impl Attack {
 	}
 
 	/// Updates the provided Hitscan attack
-	fn attack_hitscan(&mut self, enemies: &mut Vec<Enemy>, player: &mut Player) {
+	fn attack_hitscan(&mut self, enemies: &mut [Enemy], player: &mut Player) {
 		// Damages the provided entity with a raycast
 		let damage_with_raycast = |entity: &mut Entity| {
-			match cast_wide(
+			if cast_wide(
 				&Ray{
 					position: vec2_to_tuple(&self.pos), 
 					end_position: vec2_to_tuple(&self.target)
 				}, 
 				&entity_to_barriers(entity)
-			) {
-				Ok(_) => entity.try_damage(self.damage),
-				_ => ()
-			}
+			).is_ok() { entity.try_damage(self.damage) }
 		};
 		
 		match self.owner {
@@ -307,7 +304,7 @@ impl CustomType for Attack {
 // Allows Attacks to be moved
 impl MovableObj for Attack {
 	fn get_size(&self) -> &f32 {
-		&self.size
+		return &self.size
 	}
 
 	fn get_pos(&self) -> Vec2 {
@@ -315,7 +312,7 @@ impl MovableObj for Attack {
 	}
 
 	fn edit_pos(&mut self) -> &mut Vec2 {
-		&mut self.pos
+		return &mut self.pos
 	}
 }
 
@@ -407,7 +404,7 @@ pub fn try_parry(world: &mut World) {
 
 /// Converts the provided entity into two barriers, a horizontal and a vertical one 
 fn entity_to_barriers(entity: &Entity) -> Vec<Barrier> {
-	vec![
+	return vec![
 		Barrier {
 			positions: (
 				(entity.x() + entity.size, entity.y()),

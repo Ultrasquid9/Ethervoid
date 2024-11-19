@@ -27,13 +27,11 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 				.decode()
 				.unwrap();
 
-			let img = if img.color() == ColorType::Rgba8 {
+			return if img.color() == ColorType::Rgba8 {
 				img
 			} else {
 				DynamicImage::ImageRgba8(img.to_rgba8())
 			};
-
-			img
 		}));
 	}
 

@@ -21,7 +21,7 @@ use super::{
 };
 
 // For keeping track of the recursion in `try_move`
-static DEPTH: Lazy<RwLock<u8>> = Lazy::new(|| RwLock::new(0));
+static DEPTH: Lazy<RwLock<u8>> = Lazy::new(|| return RwLock::new(0));
 
 /// Trait for an object that has a size and can be moved
 pub trait MovableObj {
@@ -32,20 +32,18 @@ pub trait MovableObj {
 	/// Attempts to move the object to the provided Vec2
 	fn try_move(&mut self, target: Vec2, map: &Map) {
 		let barriers = create_barriers(&map.points);
-			
-		match cast_wide(
+		
+		// Instantly returns if about to hit a door 
+		if cast_wide(
 			&Ray {
 				position: vec2_to_tuple(&self.get_pos()),
 				end_position: vec2_to_tuple(&target)
 			},
 			&map.doors
 				.iter()
-				.map(|door| door.to_barrier())
+				.map(|door| return door.to_barrier())
 				.collect()
-		) {
-			Ok(_) => return,
-			_ => ()
-		}
+		).is_ok() { return }			
 
 		let mut try_slope_movement = false;
 
@@ -89,18 +87,15 @@ pub trait MovableObj {
 		};
 
 		for i in barriers {
-			match cast(
+			if cast(
 				&Ray {
 					position: (self.get_pos().x, self.get_pos().y),
 					end_position: (target.x, target.y)
 				}, 
 				&i
-			) {
-				Ok(_) => {
-					wall_to_check = i;
-					break
-				}
-				_ => ()
+			).is_ok() {
+				wall_to_check = i;
+				break
 			}
 		}
 
@@ -129,11 +124,7 @@ pub trait MovableObj {
 
 	/// Checks if the object is touching another object
 	fn is_touching(&self, other: &dyn MovableObj,) -> bool {
-		if self.get_pos().distance(other.get_pos()) <= *self.get_size() + *other.get_size() {
-			return true;
-		} else {
-			return false;
-		}
+		return self.get_pos().distance(other.get_pos()) <= *self.get_size() + *other.get_size();
 	}
 }
 
@@ -208,18 +199,14 @@ impl Entity {
 
 	/// Checks if the entity is dead
 	pub fn should_kill(&self) -> bool {
-		if self.health <= 0 {
-			return true
-		} else {
-			return false
-		}
+		return self.health <= 0
 	}
 }
 
 // Allows the entity to be moved 
 impl MovableObj for Entity {
 	fn get_size(&self) -> &f32 {
-		&self.size
+		return &self.size
 	}
 
 	fn get_pos(&self) -> Vec2 {
@@ -227,7 +214,7 @@ impl MovableObj for Entity {
 	}
 
 	fn edit_pos(&mut self) -> &mut Vec2 {
-		&mut self.pos
+		return &mut self.pos
 	}
 }
 
@@ -254,7 +241,7 @@ pub fn get_axis(pos: Vec2, target: Vec2) -> (Axis, Axis) {
 	return to_return
 }
 
-fn create_barriers(map: &Vec<Vec2>) -> Vec<Barrier> {
+fn create_barriers(map: &[Vec2]) -> Vec<Barrier> {
 	let mut barriers: Vec<Barrier> = Vec::new();
 
 	for i in 0..map.len() {
@@ -263,7 +250,7 @@ fn create_barriers(map: &Vec<Vec2>) -> Vec<Barrier> {
 				positions: (vec2_to_tuple(map.get(i).unwrap()), vec2_to_tuple(map.get(i + 1).unwrap()))
 			}),
 			None => barriers.push(Barrier {
-				positions: (vec2_to_tuple(map.get(i).unwrap()), (vec2_to_tuple(map.get(0).unwrap())))
+				positions: (vec2_to_tuple(map.get(i).unwrap()), (vec2_to_tuple(map.first().unwrap())))
 			})
 		}
 	}

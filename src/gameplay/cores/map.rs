@@ -13,7 +13,7 @@ use super::{
 	}, 
 	npctype::{
 		get_npctypes, 
-		NPCType
+		NpcType
 	},
 	gen_name, 
 	get_files
@@ -32,7 +32,7 @@ pub struct Map {
 	pub points: Vec<Vec2>,
 	pub doors: Vec<Door>,
 	pub enemies: Vec<(EnemyType, Vec2)>,
-	pub npcs: Vec<(NPCType, Vec2)>
+	pub npcs: Vec<(NpcType, Vec2)>
 }
 
 impl MapBuilder {
@@ -44,13 +44,13 @@ impl MapBuilder {
 		let enemytypes = get_enemytypes();
 		let npctypes = get_npctypes();
 
-		Map {
+		return Map {
 			points: self.points,
 			doors: self.doors,
 
 			enemies: self.enemies
 				.iter()
-				.map(|enemy| (
+				.map(|enemy| return (
 					enemytypes.get(enemy.0.as_str()).unwrap().clone(),
 					enemy.1
 				))
@@ -58,7 +58,7 @@ impl MapBuilder {
 			
 			npcs: self.npcs
 				.iter()
-				.map(|npc| (
+				.map(|npc| return (
 					npctypes.get(npc.0.as_str()).unwrap().clone(),
 					npc.1
 				))

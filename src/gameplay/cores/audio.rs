@@ -18,7 +18,7 @@ pub fn get_audio() -> HashMap<String, StaticSoundData> {
 		names.push(gen_name(&i));
 
 		audio_handles.push(thread::spawn(move || -> StaticSoundData {
-			StaticSoundData::from_file(i).unwrap()
+			return StaticSoundData::from_file(i).unwrap()
 		}));
 	}
 

@@ -41,7 +41,7 @@ pub fn clean_resources() {
  *	Textures
  */ 
 
-static TEXTURES: Lazy<RwLock<HashMap<String, DynamicImage>>> = Lazy::new(|| RwLock::new(HashMap::default()));
+static TEXTURES: Lazy<RwLock<HashMap<String, DynamicImage>>> = Lazy::new(|| return RwLock::new(HashMap::default()));
 
 /// Populates the texture HashMap
 fn create_textures() {
@@ -59,20 +59,20 @@ fn clean_textures() {
 
 /// Gets the image at the provided key
 pub fn access_image(key: &str) -> DynamicImage {
-	TEXTURES.read().unwrap().get(key).unwrap().clone()
+	return TEXTURES.read().unwrap().get(key).unwrap().clone()
 }
 
 /// Gets the texture at the provided key
 pub fn access_texture(key: &str) -> Texture2D {
-	to_texture(access_image(key))
+	return to_texture(access_image(key))
 }
 
 /*
  *	Audio
  */ 
 
-static MANAGER: Lazy<RwLock<AudioManager>> = Lazy::new(|| RwLock::new(AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap()));
-static AUDIO: Lazy<RwLock<HashMap<String, StaticSoundData>>> = Lazy::new(|| RwLock::new(HashMap::default()));
+static MANAGER: Lazy<RwLock<AudioManager>> = Lazy::new(|| return RwLock::new(AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap()));
+static AUDIO: Lazy<RwLock<HashMap<String, StaticSoundData>>> = Lazy::new(|| return RwLock::new(HashMap::default()));
 
 /// Populates the Audio HashMap
 fn create_audio() {
@@ -94,6 +94,6 @@ pub fn play_sound(key: &str) {
 }
 
 /// Plays a random sound from the provided list of keys 
-pub fn play_random_sound(keys: &Vec<&str>) {
+pub fn play_random_sound(keys: &[&str]) {
 	play_sound(keys[rand::gen_range(0, keys.len() - 1)]);
 }

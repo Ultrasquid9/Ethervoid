@@ -3,7 +3,7 @@ use combat::try_parry;
 use draw::draw;
 use enemy::Enemy;
 use entity::MovableObj;
-use npc::NPC;
+use npc::Npc;
 use player::Player;
 use macroquad::prelude::*;
 use stecs::prelude::Archetype;
@@ -11,7 +11,7 @@ use stecs::prelude::Archetype;
 use ecs::{
 	AttackArch, 
 	EnemyArch, 
-	NPCArch, 
+	NpcArch, 
 	PlayerArch, 
 	World
 };
@@ -142,7 +142,7 @@ pub async fn gameplay() -> State {
 			world.enemies.remove(to_remove);
 		}
 
-		// Updates NPCs
+		// Updates Npcs
 		// WIP
 		for (_, npc) in world.npcs.iter_mut() {
 			npc.io.update(world.maps.get(&world.current_map).unwrap(), &world.attacks);
@@ -178,15 +178,15 @@ pub fn populate(world: &mut World) {
 	// Removing all the old content of the world 
 
 	// Enemies
-	while world.enemies.io.len() > 0 {
+	while !world.enemies.io.is_empty() {
 		world.enemies.remove(0);
 	}
-	// NPCs
-	while world.npcs.io.len() > 0 {
+	// Npcs
+	while !world.npcs.io.is_empty() {
 		world.npcs.remove(0);
 	}
 	// Attacks
-	while world.attacks.io.len() > 0 {
+	while !world.attacks.io.is_empty() {
 		world.attacks.remove(0);
 	}
 
@@ -196,8 +196,8 @@ pub fn populate(world: &mut World) {
 	for i in world.get_current_map().enemies.clone() {
 		world.enemies.insert(EnemyArch { io: Enemy::new(i.1, i.0.clone())});
 	}
-	// NPCs
+	// Npcs
 	for i in world.get_current_map().npcs.clone() {
-		world.npcs.insert(NPCArch { io: NPC::new(i.0, i.1)});
+		world.npcs.insert(NpcArch { io: Npc::new(i.0, i.1)});
 	}
 }

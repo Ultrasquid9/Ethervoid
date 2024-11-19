@@ -28,14 +28,14 @@ impl EnemyTypeBuilder {
 	pub fn build(self) -> EnemyType {
 		let behaviors = get_attacks();
 
-		EnemyType {
+		return EnemyType {
 			max_health: self.max_health,
 			size: self.size,
 			sprite: self.sprite,
 			movement: behaviors.get(&self.movement).unwrap().clone(), 
 			attacks: self.attacks
 				.iter()
-				.map(|attack| behaviors.get(attack.as_str()).unwrap().clone())
+				.map(|attack| return behaviors.get(attack.as_str()).unwrap().clone())
 				.collect()
 		}
 	}

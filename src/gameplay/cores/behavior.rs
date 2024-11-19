@@ -44,12 +44,12 @@ pub struct BehaviorBuilder (String);
 impl BehaviorBuilder {
 	/// Creates an attack with the script at the provided directory
 	pub fn from(dir: String) -> Self {
-		Self(fs::read_to_string(dir).unwrap())
+		return Self(fs::read_to_string(dir).unwrap())
 	}
 
 	/// Creates an attack with the script at the provided directory
 	pub fn build<'a>(self) -> Behavior<'a> {
-		Behavior {
+		return Behavior {
 			current_target: Vec2::new(0., 0.),
 			script: self.0,
 			scope: Scope::new(),
@@ -69,13 +69,13 @@ pub struct Behavior<'a> {
 
 impl Behavior<'_> {
 	/// Reads the attack script. Returns true if the enemy has reached the target, or if the enemy could not move
-	pub fn read_script<'a>(&mut self, entity: &'a mut Entity, player: &Player, map: &Map, attacks: &mut Attacks) -> bool {
+	pub fn read_script(&mut self, entity: &mut Entity, player: &Player, map: &Map, attacks: &mut Attacks) -> bool {
 		// Values available in the scope
 		self.scope
 			.push("attacks", Vec::<Dynamic>::new())
-			.push_constant("player_pos", player.stats.get_pos().clone())
-			.push_constant("enemy_pos", entity.get_pos().clone())
-			.push_constant("target_pos", self.current_target.clone());
+			.push_constant("player_pos", player.stats.get_pos())
+			.push_constant("enemy_pos", entity.get_pos())
+			.push_constant("target_pos", self.current_target);
 
 		// Values needed for the script, but not exposed to it 
 		let entity_pos = entity.get_pos();
@@ -96,7 +96,7 @@ impl Behavior<'_> {
 			.register_fn("distance_between", distance_between)
 
 			// Functions for creating attacks
-			.register_fn("new_physical", move |damage: i64, size, target: Vec2,| Attack::new_physical(
+			.register_fn("new_physical", move |damage: i64, size, target: Vec2,| return Attack::new_physical(
 				entity_pos, 
 				target - entity_pos,
 				damage as isize, 
@@ -104,21 +104,21 @@ impl Behavior<'_> {
 				Owner::Enemy,
 				AttackTextureType::Dash
 			))
-			.register_fn("new_burst", move |damage: i64, size| Attack::new_burst(
+			.register_fn("new_burst", move |damage: i64, size| return Attack::new_burst(
 				entity_pos, 
 				damage as isize, 
 				size, 
 				Owner::Enemy,
 				AttackTextureType::Burst
 			))
-			.register_fn("new_projectile", move |damage: i64, target: Vec2| Attack::new_projectile(
+			.register_fn("new_projectile", move |damage: i64, target: Vec2| return Attack::new_projectile(
 				entity_pos, 
 				target,
 				damage as isize, 
 				Owner::Enemy,
 				AttackTextureType::ProjectileEnemy
 			))
-			.register_fn("new_hitscan", move |damage: i64, target: Vec2| Attack::new_hitscan(
+			.register_fn("new_hitscan", move |damage: i64, target: Vec2| return Attack::new_hitscan(
 				entity_pos, 
 				target,
 				damage as isize, 
@@ -126,7 +126,7 @@ impl Behavior<'_> {
 			))
 
 			// Hacky method to end the script
-			.register_fn("end", move || Vec2::new(999999., 999999.));
+			.register_fn("end", move || return Vec2::new(999999., 999999.));
 
 		// Executing the script
 		let new_pos = match self.engine.eval_with_scope::<Vec2>(&mut self.scope, &self.script) {
@@ -155,12 +155,7 @@ impl Behavior<'_> {
 
 		// Returns true if the enemy could not move or if the enemy has reached the target
 		// Otherwise, returns false
-		if entity.get_pos().round() == self.current_target.round()
-		|| entity.get_pos() != new_pos {
-			return true
-		} else {
-			return false
-		}
+		return entity.get_pos().round() == self.current_target.round() || entity.get_pos() != new_pos 
 	}
 }
 

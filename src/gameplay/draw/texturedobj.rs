@@ -51,7 +51,7 @@ pub struct EntityTexture {
 
 impl EntityTexture {
 	pub fn new(sprite: Texture2D) -> Self {
-		Self {
+		return Self {
 			sprite,
 
 			pos: Vec2::new(0., 0.),
@@ -95,12 +95,10 @@ impl EntityTexture {
 			}
 		} else if self.dir_horizontal != Axis::None {
 			size * 2.      // Left/right
+		} else if self.dir_vertical == Axis::Positive {
+			0.             // Down
 		} else {
-			if self.dir_vertical == Axis::Positive {
-				0.         // Down
-			} else {
-				size * 4.  // Up
-			}
+			size * 4.      // Up
 		};
 
 		let x_pos = match self.anim_time as isize / 16 {
@@ -124,11 +122,7 @@ impl EntityTexture {
 						size
 					)
 				),
-				flip_x: if self.dir_horizontal == Axis::Negative {
-					true
-				} else {
-					false
-				},
+				flip_x: self.dir_horizontal == Axis::Negative,
 				dest_size: Some(Vec2::new(size * SCREEN_SCALE, size * SCREEN_SCALE)),
 				..Default::default()
 			})
@@ -164,7 +158,7 @@ impl AttackTexture {
 	/// Creates an attack texture with a "slash" sprite
 	pub fn new(pos: Vec2, size: f32, angle: f32, texturetype: AttackTextureType) -> Self {
 		let size = size as u32;
-		Self {
+		return Self {
 			sprite: downscale(
 				match texturetype {
 					// Physical
@@ -223,9 +217,7 @@ impl AttackTexture {
 					).as_rgba8().unwrap(), 
 					self.angle,
 					imageproc::geometric_transformations::Interpolation::Nearest, 
-					Rgba {
-						0: [0, 0, 0, 0] // Clear
-					}
+					Rgba([0, 0, 0, 0]) // Clear
 				))
 			),
 			self.pos, 

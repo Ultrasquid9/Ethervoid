@@ -32,7 +32,7 @@ pub async fn menu() -> State {
 		if widgets::Button::new("Play")
 			.position(vec2(screen_width() * 0.9, (screen_height() / 3.) + 0.))
 			.size(vec2(screen_width() / 16., screen_height() / 32.))
-			.ui(&mut *root_ui()) {
+			.ui(&mut root_ui()) {
 				to_return = Some(State::Gameplay)
 			}
 
@@ -40,14 +40,13 @@ pub async fn menu() -> State {
 		if widgets::Button::new("Quit")
 			.position(vec2(screen_width() * 0.9, (screen_height() / 3.) + 64.))
 			.size(vec2(screen_width() / 16., screen_height() / 32.))
-			.ui(&mut *root_ui()) {
+			.ui(&mut root_ui()) {
 				to_return = Some(State::Quit)
 			}
 
 		// Checking to see if a button was pressed
-		match to_return {
-			Some(state) => return state,
-			_ => ()
+		if let Some(state) = to_return {
+			return state
 		}
 
 		next_frame().await

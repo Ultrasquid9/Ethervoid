@@ -44,7 +44,7 @@ impl Enemy {
 			movement: enemytype.movement.build(),
 			attacks: enemytype.attacks
 				.iter()
-				.map(|attack| attack.clone().build())
+				.map(|attack| return attack.clone().build())
 				.collect(),
 			attack_index: 0,
 			attack_cooldown: 32
@@ -73,7 +73,7 @@ impl Enemy {
 	/// Moves the enemy
 	/// 
 	/// Attacks if possible, otherwise just executes a movement script 
-	fn movement(self: &mut Self, attacks: &mut Attacks, player: &mut Player, map: &Map) {
+	fn movement(&mut self, attacks: &mut Attacks, player: &mut Player, map: &Map) {
 		if self.attack_cooldown == 0 
 		&& self.stats.stunned == 0 {
 			if self.attacks[self.attack_index].read_script(&mut self.stats, player, map, attacks) {
@@ -141,11 +141,7 @@ impl TexturedObj for Enemy {
 			self.stats.get_pos(), 
 			self.stats.dir_horizontal, 
 			self.stats.dir_vertical, 
-			if self.stats.stunned == 0 {
-				true
-			} else {
-				false
-			}
+			self.stats.stunned == 0
 		);
 	}
 }

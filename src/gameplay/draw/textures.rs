@@ -42,7 +42,7 @@ pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawT
 	);
 
 	draw_texture_ex(
-		&texture, 
+		texture, 
 		pixel_offset(pos.x - scale.x / 2.),
 		pixel_offset(pos.y - scale.y / 2.),
 		WHITE, 

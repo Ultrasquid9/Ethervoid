@@ -17,7 +17,7 @@ use super::{
 	cores::{ 
 		npctype::{
 			Message,
-			NPCType
+			NpcType
 		},
 		map::Map
 	}, 
@@ -37,7 +37,7 @@ use super::{
 	player::Axis
 };
 
-pub struct NPC {
+pub struct Npc {
 	pos: Vec2,
 	center_pos: Vec2,
 	
@@ -46,7 +46,7 @@ pub struct NPC {
 	messages: Vec<Message>,
 	messages_cooldown: f32,
 
-	movement: NPCMovement,
+	movement: NpcMovement,
 	movement_cooldown: f32,
 	movement_target: Vec2
 }
@@ -59,14 +59,14 @@ pub struct Dialogue {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub enum NPCMovement {
+pub enum NpcMovement {
 	Wander(f32),
 	Still
 }
 
-impl NPC {
-	pub fn new(npctype: NPCType, pos: Vec2) -> Self {
-		Self {
+impl Npc {
+	pub fn new(npctype: NpcType, pos: Vec2) -> Self {
+		return Self {
 			pos,
 			center_pos: pos,
 
@@ -116,7 +116,7 @@ impl NPC {
 
 	fn movement(&mut self, map: &Map) {
 		match self.movement {
-			NPCMovement::Wander(range) => {
+			NpcMovement::Wander(range) => {
 				if self.movement_cooldown > 0. {
 					self.movement_cooldown -= get_delta_time()
 
@@ -137,31 +137,27 @@ impl NPC {
 					}
 				}
 			},
-			NPCMovement::Still => ()
+			NpcMovement::Still => ()
 		}
 	}
 }
 
-// Allows the NPC to move
-impl MovableObj for NPC {
-	fn get_size(&self) -> &f32 { &15. } // NPC size is hardcoded for now
+// Allows the Npc to move
+impl MovableObj for Npc {
+	fn get_size(&self) -> &f32 { return &15. } // Npc size is hardcoded for now
 
 	fn get_pos(&self) -> Vec2 {
 		return self.pos
 	}
 
 	fn edit_pos(&mut self) -> &mut Vec2 {
-		&mut self.pos
+		return &mut self.pos
 	}
 }
 
-impl TexturedObj for NPC {
+impl TexturedObj for Npc {
 	fn update_texture(&mut self) {
-		let moving = if self.movement_cooldown >= 0. {
-			false
-		} else {
-			true
-		};
+		let moving = self.movement_cooldown < 0.;
 
 		let new_axis = if moving {
 			get_axis(self.pos, self.movement_target)
@@ -170,7 +166,7 @@ impl TexturedObj for NPC {
 		};
 
 		self.texture.update(
-			self.pos.clone(), 
+			self.pos, 
 			new_axis.0, 
 			new_axis.1, 
 			moving

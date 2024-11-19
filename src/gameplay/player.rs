@@ -164,14 +164,14 @@ impl Player {
 	pub fn attack_sword(&mut self) -> Attack {
 		match self.swords[self.current_sword].weapon {
 			Weapon::Sword => {
-				play_random_sound(&vec!(
+				play_random_sound(&[
 					"default:sfx/sword_1",
 					"default:sfx/sword_2",
 					"default:sfx/sword_3"
-				));
+				]);
 
 				self.swords[self.current_sword].cooldown = 16;
-				Attack::new_physical(
+				return Attack::new_physical(
 					self.stats.get_pos(), 
 					mouse_position_local(), 
 					10, 
@@ -182,7 +182,7 @@ impl Player {
 			},
 			Weapon::Hammer => {
 				self.swords[self.current_sword].cooldown = 32;
-				Attack::new_burst(
+				return Attack::new_burst(
 					self.stats.get_pos(), 
 					10, 
 					36., 
@@ -192,7 +192,7 @@ impl Player {
 			},
 			Weapon::Boomerang => {
 				self.swords[self.current_sword].cooldown = 48;
-				Attack::new_projectile(
+				return Attack::new_projectile(
 					self.stats.get_pos(), 
 					get_mouse_pos() * 999., 
 					10, 
@@ -210,7 +210,7 @@ impl Player {
 		match self.guns[self.current_gun].weapon {
 			Weapon::Pistol => {
 				self.guns[self.current_gun].cooldown = 16;
-				Attack::new_projectile(
+				return Attack::new_projectile(
 					self.stats.get_pos(), 
 					get_mouse_pos() * 999., 
 					10, 
@@ -220,7 +220,7 @@ impl Player {
 			},
 			Weapon::Shotgun => {
 				self.guns[self.current_gun].cooldown = 32;
-				Attack::new_burst(
+				return Attack::new_burst(
 					self.stats.get_pos(), 
 					10, 
 					36., 
@@ -230,7 +230,12 @@ impl Player {
 			},
 			Weapon::RadioCannon => {
 				self.guns[self.current_gun].cooldown = 48;
-				Attack::new_hitscan(self.stats.get_pos(), get_mouse_pos() * 999., 6, Owner::Player)
+				return Attack::new_hitscan(
+					self.stats.get_pos(), 
+					get_mouse_pos() * 999., 
+					6, 
+					Owner::Player
+				)
 			},
 			
 			_ => panic!("Bad weapon")
@@ -321,7 +326,7 @@ impl Player {
 
 		// Makes the player slow down if their speed is high
 		if self.speed > 4.5 {
-			self.speed = self.speed / 1.5;
+			self.speed /= 1.5;
 		}
 
 		// Checks to see if the player has moved. 
@@ -335,17 +340,17 @@ impl Player {
 			let current_pos = self.stats.get_pos();
 			self.stats.try_move(
 				(new_pos.normalize() * self.speed * get_delta_time()) + current_pos, 
-				&maps.get(current_map).unwrap()
+				maps.get(current_map).unwrap()
 			);
 
 			// Handling footstep sounds
 			if self.footstep_cooldown <= 0. {
-				play_random_sound(&vec!(
+				play_random_sound(&[
 					"default:sfx/walk_1",
 					"default:sfx/walk_2",
 					"default:sfx/walk_3",
 					"default:sfx/walk_4"
-				));
+				]);
 
 				self.footstep_cooldown = 20.
 			} else {
@@ -377,11 +382,7 @@ impl TexturedObj for Player {
 			self.stats.get_pos(),
 			self.axis_horizontal, 
 			self.axis_vertical, 
-			if self.speed > 1.0 {
-				true
-			} else {
-				false
-			}
+			self.speed > 1.0 
 		);
 	}
 }

@@ -92,8 +92,8 @@ pub async fn draw(camera: &mut Vec2, world: &World, map: &Map) {
 			None => draw_line(
 				map.get(i).unwrap().x, 
 				map.get(i).unwrap().y, 
-				map.get(0).unwrap().x, 
-				map.get(0).unwrap().y, 
+				map.first().unwrap().x, 
+				map.first().unwrap().y, 
 				4., 
 				BLUE
 			),
@@ -126,7 +126,7 @@ pub async fn draw(camera: &mut Vec2, world: &World, map: &Map) {
 		entity_futures.push(enemy.stats.texture.render());
 	}
 
-	// NPCs
+	// Npcs
 	for npc in world.npcs.io.iter() {
 		entity_futures.push(npc.texture.render());
 	}

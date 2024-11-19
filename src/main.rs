@@ -1,3 +1,6 @@
+#![deny(clippy::implicit_return)]
+#![allow(clippy::needless_return)]
+
 use gameplay::gameplay;
 use macroquad::prelude::*;
 use menu::menu;

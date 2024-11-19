@@ -9,7 +9,7 @@ use serde::{
 
 use crate::gameplay::npc::{
 	Dialogue, 
-	NPCMovement
+	NpcMovement
 };
 
 use super::{
@@ -26,14 +26,14 @@ pub struct Message {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct NPCType {
+pub struct NpcType {
 	pub name: String,
 	pub sprite: String,
-	pub movement: NPCMovement,
+	pub movement: NpcMovement,
 	pub messages: Vec<Message>
 }
 
-impl NPCType {
+impl NpcType {
 	pub fn read(dir: String) -> Self {
 		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
 	}
@@ -57,14 +57,14 @@ impl Message {
 	}
 }
 
-/// Provides a HashMap containing all NPC data
-pub fn get_npctypes() -> HashMap<String, NPCType> {
-	let mut npcs: HashMap<String, NPCType> = HashMap::default();
+/// Provides a HashMap containing all Npc data
+pub fn get_npctypes() -> HashMap<String, NpcType> {
+	let mut npcs: HashMap<String, NpcType> = HashMap::default();
 
 	for i in get_files(String::from("npcs")) {
 		npcs.insert(
 			gen_name(&i),
-			NPCType::read(i)
+			NpcType::read(i)
 		);
 	}
 

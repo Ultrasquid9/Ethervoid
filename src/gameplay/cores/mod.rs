@@ -44,10 +44,8 @@ pub fn get_files(file_type: String) -> Vec<String> {
 
 			// Removing "leftover" entries
 			dirs.retain(|dir| {
-				if let Err(_) = read_dir(dir) {
-						if fs::exists(dir).unwrap() {
-						return true
-					}
+				if read_dir(dir).is_err() && fs::exists(dir).unwrap() {
+					return true
 				}
 				return false
 			});

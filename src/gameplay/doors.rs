@@ -57,13 +57,13 @@ impl Door {
 	/// Converts the door into a barrier
 	pub fn to_barrier(&self) -> Barrier {
 		match self.direction {
-			Direction::North | Direction::South => Barrier {
+			Direction::North | Direction::South => return Barrier {
 				positions: (
 					(self.pos.x + 32., self.pos.y),
 					(self.pos.x - 32., self.pos.y)
 				)
 			},
-			Direction::East | Direction::West => Barrier {
+			Direction::East | Direction::West => return Barrier {
 				positions: (
 					(self.pos.x, self.pos.y + 32.),
 					(self.pos.x, self.pos.y - 32.)
@@ -88,7 +88,7 @@ impl Door {
 		};
 
 		// The player has not touched the door, so the map should not be changed
-		if let Err(_) = cast(&ray, &self.to_barrier()) {
+		if cast(&ray, &self.to_barrier()).is_err() {
 			return
 		}
 
