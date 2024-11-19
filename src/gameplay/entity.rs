@@ -92,7 +92,7 @@ pub trait MovableObj {
 		for i in barriers {
 			match cast(
 				&Ray {
-					position: (self.get_pos().x, self.get_pos().y),
+					position: (old_pos.x, old_pos.y),
 					end_position: (target.x, target.y)
 				}, 
 				&i
@@ -106,15 +106,15 @@ pub trait MovableObj {
 		}
 
 		if wall_to_check.positions.0.0 == wall_to_check.positions.1.0
-		&& wall_to_check.positions.0.1 == wall_to_check.positions.1.1 {
+		|| wall_to_check.positions.0.1 == wall_to_check.positions.1.1 {
 			return;
 		}
 
 		let point0 = tuple_to_vec2(wall_to_check.positions.0);
 		let point1 = tuple_to_vec2(wall_to_check.positions.1);
 
-		let angle0 = point1.angle_between(point0);// * ( 180. / PI);
-		let angle1 = point0.angle_between(point1);// * ( 180. / PI);
+		let angle0 = (point1.x - point0.x).atan2(point1.y - point0.y);
+		let angle1 = (point0.x - point1.x).atan2(point0.y - point1.y);
 		
 		let angle = if (Vec2::from_angle(angle0) + old_pos).distance(target)
 		< (Vec2::from_angle(angle1) + old_pos).distance(target) {
