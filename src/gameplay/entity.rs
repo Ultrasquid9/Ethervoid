@@ -47,7 +47,6 @@ pub trait MovableObj {
 			_ => ()
 		}
 
-		let old_pos = self.get_pos();
 		let mut try_slope_movement = false;
 
 		match cast_wide(
@@ -92,7 +91,7 @@ pub trait MovableObj {
 		for i in barriers {
 			match cast(
 				&Ray {
-					position: (old_pos.x, old_pos.y),
+					position: (self.get_pos().x, self.get_pos().y),
 					end_position: (target.x, target.y)
 				}, 
 				&i
@@ -116,16 +115,16 @@ pub trait MovableObj {
 		let angle0 = (point1.x - point0.x).atan2(point1.y - point0.y);
 		let angle1 = (point0.x - point1.x).atan2(point0.y - point1.y);
 		
-		let angle = if (Vec2::from_angle(angle0) + old_pos).distance(target)
-		< (Vec2::from_angle(angle1) + old_pos).distance(target) {
+		let angle = if (Vec2::from_angle(angle0) + self.get_pos()).distance(target)
+		< (Vec2::from_angle(angle1) + self.get_pos()).distance(target) {
 			angle0
 		} else {
 			angle1
 		};
 
-		let new_pos = Vec2::from_angle(angle) * old_pos.distance(target);
+		let new_pos = Vec2::from_angle(angle) * self.get_pos().distance(target);
 
-		self.try_move(old_pos + new_pos, map);
+		self.try_move(self.get_pos() + new_pos, map);
 	}
 
 	/// Checks if the object is touching another object
