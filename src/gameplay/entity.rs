@@ -31,14 +31,7 @@ pub trait MovableObj {
 
 	/// Attempts to move the object to the provided Vec2
 	fn try_move(&mut self, target: Vec2, map: &Map) {
-		let mut barriers = create_barriers(&map.points);
-
-		// This block of code is required for slope movement
-		// I do not know why, as doors are ignored regardless 
-		// Please do not touch this code until you know how it works 
-		for i in &map.doors {
-			barriers.push(i.to_barrier())
-		}
+		let barriers = create_barriers(&map.points);
 			
 		match cast_wide(
 			&Ray {
@@ -83,7 +76,7 @@ pub trait MovableObj {
 		if !try_slope_movement { return }
 
 		// Checking recursion
-		if *DEPTH.read().unwrap() > 1 {
+		if *DEPTH.read().unwrap() > 0 {
 			*DEPTH.write().unwrap() = 0;
 			return 
 		} else {
@@ -104,28 +97,35 @@ pub trait MovableObj {
 				}, 
 				&i
 			) {
-				Ok(_) => (),
-				_ => wall_to_check = i
+				Ok(_) => {
+					wall_to_check = i;
+					break
+				}
+				_ => ()
 			}
 		}
 
-		if wall_to_check.positions.0.0 != wall_to_check.positions.1.0
-		&& wall_to_check.positions.0.1 != wall_to_check.positions.1.1 {
+		if wall_to_check.positions.0.0 == wall_to_check.positions.1.0
+		&& wall_to_check.positions.0.1 == wall_to_check.positions.1.1 {
 			return;
 		}
+
+		let point0 = tuple_to_vec2(wall_to_check.positions.0);
+		let point1 = tuple_to_vec2(wall_to_check.positions.1);
+
+		let angle0 = point1.angle_between(point0);// * ( 180. / PI);
+		let angle1 = point0.angle_between(point1);// * ( 180. / PI);
 		
-		let angle = tuple_to_vec2(wall_to_check.positions.0).angle_between(tuple_to_vec2(wall_to_check.positions.1));
-
-		let new_pos = Vec2::new(
-			old_pos.distance(target) * angle.cos(), 
-			old_pos.distance(target) * angle.cos()
-		);
-
-		if (old_pos + new_pos).distance(target) > old_pos.distance(target) {
-			self.try_move(old_pos + new_pos, map);
+		let angle = if (Vec2::from_angle(angle0) + old_pos).distance(target)
+		< (Vec2::from_angle(angle1) + old_pos).distance(target) {
+			angle0
 		} else {
-			self.try_move(old_pos - new_pos, map);
-		}
+			angle1
+		};
+
+		let new_pos = Vec2::from_angle(angle) * old_pos.distance(target);
+
+		self.try_move(old_pos + new_pos, map);
 	}
 
 	/// Checks if the object is touching another object
