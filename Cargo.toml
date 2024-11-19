@@ -12,18 +12,18 @@ walkdir = "2.5.*"
 ahash = "0.8.*"
 raylite = "0.1.7"
 futures = "0.3.*"
-glam = "*"
 
-imageproc = { version = "0.25.*", default-features = false }
-image = { version = "0.25.*", default-features = false, features = ["png", "webp"] }
+imageproc = "0.25.*"
 fast_image_resize = { version = "5.0.*", features = ["image"] }
 
 rhai = { version = "1.19.0", features = ["f32_float", "sync"] }
 serde = { version = "1.0", features = ["derive"] }
 ron = "0.8.*"
 
-[features]
-glam-serde = ["glam/serde"]
-
 [profile.dev.package."*"]
 opt-level = 3
+
+# TODO: Test to see if these actually improve performance
+[profile.release]
+codegen-units = 1
+lto = "fat"

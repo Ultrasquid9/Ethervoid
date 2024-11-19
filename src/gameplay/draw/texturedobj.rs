@@ -1,8 +1,9 @@
-use imageproc::geometric_transformations::rotate_about_center;
-
-use image::{
-	DynamicImage, 
-	Rgba
+use imageproc::{
+	geometric_transformations::rotate_about_center, 
+	image::{
+		DynamicImage, 
+		Rgba
+	}
 };
 
 use crate::gameplay::{

@@ -1,6 +1,6 @@
 use std::sync::RwLock;
 use ahash::HashMap;
-use image::DynamicImage;
+use imageproc::image::DynamicImage;
 use macroquad::{rand, texture::Texture2D};
 use once_cell::sync::Lazy;
 

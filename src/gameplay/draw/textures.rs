@@ -1,5 +1,5 @@
 use futures::future::join_all;
-use image::DynamicImage;
+use imageproc::image::DynamicImage;
 use super::SCREEN_SCALE;
 
 use fast_image_resize::{

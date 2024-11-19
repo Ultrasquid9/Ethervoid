@@ -1,7 +1,6 @@
 use std::thread;
 use ahash::HashMap;
-
-use image::{
+use imageproc::image::{
 	ColorType, 
 	DynamicImage, 
 	ImageReader
