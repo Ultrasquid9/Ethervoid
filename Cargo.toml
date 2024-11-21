@@ -7,6 +7,9 @@ edition = "2021"
 macroquad = { version = "0.4", features = ["glam-serde"] }
 stecs = "0.1.*"
 
+serde = { version = "1.0", features = ["derive"] }
+ron = "0.8.*"
+
 [profile.dev]
 opt-level = 1
 

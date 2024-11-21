@@ -2,6 +2,7 @@ use gameplay::gameplay;
 use macroquad::window::next_frame;
 
 mod gameplay;
+mod utils;
 
 /// Used to determine what state the game is in.
 pub enum State {
