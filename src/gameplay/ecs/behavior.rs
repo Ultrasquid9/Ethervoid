@@ -1,3 +1,3 @@
 pub enum Behavior {
-    Player
+	Player
 }
