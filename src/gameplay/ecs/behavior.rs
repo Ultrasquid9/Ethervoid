@@ -1,3 +1,4 @@
 pub enum Behavior {
-	Player
+	Player,
+	Script // TODO: Embed Rhai script/state/engine into this variant
 }

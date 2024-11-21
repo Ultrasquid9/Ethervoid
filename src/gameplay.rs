@@ -6,11 +6,13 @@ use stecs::prelude::Archetype;
 use crate::State;
 
 pub mod ecs;
+pub mod enemy;
 pub mod player;
 
 pub async fn gameplay() -> State {
 	let mut world = World {
-		player: Default::default()
+		player: Default::default(),
+		enemies: Default::default()
 	};
 
 	world.player.insert(Player::new());
