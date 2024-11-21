@@ -17,10 +17,10 @@ pub struct Obj {
 }
 
 impl Obj {
-	pub fn new(pos: Vec2, size: f32) -> Self {
+	pub fn new(pos: Vec2, target: Vec2, size: f32) -> Self {
 		Self {
 			pos,
-			target: pos,
+			target,
 
 			axis_horizontal: Axis::None,
 			axis_vertical: Axis::None,

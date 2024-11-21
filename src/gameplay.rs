@@ -5,6 +5,7 @@ use stecs::prelude::Archetype;
 
 use crate::State;
 
+pub mod combat;
 pub mod ecs;
 pub mod enemy;
 pub mod player;

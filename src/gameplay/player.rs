@@ -12,9 +12,11 @@ pub struct Player {
 
 impl Player {
 	pub fn new() -> Self {
+		let pos = Vec2::new(0., 0.);
+
 		Self {
 			health: Health::new(100.),
-			obj: Obj::new(Vec2::new(0., 0.), 15.),
+			obj: Obj::new(pos, pos, 15.),
 			behavior: Behavior::Player
 		}
 	}
