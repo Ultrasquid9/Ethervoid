@@ -1,0 +1,16 @@
+(
+	keymap: (
+		up: KeyCode(W),
+		left: KeyCode(A),
+		down: KeyCode(S),
+		right: KeyCode(D),
+		dash: KeyCode(LeftShift),
+
+		sword: MouseButton(Left),
+		gun: MouseButton(Right),
+		change_sword: KeyCode(R),
+		change_gun: KeyCode(F),
+
+		quit: KeyCode(Escape)
+	)
+)

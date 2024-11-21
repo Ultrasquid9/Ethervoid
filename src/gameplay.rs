@@ -1,5 +1,5 @@
 use draw::draw;
-use ecs::World;
+use ecs::{behavior::handle_behavior, World};
 use macroquad::window::next_frame;
 use player::Player;
 use stecs::prelude::Archetype;
@@ -22,6 +22,8 @@ pub async fn gameplay() -> State {
 
 	loop {
 		draw(&world).await;
+
+		handle_behavior(&mut world);
 
 		next_frame().await
 	}
