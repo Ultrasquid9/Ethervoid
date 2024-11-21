@@ -3,7 +3,7 @@ use stecs::prelude::*;
 
 use super::ecs::World;
 
-pub async fn draw(world: &World) {
+pub async fn draw<'a>(world: &World<'a>) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 

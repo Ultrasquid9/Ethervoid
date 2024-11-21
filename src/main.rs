@@ -1,6 +1,7 @@
 use gameplay::gameplay;
 use macroquad::window::next_frame;
 
+mod cores;
 mod gameplay;
 mod utils;
 

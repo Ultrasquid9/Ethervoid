@@ -6,7 +6,7 @@ pub mod behavior;
 pub mod health;
 pub mod obj;
 
-pub struct World {
-	pub player: StructOf<Vec<Player>>,
-	pub enemies: StructOf<Vec<Enemy>>,
+pub struct World<'a> {
+	pub player: StructOf<Vec<Player<'a>>>,
+	pub enemies: StructOf<Vec<Enemy<'a>>>,
 }

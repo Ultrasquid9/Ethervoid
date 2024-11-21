@@ -1,0 +1,20 @@
+(
+	points: [
+		(-100, -100),
+		(-120, 120),
+		(100, 100),
+		(140, -140)
+	],
+	enemies: [
+		("default:test", (30, 30)),
+		("default:test", (-30, -30))
+	],
+	doors: [
+		(
+			direction: South,
+			pos: (80, 80),
+			dest: "default:test2"
+		)
+	],
+	npcs: []
+)

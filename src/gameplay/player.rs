@@ -6,15 +6,15 @@ use crate::utils::config::Config;
 use super::ecs::{behavior::Behavior, health::Health, obj::Obj};
 
 #[derive(SplitFields)]
-pub struct Player {
+pub struct Player<'a> {
 	pub health: Health,
 	pub obj: Obj,
-	pub behavior: Behavior,
+	pub behavior: Behavior<'a>,
 
 	pub config: Config
 }
 
-impl Player {
+impl Player<'_> {
 	pub fn new() -> Self {
 		let pos = Vec2::new(0., 0.);
 
