@@ -71,6 +71,7 @@ pub fn player_movement(obj: &mut Obj, config: &Config) {
 	if new_pos == Vec2::new(0., 0.) {
 		obj.speed = 1.0;
 	} else {
-		obj.pos = (new_pos.normalize() * obj.speed * get_delta_time()) + obj.pos
+		obj.update(new_pos.normalize() * obj.speed * get_delta_time() + obj.pos);
+		obj.try_move();
 	}
 }
