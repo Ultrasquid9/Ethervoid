@@ -8,14 +8,14 @@ use crate::utils::{resources::maps::access_map, tuple_to_vec2};
 // For keeping track of the recursion in `try_move`
 static DEPTH: LazyLock<RwLock<u8>> = LazyLock::new(|| RwLock::new(0));
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum Axis {
 	Positive,
 	Negative,
 	None
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Obj {
 	pub pos: Vec2,
 	pub target: Vec2,
