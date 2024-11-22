@@ -1,4 +1,5 @@
 use player::player_movement;
+use script::script_movement;
 use stecs::prelude::*;
 
 use crate::cores::script::Script;
@@ -16,8 +17,15 @@ pub enum Behavior<'a> {
 pub fn handle_behavior(world: &mut World) {
 	for (obj, behavior) in query!([world.player, world.enemies], (&mut obj, &mut behavior)) {
 		match behavior {
-			Behavior::Player => player_movement(obj, &mut world.player.config.first().unwrap()),
-			_ => todo!()
+			Behavior::Player => player_movement(
+				obj, 
+				&mut world.player.config.first().unwrap()
+			),
+			Behavior::Script(script) => script_movement(
+				script, 
+				obj, 
+				&mut world.attacks
+			)
 		}
 	}
 }

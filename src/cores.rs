@@ -5,8 +5,10 @@ use std::fs::{
 	read_dir
 };
 
-pub mod script;
 pub mod enemytype;
+pub mod script;
+pub mod map;
+pub mod npctype;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: String) -> Vec<String> {

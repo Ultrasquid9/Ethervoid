@@ -10,12 +10,14 @@ pub mod combat;
 pub mod draw;
 pub mod ecs;
 pub mod enemy;
+pub mod npc;
 pub mod player;
 
 pub async fn gameplay() -> State {
 	let mut world = World {
 		player: Default::default(),
-		enemies: Default::default()
+		enemies: Default::default(),
+		attacks: Default::default()
 	};
 
 	world.player.insert(Player::new());

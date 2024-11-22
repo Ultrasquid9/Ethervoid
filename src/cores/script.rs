@@ -38,9 +38,9 @@ impl ScriptBuilder {
 /// The lifetime annotation allows the compiler to know that the Script lives as long as its owner does
 pub struct Script<'a> {
 	pub current_target: Vec2,
-	script: String,
-	scope: Scope<'a>,
-	engine: Engine
+	pub script: String,
+	pub scope: Scope<'a>,
+	pub engine: Engine
 }
 
 /// Provides a HashMap containing all Attacks
