@@ -1,10 +1,16 @@
 use image::DynamicImage;
 use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::{Color, RED}, math::vec2, shapes::draw_circle, texture::Texture2D, window::{clear_background, screen_height, screen_width}};
+use render::draw_tilemap;
 use stecs::prelude::*;
 
-use crate::utils::camera_scale;
+use crate::utils::{camera_scale, resources::textures::access_image};
 
 use super::ecs::World;
+
+pub mod process;
+pub mod render;
+
+const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 pub async fn draw<'a>(world: &mut World<'a>) {
 	// Draws the background
@@ -20,6 +26,8 @@ pub async fn draw<'a>(world: &mut World<'a>) {
 		target: world.player.obj.first().unwrap().pos,
 		..Default::default()
 	});
+
+	draw_tilemap(to_texture(access_image("default:tiles/grass_test"))).await;
 
 	for (sprite, obj) in query!([world.player], (&mut sprite, &obj)) {
 		sprite.update(*obj);
