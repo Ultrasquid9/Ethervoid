@@ -22,7 +22,7 @@ static MANAGER: LazyLock<RwLock<AudioManager>> = LazyLock::new(|| return RwLock:
 static AUDIO: LazyLock<RwLock<HashMap<String, StaticSoundData>>> = LazyLock::new(|| return RwLock::new(HashMap::default()));
 
 /// Populates the Audio HashMap
-pub fn create_audio() {
+pub(super) fn create_audio() {
 	let audio = get_audio();
 
 	for i in audio {
@@ -31,7 +31,7 @@ pub fn create_audio() {
 }
 
 /// Cleans the Audio HashMap
-pub fn clean_audio() {
+pub(super) fn clean_audio() {
 	AUDIO.write().unwrap().clear();
 }
 

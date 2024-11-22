@@ -2,7 +2,10 @@ use std::fs;
 
 use ahash::HashMap;
 use macroquad::math::Vec2;
+use raylite::Barrier;
 use serde::Deserialize;
+
+use crate::utils::vec2_to_tuple;
 
 use super::{
 	enemytype::{
@@ -27,7 +30,7 @@ struct MapBuilder {
 
 #[derive(Clone)]
 pub struct Map {
-	pub points: Vec<Vec2>,
+	pub walls: Vec<Barrier>,
 	//pub doors: Vec<Door>,
 	pub enemies: Vec<(EnemyType, Vec2)>,
 	pub npcs: Vec<(NpcType, Vec2)>
@@ -43,7 +46,28 @@ impl MapBuilder {
 		let npctypes = get_npctypes();
 
 		return Map {
-			points: self.points,
+			walls: {
+				let mut walls = Vec::new();
+
+				for point in 0..self.points.len() {
+					match self.points.get(point + 1) {
+						Some(_) => walls.push(Barrier {
+							positions: (vec2_to_tuple(
+								self.points.get(point).unwrap()), 
+								vec2_to_tuple(self.points.get(point + 1).unwrap())
+							)
+						}),
+						None => walls.push(Barrier {
+							positions: (
+								vec2_to_tuple(self.points.get(point).unwrap()), 
+								(vec2_to_tuple(self.points.first().unwrap()))
+							)
+						})
+					}
+				}
+
+				walls
+			},
 			//doors: self.doors,
 
 			enemies: self.enemies

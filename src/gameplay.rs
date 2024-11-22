@@ -6,7 +6,7 @@ use npc::Npc;
 use player::Player;
 use stecs::prelude::Archetype;
 
-use crate::{cores::map::get_maps, utils::resources::create_resources, State};
+use crate::{utils::resources::{create_resources, maps::access_map}, State};
 
 pub mod combat;
 pub mod draw;
@@ -18,7 +18,6 @@ pub mod player;
 pub async fn gameplay() -> State {
 	unsafe { create_resources(); } // TODO: Clean resources (irrelevant until main menu is reimplemented)
 
-	let maps = get_maps();
 	let current_map = String::from("default:test");
 
 	let mut world = World {
@@ -28,11 +27,11 @@ pub async fn gameplay() -> State {
 		attacks: Default::default()
 	};
 
-	for (enemy, pos) in maps.get(&current_map).unwrap().enemies.iter() {
+	for (enemy, pos) in access_map(&current_map).enemies.iter() {
 		let _ = world.enemies.insert(Enemy::from_type(enemy, pos));
 	}
 
-	for (npc, pos) in maps.get(&current_map).unwrap().npcs.iter() {
+	for (npc, pos) in access_map(&current_map).npcs.iter() {
 		let _ = world.npcs.insert(Npc::from_type(npc, pos));
 	}
 

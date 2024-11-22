@@ -3,7 +3,7 @@ use std::sync::{LazyLock, RwLock};
 use macroquad::math::Vec2;
 use raylite::{cast, cast_wide, Barrier, Ray};
 
-use crate::utils::tuple_to_vec2;
+use crate::utils::{resources::maps::access_map, tuple_to_vec2};
 
 // For keeping track of the recursion in `try_move`
 static DEPTH: LazyLock<RwLock<u8>> = LazyLock::new(|| RwLock::new(0));
@@ -65,7 +65,7 @@ impl Obj {
 
 	/// Attempts to move the Obj to its current target
 	pub fn try_move(&mut self) {
-		let barriers = Vec::new();
+		let barriers = access_map("default:test").walls;
 		
 		// Instantly returns if about to hit a door 
 /* 		if cast_wide(

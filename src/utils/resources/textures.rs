@@ -12,7 +12,7 @@ use crate::cores::textures::get_textures;
 static TEXTURES: LazyLock<RwLock<HashMap<String, DynamicImage>>> = LazyLock::new(|| return RwLock::new(HashMap::default()));
 
 /// Populates the texture HashMap
-pub fn create_textures() {
+pub(super) fn create_textures() {
 	let textures = get_textures();
 
 	for i in textures {
@@ -21,7 +21,7 @@ pub fn create_textures() {
 }
 
 /// Cleans the texture HashMap
-pub fn clean_textures() {
+pub(super) fn clean_textures() {
 	TEXTURES.write().unwrap().clear()
 }
 
