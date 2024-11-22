@@ -4,7 +4,7 @@ use stecs::prelude::*;
 
 use crate::cores::script::Script;
 
-use super::{obj, World};
+use super::World;
 
 pub mod script;
 pub mod player;

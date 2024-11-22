@@ -29,3 +29,8 @@ pub fn get_mouse_pos() -> Vec2 {
 pub fn get_delta_time() -> f32 {
 	return get_frame_time() * 100. * (2./3.)
 }
+
+/// Gets the scale that the camera should be rendered at
+pub fn camera_scale() -> f32 {
+	return screen_width() / screen_height() * 512.
+}

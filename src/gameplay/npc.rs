@@ -37,16 +37,16 @@ pub enum NpcMovement {
 }
 
 impl Npc<'_> {
-	pub fn new(npctype: NpcType, pos: Vec2) -> Self {
+	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
 		return Self {
-			obj: Obj::new(pos, pos, 15.),
-			behavior: Behavior::Script(npctype.movement.build()),
+			obj: Obj::new(*pos, *pos, 15.),
+			behavior: Behavior::Script(npctype.movement.clone().build()),
 
-			messages: npctype.messages,
+			messages: npctype.messages.clone(),
 			messages_cooldown: 0.,
 
 			movement_cooldown: 0.,
-			movement_target: pos
+			movement_target: *pos
 		}
 	}
 
@@ -59,9 +59,9 @@ impl Npc<'_> {
 	}
 
 	pub fn read_message(&mut self) {
-		let mut should_read = false;
+		//let mut should_read = false;
 
-		if !should_read { return }
+		//if !should_read { return }
 
 		for i in &self.messages {
 			if i.should_read() {
