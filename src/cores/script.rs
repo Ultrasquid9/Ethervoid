@@ -43,6 +43,16 @@ pub struct Script<'a> {
 	pub engine: Engine
 }
 
+impl PartialEq for Script<'_> {
+	fn eq(&self, other: &Self) -> bool {
+		if self.current_target == other.current_target
+		&& self.script == other.script {
+			return true
+		}
+		false
+	}
+}
+
 /// Provides a HashMap containing all Attacks
 pub fn get_scripts() -> HashMap<String, ScriptBuilder> {
 	let mut attacks: HashMap<String, ScriptBuilder> = HashMap::default();

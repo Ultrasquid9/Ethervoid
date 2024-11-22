@@ -9,6 +9,7 @@ use super::World;
 pub mod script;
 pub mod player;
 
+#[derive(PartialEq)]
 pub enum Behavior<'a> {
 	Player,
 	Script(Script<'a>) // TODO: Embed Rhai script/state/engine into this variant
