@@ -1,6 +1,8 @@
 use macroquad::math::Vec2;
 use stecs::prelude::*;
 
+use crate::cores::enemytype::EnemyType;
+
 use super::ecs::{behavior::Behavior, health::Health, obj::Obj};
 
 #[derive(SplitFields)]
@@ -11,13 +13,11 @@ pub struct Enemy<'a> {
 }
 
 impl Enemy<'_> {
-	pub fn new() -> Self {
-		let pos = Vec2::new(0., 0.);
-
+	pub fn from_type(enemytype: &EnemyType, pos: &Vec2) -> Self {
 		Self {
-			health: Health::new(100.),
-			obj: Obj::new(pos, pos, 15.),
-			behavior: Behavior::Script(todo!())
+			health: Health::new(enemytype.max_health),
+			obj: Obj::new(*pos, *pos, enemytype.size),
+			behavior: Behavior::Script(enemytype.movement.clone().build())
 		}
 	}
 }

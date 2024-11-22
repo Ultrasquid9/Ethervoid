@@ -1,12 +1,13 @@
 use macroquad::math::Vec2;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Axis {
 	Positive,
 	Negative,
 	None
 }
 
+#[derive(Clone)]
 pub struct Obj {
 	pub pos: Vec2,
 	pub target: Vec2,

@@ -8,11 +8,13 @@ use crate::{cores::script::Script, gameplay::{combat::Attack, ecs::obj::Obj}, ut
 pub fn script_movement<'a>(
 	script: &mut Script<'a>, 
 	obj: &mut Obj, 
+	obj_player: &Obj,
 	_attacks: &mut StructOf<Vec<Attack>>
 ) {
 	// Values available in the scope
 	script.scope
 		.push("attacks", Vec::<Dynamic>::new())
+		.push_constant("player_pos", obj_player.pos)
 		.push_constant("enemy_pos", obj.pos)
 		.push_constant("target_pos", script.current_target);
 

@@ -4,7 +4,7 @@ use stecs::prelude::*;
 
 use crate::cores::script::Script;
 
-use super::World;
+use super::{obj, World};
 
 pub mod script;
 pub mod player;
@@ -15,6 +15,8 @@ pub enum Behavior<'a> {
 }
 
 pub fn handle_behavior(world: &mut World) {
+	let obj_player = world.player.obj.first().unwrap().clone();
+
 	for (obj, behavior) in query!([world.player, world.enemies], (&mut obj, &mut behavior)) {
 		match behavior {
 			Behavior::Player => player_movement(
@@ -24,6 +26,7 @@ pub fn handle_behavior(world: &mut World) {
 			Behavior::Script(script) => script_movement(
 				script, 
 				obj, 
+				&obj_player,
 				&mut world.attacks
 			)
 		}
