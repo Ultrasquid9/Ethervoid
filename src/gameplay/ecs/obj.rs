@@ -63,6 +63,11 @@ impl Obj {
 		}
 	}
 
+	/// Checks if the Obj is touching another Obj
+	pub fn is_touching(&self, other: &Self) -> bool {
+		self.pos.distance(other.pos) <= self.size + other.size
+	}
+
 	/// Attempts to move the Obj to its current target
 	pub fn try_move(&mut self) {
 		let barriers = access_map("default:test").walls;

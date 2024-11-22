@@ -4,7 +4,7 @@ use enemy::Enemy;
 use macroquad::window::next_frame;
 use npc::Npc;
 use player::Player;
-use stecs::prelude::Archetype;
+use stecs::prelude::*;
 
 use crate::{utils::resources::{create_resources, maps::access_map}, State};
 
@@ -41,6 +41,17 @@ pub async fn gameplay() -> State {
 		draw(&mut world).await;
 
 		handle_behavior(&mut world);
+
+		// Damages entities
+		for (obj, health) in query!([world.player, world.enemies], (&obj, &mut health)) {
+			health.update();
+
+			for (attack_obj, damage) in query!(world.attacks, (&obj, &damage)) {
+				if obj.is_touching(attack_obj) {
+					health.damage(*damage)
+				}
+			}
+		}
 
 		next_frame().await
 	}
