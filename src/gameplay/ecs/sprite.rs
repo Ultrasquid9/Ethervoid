@@ -1,6 +1,6 @@
-use macroquad::{color::WHITE, texture::{draw_texture, Texture2D}};
+use macroquad::texture::Texture2D;
 
-use crate::{gameplay::draw::to_texture, utils::resources::textures::access_image};
+use crate::{gameplay::draw::{process::{downscale, to_texture}, render::render_texture}, utils::resources::textures::access_image};
 
 use super::obj::Obj;
 
@@ -12,7 +12,10 @@ pub struct Sprite {
 impl Sprite {
 	pub fn new(obj: &Obj) -> Self {
 		Self {
-			sprite: to_texture(access_image("default:appl")),
+			sprite: to_texture(downscale(
+				access_image("default:appl"),
+				obj.size as u32
+			)),
 			obj: obj.clone()
 		}
 	}
@@ -21,7 +24,7 @@ impl Sprite {
 		self.obj = new_obj;
 	}
 
-	pub fn render(&self) {
-		draw_texture(&self.sprite, self.obj.pos.x, self.obj.pos.y, WHITE);
+	pub async fn render(&self) {
+		render_texture(&self.sprite, self.obj.pos, None).await;
 	}
 }

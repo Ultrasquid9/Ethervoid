@@ -1,5 +1,5 @@
-use image::DynamicImage;
-use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::{Color, RED}, math::vec2, shapes::draw_circle, texture::Texture2D, window::{clear_background, screen_height, screen_width}};
+use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::Color, math::vec2, window::{clear_background, screen_height, screen_width}};
+use process::to_texture;
 use render::draw_tilemap;
 use stecs::prelude::*;
 
@@ -29,21 +29,10 @@ pub async fn draw<'a>(world: &mut World<'a>) {
 
 	draw_tilemap(to_texture(access_image("default:tiles/grass_test"))).await;
 
-	for (sprite, obj) in query!([world.player], (&mut sprite, &obj)) {
+	for (sprite, obj) in query!([world.player, world.enemies], (&mut sprite, &obj)) {
 		sprite.update(*obj);
-		sprite.render();
-	}
-
-	for obj in query!([world.player, world.enemies], (&obj)) {
-		draw_circle(obj.pos.x, obj.pos.y, obj.size, RED);
+		sprite.render().await;
 	}
 
 	set_default_camera();
-}
-
-/// Transforms a `DynamicImage` into a `Texture2D`
-pub fn to_texture(img: DynamicImage) -> Texture2D {
-	let texture = Texture2D::from_rgba8(img.width() as u16, img.height() as u16, img.as_bytes());
-	texture.set_filter(macroquad::texture::FilterMode::Nearest);
-	return texture
 }
