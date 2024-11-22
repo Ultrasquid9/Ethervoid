@@ -5,10 +5,12 @@ use std::fs::{
 	read_dir
 };
 
+pub mod audio;
 pub mod enemytype;
 pub mod script;
 pub mod map;
 pub mod npctype;
+pub mod textures;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: String) -> Vec<String> {

@@ -6,7 +6,7 @@ use npc::Npc;
 use player::Player;
 use stecs::prelude::Archetype;
 
-use crate::{cores::map::get_maps, State};
+use crate::{cores::map::get_maps, utils::resources::create_resources, State};
 
 pub mod combat;
 pub mod draw;
@@ -16,6 +16,8 @@ pub mod npc;
 pub mod player;
 
 pub async fn gameplay() -> State {
+	unsafe { create_resources(); } // TODO: Clean resources (irrelevant until main menu is reimplemented)
+
 	let maps = get_maps();
 	let current_map = String::from("default:test");
 

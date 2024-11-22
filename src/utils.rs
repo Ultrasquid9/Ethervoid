@@ -9,6 +9,7 @@ use macroquad::{
 };
 
 pub mod config;
+pub mod resources;
 
 /// Converts inputted Vec2 into a tuple of f32
 pub fn vec2_to_tuple(vec: &Vec2) -> (f32, f32) {

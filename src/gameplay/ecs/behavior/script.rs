@@ -46,6 +46,7 @@ pub fn script_movement<'a>(
 	let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;
 
 	if new_pos != vec2(999999., 999999.) {
-		obj.pos = new_pos
+		obj.update(new_pos);
+		obj.try_move();
 	}
 }
