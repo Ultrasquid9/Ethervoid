@@ -5,8 +5,8 @@ use stecs::prelude::StructOf;
 use crate::{cores::script::Script, gameplay::{combat::Attack, ecs::obj::Obj}, utils::get_delta_time};
 
 /// Reads a script
-pub fn script_movement<'a>(
-	script: &mut Script<'a>, 
+pub fn script_movement(
+	script: &mut Script<'_>, 
 	obj: &mut Obj, 
 	obj_player: &Obj,
 	_attacks: &mut StructOf<Vec<Attack>>
@@ -20,10 +20,10 @@ pub fn script_movement<'a>(
 
 	// The Vec2 built-in methods don't work, so I have to make shitty copies
 	fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
-		return pos1.move_towards(pos2, distance)
+		pos1.move_towards(pos2, distance)
 	}
 	fn distance_between(pos1: Vec2, pos2: Vec2) -> f32 {
-		return pos1.distance(pos2)
+		pos1.distance(pos2)
 	}
 
 	// Registerring functions for the script
@@ -34,7 +34,7 @@ pub fn script_movement<'a>(
 		.register_fn("distance_between", distance_between)
 
 		// Hacky method to end the script
-		.register_fn("end", move || return Vec2::new(999999., 999999.));
+		.register_fn("end", move || Vec2::new(999999., 999999.));
 
 	// Executing the script
 	let new_pos = match script.engine.eval_with_scope::<Vec2>(&mut script.scope, &script.script) {

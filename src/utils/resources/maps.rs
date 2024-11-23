@@ -4,7 +4,7 @@ use ahash::HashMap;
 
 use crate::cores::map::{get_maps, Map};
 
-static MAPS: LazyLock<RwLock<HashMap<String, Map>>> = LazyLock::new(|| return RwLock::new(HashMap::default()));
+static MAPS: LazyLock<RwLock<HashMap<String, Map>>> = LazyLock::new(|| RwLock::new(HashMap::default()));
 
 /// Populates the map HashMap
 pub(super) fn create_maps() {

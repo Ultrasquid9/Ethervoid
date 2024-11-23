@@ -31,12 +31,12 @@ pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
 		})
 	).unwrap();
 
-	return downscaled_img;
+	downscaled_img
 }
 
 /// Transforms a `DynamicImage` into a `Texture2D`
 pub fn to_texture(img: DynamicImage) -> Texture2D {
 	let texture = Texture2D::from_rgba8(img.width() as u16, img.height() as u16, img.as_bytes());
 	texture.set_filter(macroquad::texture::FilterMode::Nearest);
-	return texture
+	texture
 }

@@ -18,8 +18,8 @@ use crate::cores::audio::get_audio;
  *	Audio
  */ 
 
-static MANAGER: LazyLock<RwLock<AudioManager>> = LazyLock::new(|| return RwLock::new(AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap()));
-static AUDIO: LazyLock<RwLock<HashMap<String, StaticSoundData>>> = LazyLock::new(|| return RwLock::new(HashMap::default()));
+static MANAGER: LazyLock<RwLock<AudioManager>> = LazyLock::new(|| RwLock::new(AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap()));
+static AUDIO: LazyLock<RwLock<HashMap<String, StaticSoundData>>> = LazyLock::new(|| RwLock::new(HashMap::default()));
 
 /// Populates the Audio HashMap
 pub(super) fn create_audio() {

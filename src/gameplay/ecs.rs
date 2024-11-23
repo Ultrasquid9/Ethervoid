@@ -11,5 +11,5 @@ pub struct World<'a> {
 	pub player: StructOf<Vec<Player<'a>>>,
 	pub enemies: StructOf<Vec<Enemy<'a>>>,
 	pub npcs: StructOf<Vec<Npc<'a>>>,
-	pub attacks: StructOf<Vec<Attack<'a>>>
+	pub attacks: StructOf<Vec<Attack>>
 }

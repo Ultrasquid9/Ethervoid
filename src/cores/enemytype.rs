@@ -22,7 +22,7 @@ struct EnemyTypeBuilder {
 
 impl EnemyTypeBuilder {
 	pub fn read(dir: String) -> Self {
-		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
 	pub fn build(self) -> EnemyType {
@@ -62,5 +62,5 @@ pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 		);
 	}
 
-	return enemytypes;
+	enemytypes
 }

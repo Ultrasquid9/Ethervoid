@@ -51,5 +51,5 @@ pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawT
 }
 
 pub fn pixel_offset(base: f32) -> f32 {
-	return (base / SCREEN_SCALE).round() * SCREEN_SCALE;
+	(base / SCREEN_SCALE).round() * SCREEN_SCALE
 }

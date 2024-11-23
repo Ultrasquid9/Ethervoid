@@ -9,7 +9,7 @@ use image::DynamicImage;
 
 use crate::cores::textures::get_textures; 
 
-static TEXTURES: LazyLock<RwLock<HashMap<String, DynamicImage>>> = LazyLock::new(|| return RwLock::new(HashMap::default()));
+static TEXTURES: LazyLock<RwLock<HashMap<String, DynamicImage>>> = LazyLock::new(|| RwLock::new(HashMap::default()));
 
 /// Populates the texture HashMap
 pub(super) fn create_textures() {

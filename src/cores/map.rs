@@ -38,14 +38,14 @@ pub struct Map {
 
 impl MapBuilder {
 	pub fn read(dir: String) -> Self {
-		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
 	pub fn build(self) -> Map {
 		let enemytypes = get_enemytypes();
 		let npctypes = get_npctypes();
 
-		return Map {
+		Map {
 			walls: {
 				let mut walls = Vec::new();
 
@@ -72,7 +72,7 @@ impl MapBuilder {
 
 			enemies: self.enemies
 				.iter()
-				.map(|enemy| return (
+				.map(|enemy| (
 					enemytypes.get(enemy.0.as_str()).unwrap().clone(),
 					enemy.1
 				))
@@ -80,7 +80,7 @@ impl MapBuilder {
 			
 			npcs: self.npcs
 				.iter()
-				.map(|npc| return (
+				.map(|npc| (
 					npctypes.get(npc.0.as_str()).unwrap().clone(),
 					npc.1
 				))
@@ -100,5 +100,5 @@ pub fn get_maps() -> HashMap<String, Map> {
 		);
 	}
 
-	return maps;
+	maps
 }

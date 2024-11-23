@@ -4,6 +4,7 @@ use crate::{gameplay::draw::{process::{downscale, to_texture}, render::render_te
 
 use super::obj::Obj;
 
+#[derive(Clone)]
 pub struct Sprite {
 	pub sprite: Texture2D,
 	pub obj: Obj,
@@ -16,7 +17,7 @@ impl Sprite {
 				access_image("default:appl"),
 				obj.size as u32
 			)),
-			obj: obj.clone()
+			obj: *obj
 		}
 	}
 

@@ -20,12 +20,12 @@ pub struct ScriptBuilder(String);
 impl ScriptBuilder {
 	/// Creates an attack with the script at the provided directory
 	pub fn from(dir: String) -> Self {
-		return Self(fs::read_to_string(dir).unwrap())
+		Self(fs::read_to_string(dir).unwrap())
 	}
 
 	/// Creates an attack with the script at the provided directory
 	pub fn build<'a>(self) -> Script<'a> {
-		return Script {
+		Script {
 			current_target: Vec2::new(0., 0.),
 			script: self.0,
 			scope: Scope::new(),
@@ -53,6 +53,17 @@ impl PartialEq for Script<'_> {
 	}
 }
 
+impl Clone for Script<'_> {
+	fn clone(&self) -> Self {
+		Self {
+			current_target: self.current_target,
+			script: self.script.clone(),
+			scope: self.scope.clone(),
+			engine: Engine::new()
+		}
+	}
+}
+
 /// Provides a HashMap containing all Attacks
 pub fn get_scripts() -> HashMap<String, ScriptBuilder> {
 	let mut attacks: HashMap<String, ScriptBuilder> = HashMap::default();
@@ -64,5 +75,5 @@ pub fn get_scripts() -> HashMap<String, ScriptBuilder> {
 		);
 	}
 
-	return attacks;
+	attacks
 }

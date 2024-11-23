@@ -40,7 +40,7 @@ pub struct NpcType {
 
 impl NpcTypeBuilder {
 	pub fn read(dir: String) -> Self {
-		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
 	pub fn build(self) -> NpcType {
@@ -62,7 +62,7 @@ impl Message {
 			return false 
 		}
 
-		return true;
+		true
 	}
 
 	// TODO - Make 
@@ -84,5 +84,5 @@ pub fn get_npctypes() -> HashMap<String, NpcType> {
 		);
 	}
 
-	return npcs;
+	npcs
 }
