@@ -47,6 +47,6 @@ pub fn script_movement(
 
 	if new_pos != vec2(999999., 999999.) {
 		obj.update(new_pos);
-		obj.try_move();
+		obj.try_move(obj.target);
 	}
 }

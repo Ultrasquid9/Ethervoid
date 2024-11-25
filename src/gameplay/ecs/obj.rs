@@ -68,8 +68,16 @@ impl Obj {
 		self.pos.distance(other.pos) <= self.size + other.size
 	}
 
+	/// Creates a Ray from an Obj
+	pub fn to_ray(&self) -> Ray {
+		Ray {
+			position: (self.pos.x, self.pos.y),
+			end_position: (self.target.x, self.target.y)
+		}
+	}
+
 	/// Attempts to move the Obj to its current target
-	pub fn try_move(&mut self) {
+	pub fn try_move(&mut self, new_pos: Vec2) {
 		let barriers = access_map("default:test").walls;
 		
 		// Instantly returns if about to hit a door 
@@ -89,23 +97,23 @@ impl Obj {
 		match cast_wide(
 			&Ray {
 				position: (self.pos.x, self.pos.y),
-				end_position: (self.target.x, self.pos.y)
+				end_position: (new_pos.x, self.pos.y)
 			}, 
 			&barriers
 		) {
 			Ok(_) => try_slope_movement = true,
-			_ => self.pos.x = self.target.x
+			_ => self.pos.x = new_pos.x
 		}
 	
 		match cast_wide(
 			&Ray {
 				position: (self.pos.x, self.pos.y),
-				end_position: (self.pos.x, self.target.y)
+				end_position: (self.pos.x, new_pos.y)
 			}, 
 			&barriers
 		) {
 			Ok(_) => try_slope_movement = true,
-			_ => self.pos.y = self.target.y
+			_ => self.pos.y = new_pos.y
 		}
 
 		// Everything beyond this point is for handling slopes
@@ -129,7 +137,7 @@ impl Obj {
 			if cast(
 				&Ray {
 					position: (self.pos.x, self.pos.y),
-					end_position: (self.target.x, self.target.y)
+					end_position: (new_pos.x, new_pos.y)
 				}, 
 				&i
 			).is_ok() {
@@ -149,16 +157,16 @@ impl Obj {
 		let angle0 = (point1.x - point0.x).atan2(point1.y - point0.y);
 		let angle1 = (point0.x - point1.x).atan2(point0.y - point1.y);
 		
-		let angle = if (Vec2::from_angle(angle0) + self.pos).distance(self.target)
+		let angle = if (Vec2::from_angle(angle0) + self.pos).distance(new_pos)
 		< (Vec2::from_angle(angle1) + self.pos).distance(self.target) {
 			angle0
 		} else {
 			angle1
 		};
 
+		// Newer pos
 		let new_pos = Vec2::from_angle(angle) * self.pos.distance(self.target);
 
-		self.target = self.pos + new_pos;
-		self.try_move();
+		self.try_move(new_pos);
 	}
 }

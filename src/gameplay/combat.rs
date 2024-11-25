@@ -59,7 +59,7 @@ impl Attack {
 
 	pub fn update(&mut self) {
 		if let AttackType::Projectile(_) = self.attack_type {
-
+			// There is not an inverted 'if let' statement
 		} else {
 			self.lifetime -= get_delta_time()
 		}

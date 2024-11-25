@@ -72,6 +72,6 @@ pub fn player_movement(obj: &mut Obj, config: &Config) {
 		obj.speed = 1.0;
 	} else {
 		obj.update(new_pos.normalize() * obj.speed * get_delta_time() + obj.pos);
-		obj.try_move();
+		obj.try_move(obj.target);
 	}
 }
