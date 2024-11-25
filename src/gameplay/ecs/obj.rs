@@ -167,6 +167,6 @@ impl Obj {
 		// Newer pos
 		let new_pos = Vec2::from_angle(angle) * self.pos.distance(self.target);
 
-		self.try_move(new_pos);
+		self.try_move(self.pos + new_pos);
 	}
 }
