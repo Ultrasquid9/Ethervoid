@@ -21,7 +21,7 @@ impl Enemy<'_> {
 			health: Health::new(enemytype.max_health),
 			obj,
 			behavior: Behavior::Script(enemytype.movement.clone().build()),
-			sprite: Sprite::new(&obj)
+			sprite: Sprite::new(obj, &enemytype.sprite, super::ecs::sprite::SpriteType::EightWay)
 		}
 	}
 }

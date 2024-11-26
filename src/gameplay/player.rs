@@ -24,7 +24,7 @@ impl Player<'_> {
 			health: Health::new(100.),
 			obj,
 			behavior: Behavior::Player,
-			sprite: Sprite::new(&obj),
+			sprite: Sprite::new(obj, "default:entity/player/player_spritesheet_wip", super::ecs::sprite::SpriteType::EightWay),
 
 			config: Config::read("./config.ron")
 		}
