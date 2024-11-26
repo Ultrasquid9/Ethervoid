@@ -73,7 +73,7 @@ impl Sprite {
 		} else {
 			// There is definitely a far better way to do this
 			// I apologize to whoever has to deal with this in the future 
-			let y_pos = if self.obj.axis_horizontal != Axis::None && self.obj.axis_vertical != Axis::None {
+			if self.obj.axis_horizontal != Axis::None && self.obj.axis_vertical != Axis::None {
 				if self.obj.axis_vertical == Axis::Positive {
 					size       // Diagonal up
 				} else {
@@ -85,9 +85,7 @@ impl Sprite {
 				0              // Down
 			} else {
 				size * 4       // Up
-			};
-
-			y_pos
+			}
 		};
 
 		render_texture(
@@ -101,7 +99,10 @@ impl Sprite {
 			} else {
 				self.sprite.clone()
 			}),
-			self.obj.pos, 
+			Vec2::new(
+				self.obj.pos.x + self.sprite.width() as f32, 
+				self.obj.pos.y + self.sprite.height() as f32
+			), 
 			Some(DrawTextureParams {
 				source: Some(
 					Rect::new(

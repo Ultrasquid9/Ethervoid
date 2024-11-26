@@ -1,18 +1,16 @@
 use futures::future::join_all;
+use raylite::Barrier;
 use super::SCREEN_SCALE;
 
 use macroquad::{
-	texture::{
+	color::{BLUE, WHITE}, math::Vec2, shapes::draw_line, texture::{
 		draw_texture_ex, 
 		DrawTextureParams, 
 		Texture2D
-	}, 
-	window::{
+	}, window::{
 		screen_height, 
 		screen_width
-	},
-	color::WHITE, 
-	math::Vec2
+	}
 };
 
 
@@ -52,4 +50,17 @@ pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawT
 
 pub fn pixel_offset(base: f32) -> f32 {
 	(base / SCREEN_SCALE).round() * SCREEN_SCALE
+}
+
+/// Draws a Barrier
+/// Probably temporary, may remain for debug
+pub fn draw_bar(bar: &Barrier) {
+	draw_line(
+		bar.positions.0.0, 
+		bar.positions.0.1, 
+		bar.positions.1.0, 
+		bar.positions.1.1, 
+		6., 
+		BLUE
+	);
 }

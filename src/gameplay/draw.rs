@@ -1,9 +1,9 @@
 use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::Color, math::vec2, window::{clear_background, screen_height, screen_width}};
 use process::to_texture;
-use render::draw_tilemap;
+use render::{draw_bar, draw_tilemap};
 use stecs::prelude::*;
 
-use crate::utils::{camera_scale, resources::textures::access_image};
+use crate::utils::{camera_scale, resources::{maps::access_map, textures::access_image}};
 
 use super::ecs::World;
 
@@ -12,7 +12,7 @@ pub mod render;
 
 pub const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
-pub async fn draw<'a>(world: &mut World<'a>) {
+pub async fn draw<'a>(world: &mut World<'a>, current_map: &str) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -28,6 +28,10 @@ pub async fn draw<'a>(world: &mut World<'a>) {
 	});
 
 	draw_tilemap(to_texture(access_image("default:tiles/grass_test"))).await;
+
+	for bar in access_map(current_map).walls {
+		draw_bar(&bar);
+	}
 
 	for (sprite, obj) in query!([world.player, world.enemies], (&mut sprite, &obj)) {
 		sprite.update(*obj);

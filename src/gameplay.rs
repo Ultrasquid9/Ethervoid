@@ -38,7 +38,7 @@ pub async fn gameplay() -> State {
 	world.player.insert(Player::new());
 
 	loop {
-		draw(&mut world).await;
+		draw(&mut world, &current_map).await;
 
 		handle_behavior(&mut world);
 
