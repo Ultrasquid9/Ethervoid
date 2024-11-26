@@ -4,7 +4,7 @@ use stecs::prelude::*;
 
 use crate::utils::get_delta_time;
 
-use super::ecs::{behavior::Behavior, obj::Obj, sprite::{Sprite, SpriteType}};
+use super::ecs::{behavior::Behavior, obj::Obj, sprite::{Frames, Rotation, Sprite}};
 
 #[derive(SplitFields, Clone)]
 pub struct Attack {
@@ -46,7 +46,12 @@ impl Attack {
 
 		Attack {
 			obj,
-			sprite: Sprite::new(obj, "default:attacks/slash", SpriteType::Rotated),
+			sprite: Sprite::new(
+				obj, 
+				"default:attacks/slash", 
+				Rotation::Angle, 
+				Frames::new_attack()
+			),
 
 			attack_type,
 			

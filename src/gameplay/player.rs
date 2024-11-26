@@ -3,7 +3,7 @@ use stecs::prelude::*;
 
 use crate::utils::config::Config;
 
-use super::ecs::{behavior::Behavior, health::Health, obj::Obj, sprite::Sprite};
+use super::ecs::{behavior::Behavior, health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}};
 
 #[derive(SplitFields)]
 pub struct Player<'a> {
@@ -24,7 +24,12 @@ impl Player<'_> {
 			health: Health::new(100.),
 			obj,
 			behavior: Behavior::Player,
-			sprite: Sprite::new(obj, "default:entity/player/player_spritesheet_wip", super::ecs::sprite::SpriteType::EightWay),
+			sprite: Sprite::new(
+				obj, 
+				"default:entity/player/player_spritesheet_wip",
+				Rotation::EightWay,
+				Frames::new_entity()
+			),
 
 			config: Config::read("./config.ron")
 		}

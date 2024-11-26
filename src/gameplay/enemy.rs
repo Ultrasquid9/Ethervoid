@@ -3,7 +3,7 @@ use stecs::prelude::*;
 
 use crate::cores::enemytype::EnemyType;
 
-use super::ecs::{behavior::Behavior, health::Health, obj::Obj, sprite::Sprite};
+use super::ecs::{behavior::Behavior, health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}};
 
 #[derive(SplitFields)]
 pub struct Enemy<'a> {
@@ -21,7 +21,12 @@ impl Enemy<'_> {
 			health: Health::new(enemytype.max_health),
 			obj,
 			behavior: Behavior::Script(enemytype.movement.clone().build()),
-			sprite: Sprite::new(obj, &enemytype.sprite, super::ecs::sprite::SpriteType::EightWay)
+			sprite: Sprite::new(
+				obj, 
+				&enemytype.sprite, 
+				Rotation::EightWay,
+				Frames::new_entity()
+			)
 		}
 	}
 }

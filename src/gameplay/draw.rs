@@ -10,7 +10,7 @@ use super::ecs::World;
 pub mod process;
 pub mod render;
 
-const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
+pub const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 pub async fn draw<'a>(world: &mut World<'a>) {
 	// Draws the background
