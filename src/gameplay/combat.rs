@@ -48,6 +48,7 @@ impl Attack {
 			obj,
 			sprite: Sprite::new(
 				obj, 
+				size as u32,
 				"default:attacks/slash", 
 				Rotation::Angle, 
 				Frames::new_attack()

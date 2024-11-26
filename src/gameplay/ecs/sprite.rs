@@ -32,12 +32,20 @@ pub struct Frames {
 }
 
 impl Sprite {
-	pub fn new(obj: Obj, key: &str, rotation: Rotation, frames: Frames) -> Self {
+	pub fn new(
+		obj: Obj, 
+		_size: u32, 
+		key: &str, 
+		rotation: Rotation, 
+		frames: Frames
+	) -> Self {
 		Self {
-			sprite: downscale(
-				access_image(key),
-				obj.size as u32
-			),
+			sprite: if rotation == Rotation::Angle {
+				downscale(
+					access_image(key),
+					obj.size as u32
+				)
+			} else { access_image(key) },
 			obj,
 
 			rotation,
@@ -52,9 +60,13 @@ impl Sprite {
 	}
 
 	pub async fn render(&self) {
-		let size = self.sprite.height() / 5;
+		let size = if self.rotation == Rotation::EightWay {
+			self.sprite.height() / 5
+		} else {
+			self.sprite.height()
+		};
 
-		let x_pos = self.frames.get_frame() * self.obj.size as u32;
+		let x_pos = self.frames.get_frame() * size;
 
 		let y_pos: u32 = if self.rotation != Rotation::EightWay {
 			0
