@@ -41,7 +41,7 @@ pub async fn gameplay() -> State {
 	world.player.insert(Player::new());
 
 	loop {
-		draw(&mut world).await;
+		draw(&mut world, &mut attacks).await;
 		
 		// Handling hitstop
 		if world.hitstop > 0. {
@@ -49,6 +49,29 @@ pub async fn gameplay() -> State {
 
 			next_frame().await;
 			continue;
+		}
+
+		// Attacking
+		for (inventory, config, obj) in query!(world.player, (&mut inventory, &config, &obj)) {
+			// Cooldown
+			for sword in inventory.swords.iter_mut() {
+				if sword.cooldown >= 0. {
+					sword.cooldown -= get_delta_time()
+				}
+			}
+			for gun in inventory.guns.iter_mut() {
+				if gun.cooldown >= 0. {
+					gun.cooldown -= get_delta_time()
+				}
+			}
+
+			// Creating attacks
+			if config.keymap.sword.is_down() && inventory.swords[inventory.current_sword].cooldown <= 0. {
+				attacks.push(inventory.attack_sword(obj.pos)); 
+			}
+			if config.keymap.gun.is_down() && inventory.guns[inventory.current_gun].cooldown <= 0. {
+				attacks.push(inventory.attack_gun(obj.pos)); 
+			}
 		}
 
 		// Attacks 
