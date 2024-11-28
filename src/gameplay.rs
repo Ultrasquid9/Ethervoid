@@ -1,3 +1,4 @@
+use combat::Attack;
 use draw::draw;
 use ecs::{behavior::handle_behavior, World};
 use enemy::Enemy;
@@ -18,39 +19,34 @@ pub mod player;
 pub async fn gameplay() -> State {
 	unsafe { create_resources(); } // TODO: Clean resources (irrelevant until main menu is reimplemented)
 
-	let current_map = String::from("default:test");
-
 	let mut world = World {
 		player: Default::default(),
 		enemies: Default::default(),
 		npcs: Default::default(),
-		attacks: Default::default()
+
+		current_map: String::from("default:test")
 	};
 
-	for (enemy, pos) in access_map(&current_map).enemies.iter() {
+	let mut attacks: Vec<Attack> = Vec::new();
+
+	for (enemy, pos) in access_map(&world.current_map).enemies.iter() {
 		let _ = world.enemies.insert(Enemy::from_type(enemy, pos));
 	}
 
-	for (npc, pos) in access_map(&current_map).npcs.iter() {
+	for (npc, pos) in access_map(&world.current_map).npcs.iter() {
 		let _ = world.npcs.insert(Npc::from_type(npc, pos));
 	}
 
 	world.player.insert(Player::new());
 
 	loop {
-		draw(&mut world, &current_map).await;
+		draw(&mut world).await;
 
-		handle_behavior(&mut world);
+		handle_behavior(&mut world, &mut attacks);
 
 		// Damages entities
-		for (obj, health) in query!([world.player, world.enemies], (&obj, &mut health)) {
-			health.update();
-
-			for (attack_obj, damage) in query!(world.attacks, (&obj, &damage)) {
-				if obj.is_touching(attack_obj) {
-					health.damage(*damage)
-				}
-			}
+		for atk in attacks.iter_mut() {
+			atk.update(&mut world);
 		}
 
 		next_frame().await

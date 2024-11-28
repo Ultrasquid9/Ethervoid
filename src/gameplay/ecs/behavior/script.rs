@@ -1,6 +1,5 @@
 use macroquad::math::{vec2, Vec2};
 use rhai::Dynamic;
-use stecs::prelude::StructOf;
 
 use crate::{cores::script::Script, gameplay::{combat::Attack, ecs::obj::Obj}, utils::get_delta_time};
 
@@ -9,7 +8,7 @@ pub fn script_movement(
 	script: &mut Script<'_>, 
 	obj: &mut Obj, 
 	obj_player: &Obj,
-	_attacks: &mut StructOf<Vec<Attack>>
+	_attacks: &mut Vec<Attack>
 ) {
 	// Values available in the scope
 	script.scope

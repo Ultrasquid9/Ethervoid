@@ -76,6 +76,24 @@ impl Obj {
 		}
 	}
 
+	/// Converts the Obj into two barriers, a horizontal and a vertical one 
+	pub fn to_barriers(&self) -> Vec<Barrier> {
+		return vec![
+			Barrier {
+				positions: (
+					(self.pos.x + self.size, self.pos.y),
+					(self.pos.x - self.size, self.pos.y)
+				)
+			},
+			Barrier {
+				positions: (
+					(self.pos.x, self.pos.y + self.size),
+					(self.pos.x, self.pos.y - self.size)
+				)
+			}
+		]
+	}
+
 	/// Attempts to move the Obj to its current target
 	pub fn try_move(&mut self, new_pos: Vec2) {
 		let barriers = access_map("default:test").walls;

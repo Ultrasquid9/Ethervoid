@@ -12,7 +12,7 @@ pub mod render;
 
 pub const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
-pub async fn draw<'a>(world: &mut World<'a>, current_map: &str) {
+pub async fn draw<'a>(world: &mut World<'a>) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -29,7 +29,7 @@ pub async fn draw<'a>(world: &mut World<'a>, current_map: &str) {
 
 	draw_tilemap(to_texture(access_image("default:tiles/grass_test"))).await;
 
-	for bar in access_map(current_map).walls {
+	for bar in access_map(&world.current_map).walls {
 		draw_bar(&bar);
 	}
 
