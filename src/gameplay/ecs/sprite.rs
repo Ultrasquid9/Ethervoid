@@ -28,7 +28,8 @@ pub struct Frames {
 	frame_order: Vec<u32>,
 	frame_time: f32,
 
-	anim_time: f32
+	anim_time: f32,
+	anim_completed: bool
 }
 
 impl Sprite {
@@ -57,6 +58,10 @@ impl Sprite {
 		self.obj = new_obj;
 
 		self.frames.update(); 
+	}
+
+	pub fn anim_completed(&self) -> bool {
+		self.frames.anim_completed
 	}
 
 	pub async fn render(&self) {
@@ -126,7 +131,8 @@ impl Frames {
 			frame_order: vec![0, 1, 0, 2],
 			frame_time: 16.,
 
-			anim_time: 0.
+			anim_time: 0.,
+			anim_completed: false
 		}
 	}
 
@@ -135,7 +141,18 @@ impl Frames {
 			frame_order: vec![0, 1, 2],
 			frame_time: 4.,
 
-			anim_time: 0.
+			anim_time: 0.,
+			anim_completed: false
+		}
+	}
+
+	pub fn new_static() -> Self {
+		Self {
+			frame_order: vec![0],
+			frame_time: 0.,
+
+			anim_time: 0.,
+			anim_completed: false
 		}
 	}
 
@@ -143,7 +160,8 @@ impl Frames {
 		self.anim_time += get_delta_time();
 
 		if self.anim_time as usize >= (self.frame_order.len() * self.frame_time as usize) {
-			self.anim_time = 0.
+			self.anim_time = 0.;
+			self.anim_completed = true;
 		}
 	}
 

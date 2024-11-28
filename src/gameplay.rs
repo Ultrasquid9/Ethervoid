@@ -43,6 +43,7 @@ pub async fn gameplay() -> State {
 		draw(&mut world).await;
 
 		handle_behavior(&mut world, &mut attacks);
+		attacks.retain(|atk| !atk.should_rm());
 
 		// Damages entities
 		for atk in attacks.iter_mut() {

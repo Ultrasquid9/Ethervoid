@@ -14,7 +14,7 @@ use crate::utils::{
 	get_delta_time, vec2_to_tuple
 };
 
-use super::ecs::{health::Health, obj::Obj, sprite::Sprite, World};
+use super::ecs::{health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}, World};
 
 #[derive(Clone, SplitFields)]
 pub struct Attack {
@@ -45,7 +45,7 @@ pub enum AttackType {
 }
 
 impl Attack {
-	pub fn new_physical(obj: Obj, damage: f32, owner: Owner, sprite: Sprite) -> Attack {
+	pub fn new_physical(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
 		return Attack {
 			obj,
 
@@ -56,11 +56,17 @@ impl Attack {
 			damage,
 			lifetime: 2.,
 
-			sprite
+			sprite: Sprite::new(
+				obj, 
+				obj.size as u32, 
+				key, 
+				Rotation::Angle,
+				Frames::new_attack()
+			)
 		}
 	}
 
-	pub fn new_burst(obj: Obj, damage: f32, owner: Owner, sprite: Sprite) -> Attack {
+	pub fn new_burst(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
 		return Attack {
 			obj,
 
@@ -71,11 +77,17 @@ impl Attack {
 			damage,
 			lifetime: 12.,
 
-			sprite
+			sprite: Sprite::new(
+				obj,
+				obj.size as u32,
+				key,
+				Rotation::Static,
+				Frames::new_attack()
+			)
 		}
 	}
 
-	pub fn new_projectile(obj: Obj, damage: f32, owner: Owner, sprite: Sprite) -> Attack {
+	pub fn new_projectile(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
 		return Attack {
 			obj: Obj::new(
 				obj.pos, 
@@ -90,11 +102,17 @@ impl Attack {
 			damage,
 			lifetime: 1.,
 
-			sprite
+			sprite: Sprite::new(
+				obj,
+				obj.size as u32,
+				key,
+				Rotation::Static,
+				Frames::new_static()
+			)
 		}
 	}
 
-	pub fn new_hitscan(obj: Obj, damage: f32, owner: Owner, sprite: Sprite) -> Attack {
+	pub fn new_hitscan(obj: Obj, damage: f32, owner: Owner) -> Attack {
 		return Attack {
 			obj,
 
@@ -105,13 +123,22 @@ impl Attack {
 			damage,
 			lifetime: 8.,
 
-			sprite
+			sprite: Sprite::new(
+				obj,
+				obj.size as u32,
+				"default:attacks/projectile-enemy",
+				Rotation::Static,
+				Frames::new_static()
+			)
 		}
 	}
 
 	/// Checks if the attack should be removed
 	pub fn should_rm(&self) -> bool {
-		self.lifetime <= 0.
+		match self.attack_type {
+			AttackType::Physical | AttackType::Burst => self.sprite.anim_completed(),
+			_ => self.lifetime <= 0.
+		}
 	}
 
 	// The following code is for updating attacks
