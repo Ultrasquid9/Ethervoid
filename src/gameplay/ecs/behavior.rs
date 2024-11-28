@@ -22,7 +22,7 @@ pub fn handle_behavior(world: &mut World, attacks: &mut Vec<Attack>) {
 		match behavior {
 			Behavior::Player => player_behavior(
 				obj, 
-				world.player.config.first().unwrap()
+				&world.config
 			),
 			Behavior::Script(script) => script_behavior(
 				script, 

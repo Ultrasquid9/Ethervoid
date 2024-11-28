@@ -7,7 +7,7 @@ use npc::Npc;
 use player::Player;
 use stecs::prelude::*;
 
-use crate::{utils::{get_delta_time, resources::{create_resources, maps::access_map}}, State};
+use crate::{utils::{config::Config, get_delta_time, resources::{clean_resources, create_resources, maps::access_map}}, State};
 
 pub mod combat;
 pub mod draw;
@@ -24,6 +24,7 @@ pub async fn gameplay() -> State {
 		enemies: Default::default(),
 		npcs: Default::default(),
 
+		config: Config::read("./config.ron"),
 		current_map: String::from("default:test"),
 		hitstop: 0.
 	};
@@ -52,7 +53,7 @@ pub async fn gameplay() -> State {
 		}
 
 		// Attacking
-		for (inventory, config, obj) in query!(world.player, (&mut inventory, &config, &obj)) {
+		for (inventory, obj) in query!(world.player, (&mut inventory, &obj)) {
 			// Cooldown
 			for sword in inventory.swords.iter_mut() {
 				if sword.cooldown >= 0. {
@@ -66,10 +67,10 @@ pub async fn gameplay() -> State {
 			}
 
 			// Creating attacks
-			if config.keymap.sword.is_down() && inventory.swords[inventory.current_sword].cooldown <= 0. {
+			if world.config.keymap.sword.is_down() && inventory.swords[inventory.current_sword].cooldown <= 0. {
 				attacks.push(inventory.attack_sword(obj.pos)); 
 			}
-			if config.keymap.gun.is_down() && inventory.guns[inventory.current_gun].cooldown <= 0. {
+			if world.config.keymap.gun.is_down() && inventory.guns[inventory.current_gun].cooldown <= 0. {
 				attacks.push(inventory.attack_gun(obj.pos)); 
 			}
 		}
@@ -81,6 +82,12 @@ pub async fn gameplay() -> State {
 
 		for atk in attacks.iter_mut() {
 			atk.update(&mut world);
+		}
+
+		// Quitting the game
+		if world.config.keymap.quit.is_down() {
+			unsafe{ clean_resources(); }
+			return State::Quit
 		}
 
 		next_frame().await

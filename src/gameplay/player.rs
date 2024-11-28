@@ -1,7 +1,7 @@
 use macroquad::{input::mouse_position_local, math::Vec2};
 use stecs::prelude::*;
 
-use crate::utils::{config::Config, get_mouse_pos};
+use crate::utils::{get_mouse_pos, resources::audio::play_random_sound};
 
 use super::{combat::{Attack, Owner}, ecs::{behavior::Behavior, health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}}};
 
@@ -12,9 +12,7 @@ pub struct Player<'a> {
 	pub behavior: Behavior<'a>,
 	pub sprite: Sprite,
 
-	pub inventory: Inventory,
-
-	pub config: Config
+	pub inventory: Inventory
 }
 
 pub struct Inventory {
@@ -73,9 +71,7 @@ impl Player<'_> {
 				],
 				current_sword: 0,
 				current_gun: 0,
-			},
-
-			config: Config::read("./config.ron")
+			}
 		}
 	}
 }
@@ -85,11 +81,11 @@ impl Inventory {
 	pub fn attack_sword(&mut self, pos: Vec2) -> Attack {
 		match self.swords[self.current_sword].weapon {
 			Weapon::Sword => {
-/* 				play_random_sound(&[
+				play_random_sound(&[
 					"default:sfx/sword_1",
 					"default:sfx/sword_2",
 					"default:sfx/sword_3"
-				]); */
+				]);
 
 				self.swords[self.current_sword].cooldown = 16.;
 				return Attack::new_physical(

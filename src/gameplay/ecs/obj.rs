@@ -68,14 +68,6 @@ impl Obj {
 		self.pos.distance(other.pos) <= self.size + other.size
 	}
 
-	/// Creates a Ray from an Obj
-	pub fn to_ray(&self) -> Ray {
-		Ray {
-			position: (self.pos.x, self.pos.y),
-			end_position: (self.target.x, self.target.y)
-		}
-	}
-
 	/// Converts the Obj into two barriers, a horizontal and a vertical one 
 	pub fn to_barriers(&self) -> Vec<Barrier> {
 		return vec![

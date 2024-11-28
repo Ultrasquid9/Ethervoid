@@ -18,7 +18,8 @@ pub unsafe fn create_resources() {
 }
 
 /// Cleans the global resources
-pub fn clean_resources() {
+/// NOTE: THIS DELETES ALL RESOURCES. ONLY CALL WHEN QUITTING THE GAME
+pub unsafe fn clean_resources() {
 	clean_audio();
 	clean_textures();
 	clean_maps();

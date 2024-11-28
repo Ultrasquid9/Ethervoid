@@ -1,5 +1,7 @@
 use stecs::prelude::StructOf;
 
+use crate::utils::config::Config;
+
 use super::{enemy::Enemy, npc::Npc, player::Player};
 
 pub mod behavior;
@@ -13,5 +15,6 @@ pub struct World<'a> {
 	pub npcs: StructOf<Vec<Npc<'a>>>,
 
 	pub current_map: String,
+	pub config: Config,
 	pub hitstop: f32
 }
