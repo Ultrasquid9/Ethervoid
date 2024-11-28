@@ -1,5 +1,5 @@
-use player::player_movement;
-use script::script_movement;
+use player::player_behavior;
+use script::script_behavior;
 use stecs::prelude::*;
 
 use crate::{cores::script::Script, gameplay::combat::Attack};
@@ -20,11 +20,11 @@ pub fn handle_behavior(world: &mut World, attacks: &mut Vec<Attack>) {
 
 	for (obj, behavior) in query!([world.player, world.enemies], (&mut obj, &mut behavior)) {
 		match behavior {
-			Behavior::Player => player_movement(
+			Behavior::Player => player_behavior(
 				obj, 
 				world.player.config.first().unwrap()
 			),
-			Behavior::Script(script) => script_movement(
+			Behavior::Script(script) => script_behavior(
 				script, 
 				obj, 
 				&obj_player,

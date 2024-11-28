@@ -11,7 +11,7 @@ use rhai::{
 };
 
 use crate::utils::{
-	get_delta_time, vec2_to_tuple
+	get_delta_time, get_mouse_pos, vec2_to_tuple
 };
 
 use super::ecs::{health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}, World};
@@ -272,9 +272,7 @@ impl CustomType for Attack {
 }
 
 /// Attempts to parry attacks 
-pub fn try_parry(_world: &mut World) {
-	todo!("rewrite");
-/* 
+pub fn try_parry(attacks: &mut [Attack], world: &mut World) {
 	// i is the index of the attack that is trying to parry other attacks
 	for i in (0..attacks.len()).rev() {
 		// Checking if i is not physical or has been parried, and continuing the loop if either is true
@@ -292,7 +290,7 @@ pub fn try_parry(_world: &mut World) {
 			// Coming up next: more nesting than the average bird
 
 			// Checking if j is touching i and if j has not already been parried
-			if attacks[j].is_touching(&attacks[i])
+			if attacks[j].obj.is_touching(&attacks[i].obj)
 			&& !attacks[j].is_parried {
 				// Checking the attack type of j
 				match &attacks[j].attack_type {
@@ -323,9 +321,9 @@ pub fn try_parry(_world: &mut World) {
 						attacks[j].attack_type = AttackType::Hitscan;
 						attacks[j].damage += attacks[i].damage;
 
-						attacks[j].target = match attacks[j].owner {
+						attacks[j].obj.target = match attacks[j].owner {
 							Owner::Player => get_mouse_pos() * 999.,
-							Owner::Enemy => attacks[i].target * 999.
+							Owner::Enemy => attacks[i].obj.target * 999.
 						};
 
 						world.hitstop = 10.;
@@ -338,5 +336,5 @@ pub fn try_parry(_world: &mut World) {
 				}
 			}
 		}
-	} */
+	}
 }

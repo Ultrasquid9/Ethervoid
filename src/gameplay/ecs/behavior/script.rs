@@ -4,7 +4,7 @@ use rhai::Dynamic;
 use crate::{cores::script::Script, gameplay::{combat::{Attack, Owner}, ecs::obj::Obj}, utils::get_delta_time};
 
 /// Reads a script
-pub fn script_movement(
+pub fn script_behavior(
 	script: &mut Script<'_>, 
 	obj: &mut Obj, 
 	obj_player: &Obj,

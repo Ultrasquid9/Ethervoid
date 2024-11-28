@@ -1,4 +1,4 @@
-use combat::Attack;
+use combat::{try_parry, Attack};
 use draw::draw;
 use ecs::{behavior::handle_behavior, World};
 use enemy::Enemy;
@@ -7,7 +7,7 @@ use npc::Npc;
 use player::Player;
 use stecs::prelude::*;
 
-use crate::{utils::resources::{create_resources, maps::access_map}, State};
+use crate::{utils::{get_delta_time, resources::{create_resources, maps::access_map}}, State};
 
 pub mod combat;
 pub mod draw;
@@ -24,7 +24,8 @@ pub async fn gameplay() -> State {
 		enemies: Default::default(),
 		npcs: Default::default(),
 
-		current_map: String::from("default:test")
+		current_map: String::from("default:test"),
+		hitstop: 0.
 	};
 
 	let mut attacks: Vec<Attack> = Vec::new();
@@ -41,11 +42,20 @@ pub async fn gameplay() -> State {
 
 	loop {
 		draw(&mut world).await;
+		
+		// Handling hitstop
+		if world.hitstop > 0. {
+			world.hitstop -= get_delta_time();
 
+			next_frame().await;
+			continue;
+		}
+
+		// Attacks 
 		handle_behavior(&mut world, &mut attacks);
+		try_parry(&mut attacks, &mut world);
 		attacks.retain(|atk| !atk.should_rm());
 
-		// Damages entities
 		for atk in attacks.iter_mut() {
 			atk.update(&mut world);
 		}

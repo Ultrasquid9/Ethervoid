@@ -2,7 +2,7 @@ use macroquad::math::Vec2;
 
 use crate::{gameplay::ecs::obj::{Axis, Obj}, utils::{config::Config, get_delta_time}};
 
-pub fn player_movement(obj: &mut Obj, config: &Config) {
+pub fn player_behavior(obj: &mut Obj, config: &Config) {
 	// Checks to see if both Up and Down are being held at the same time.
 	// If they are, sets the direction to move based upon the most recently pressed key. 
 	// Otherwise, sets the direction to move based upon the currently pressed key.

@@ -24,5 +24,4 @@ ron = "0.8"
 opt-level = 1
 
 [profile.dev.package."*"]
-codegen-units = 1
 opt-level = 3

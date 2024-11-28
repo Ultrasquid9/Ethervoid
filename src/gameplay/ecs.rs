@@ -12,5 +12,6 @@ pub struct World<'a> {
 	pub enemies: StructOf<Vec<Enemy<'a>>>,
 	pub npcs: StructOf<Vec<Npc<'a>>>,
 
-	pub current_map: String
+	pub current_map: String,
+	pub hitstop: f32
 }

@@ -12,7 +12,35 @@ pub struct Player<'a> {
 	pub behavior: Behavior<'a>,
 	pub sprite: Sprite,
 
+	pub inventory: Inventory,
+
 	pub config: Config
+}
+
+pub struct Inventory {
+	pub swords: [WeaponInfo; 3],
+	pub guns: [WeaponInfo; 3],
+	pub current_sword: usize,
+	pub current_gun: usize, 
+}
+
+/// Contains info about one of the player's weaponsa
+pub struct WeaponInfo {
+	pub weapon: Weapon,
+	pub unlocked: bool,
+	pub cooldown: u8
+}
+
+pub enum Weapon {
+	// Swords
+	Sword,
+	Hammer,
+	Boomerang,
+
+	// Gunssword_
+	Pistol,
+	Shotgun,
+	RadioCannon
 }
 
 impl Player<'_> {
@@ -31,6 +59,21 @@ impl Player<'_> {
 				Rotation::EightWay,
 				Frames::new_entity()
 			),
+
+			inventory: Inventory {
+				swords: [
+					WeaponInfo {weapon: Weapon::Sword, unlocked: true, cooldown: 0},
+					WeaponInfo {weapon: Weapon::Hammer, unlocked: true, cooldown: 0},
+					WeaponInfo {weapon: Weapon::Boomerang, unlocked: true, cooldown: 0}
+				],
+				guns: [
+					WeaponInfo {weapon: Weapon::Pistol, unlocked: true, cooldown: 0},
+					WeaponInfo {weapon: Weapon::Shotgun, unlocked: true, cooldown: 0},
+					WeaponInfo {weapon: Weapon::RadioCannon, unlocked: true, cooldown: 0}
+				],
+				current_sword: 0,
+				current_gun: 0,
+			},
 
 			config: Config::read("./config.ron")
 		}
