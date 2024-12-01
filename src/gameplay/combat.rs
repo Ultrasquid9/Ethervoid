@@ -142,74 +142,6 @@ impl CustomType for Attack {
 	}
 }
 
-/// Attempts to parry attacks 
-pub fn try_parry(attacks: &mut [Attack], world: &mut World) {
-	// i is the index of the attack that is trying to parry other attacks
-	for i in (0..attacks.len()).rev() {
-		// Checking if i is not physical or has been parried, and continuing the loop if either is true
-		if attacks[i].attack_type != AttackType::Physical
-		|| attacks[i].is_parried {
-			continue;
-		}
-
-		// Looping through all the other attacks
-		for j in (0..attacks.len()).rev() {
-			if i == j {
-				continue;
-			}
-
-			// Coming up next: more nesting than the average bird
-
-			// Checking if j is touching i and if j has not already been parried
-			if attacks[j].obj.is_touching(&attacks[i].obj)
-			&& !attacks[j].is_parried {
-				// Checking the attack type of j
-				match &attacks[j].attack_type {
-
-					// Physical attacks
-					AttackType::Physical => {
-						if attacks[j].owner != attacks[i].owner {
-							attacks[j].owner = attacks[i].owner.clone();
-
-							attacks[j].damage += attacks[i].damage;
-							
-							attacks[i].lifetime += get_delta_time();
-							attacks[j].lifetime += get_delta_time();
-
-							attacks[i].is_parried = true;
-							attacks[j].is_parried = true;
-
-							world.hitstop = 10.;
-						}
-					}
-
-					// Projectile attacks
-					AttackType::Projectile => {
-						if attacks[j].owner != attacks[i].owner {
-							attacks[j].owner = attacks[i].owner.clone();
-						}
-
-						attacks[j].attack_type = AttackType::Hitscan;
-						attacks[j].damage += attacks[i].damage;
-
-						attacks[j].obj.target = match attacks[j].owner {
-							Owner::Player => get_mouse_pos() * 999.,
-							Owner::Enemy => attacks[i].obj.target * 999.
-						};
-
-						world.hitstop = 10.;
-
-						// Since hitscan attacks cannot be parried, the is_parried bool is unneccessary
-					}
-
-					// Burst and Hitscan attacks cannot be parried
-					_ => ()
-				}
-			}
-		}
-	}
-}
-
 pub fn handle_combat(world: &mut World) {
 	for (_, mut atk) in world.attacks.iter_mut() {
 		atk.sprite.update(*atk.obj);
@@ -280,4 +212,82 @@ fn attack_hitscan(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 		}, 
 		&obj.to_barriers()
 	).is_ok() { hp.damage(*atk.damage) }
+}
+
+/// Attempts to parry attacks 
+pub fn try_parry(world: &mut World) {
+	let attacks = &mut world.attacks;
+
+	for i in 0..attacks.attack_type.len() {
+		let atk_1 = attacks.get(i).unwrap();
+
+		if *atk_1.attack_type != AttackType::Physical
+		|| !*atk_1.is_parried {
+			continue;
+		}
+
+		for j in 0..attacks.attack_type.len() {
+			if i == j { continue }
+
+			let atk_2 = attacks.get(j).unwrap();
+
+			if !atk_2.obj.is_touching(&atk_1.obj)
+			|| !atk_2.is_parried {
+				continue;
+			}
+
+			// I have no clue why the borrow checker approved of 
+			// the code inside this match block.
+			// 
+			// I know its safe, but the borrow checker shouldn't.
+			match atk_2.attack_type {
+
+				// Physical attacks 
+				AttackType::Physical => {
+					if atk_1.owner == atk_2.owner { continue }
+
+					let atk_1 = &mut attacks.get_mut(i).unwrap();
+					*atk_1.lifetime += get_delta_time();
+					*atk_1.is_parried = true;
+
+					let new_owner = atk_1.owner.clone();
+					let new_damage = atk_1.damage.clone();
+
+					let atk_2 = &mut attacks.get_mut(j).unwrap();
+					*atk_2.owner = new_owner;
+					*atk_2.damage += new_damage;
+					*atk_2.lifetime += get_delta_time();
+					*atk_2.is_parried = true;
+
+					world.hitstop = 10.;
+
+					break;
+				}
+
+				// Projectile attacks
+				AttackType::Projectile => {
+					let new_owner = atk_1.owner.clone();
+					let new_damage = atk_1.damage.clone();
+					let new_target = atk_1.obj.target;
+
+					let atk_2 = &mut attacks.get_mut(j).unwrap();
+					*atk_2.owner = new_owner;
+					*atk_2.damage += new_damage;
+					*atk_2.lifetime = 6.;
+
+					atk_2.obj.target = match atk_2.owner {
+						Owner::Player => get_mouse_pos() * 999.,
+						Owner::Enemy => new_target * 999.
+					};
+
+					world.hitstop = 10.;
+
+					break;
+				}
+
+				// Burst and hitscan attacks cannot be parried
+				_ => ()
+			}
+		}
+	}
 }

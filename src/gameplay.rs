@@ -78,7 +78,7 @@ pub async fn gameplay() -> State {
 		handle_behavior(&mut world);
 		handle_combat(&mut world);
 		
-		//try_parry(&mut world);
+		try_parry(&mut world);
 
 		// Removing dead enemies and old attacks
 		remove_dead_enemies(&mut world);
