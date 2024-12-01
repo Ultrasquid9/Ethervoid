@@ -55,9 +55,13 @@ impl Sprite {
 	}
 
 	pub fn update(&mut self, new_obj: Obj) {
-		self.obj = new_obj;
-
-		self.frames.update(); 
+		if self.obj.pos == new_obj.pos 
+		&& self.rotation == Rotation::EightWay {
+			self.frames.reset();
+		} else {
+			self.frames.update(); 
+			self.obj = new_obj;
+		}
 	}
 
 	pub fn anim_completed(&self) -> bool {
@@ -170,6 +174,10 @@ impl Frames {
 			self.anim_time = 0.;
 			self.anim_completed = true;
 		}
+	}
+
+	fn reset(&mut self) {
+		self.anim_time = 0.;
 	}
 
 	fn get_frame(&self) -> u32 {

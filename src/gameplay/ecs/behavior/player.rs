@@ -2,7 +2,9 @@ use macroquad::math::Vec2;
 
 use crate::{gameplay::ecs::obj::{Axis, Obj}, utils::{config::Config, get_delta_time}};
 
-pub fn player_behavior(obj: &mut Obj, config: &Config) {
+use super::PlayerBehavior;
+
+pub fn player_behavior(obj: &mut Obj, behavior: &mut PlayerBehavior, config: &Config) {
 	// Checks to see if both Up and Down are being held at the same time.
 	// If they are, sets the direction to move based upon the most recently pressed key. 
 	// Otherwise, sets the direction to move based upon the currently pressed key.
@@ -58,20 +60,34 @@ pub fn player_behavior(obj: &mut Obj, config: &Config) {
 		Axis::None => ()
 	}
 
+	// Dashing
+	if config.keymap.dash.is_down() && behavior.dash_cooldown <= 0.{
+		behavior.speed += 12.;
+		behavior.dash_cooldown += 70.;
+	} else if behavior.dash_cooldown > 0. {
+		if behavior.dash_cooldown > 55. {
+			behavior.is_dashing = true;
+			behavior.speed = 12.;
+		} else {
+			behavior.is_dashing = false;
+		}
+		behavior.dash_cooldown -= get_delta_time();
+	}
+
 	// Makes the player build up speed over time, rather than instantly starting at max speed
-	if obj.speed < 3.5 && new_pos != Vec2::new(0., 0.) {
-		obj.speed += obj.speed / 6.;
+	if behavior.speed < 3.5 && new_pos != Vec2::new(0., 0.) {
+		behavior.speed += behavior.speed / 6.;
 	}
 
 	// Makes the player slow down if their speed is high
-	if obj.speed > 4.5 {
-		obj.speed /= 1.5;
+	if behavior.speed > 4.5 {
+		behavior.speed /= 1.5;
 	}
 
 	if new_pos == Vec2::new(0., 0.) {
-		obj.speed = 1.0;
+		behavior.speed = 1.0;
 	} else {
-		obj.update(new_pos.normalize() * obj.speed * get_delta_time() + obj.pos);
+		obj.update(new_pos.normalize() * behavior.speed * get_delta_time() + obj.pos);
 		obj.try_move(obj.target);
 	}
 }

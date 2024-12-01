@@ -3,7 +3,7 @@ use stecs::prelude::*;
 
 use crate::utils::{get_mouse_pos, resources::audio::play_random_sound};
 
-use super::{combat::{Attack, Owner}, ecs::{behavior::Behavior, health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}}};
+use super::{combat::{Attack, Owner}, ecs::{behavior::{Behavior, PlayerBehavior}, health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}}};
 
 #[derive(SplitFields)]
 pub struct Player<'a> {
@@ -49,7 +49,12 @@ impl Player<'_> {
 		Self {
 			health: Health::new(100.),
 			obj,
-			behavior: Behavior::Player,
+			behavior: Behavior::Player(PlayerBehavior {
+				speed: 1.,
+
+				dash_cooldown: 0.,
+				is_dashing: false
+			}),
 			sprite: Sprite::new(
 				obj, 
 				32,
