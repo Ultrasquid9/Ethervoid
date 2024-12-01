@@ -132,135 +132,6 @@ impl Attack {
 			)
 		}
 	}
-
-	/// Checks if the attack should be removed
-	pub fn should_rm(&self) -> bool {
-		match self.attack_type {
-			AttackType::Physical | AttackType::Burst => self.sprite.anim_completed(),
-			_ => self.lifetime <= 0.
-		}
-	}
-
-	// The following code is for updating attacks
-	// Be warned: expect horrors beyond human comprehension
-
-	/// Updates the attack based upon its type
-	pub fn update(&mut self, world: &mut World) {
-		self.sprite.update(self.obj);
-
-		match &self.attack_type {
-			AttackType::Physical => {
-				if self.lifetime > 0. {
-					self.attack_physical(world);
-				}
-			} 
-			AttackType::Burst => {
-				if self.lifetime > 0. {
-					self.attack_burst(world);
-				}
-			}
-			AttackType::Projectile => self.attack_projectile(world),
-			AttackType::Hitscan => self.attack_hitscan(world),
-		}
-	}
-
-	/// Updates the provided Physical attack
-	fn attack_physical(&mut self, world: &mut World) {
-		match self.owner {
-			Owner::Player => for (obj, health) in query!(world.enemies, (&obj, &mut health)) {
-				if obj.is_touching(&self.obj) {
-					health.damage(self.damage);
-				}
-			}
-			Owner::Enemy => for (obj, health) in query!(world.player, (&obj, &mut health)) {
-				if obj.is_touching(&self.obj) {
-					health.damage(self.damage);
-				}
-			}
-		}
-
-		self.lifetime -= get_delta_time();
-	}
-
-	/// Updates the provided Burst attack
-	fn attack_burst(&mut self, world: &mut World) {
-		// Returns the attack but with double the size
-		let double_size = || {
-			let mut to_return = self.clone();
-			to_return.obj.size *= 2.;
-
-			return to_return;
-		};
-
-		match self.owner {
-			Owner::Player => for (obj, health) in query!(world.enemies, (&obj, &mut health)) {
-				if obj.is_touching(&double_size().obj) {
-					health.damage(self.damage * (obj.pos.distance(self.obj.pos) / (self.obj.size * 2.)));
-				}
-			}
-			Owner::Enemy => for (obj, health) in query!(world.player, (&obj, &mut health)) {
-				if obj.is_touching(&double_size().obj) {
-					health.damage(self.damage * (obj.pos.distance(self.obj.pos) / (self.obj.size * 2.)));
-				}
-			}
-		}
-
-		self.lifetime -= get_delta_time();
-	}
-
-	/// Updates the provided Projectile attack
-	fn attack_projectile(&mut self, world: &mut World) {
-		match self.owner {
-			Owner::Player => for (obj, health) in query!(world.enemies, (&obj, &mut health)) {
-				if obj.is_touching(&self.obj) {
-					health.damage(self.damage);
-					self.lifetime = 0.;
-					return
-				}
-			}
-			Owner::Enemy => for (obj, health) in query!(world.player, (&obj, &mut health)) {
-				if obj.is_touching(&self.obj) {
-					health.damage(self.damage);
-					self.lifetime = 0.;
-					return
-				}
-			}
-		}
-
-		let new_pos = self.obj.pos.move_towards(self.obj.target, 5.);
-		let new_pos = ((new_pos - self.obj.pos) * get_delta_time()) + self.obj.pos;
-		
-		self.obj.try_move(new_pos);
-
-		if self.obj.pos != new_pos {
-			self.lifetime = 0.;
-		}
-	}
-
-	/// Updates the provided Hitscan attack
-	fn attack_hitscan(&mut self, world: &mut World) {
-		// Damages the provided entity with a raycast
-		let damage_with_raycast = |obj: &Obj, hp: &mut Health| {
-			if cast_wide(
-				&Ray{
-					position: vec2_to_tuple(&self.obj.pos), 
-					end_position: vec2_to_tuple(&self.obj.target)
-				}, 
-				&obj.to_barriers()
-			).is_ok() { hp.damage(self.damage) }
-		};
-
-		match self.owner {
-			Owner::Player => for (obj, health) in query!(world.enemies, (&obj, &mut health)) {
-				damage_with_raycast(obj, health)
-			}
-			Owner::Enemy => for (obj, health) in query!(world.player, (&obj, &mut health)) {
-				damage_with_raycast(obj, health)
-			}
-		}
-
-		self.lifetime -= get_delta_time();
-	}
 }
 
 // Allows Attacks to be created by scripts
@@ -337,4 +208,76 @@ pub fn try_parry(attacks: &mut [Attack], world: &mut World) {
 			}
 		}
 	}
+}
+
+pub fn handle_combat(world: &mut World) {
+	for (_, mut atk) in world.attacks.iter_mut() {
+		atk.sprite.update(*atk.obj);
+
+		// Handling the lifetime of non-projectile attacks 
+		if *atk.attack_type != AttackType::Projectile {
+			*atk.lifetime -= get_delta_time()
+		}
+
+		let func = match atk.attack_type {
+			AttackType::Physical => attack_physical,
+			AttackType::Burst => attack_burst,
+			AttackType::Projectile => attack_projectile,
+			AttackType::Hitscan => attack_hitscan
+		};
+
+		match atk.owner {
+			Owner::Player => for (obj, hp) in query!(world.enemies, (&obj, &mut health)) {
+				func(obj, hp, &mut atk)
+			},
+			Owner::Enemy => for (obj, hp) in query!(world.player, (&obj, &mut health)) {
+				func(obj, hp, &mut atk)
+			},
+		}
+	}
+}
+
+fn attack_physical(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+	if *atk.lifetime >= 0. && obj.is_touching(&atk.obj) {
+		hp.damage(*atk.damage);
+	}
+}
+
+fn attack_burst(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+	// Returns the attack but with double the size
+	let double_size = |obj: &Obj| {
+		let mut to_return = *obj;
+		to_return.size *= 2.;
+
+		return to_return;
+	};
+
+	if *atk.lifetime >= 0. && obj.is_touching(&double_size(&atk.obj)) {
+		hp.damage(*atk.damage * (obj.pos.distance(atk.obj.pos) / (atk.obj.size * 2.)));
+	}
+}
+
+fn attack_projectile(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+	if obj.is_touching(&atk.obj) {
+		hp.damage(*atk.damage);
+		*atk.lifetime = 0.;
+		return
+	}
+
+	let new_pos = atk.obj.pos.move_towards(atk.obj.target, get_delta_time() * 5.);	
+	atk.obj.try_move(new_pos);
+
+	if atk.obj.pos != new_pos {
+		*atk.lifetime = 0.;
+	}
+}
+
+fn attack_hitscan(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+	if cast_wide(
+		&Ray{
+			position: vec2_to_tuple(&atk.obj.pos), 
+			end_position: vec2_to_tuple(&atk.obj.target)
+		}, 
+		&obj.to_barriers()
+	).is_ok() { hp.damage(*atk.damage) }
 }

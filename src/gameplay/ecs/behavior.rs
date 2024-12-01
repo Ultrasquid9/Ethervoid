@@ -2,7 +2,7 @@ use player::player_behavior;
 use script::script_behavior;
 use stecs::prelude::*;
 
-use crate::{cores::script::Script, gameplay::combat::Attack};
+use crate::cores::script::Script;
 
 use super::World;
 
@@ -15,7 +15,7 @@ pub enum Behavior<'a> {
 	Script(Script<'a>) // TODO: Embed Rhai script/state/engine into this variant
 }
 
-pub fn handle_behavior(world: &mut World, attacks: &mut Vec<Attack>) {
+pub fn handle_behavior(world: &mut World) {
 	let obj_player = *world.player.obj.first().unwrap();
 
 	for (obj, behavior) in query!([world.player, world.enemies], (&mut obj, &mut behavior)) {
@@ -28,7 +28,7 @@ pub fn handle_behavior(world: &mut World, attacks: &mut Vec<Attack>) {
 				script, 
 				obj, 
 				&obj_player,
-				attacks
+				&mut world.attacks
 			)
 		}
 	}

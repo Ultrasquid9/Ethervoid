@@ -1,4 +1,4 @@
-use combat::{try_parry, Attack};
+use combat::{handle_combat, try_parry, AttackType};
 use draw::draw;
 use ecs::{behavior::handle_behavior, World};
 use enemy::Enemy;
@@ -23,13 +23,12 @@ pub async fn gameplay() -> State {
 		player: Default::default(),
 		enemies: Default::default(),
 		npcs: Default::default(),
+		attacks: Default::default(),
 
 		config: Config::read("./config.ron"),
 		current_map: String::from("default:test"),
 		hitstop: 0.
 	};
-
-	let mut attacks: Vec<Attack> = Vec::new();
 
 	for (enemy, pos) in access_map(&world.current_map).enemies.iter() {
 		let _ = world.enemies.insert(Enemy::from_type(enemy, pos));
@@ -42,7 +41,7 @@ pub async fn gameplay() -> State {
 	world.player.insert(Player::new());
 
 	loop {
-		draw(&mut world, &mut attacks).await;
+		draw(&mut world).await;
 		
 		// Handling hitstop
 		if world.hitstop > 0. {
@@ -68,21 +67,22 @@ pub async fn gameplay() -> State {
 
 			// Creating attacks
 			if world.config.keymap.sword.is_down() && inventory.swords[inventory.current_sword].cooldown <= 0. {
-				attacks.push(inventory.attack_sword(obj.pos)); 
+				world.attacks.insert(inventory.attack_sword(obj.pos)); 
 			}
 			if world.config.keymap.gun.is_down() && inventory.guns[inventory.current_gun].cooldown <= 0. {
-				attacks.push(inventory.attack_gun(obj.pos)); 
+				world.attacks.insert(inventory.attack_gun(obj.pos)); 
 			}
 		}
 
 		// Attacks 
-		handle_behavior(&mut world, &mut attacks);
-		try_parry(&mut attacks, &mut world);
-		attacks.retain(|atk| !atk.should_rm());
+		handle_behavior(&mut world);
+		handle_combat(&mut world);
+		
+		//try_parry(&mut world);
 
-		for atk in attacks.iter_mut() {
-			atk.update(&mut world);
-		}
+		// Removing dead enemies and old attacks
+		remove_dead_enemies(&mut world);
+		remove_old_attacks(&mut world);
 
 		// Quitting the game
 		if world.config.keymap.quit.is_down() {
@@ -91,5 +91,38 @@ pub async fn gameplay() -> State {
 		}
 
 		next_frame().await
+	}
+}
+
+fn remove_dead_enemies(world: &mut World) {
+	let mut to_remove: usize = 0;
+	while (|| {
+		for (index, enemy) in world.enemies.iter() {
+			if enemy.health.should_kill() {
+				to_remove = index;
+				return true
+			}
+		}
+		return false
+	})() {
+		world.enemies.remove(to_remove);
+	}
+}
+
+fn remove_old_attacks(world: &mut World) {
+	let mut to_remove: usize = 0;
+	while (|| {
+		for (index, atk) in world.attacks.iter() {
+			if match atk.attack_type {
+				AttackType::Physical | AttackType::Burst => atk.sprite.anim_completed(),
+				_ => *atk.lifetime <= 0.
+			} {
+				to_remove = index;
+				return true
+			}
+		}
+		return false
+	})() {
+		world.attacks.remove(to_remove);
 	}
 }

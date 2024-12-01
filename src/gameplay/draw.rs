@@ -5,14 +5,14 @@ use stecs::prelude::*;
 
 use crate::utils::{camera_scale, resources::{maps::access_map, textures::access_image}};
 
-use super::{combat::Attack, ecs::World};
+use super::ecs::World;
 
 pub mod process;
 pub mod render;
 
 pub const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
-pub async fn draw<'a>(world: &mut World<'a>, attacks: &mut Vec<Attack>) {
+pub async fn draw<'a>(world: &mut World<'a>) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 
@@ -33,14 +33,9 @@ pub async fn draw<'a>(world: &mut World<'a>, attacks: &mut Vec<Attack>) {
 		draw_bar(&bar);
 	}
 
-	for (sprite, obj) in query!([world.player, world.enemies], (&mut sprite, &obj)) {
+	for (sprite, obj) in query!([world.player, world.enemies, world.attacks], (&mut sprite, &obj)) {
 		sprite.update(*obj);
 		sprite.render().await
-	}
-
-	for atk in attacks {
-		atk.sprite.update(atk.obj);
-		atk.sprite.render().await
 	}
 
 	set_default_camera();
