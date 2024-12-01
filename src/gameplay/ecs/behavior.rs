@@ -2,7 +2,7 @@ use player::player_behavior;
 use script::script_behavior;
 use stecs::prelude::*;
 
-use crate::cores::script::Script;
+use crate::{cores::script::Script, utils::get_delta_time};
 
 use super::World;
 
@@ -13,7 +13,7 @@ pub mod player;
 pub enum Behavior<'a> {
 	Player(PlayerBehavior),
 	Enemy(EnemyBehavior<'a>),
-	Script(Script<'a>)
+	None
 }
 
 #[derive(PartialEq, Clone)]
@@ -43,12 +43,29 @@ pub fn handle_behavior(world: &mut World) {
 				behavior,
 				&world.config
 			),
-			Behavior::Script(script) => script_behavior(
-				script, 
-				obj, 
-				&obj_player,
-				&mut world.attacks
-			),
+			Behavior::Enemy(behavior) => {
+				if script_behavior(
+					if behavior.attack_cooldown > 0. {
+						behavior.attack_cooldown -= get_delta_time();
+						behavior.attacks[behavior.attack_index].current_target = obj_player.pos;
+
+						&mut behavior.movement
+					} else {
+						&mut behavior.attacks[behavior.attack_index]
+					}, 
+					obj, 
+					&obj_player, 
+					&mut world.attacks
+				) {
+					behavior.attack_index = if behavior.attack_index >= behavior.attacks.len() - 1 {
+						0
+					} else {
+						behavior.attack_index + 1
+					};
+
+					behavior.attack_cooldown = 40.;
+				};
+			}
 
 			_ => ()
 		}

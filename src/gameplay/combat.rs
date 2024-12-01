@@ -235,7 +235,6 @@ pub fn try_parry(world: &mut World) {
 			|| *atk_2.is_parried {
 				continue;
 			}
-			println!("Parrying!");
 
 			// I have no clue why the borrow checker approved of 
 			// the code inside this match block.

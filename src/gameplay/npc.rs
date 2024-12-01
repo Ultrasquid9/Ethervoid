@@ -40,7 +40,7 @@ impl Npc<'_> {
 	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
 		return Self {
 			obj: Obj::new(*pos, *pos, 15.),
-			behavior: Behavior::Script(npctype.movement.clone().build()),
+			behavior: Behavior::None,
 
 			messages: npctype.messages.clone(),
 			messages_cooldown: 0.,

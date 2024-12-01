@@ -26,7 +26,7 @@ pub struct Message {
 pub struct NpcTypeBuilder {
 	pub name: String,
 	pub sprite: String,
-	pub movement: String,
+	pub movement: (),
 	pub messages: Vec<Message>
 }
 
@@ -34,7 +34,7 @@ pub struct NpcTypeBuilder {
 pub struct NpcType {
 	pub name: String,
 	pub sprite: String,
-	pub movement: ScriptBuilder,
+	pub movement: (),
 	pub messages: Vec<Message>
 }
 
@@ -49,7 +49,7 @@ impl NpcTypeBuilder {
 		NpcType {
 			name: self.name,
 			sprite: self.sprite, 
-			movement: scripts.get(&self.movement).unwrap().clone(), 
+			movement: (), 
 			messages: self.messages
 		}
 	}

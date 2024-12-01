@@ -4,13 +4,13 @@ use stecs::{prelude::*, storage::vec::VecFamily};
 
 use crate::{cores::script::Script, gameplay::{combat::{Attack, AttackStructOf, Owner}, ecs::obj::Obj}, utils::get_delta_time};
 
-/// Reads a script
+/// Reads a script. Returns true if the script has finished, or the Obj could not move
 pub fn script_behavior(
 	script: &mut Script<'_>, 
 	obj: &mut Obj, 
 	obj_player: &Obj,
 	attacks: &mut AttackStructOf<VecFamily>
-) {
+) -> bool {
 	// Values available in the scope
 	script.scope
 		.push("attacks", Vec::<Dynamic>::new())
@@ -83,6 +83,10 @@ pub fn script_behavior(
 
 	if new_pos != vec2(999999., 999999.) {
 		obj.update(new_pos);
-		obj.try_move(obj.target);
+		obj.try_move(new_pos);
+	} else {
+		return true
 	}
+
+	return obj.pos != obj.target || obj.pos.round() == script.current_target.round()
 }

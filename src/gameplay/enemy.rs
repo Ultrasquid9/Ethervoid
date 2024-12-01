@@ -20,8 +20,7 @@ impl Enemy<'_> {
 		Self {
 			health: Health::new(enemytype.max_health),
 			obj,
-			behavior: Behavior::Script(enemytype.movement.clone().build()),
-/* 			behavior: Behavior::Enemy(EnemyBehavior {
+			behavior: Behavior::Enemy(EnemyBehavior {
 				movement: enemytype.movement.clone().build(),
 
 				attacks: enemytype.attacks
@@ -31,7 +30,7 @@ impl Enemy<'_> {
 
 				attack_index: 0,
 				attack_cooldown: 0.
-			}), */
+			}),
 			sprite: Sprite::new(
 				obj, 
 				enemytype.size as u32,
