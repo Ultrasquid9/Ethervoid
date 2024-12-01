@@ -1,6 +1,6 @@
 use macroquad::math::{vec2, Vec2};
 use rhai::Dynamic;
-use stecs::storage::vec::VecFamily;
+use stecs::{prelude::*, storage::vec::VecFamily};
 
 use crate::{cores::script::Script, gameplay::{combat::{Attack, AttackStructOf, Owner}, ecs::obj::Obj}, utils::get_delta_time};
 
@@ -9,7 +9,7 @@ pub fn script_behavior(
 	script: &mut Script<'_>, 
 	obj: &mut Obj, 
 	obj_player: &Obj,
-	_attacks: &mut AttackStructOf<VecFamily>
+	attacks: &mut AttackStructOf<VecFamily>
 ) {
 	// Values available in the scope
 	script.scope
@@ -19,7 +19,7 @@ pub fn script_behavior(
 		.push_constant("target_pos", script.current_target);
 
 	// Values needed for the script, but not exposed to it
-	let mut obj = obj.clone();
+	let obj_clone = obj.clone();
 
 	// The Vec2 built-in methods don't work, so I have to make shitty copies
 	fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
@@ -38,25 +38,25 @@ pub fn script_behavior(
 
 		// Functions for creating attacks
 		.register_fn("new_physical", move |damage: f32, size, target: Vec2,| return Attack::new_physical(
-			Obj::new(obj.pos, target, size),
+			Obj::new(obj_clone.pos, target, size),
 			damage, 
 			Owner::Enemy,
 			"default:attacks/dash"
 		))
 		.register_fn("new_burst", move |damage: f32, size| return Attack::new_burst(
-			Obj::new(obj.pos, obj.pos, size), 
+			Obj::new(obj_clone.pos, obj_clone.pos, size), 
 			damage, 
 			Owner::Enemy,
 			"default:attacks/burst"
 		))
 		.register_fn("new_projectile", move |damage: f32, target: Vec2| return Attack::new_projectile(
-			Obj::new(obj.pos, target, 10.),
+			Obj::new(obj_clone.pos, target, 10.),
 			damage, 
 			Owner::Enemy,
 			"default:attacks/projectile-enemy"
 		))
 		.register_fn("new_hitscan", move |damage: f32, target: Vec2| return Attack::new_hitscan(
-			Obj::new(obj.pos, target, 6.),
+			Obj::new(obj_clone.pos, target, 6.),
 			damage, 
 			Owner::Enemy
 		))
@@ -69,6 +69,14 @@ pub fn script_behavior(
 		Ok(new_pos) => new_pos,
 		Err(e) => panic!("Bad script: {}", e)
 	};
+
+	// Getting attacks out of the scope
+	let new_attacks = script.scope
+		.get_value_mut::<Vec<Dynamic>>("attacks")
+		.expect("Attacks not found");
+	for i in new_attacks {
+		attacks.insert( i.clone_cast() );
+	}
 
 	// Taking delta time into consideration
 	let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;

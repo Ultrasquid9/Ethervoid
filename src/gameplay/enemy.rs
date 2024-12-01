@@ -23,7 +23,7 @@ impl Enemy<'_> {
 			behavior: Behavior::Script(enemytype.movement.clone().build()),
 			sprite: Sprite::new(
 				obj, 
-				32,
+				enemytype.size as u32,
 				&enemytype.sprite, 
 				Rotation::EightWay,
 				Frames::new_entity()

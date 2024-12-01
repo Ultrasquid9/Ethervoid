@@ -12,7 +12,7 @@ pub mod player;
 #[derive(PartialEq, Clone)]
 pub enum Behavior<'a> {
 	Player,
-	Script(Script<'a>) // TODO: Embed Rhai script/state/engine into this variant
+	Script(Script<'a>)
 }
 
 pub fn handle_behavior(world: &mut World) {
