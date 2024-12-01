@@ -1,11 +1,11 @@
-use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::Color, math::vec2, window::{clear_background, screen_height, screen_width}};
+use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::{Color, RED}, math::vec2, shapes::draw_line, window::{clear_background, screen_height, screen_width}};
 use process::to_texture;
 use render::{draw_bar, draw_tilemap};
 use stecs::prelude::*;
 
 use crate::utils::{camera_scale, resources::{maps::access_map, textures::access_image}};
 
-use super::ecs::World;
+use super::{combat::AttackType, ecs::World};
 
 pub mod process;
 pub mod render;
@@ -34,8 +34,21 @@ pub async fn draw<'a>(world: &mut World<'a>) {
 	}
 
 	for (sprite, obj) in query!([world.player, world.enemies, world.attacks], (&mut sprite, &obj)) {
-		sprite.update(*obj);
+		if world.hitstop <= 0. { sprite.update(*obj) }
 		sprite.render().await
+	}
+
+	for (atk_type, obj) in query!(world.attacks, (&attack_type, &obj)) {
+		if let AttackType::Hitscan = atk_type {
+			draw_line(
+				obj.pos.x, 
+				obj.pos.y, 
+				obj.target.x, 
+				obj.target.y, 
+				obj.size, 
+				RED
+			);
+		}
 	}
 
 	set_default_camera();

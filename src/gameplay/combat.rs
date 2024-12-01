@@ -146,9 +146,16 @@ pub fn handle_combat(world: &mut World) {
 	for (_, mut atk) in world.attacks.iter_mut() {
 		atk.sprite.update(*atk.obj);
 
-		// Handling the lifetime of non-projectile attacks 
+		// Handling the lifetime and movement of attacks 
 		if *atk.attack_type != AttackType::Projectile {
 			*atk.lifetime -= get_delta_time()
+		} else {
+			let new_pos = atk.obj.pos.move_towards(atk.obj.target, get_delta_time() * 5.);	
+			atk.obj.try_move(new_pos);
+		
+			if atk.obj.pos != new_pos {
+				*atk.lifetime = 0.;
+			}
 		}
 
 		let func = match atk.attack_type {
@@ -195,13 +202,6 @@ fn attack_projectile(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 		*atk.lifetime = 0.;
 		return
 	}
-
-	let new_pos = atk.obj.pos.move_towards(atk.obj.target, get_delta_time() * 5.);	
-	atk.obj.try_move(new_pos);
-
-	if atk.obj.pos != new_pos {
-		*atk.lifetime = 0.;
-	}
 }
 
 fn attack_hitscan(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
@@ -222,7 +222,7 @@ pub fn try_parry(world: &mut World) {
 		let atk_1 = attacks.get(i).unwrap();
 
 		if *atk_1.attack_type != AttackType::Physical
-		|| !*atk_1.is_parried {
+		|| *atk_1.is_parried {
 			continue;
 		}
 
@@ -232,9 +232,10 @@ pub fn try_parry(world: &mut World) {
 			let atk_2 = attacks.get(j).unwrap();
 
 			if !atk_2.obj.is_touching(&atk_1.obj)
-			|| !atk_2.is_parried {
+			|| *atk_2.is_parried {
 				continue;
 			}
+			println!("Parrying!");
 
 			// I have no clue why the borrow checker approved of 
 			// the code inside this match block.
@@ -274,6 +275,9 @@ pub fn try_parry(world: &mut World) {
 					*atk_2.owner = new_owner;
 					*atk_2.damage += new_damage;
 					*atk_2.lifetime = 6.;
+					*atk_2.is_parried = true;
+
+					*atk_2.attack_type = AttackType::Hitscan;
 
 					atk_2.obj.target = match atk_2.owner {
 						Owner::Player => get_mouse_pos() * 999.,
