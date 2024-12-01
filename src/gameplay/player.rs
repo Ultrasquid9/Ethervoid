@@ -25,7 +25,7 @@ pub struct Inventory {
 /// Contains info about one of the player's weaponsa
 pub struct WeaponInfo {
 	pub weapon: Weapon,
-	pub unlocked: bool,
+	pub _unlocked: bool,
 	pub cooldown: f32
 }
 
@@ -60,14 +60,14 @@ impl Player<'_> {
 
 			inventory: Inventory {
 				swords: [
-					WeaponInfo {weapon: Weapon::Sword, unlocked: true, cooldown: 0.},
-					WeaponInfo {weapon: Weapon::Hammer, unlocked: true, cooldown: 0.},
-					WeaponInfo {weapon: Weapon::Boomerang, unlocked: true, cooldown: 0.}
+					WeaponInfo {weapon: Weapon::Sword, _unlocked: true, cooldown: 0.},
+					WeaponInfo {weapon: Weapon::Hammer, _unlocked: true, cooldown: 0.},
+					WeaponInfo {weapon: Weapon::Boomerang, _unlocked: true, cooldown: 0.}
 				],
 				guns: [
-					WeaponInfo {weapon: Weapon::Pistol, unlocked: true, cooldown: 0.},
-					WeaponInfo {weapon: Weapon::Shotgun, unlocked: true, cooldown: 0.},
-					WeaponInfo {weapon: Weapon::RadioCannon, unlocked: true, cooldown: 0.}
+					WeaponInfo {weapon: Weapon::Pistol, _unlocked: true, cooldown: 0.},
+					WeaponInfo {weapon: Weapon::Shotgun, _unlocked: true, cooldown: 0.},
+					WeaponInfo {weapon: Weapon::RadioCannon, _unlocked: true, cooldown: 0.}
 				],
 				current_sword: 0,
 				current_gun: 0,
@@ -91,10 +91,10 @@ impl Inventory {
 				return Attack::new_physical(
 					Obj::new(
 						pos, 
-						mouse_position_local(), 
-						10., 
+						pos + mouse_position_local(), 
+						36., 
 					),
-					36., 
+					10., 
 					Owner::Player, 
 					"default:attacks/slash"
 				)
@@ -105,9 +105,9 @@ impl Inventory {
 					Obj::new(
 						pos, 
 						pos, 
-						10., 
+						36., 
 					),
-					36., 
+					10., 
 					Owner::Player, 
 					"default:attacks/burst"
 				)
@@ -120,7 +120,7 @@ impl Inventory {
 						get_mouse_pos() * 999., 
 						10., 
 					),
-					36., 
+					10., 
 					Owner::Player, 
 					"default:attacks/projectile-player"
 				)
@@ -151,9 +151,9 @@ impl Inventory {
 					Obj::new(
 						pos, 
 						pos, 
-						10., 
+						16., 
 					),
-					36., 
+					10., 
 					Owner::Player, 
 					"default:attacks/burst"
 				)
@@ -166,7 +166,7 @@ impl Inventory {
 						get_mouse_pos() * 999., 
 						6., 
 					),
-					36., 
+					6., 
 					Owner::Player
 				)
 			},

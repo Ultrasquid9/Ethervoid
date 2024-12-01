@@ -96,8 +96,13 @@ impl Sprite {
 		render_texture(
 			&to_texture(if self.rotation == Rotation::Angle {
 				DynamicImage::ImageRgba8(rotate_about_center(
-					self.sprite.as_rgba8().unwrap(), 
-					self.obj.pos.angle_between(self.obj.target), 
+					self.sprite.crop_imm(
+						x_pos, 
+						y_pos, 
+						size, 
+						size
+					).as_rgba8().unwrap(), 
+					(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x),
 					imageproc::geometric_transformations::Interpolation::Nearest, 
 					Rgba([0, 0, 0, 0])
 				))
@@ -105,18 +110,20 @@ impl Sprite {
 				self.sprite.clone()
 			}),
 			Vec2::new(
-				self.obj.pos.x + self.sprite.width() as f32, 
-				self.obj.pos.y + self.sprite.height() as f32
+				self.obj.pos.x + if self.rotation == Rotation::EightWay { self.sprite.width() as f32 } else { 0. }, 
+				self.obj.pos.y + if self.rotation == Rotation::EightWay { self.sprite.height() as f32 } else { 0. }
 			), 
 			Some(DrawTextureParams {
-				source: Some(
-					Rect::new(
-						x_pos as f32,
-						y_pos as f32,
-						size as f32,
-						size as f32
+				source: if self.rotation == Rotation::EightWay {
+					Some(
+						Rect::new(
+							x_pos as f32,
+							y_pos as f32,
+							size as f32,
+							size as f32
+						)
 					)
-				),
+				} else { None },
 				flip_x: self.obj.axis_horizontal == Axis::Negative && self.rotation == Rotation::EightWay,
 				dest_size: Some(Vec2::new(size as f32 * SCREEN_SCALE, size as f32 * SCREEN_SCALE)),
 				..Default::default()

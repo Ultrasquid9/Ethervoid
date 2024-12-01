@@ -74,6 +74,11 @@ pub async fn gameplay() -> State {
 			}
 		}
 
+		// Updating health (this is primarily for i-frames)
+		for hp in query!([world.player, world.enemies], (&mut health)) {
+			hp.update();
+		}
+
 		// Attacks 
 		handle_behavior(&mut world);
 		handle_combat(&mut world);
