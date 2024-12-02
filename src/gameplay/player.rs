@@ -93,7 +93,7 @@ impl Inventory {
 				]);
 
 				self.swords[self.current_sword].cooldown = 16.;
-				return Attack::new_physical(
+				Attack::new_physical(
 					Obj::new(
 						pos, 
 						pos + mouse_position_local(), 
@@ -106,7 +106,7 @@ impl Inventory {
 			},
 			Weapon::Hammer => {
 				self.swords[self.current_sword].cooldown = 32.;
-				return Attack::new_burst(
+				Attack::new_burst(
 					Obj::new(
 						pos, 
 						pos, 
@@ -119,7 +119,7 @@ impl Inventory {
 			},
 			Weapon::Boomerang => {
 				self.swords[self.current_sword].cooldown = 48.;
-				return Attack::new_projectile(
+				Attack::new_projectile(
 					Obj::new(
 						pos, 
 						get_mouse_pos() * 999., 
@@ -140,7 +140,7 @@ impl Inventory {
 		match self.guns[self.current_gun].weapon {
 			Weapon::Pistol => {
 				self.guns[self.current_gun].cooldown = 16.;
-				return Attack::new_projectile(
+				Attack::new_projectile(
 					Obj::new(
 						pos, 
 						get_mouse_pos() * 999., 
@@ -152,7 +152,7 @@ impl Inventory {
 				)
 			},
 			Weapon::Shotgun => {
-				return Attack::new_burst(
+				Attack::new_burst(
 					Obj::new(
 						pos, 
 						pos, 
@@ -165,7 +165,7 @@ impl Inventory {
 			},
 			Weapon::RadioCannon => {
 				self.guns[self.current_gun].cooldown = 48.;
-				return Attack::new_hitscan(
+				Attack::new_hitscan(
 					Obj::new(
 						pos, 
 						get_mouse_pos() * 999., 

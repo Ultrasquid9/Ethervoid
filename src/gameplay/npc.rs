@@ -35,7 +35,7 @@ impl Npc<'_> {
 	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
 		let obj = Obj::new(*pos, *pos, 15.);
 		
-		return Self {
+		Self {
 			obj,
 			behavior: match npctype.movement {
 				NpcMovement::Wander => Behavior::Wander(WanderBehavior {

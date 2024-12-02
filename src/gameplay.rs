@@ -99,7 +99,7 @@ fn remove_dead_enemies(world: &mut World) {
 				return true
 			}
 		}
-		return false
+		false
 	})() {
 		world.enemies.remove(to_remove);
 	}
@@ -117,7 +117,7 @@ fn remove_old_attacks(world: &mut World) {
 				return true
 			}
 		}
-		return false
+		false
 	})() {
 		world.attacks.remove(to_remove);
 	}

@@ -46,7 +46,7 @@ pub enum AttackType {
 
 impl Attack {
 	pub fn new_physical(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
-		return Attack {
+		Attack {
 			obj,
 
 			owner,
@@ -67,7 +67,7 @@ impl Attack {
 	}
 
 	pub fn new_burst(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
-		return Attack {
+		Attack {
 			obj,
 
 			owner,
@@ -88,7 +88,7 @@ impl Attack {
 	}
 
 	pub fn new_projectile(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
-		return Attack {
+		Attack {
 			obj: Obj::new(
 				obj.pos, 
 				((obj.target - obj.pos) * 999.) + obj.pos, 
@@ -113,7 +113,7 @@ impl Attack {
 	}
 
 	pub fn new_hitscan(obj: Obj, damage: f32, owner: Owner) -> Attack {
-		return Attack {
+		Attack {
 			obj,
 
 			owner,
@@ -179,7 +179,7 @@ pub fn handle_combat(world: &mut World) {
 }
 
 fn attack_physical(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
-	if *atk.lifetime >= 0. && obj.is_touching(&atk.obj) {
+	if *atk.lifetime >= 0. && obj.is_touching(atk.obj) {
 		hp.damage(*atk.damage);
 	}
 }
@@ -190,19 +190,18 @@ fn attack_burst(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 		let mut to_return = *obj;
 		to_return.size *= 2.;
 
-		return to_return;
+		to_return
 	};
 
-	if *atk.lifetime >= 0. && obj.is_touching(&double_size(&atk.obj)) {
+	if *atk.lifetime >= 0. && obj.is_touching(&double_size(atk.obj)) {
 		hp.damage(*atk.damage * (obj.pos.distance(atk.obj.pos) / (atk.obj.size * 2.)));
 	}
 }
 
 fn attack_projectile(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
-	if obj.is_touching(&atk.obj) {
+	if obj.is_touching(atk.obj) {
 		hp.damage(*atk.damage);
 		*atk.lifetime = 0.;
-		return
 	}
 }
 
@@ -233,7 +232,7 @@ fn try_parry(world: &mut World) {
 
 			let atk_2 = attacks.get(j).unwrap();
 
-			if !atk_2.obj.is_touching(&atk_1.obj)
+			if !atk_2.obj.is_touching(atk_1.obj)
 			|| *atk_2.is_parried {
 				continue;
 			}
@@ -253,7 +252,7 @@ fn try_parry(world: &mut World) {
 					*atk_1.is_parried = true;
 
 					let new_owner = atk_1.owner.clone();
-					let new_damage = atk_1.damage.clone();
+					let new_damage = *atk_1.damage;
 
 					let atk_2 = &mut attacks.get_mut(j).unwrap();
 					*atk_2.owner = new_owner;
@@ -269,7 +268,7 @@ fn try_parry(world: &mut World) {
 				// Projectile attacks
 				AttackType::Projectile => {
 					let new_owner = atk_1.owner.clone();
-					let new_damage = atk_1.damage.clone();
+					let new_damage = *atk_1.damage;
 					let new_target = atk_1.obj.target;
 
 					let atk_2 = &mut attacks.get_mut(j).unwrap();

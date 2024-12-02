@@ -34,7 +34,7 @@ impl Direction {
 			return true
 		}
 
-		return false
+		false
 	}
 }
 
@@ -49,13 +49,13 @@ impl Door {
 	/// Converts the door into a barrier
 	pub fn to_barrier(&self) -> Barrier {
 		match self.direction {
-			Direction::North | Direction::South => return Barrier {
+			Direction::North | Direction::South => Barrier {
 				positions: (
 					(self.pos.x + 32., self.pos.y),
 					(self.pos.x - 32., self.pos.y)
 				)
 			},
-			Direction::East | Direction::West => return Barrier {
+			Direction::East | Direction::West => Barrier {
 				positions: (
 					(self.pos.x, self.pos.y + 32.),
 					(self.pos.x, self.pos.y - 32.)
@@ -105,7 +105,6 @@ impl Door {
 			};
 			player.obj.pos = new_pos - self.pos + i.pos;
 
-			drop(player);
 			world.current_map = self.dest.clone();
 			world.populate();
 			return;

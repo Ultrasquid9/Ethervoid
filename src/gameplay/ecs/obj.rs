@@ -67,8 +67,8 @@ impl Obj {
 	}
 
 	/// Converts the Obj into two barriers, a horizontal and a vertical one 
-	pub fn to_barriers(&self) -> Vec<Barrier> {
-		return vec![
+	pub fn to_barriers(self) -> Vec<Barrier> {
+		vec![
 			Barrier {
 				positions: (
 					(self.pos.x + self.size, self.pos.y),
@@ -96,7 +96,7 @@ impl Obj {
 			},
 			&access_map(current_map).doors
 				.iter()
-				.map(|door| return door.to_barrier())
+				.map(|door| door.to_barrier())
 				.collect()
 		).is_ok() { return }
 

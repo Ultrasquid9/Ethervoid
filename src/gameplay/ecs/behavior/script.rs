@@ -20,7 +20,7 @@ pub fn script_behavior(
 		.push_constant("target_pos", script.current_target);
 
 	// Values needed for the script, but not exposed to it
-	let obj_clone = obj.clone();
+	let obj_clone = *obj;
 
 	// The Vec2 built-in methods don't work, so I have to make shitty copies
 	fn move_towards(pos1: Vec2, pos2: Vec2, distance: f32) -> Vec2 {
@@ -38,25 +38,25 @@ pub fn script_behavior(
 		.register_fn("distance_between", distance_between)
 
 		// Functions for creating attacks
-		.register_fn("new_physical", move |damage: f32, size, target: Vec2,| return Attack::new_physical(
+		.register_fn("new_physical", move |damage: f32, size, target: Vec2,| Attack::new_physical(
 			Obj::new(obj_clone.pos, target, size),
 			damage, 
 			Owner::Enemy,
 			"default:attacks/dash"
 		))
-		.register_fn("new_burst", move |damage: f32, size| return Attack::new_burst(
+		.register_fn("new_burst", move |damage: f32, size| Attack::new_burst(
 			Obj::new(obj_clone.pos, obj_clone.pos, size), 
 			damage, 
 			Owner::Enemy,
 			"default:attacks/burst"
 		))
-		.register_fn("new_projectile", move |damage: f32, target: Vec2| return Attack::new_projectile(
+		.register_fn("new_projectile", move |damage: f32, target: Vec2| Attack::new_projectile(
 			Obj::new(obj_clone.pos, target, 10.),
 			damage, 
 			Owner::Enemy,
 			"default:attacks/projectile-enemy"
 		))
-		.register_fn("new_hitscan", move |damage: f32, target: Vec2| return Attack::new_hitscan(
+		.register_fn("new_hitscan", move |damage: f32, target: Vec2| Attack::new_hitscan(
 			Obj::new(obj_clone.pos, target, 6.),
 			damage, 
 			Owner::Enemy
@@ -86,8 +86,14 @@ pub fn script_behavior(
 		obj.update(new_pos);
 		obj.try_move(new_pos, current_map);
 	} else {
+		script.scope.clear();
 		return true
 	}
 
-	return obj.pos != obj.target || obj.pos.round() == script.current_target.round()
+	if obj.pos != obj.target || obj.pos.round() == script.current_target.round() {
+		script.scope.clear();
+		true
+	} else {
+		false
+	}
 }
