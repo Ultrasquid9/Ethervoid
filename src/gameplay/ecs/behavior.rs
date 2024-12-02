@@ -85,13 +85,19 @@ pub fn handle_behavior(world: &mut World) {
 					behavior.cooldown -= get_delta_time();
 					continue;
 				} else if obj.pos.distance(obj.target) < 5. {
-					behavior.pos = Vec2::new(
+					obj.update(Vec2::new(
 						rand::gen_range(behavior.pos.x - behavior.range, behavior.pos.x + behavior.range),
 						rand::gen_range(behavior.pos.y - behavior.range, behavior.pos.y + behavior.range)
-					);
+					));
+					behavior.cooldown = 120.;
+					continue;
 				}
+				let new_pos = obj.pos.move_towards(obj.target, 2. * get_delta_time());
+				obj.try_move(new_pos, &world.current_map);
 
-
+				if obj.pos != new_pos {
+					obj.target = obj.pos
+				}
 			},
 
 			_ => ()

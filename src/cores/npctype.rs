@@ -24,7 +24,7 @@ pub struct Message {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum NpcMovement {
-	Wander,
+	Wander(f32),
 	Still
 }
 

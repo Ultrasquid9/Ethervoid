@@ -19,9 +19,6 @@ pub struct Npc<'a> {
 	
 	messages: Vec<Message>,
 	messages_cooldown: f32,
-
-	movement_cooldown: f32,
-	movement_target: Vec2
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -38,9 +35,9 @@ impl Npc<'_> {
 		Self {
 			obj,
 			behavior: match npctype.movement {
-				NpcMovement::Wander => Behavior::Wander(WanderBehavior {
+				NpcMovement::Wander(range) => Behavior::Wander(WanderBehavior {
 					pos: *pos,
-					range: 32.,
+					range,
 					cooldown: 0.
 				}),
 				NpcMovement::Still => Behavior::None
@@ -55,9 +52,6 @@ impl Npc<'_> {
 
 			messages: npctype.messages.clone(),
 			messages_cooldown: 0.,
-
-			movement_cooldown: 0.,
-			movement_target: *pos
 		}
 	}
 }
