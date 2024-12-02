@@ -20,6 +20,8 @@ pub struct Obj {
 	pub pos: Vec2,
 	pub target: Vec2,
 
+	pub stunned: f32,
+
 	pub axis_horizontal: Axis,
 	pub axis_vertical: Axis,
 
@@ -31,6 +33,8 @@ impl Obj {
 		Self {
 			pos,
 			target,
+			
+			stunned: 0.,
 
 			axis_horizontal: Axis::None,
 			axis_vertical: Axis::None,

@@ -143,6 +143,8 @@ impl CustomType for Attack {
 }
 
 pub fn handle_combat(world: &mut World) {
+	try_parry(world);
+
 	for (_, mut atk) in world.attacks.iter_mut() {
 		atk.sprite.update(*atk.obj);
 
@@ -166,25 +168,27 @@ pub fn handle_combat(world: &mut World) {
 		};
 
 		match atk.owner {
-			Owner::Player => for (obj, hp) in query!(world.enemies, (&obj, &mut health)) {
+			Owner::Player => for (obj, hp) in query!(world.enemies, (&mut obj, &mut health)) {
 				func(obj, hp, &mut atk)
 			},
-			Owner::Enemy => for (obj, hp) in query!(world.player, (&obj, &mut health)) {
+			Owner::Enemy => for (obj, hp) in query!(world.player, (&mut obj, &mut health)) {
 				func(obj, hp, &mut atk)
 			},
 		}
 	}
-
-	try_parry(world);
 }
 
-fn attack_physical(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+fn attack_physical(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 	if *atk.lifetime >= 0. && obj.is_touching(atk.obj) {
 		hp.damage(*atk.damage);
+
+		if *atk.is_parried {
+			obj.stunned = 40.
+		}
 	}
 }
 
-fn attack_burst(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+fn attack_burst(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 	// Returns the attack but with double the size
 	let double_size = |obj: &Obj| {
 		let mut to_return = *obj;
@@ -198,14 +202,14 @@ fn attack_burst(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 	}
 }
 
-fn attack_projectile(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+fn attack_projectile(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 	if obj.is_touching(atk.obj) {
 		hp.damage(*atk.damage);
 		*atk.lifetime = 0.;
 	}
 }
 
-fn attack_hitscan(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+fn attack_hitscan(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 	if cast_wide(
 		&Ray{
 			position: vec2_to_tuple(&atk.obj.pos), 
@@ -217,20 +221,23 @@ fn attack_hitscan(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 
 /// Attempts to parry attacks 
 fn try_parry(world: &mut World) {
-	let attacks = &mut world.attacks;
+	let attack_ids: Vec<usize> = world.attacks.ids()
+		.into_iter()
+		.map(|i| i)
+		.collect();
 
-	for i in 0..attacks.attack_type.len() {
-		let atk_1 = attacks.get(i).unwrap();
+	for i in attack_ids.iter().rev() {
+		let atk_1 = world.attacks.get(*i).unwrap();
 
 		if *atk_1.attack_type != AttackType::Physical
 		|| *atk_1.is_parried {
 			continue;
 		}
 
-		for j in 0..attacks.attack_type.len() {
-			if i == j { continue }
+		for j in attack_ids.iter().rev() {
+			if *i == *j { continue }
 
-			let atk_2 = attacks.get(j).unwrap();
+			let atk_2 = world.attacks.get(*j).unwrap();
 
 			if !atk_2.obj.is_touching(atk_1.obj)
 			|| *atk_2.is_parried {
@@ -243,18 +250,20 @@ fn try_parry(world: &mut World) {
 			// I know its safe, but the borrow checker shouldn't.
 			match atk_2.attack_type {
 
+				// TODO: decrease code duplication
+
 				// Physical attacks 
 				AttackType::Physical => {
 					if atk_1.owner == atk_2.owner { continue }
 
-					let atk_1 = &mut attacks.get_mut(i).unwrap();
+					let atk_1 = &mut world.attacks.get_mut(*i).unwrap();
 					*atk_1.lifetime += get_delta_time();
 					*atk_1.is_parried = true;
 
 					let new_owner = atk_1.owner.clone();
 					let new_damage = *atk_1.damage;
 
-					let atk_2 = &mut attacks.get_mut(j).unwrap();
+					let atk_2 = &mut world.attacks.get_mut(*j).unwrap();
 					*atk_2.owner = new_owner;
 					*atk_2.damage += new_damage;
 					*atk_2.lifetime += get_delta_time();
@@ -271,7 +280,11 @@ fn try_parry(world: &mut World) {
 					let new_damage = *atk_1.damage;
 					let new_target = atk_1.obj.target;
 
-					let atk_2 = &mut attacks.get_mut(j).unwrap();
+					let atk_1 = &mut world.attacks.get_mut(*i).unwrap();
+					*atk_1.lifetime += get_delta_time();
+					*atk_1.is_parried = true;
+
+					let atk_2 = &mut world.attacks.get_mut(*j).unwrap();
 					*atk_2.owner = new_owner;
 					*atk_2.damage += new_damage;
 					*atk_2.lifetime = 6.;

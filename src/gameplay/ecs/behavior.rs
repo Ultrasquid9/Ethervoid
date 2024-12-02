@@ -47,6 +47,11 @@ pub fn handle_behavior(world: &mut World) {
 	let obj_player = *world.player.obj.first().unwrap();
 
 	for (obj, behavior) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior)) {
+		if obj.stunned > 0. { 
+			obj.stunned -= get_delta_time();
+			continue;
+		}
+
 		match behavior {
 			Behavior::Player(behavior) => player_behavior(
 				obj, 
