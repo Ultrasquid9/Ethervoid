@@ -21,7 +21,8 @@ impl Health {
 
 	pub fn damage(&mut self, damage: f32) {
 		if self.i_frames <= 0. {
-			self.hp -= damage
+			self.hp -= damage;
+			self.i_frames = 10.;
 		}
 	}
 

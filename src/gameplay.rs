@@ -109,9 +109,10 @@ pub async fn gameplay() -> State {
 		// Movement and behavior
 		handle_behavior(&mut world);
 		
-		// Removing dead enemies and old attacks
+		// handling dead entities/players and old attacks 
 		remove_dead_enemies(&mut world);
 		remove_old_attacks(&mut world);
+		try_player_death(&mut world);
 
 		// Quitting the game
 		if world.config.keymap.quit.is_down() {
@@ -123,35 +124,70 @@ pub async fn gameplay() -> State {
 	}
 }
 
+/// Handling dead enemies.
+/// TODO: Death animation
 fn remove_dead_enemies(world: &mut World) {
 	let mut to_remove: usize = 0;
-	while (|| {
+	while {
+		let mut enemy_to_remove = false;
+
 		for (index, enemy) in world.enemies.iter() {
 			if enemy.health.should_kill() {
 				to_remove = index;
-				return true
+				enemy_to_remove = true;
+				break;
 			}
 		}
-		false
-	})() {
+
+		enemy_to_remove
+	} {
 		world.enemies.remove(to_remove);
 	}
 }
 
+/// Handling old attacks
 fn remove_old_attacks(world: &mut World) {
 	let mut to_remove: usize = 0;
-	while (|| {
+	while {
+		let mut atk_to_remove = false;
+
 		for (index, atk) in world.attacks.iter() {
 			if match atk.attack_type {
 				AttackType::Physical | AttackType::Burst => atk.sprite.anim_completed(),
 				_ => *atk.lifetime <= 0.
 			} {
 				to_remove = index;
-				return true
+				atk_to_remove = true;
+				break;
 			}
 		}
-		false
-	})() {
+
+		atk_to_remove
+	} {
 		world.attacks.remove(to_remove);
+	}
+}
+
+/// Handling the player's death (WIP)
+fn try_player_death(world: &mut World) {
+	if {
+		let mut player_is_dead = false;
+
+		for hp in query!(world.player, (&health)) {
+			if hp.should_kill() {
+				player_is_dead = true;
+				break;
+			}
+		}
+
+		player_is_dead
+	} {
+		while !world.player.ids.is_empty() {
+			world.player.remove(0);
+		}
+
+		world.player.insert(Player::new());
+
+		world.populate();
 	}
 }

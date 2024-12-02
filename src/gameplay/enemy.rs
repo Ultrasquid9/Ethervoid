@@ -29,7 +29,7 @@ impl Enemy<'_> {
 					.collect(),
 
 				attack_index: 0,
-				attack_cooldown: 0.
+				attack_cooldown: 40.
 			}),
 			sprite: Sprite::new(
 				obj, 
