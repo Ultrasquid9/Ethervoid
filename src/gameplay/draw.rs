@@ -1,4 +1,4 @@
-use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::{Color, RED}, math::vec2, shapes::draw_line, window::{clear_background, screen_height, screen_width}};
+use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::{Color, BLACK, RED}, math::vec2, shapes::draw_line, text::draw_text, window::{clear_background, screen_height, screen_width}};
 use process::to_texture;
 use render::{draw_bar, draw_tilemap};
 use stecs::prelude::*;
@@ -55,4 +55,8 @@ pub async fn draw<'a>(world: &mut World<'a>) {
 	}
 
 	set_default_camera();
+
+	 
+	// Drawing a temporary UI
+	draw_text(&format!("{}", world.player.health[0].hp), 32.0, 64.0, camera_scale() / 10., BLACK);
 }

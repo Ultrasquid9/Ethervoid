@@ -116,7 +116,7 @@ pub async fn gameplay() -> State {
 		// Quitting the game
 		if world.config.keymap.quit.is_down() {
 			unsafe{ clean_resources(); }
-			return State::Quit
+			return State::Menu
 		}
 
 		next_frame().await
