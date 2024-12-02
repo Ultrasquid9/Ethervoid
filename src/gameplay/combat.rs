@@ -244,67 +244,55 @@ fn try_parry(world: &mut World) {
 				continue;
 			}
 
-			// I have no clue why the borrow checker approved of 
-			// the code inside this match block.
-			// 
-			// I know its safe, but the borrow checker shouldn't.
 			match atk_2.attack_type {
-
-				// TODO: decrease code duplication
-
-				// Physical attacks 
+				// Physical attacks should not be able to parry themselves
 				AttackType::Physical => {
 					if atk_1.owner == atk_2.owner { continue }
-
-					let atk_1 = &mut world.attacks.get_mut(*i).unwrap();
-					*atk_1.lifetime += get_delta_time();
-					*atk_1.is_parried = true;
-
-					let new_owner = atk_1.owner.clone();
-					let new_damage = *atk_1.damage;
-
-					let atk_2 = &mut world.attacks.get_mut(*j).unwrap();
-					*atk_2.owner = new_owner;
-					*atk_2.damage += new_damage;
-					*atk_2.lifetime += get_delta_time();
-					*atk_2.is_parried = true;
-
-					world.hitstop = 10.;
-
-					break;
 				}
+				// Burst and hitscan attacks cannot be parried
+				AttackType::Burst | AttackType::Hitscan => continue,
 
-				// Projectile attacks
+				_ => ()
+			}
+
+			// I have no clue why the borrow checker approved of 
+			// the following code.
+			// 
+			// I know its safe, but the borrow checker shouldn't.
+
+			world.hitstop = 10.;
+
+			let atk_1 = &mut world.attacks.get_mut(*i).unwrap();
+			*atk_1.lifetime += get_delta_time();
+			*atk_1.is_parried = true;
+
+			let new_owner = atk_1.owner.clone();
+			let new_damage = *atk_1.damage;
+			let new_target = atk_1.obj.target;
+
+			let atk_2 = &mut world.attacks.get_mut(*j).unwrap();
+			*atk_2.owner = new_owner;
+			*atk_2.damage += new_damage;
+			*atk_2.is_parried = true;
+
+			// Yes, I used two match blocks.
+			// Unfortunately, this was needed because of borrow checker shenanigans.
+			match atk_2.attack_type {
+				AttackType::Physical => *atk_2.lifetime += get_delta_time(),
+
 				AttackType::Projectile => {
-					let new_owner = atk_1.owner.clone();
-					let new_damage = *atk_1.damage;
-					let new_target = atk_1.obj.target;
-
-					let atk_1 = &mut world.attacks.get_mut(*i).unwrap();
-					*atk_1.lifetime += get_delta_time();
-					*atk_1.is_parried = true;
-
-					let atk_2 = &mut world.attacks.get_mut(*j).unwrap();
-					*atk_2.owner = new_owner;
-					*atk_2.damage += new_damage;
 					*atk_2.lifetime = 6.;
-					*atk_2.is_parried = true;
-
 					*atk_2.attack_type = AttackType::Hitscan;
-
 					atk_2.obj.target = match atk_2.owner {
 						Owner::Player => get_mouse_pos() * 999.,
 						Owner::Enemy => new_target * 999.
 					};
-
-					world.hitstop = 10.;
-
-					break;
 				}
 
-				// Burst and hitscan attacks cannot be parried
-				_ => ()
+				_ => panic!("How did a non-parryable attack end up here?")
 			}
+
+			break;
 		}
 	}
 }
