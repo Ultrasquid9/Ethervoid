@@ -114,11 +114,11 @@ impl Sprite {
 				self.sprite.clone()
 			}),
 			Vec2::new(
-				self.obj.pos.x + if self.rotation == Rotation::EightWay { self.sprite.width() as f32 } else { 0. }, 
-				self.obj.pos.y + if self.rotation == Rotation::EightWay { self.sprite.height() as f32 } else { 0. }
+				self.obj.pos.x + if self.rotation != Rotation::Angle { self.sprite.width() as f32 } else { 0. }, 
+				self.obj.pos.y + if self.rotation != Rotation::Angle { self.sprite.height() as f32 } else { 0. }
 			), 
 			Some(DrawTextureParams {
-				source: if self.rotation == Rotation::EightWay {
+				source: if self.rotation != Rotation::Angle {
 					Some(
 						Rect::new(
 							x_pos as f32,

@@ -2,7 +2,7 @@ use combat::{handle_combat, AttackType, Owner};
 use draw::draw;
 use ecs::{behavior::handle_behavior, World};
 use macroquad::window::next_frame;
-use player::Player;
+use player::{swap_weapons, Player};
 use stecs::prelude::*;
 
 use crate::{utils::{config::Config, get_delta_time, resources::{clean_resources, create_resources}}, State};
@@ -52,7 +52,8 @@ pub async fn gameplay() -> State {
 
 			for (atk_obj, atk_type, owner) in query!(world.attacks, (&obj, &attack_type, &owner)) {
 				if !atk_obj.is_touching(obj) 
-				|| *atk_type != AttackType::Physical
+				|| *atk_type == AttackType::Projectile
+				|| *atk_type == AttackType::Hitscan
 				|| *owner != Owner::Player {
 					continue;
 				}
@@ -71,6 +72,14 @@ pub async fn gameplay() -> State {
 		handle_combat(&mut world);
 
 		for (inventory, obj) in query!(world.player, (&mut inventory, &obj)) {
+			// Switching weapons
+			if world.config.keymap.change_sword.is_pressed() {
+				inventory.current_sword = swap_weapons(&inventory.current_sword, &inventory.swords);
+			}
+			if world.config.keymap.change_gun.is_pressed() {
+				inventory.current_gun = swap_weapons(&inventory.current_gun, &inventory.guns);
+			}
+
 			// Cooldown
 			for sword in inventory.swords.iter_mut() {
 				if sword.cooldown >= 0. {
