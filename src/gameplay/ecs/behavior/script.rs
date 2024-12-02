@@ -9,7 +9,8 @@ pub fn script_behavior(
 	script: &mut Script<'_>, 
 	obj: &mut Obj, 
 	obj_player: &Obj,
-	attacks: &mut AttackStructOf<VecFamily>
+	attacks: &mut AttackStructOf<VecFamily>,
+	current_map: &str
 ) -> bool {
 	// Values available in the scope
 	script.scope
@@ -83,7 +84,7 @@ pub fn script_behavior(
 
 	if new_pos != vec2(999999., 999999.) {
 		obj.update(new_pos);
-		obj.try_move(new_pos);
+		obj.try_move(new_pos, current_map);
 	} else {
 		return true
 	}

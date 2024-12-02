@@ -7,14 +7,15 @@ use serde::{
 	Serialize
 };
 
-use crate::{cores::npctype::{Message, NpcMovement, NpcType}, utils::get_delta_time};
+use crate::cores::npctype::{Message, NpcMovement, NpcType};
 
-use super::ecs::{behavior::{Behavior, WanderBehavior}, obj::Obj};
+use super::ecs::{behavior::{Behavior, WanderBehavior}, obj::Obj, sprite::{Frames, Rotation, Sprite}};
 
 #[derive(SplitFields)]
 pub struct Npc<'a> {
 	obj: Obj,
 	behavior: Behavior<'a>,
+	sprite: Sprite,
 	
 	messages: Vec<Message>,
 	messages_cooldown: f32,
@@ -32,8 +33,10 @@ pub struct Dialogue {
 
 impl Npc<'_> {
 	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
+		let obj = Obj::new(*pos, *pos, 15.);
+		
 		return Self {
-			obj: Obj::new(*pos, *pos, 15.),
+			obj,
 			behavior: match npctype.movement {
 				NpcMovement::Wander => Behavior::Wander(WanderBehavior {
 					pos: *pos,
@@ -42,34 +45,19 @@ impl Npc<'_> {
 				}),
 				NpcMovement::Still => Behavior::None
 			},
+			sprite: Sprite::new(
+				obj, 
+				32,
+				"default:entity/player/player_spritesheet_wip",
+				Rotation::EightWay,
+				Frames::new_entity()
+			),
 
 			messages: npctype.messages.clone(),
 			messages_cooldown: 0.,
 
 			movement_cooldown: 0.,
 			movement_target: *pos
-		}
-	}
-
-	pub fn update(&mut self) {
-		if self.messages_cooldown <= 0. {
-			self.read_message();
-		} else {
-			self.messages_cooldown -= get_delta_time()
-		}
-	}
-
-	pub fn read_message(&mut self) {
-		//let mut should_read = false;
-
-		//if !should_read { return }
-
-		for i in &self.messages {
-			if i.should_read() {
-				i.read();
-				self.messages_cooldown = 10.;
-				break
-			}
 		}
 	}
 }

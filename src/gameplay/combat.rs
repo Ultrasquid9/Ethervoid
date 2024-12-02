@@ -151,7 +151,7 @@ pub fn handle_combat(world: &mut World) {
 			*atk.lifetime -= get_delta_time()
 		} else {
 			let new_pos = atk.obj.pos.move_towards(atk.obj.target, get_delta_time() * 5.);	
-			atk.obj.try_move(new_pos);
+			atk.obj.try_move(new_pos, &world.current_map);
 		
 			if atk.obj.pos != new_pos {
 				*atk.lifetime = 0.;
@@ -174,6 +174,8 @@ pub fn handle_combat(world: &mut World) {
 			},
 		}
 	}
+
+	try_parry(world);
 }
 
 fn attack_physical(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
@@ -215,7 +217,7 @@ fn attack_hitscan(obj: &Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 }
 
 /// Attempts to parry attacks 
-pub fn try_parry(world: &mut World) {
+fn try_parry(world: &mut World) {
 	let attacks = &mut world.attacks;
 
 	for i in 0..attacks.attack_type.len() {

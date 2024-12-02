@@ -1,7 +1,7 @@
 (
 	name: "Testing Bro",
 	sprite: "default:entity/player/player_spritesheet_wip",
-	movement: (),
+	movement: Wander,
 	messages: [
 		(
 			required_flags: [],

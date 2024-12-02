@@ -3,7 +3,7 @@ use std::sync::{LazyLock, RwLock};
 use macroquad::math::Vec2;
 use raylite::{cast, cast_wide, Barrier, Ray};
 
-use crate::utils::{resources::maps::access_map, tuple_to_vec2};
+use crate::utils::{resources::maps::access_map, tuple_to_vec2, vec2_to_tuple};
 
 // For keeping track of the recursion in `try_move`
 static DEPTH: LazyLock<RwLock<u8>> = LazyLock::new(|| RwLock::new(0));
@@ -85,20 +85,20 @@ impl Obj {
 	}
 
 	/// Attempts to move the Obj to its current target
-	pub fn try_move(&mut self, new_pos: Vec2) {
-		let barriers = access_map("default:test").walls;
+	pub fn try_move(&mut self, new_pos: Vec2, current_map: &str) {
+		let barriers = access_map(current_map).walls;
 		
 		// Instantly returns if about to hit a door 
-/* 		if cast_wide(
+ 		if cast_wide(
 			&Ray {
-				position: vec2_to_tuple(&self.get_pos()),
-				end_position: vec2_to_tuple(&target)
+				position: vec2_to_tuple(&self.pos),
+				end_position: vec2_to_tuple(&self.target)
 			},
-			&map.doors
+			&access_map(current_map).doors
 				.iter()
 				.map(|door| return door.to_barrier())
 				.collect()
-		).is_ok() { return }		 */	
+		).is_ok() { return }
 
 		let mut try_slope_movement = false;
 
@@ -175,6 +175,6 @@ impl Obj {
 		// Newer pos
 		let new_pos = Vec2::from_angle(angle) * self.pos.distance(self.target);
 
-		self.try_move(self.pos + new_pos);
+		self.try_move(self.pos + new_pos, current_map);
 	}
 }

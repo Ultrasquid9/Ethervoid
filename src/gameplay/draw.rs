@@ -32,8 +32,11 @@ pub async fn draw<'a>(world: &mut World<'a>) {
 	for bar in access_map(&world.current_map).walls {
 		draw_bar(&bar);
 	}
+	for bar in access_map(&world.current_map).doors {
+		draw_bar(&bar.to_barrier());
+	}
 
-	for (sprite, obj) in query!([world.player, world.enemies, world.attacks], (&mut sprite, &obj)) {
+	for (sprite, obj) in query!([world.player, world.enemies, world.npcs, world.attacks], (&mut sprite, &obj)) {
 		if world.hitstop <= 0. { sprite.update(*obj) }
 		sprite.render().await
 	}

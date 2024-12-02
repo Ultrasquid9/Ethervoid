@@ -5,7 +5,7 @@ use macroquad::math::Vec2;
 use raylite::Barrier;
 use serde::Deserialize;
 
-use crate::utils::vec2_to_tuple;
+use crate::{gameplay::doors::Door, utils::vec2_to_tuple};
 
 use super::{
 	enemytype::{
@@ -23,7 +23,7 @@ use super::{
 #[derive(Deserialize)]
 struct MapBuilder {
 	pub points: Vec<Vec2>,
-	//pub doors: Vec<Door>,
+	pub doors: Vec<Door>,
 	pub enemies: Vec<(String, Vec2)>,
 	pub npcs: Vec<(String, Vec2)>
 }
@@ -31,7 +31,7 @@ struct MapBuilder {
 #[derive(Clone)]
 pub struct Map {
 	pub walls: Vec<Barrier>,
-	//pub doors: Vec<Door>,
+	pub doors: Vec<Door>,
 	pub enemies: Vec<(EnemyType, Vec2)>,
 	pub npcs: Vec<(NpcType, Vec2)>
 }
@@ -68,7 +68,7 @@ impl MapBuilder {
 
 				walls
 			},
-			//doors: self.doors,
+			doors: self.doors,
 
 			enemies: self.enemies
 				.iter()

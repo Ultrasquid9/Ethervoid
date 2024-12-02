@@ -1,15 +1,14 @@
-use combat::{handle_combat, try_parry, AttackType};
+use combat::{handle_combat, AttackType};
 use draw::draw;
 use ecs::{behavior::handle_behavior, World};
-use enemy::Enemy;
 use macroquad::window::next_frame;
-use npc::Npc;
 use player::Player;
 use stecs::prelude::*;
 
-use crate::{utils::{config::Config, get_delta_time, resources::{clean_resources, create_resources, maps::access_map}}, State};
+use crate::{utils::{config::Config, get_delta_time, resources::{clean_resources, create_resources}}, State};
 
 pub mod combat;
+pub mod doors;
 pub mod draw;
 pub mod ecs;
 pub mod enemy;
@@ -30,15 +29,8 @@ pub async fn gameplay() -> State {
 		hitstop: 0.
 	};
 
-	for (enemy, pos) in access_map(&world.current_map).enemies.iter() {
-		let _ = world.enemies.insert(Enemy::from_type(enemy, pos));
-	}
-
-	for (npc, pos) in access_map(&world.current_map).npcs.iter() {
-		let _ = world.npcs.insert(Npc::from_type(npc, pos));
-	}
-
 	world.player.insert(Player::new());
+	world.populate();
 
 	loop {
 		draw(&mut world).await;
@@ -52,6 +44,8 @@ pub async fn gameplay() -> State {
 		}
 
 		// Attacking
+		handle_combat(&mut world);
+
 		for (inventory, obj) in query!(world.player, (&mut inventory, &obj)) {
 			// Cooldown
 			for sword in inventory.swords.iter_mut() {
@@ -79,12 +73,9 @@ pub async fn gameplay() -> State {
 			hp.update();
 		}
 
-		// Attacks 
+		// Movement and behavior
 		handle_behavior(&mut world);
-		handle_combat(&mut world);
 		
-		try_parry(&mut world);
-
 		// Removing dead enemies and old attacks
 		remove_dead_enemies(&mut world);
 		remove_old_attacks(&mut world);

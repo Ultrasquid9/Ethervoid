@@ -4,7 +4,14 @@ use crate::{gameplay::ecs::obj::{Axis, Obj}, utils::{config::Config, get_delta_t
 
 use super::PlayerBehavior;
 
-pub fn player_behavior(obj: &mut Obj, behavior: &mut PlayerBehavior, config: &Config) {
+/// Handles player movement.
+/// Returns true if the player attempted to move but didn't. 
+pub fn player_behavior(
+	obj: &mut Obj, 
+	behavior: &mut PlayerBehavior, 
+	config: &Config,
+	current_map: &str
+) {
 	// Checks to see if both Up and Down are being held at the same time.
 	// If they are, sets the direction to move based upon the most recently pressed key. 
 	// Otherwise, sets the direction to move based upon the currently pressed key.
@@ -88,6 +95,6 @@ pub fn player_behavior(obj: &mut Obj, behavior: &mut PlayerBehavior, config: &Co
 		behavior.speed = 1.0;
 	} else {
 		obj.update(new_pos.normalize() * behavior.speed * get_delta_time() + obj.pos);
-		obj.try_move(obj.target);
+		obj.try_move(obj.target, current_map);
 	}
 }

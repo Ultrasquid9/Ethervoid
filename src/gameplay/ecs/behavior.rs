@@ -3,7 +3,7 @@ use player::player_behavior;
 use script::script_behavior;
 use stecs::prelude::*;
 
-use crate::{cores::script::Script, utils::get_delta_time};
+use crate::{cores::script::Script, utils::{get_delta_time, resources::maps::access_map}};
 
 use super::World;
 
@@ -51,7 +51,8 @@ pub fn handle_behavior(world: &mut World) {
 			Behavior::Player(behavior) => player_behavior(
 				obj, 
 				behavior,
-				&world.config
+				&world.config,
+				&world.current_map
 			),
 
 			Behavior::Enemy(behavior) => {
@@ -66,7 +67,8 @@ pub fn handle_behavior(world: &mut World) {
 					}, 
 					obj, 
 					&obj_player, 
-					&mut world.attacks
+					&mut world.attacks,
+					&world.current_map
 				) {
 					behavior.attack_index = if behavior.attack_index >= behavior.attacks.len() - 1 {
 						0
@@ -94,5 +96,9 @@ pub fn handle_behavior(world: &mut World) {
 
 			_ => ()
 		}
+	}
+
+	for door in access_map(&world.current_map).doors {
+		door.try_change_map(world);
 	}
 }
