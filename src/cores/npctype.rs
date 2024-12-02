@@ -11,7 +11,7 @@ use crate::gameplay::npc::Dialogue;
 
 use super::{
 	gen_name, 
-	get_files, script::{get_scripts, ScriptBuilder}
+	get_files
 };
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -23,35 +23,22 @@ pub struct Message {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct NpcTypeBuilder {
-	pub name: String,
-	pub sprite: String,
-	pub movement: (),
-	pub messages: Vec<Message>
+pub enum NpcMovement {
+	Wander,
+	Still
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NpcType {
 	pub name: String,
 	pub sprite: String,
-	pub movement: (),
+	pub movement: NpcMovement,
 	pub messages: Vec<Message>
 }
 
-impl NpcTypeBuilder {
+impl NpcType {
 	pub fn read(dir: String) -> Self {
 		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
-	}
-
-	pub fn build(self) -> NpcType {
-		let scripts = get_scripts();
-
-		NpcType {
-			name: self.name,
-			sprite: self.sprite, 
-			movement: (), 
-			messages: self.messages
-		}
 	}
 }
 
@@ -80,7 +67,7 @@ pub fn get_npctypes() -> HashMap<String, NpcType> {
 	for i in get_files(String::from("npcs")) {
 		npcs.insert(
 			gen_name(&i),
-			NpcTypeBuilder::read(i).build()
+			NpcType::read(i)
 		);
 	}
 

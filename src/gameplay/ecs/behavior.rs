@@ -1,3 +1,4 @@
+use macroquad::{math::Vec2, prelude::rand};
 use player::player_behavior;
 use script::script_behavior;
 use stecs::prelude::*;
@@ -13,6 +14,7 @@ pub mod player;
 pub enum Behavior<'a> {
 	Player(PlayerBehavior),
 	Enemy(EnemyBehavior<'a>),
+	Wander(WanderBehavior),
 	None
 }
 
@@ -33,16 +35,25 @@ pub struct EnemyBehavior<'a> {
 	pub attack_cooldown: f32,
 }
 
+#[derive(PartialEq, Clone)]
+pub struct WanderBehavior {
+	pub pos: Vec2,
+	pub range: f32,
+
+	pub cooldown: f32
+}
+
 pub fn handle_behavior(world: &mut World) {
 	let obj_player = *world.player.obj.first().unwrap();
 
-	for (obj, behavior) in query!([world.player, world.enemies], (&mut obj, &mut behavior)) {
+	for (obj, behavior) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior)) {
 		match behavior {
 			Behavior::Player(behavior) => player_behavior(
 				obj, 
 				behavior,
 				&world.config
 			),
+
 			Behavior::Enemy(behavior) => {
 				if script_behavior(
 					if behavior.attack_cooldown > 0. {
@@ -65,7 +76,21 @@ pub fn handle_behavior(world: &mut World) {
 
 					behavior.attack_cooldown = 40.;
 				};
-			}
+			},
+
+			Behavior::Wander(behavior) => {
+				if behavior.cooldown > 0. {
+					behavior.cooldown -= get_delta_time();
+					continue;
+				} else if obj.pos.distance(obj.target) < 5. {
+					behavior.pos = Vec2::new(
+						rand::gen_range(behavior.pos.x - behavior.range, behavior.pos.x + behavior.range),
+						rand::gen_range(behavior.pos.y - behavior.range, behavior.pos.y + behavior.range)
+					);
+				}
+
+
+			},
 
 			_ => ()
 		}

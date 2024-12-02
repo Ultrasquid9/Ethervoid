@@ -7,9 +7,9 @@ use serde::{
 	Serialize
 };
 
-use crate::{cores::npctype::{Message, NpcType}, utils::get_delta_time};
+use crate::{cores::npctype::{Message, NpcMovement, NpcType}, utils::get_delta_time};
 
-use super::ecs::{behavior::Behavior, obj::Obj};
+use super::ecs::{behavior::{Behavior, WanderBehavior}, obj::Obj};
 
 #[derive(SplitFields)]
 pub struct Npc<'a> {
@@ -30,17 +30,18 @@ pub struct Dialogue {
 	text: String
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-pub enum NpcMovement {
-	Wander(f32),
-	Still
-}
-
 impl Npc<'_> {
 	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
 		return Self {
 			obj: Obj::new(*pos, *pos, 15.),
-			behavior: Behavior::None,
+			behavior: match npctype.movement {
+				NpcMovement::Wander => Behavior::Wander(WanderBehavior {
+					pos: *pos,
+					range: 32.,
+					cooldown: 0.
+				}),
+				NpcMovement::Still => Behavior::None
+			},
 
 			messages: npctype.messages.clone(),
 			messages_cooldown: 0.,
