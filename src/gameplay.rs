@@ -1,4 +1,4 @@
-use combat::{handle_combat, AttackType};
+use combat::{handle_combat, AttackType, Owner};
 use draw::draw;
 use ecs::{behavior::handle_behavior, World};
 use macroquad::window::next_frame;
@@ -41,6 +41,30 @@ pub async fn gameplay() -> State {
 
 			next_frame().await;
 			continue;
+		}
+
+		// NPC Dialogue (WIP)
+		for (obj, messages, messages_cooldown) in query!(world.npcs, (&obj, &messages, &mut messages_cooldown)) {
+			if *messages_cooldown > 0. { 
+				*messages_cooldown -= get_delta_time();
+				continue 
+			}
+
+			for (atk_obj, atk_type, owner) in query!(world.attacks, (&obj, &attack_type, &owner)) {
+				if !atk_obj.is_touching(obj) 
+				|| *atk_type != AttackType::Physical
+				|| *owner != Owner::Player {
+					continue;
+				}
+
+				for message in messages {
+					if message.should_read() {
+						message.read();
+						*messages_cooldown = 10.;
+						break
+					}
+				}
+			}
 		}
 
 		// Attacking
