@@ -50,7 +50,7 @@ pub enum Key{
 impl Config {
 	/// Reads the config file 
 	pub fn read(dir: &str) -> Self {
-		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 }
 
@@ -65,7 +65,7 @@ impl Key {
 				if is_mouse_button_down(*button) {return true}
 			}
 		}
-		return false
+		false
 	}
 
 	/// Checks if the key is pressed
@@ -78,7 +78,7 @@ impl Key {
 				if is_mouse_button_pressed(*button) {return true}
 			}
 		}
-		return false
+		false
 	}
 }
 

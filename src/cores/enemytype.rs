@@ -3,9 +3,9 @@ use ahash::HashMap;
 use serde::Deserialize;
 
 use super::{
-	behavior::{
-		get_attacks, 
-		BehaviorBuilder
+	script::{
+		get_scripts, 
+		ScriptBuilder
 	}, 
 	gen_name, 
 	get_files
@@ -13,7 +13,7 @@ use super::{
 
 #[derive(Clone, Deserialize)]
 struct EnemyTypeBuilder {
-	max_health: usize,
+	max_health: f32,
 	size: f32,
 	sprite: String,
 	movement: String,
@@ -22,20 +22,20 @@ struct EnemyTypeBuilder {
 
 impl EnemyTypeBuilder {
 	pub fn read(dir: String) -> Self {
-		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
 	pub fn build(self) -> EnemyType {
-		let behaviors = get_attacks();
+		let scripts = get_scripts();
 
-		return EnemyType {
+		EnemyType {
 			max_health: self.max_health,
 			size: self.size,
 			sprite: self.sprite,
-			movement: behaviors.get(&self.movement).unwrap().clone(), 
+			movement: scripts.get(&self.movement).unwrap().clone(), 
 			attacks: self.attacks
 				.iter()
-				.map(|attack| return behaviors.get(attack.as_str()).unwrap().clone())
+				.map(|attack| scripts.get(attack.as_str()).unwrap().clone())
 				.collect()
 		}
 	}
@@ -44,11 +44,11 @@ impl EnemyTypeBuilder {
 /// A struct containing the stats of an enemy type
 #[derive(Clone)]
 pub struct EnemyType {
-	pub max_health: usize,
+	pub max_health: f32,
 	pub size: f32,
 	pub sprite: String,
-	pub movement: BehaviorBuilder,
-	pub attacks: Vec<BehaviorBuilder>
+	pub movement: ScriptBuilder,
+	pub attacks: Vec<ScriptBuilder>
 }
 
 /// Provides a HashMap containing all EnemyTypes
@@ -62,5 +62,5 @@ pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 		);
 	}
 
-	return enemytypes;
+	enemytypes
 }

@@ -1,5 +1,6 @@
 use std::thread;
 use ahash::HashMap;
+
 use imageproc::image::{
 	ColorType, 
 	DynamicImage, 
@@ -27,11 +28,11 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 				.decode()
 				.unwrap();
 
-			return if img.color() == ColorType::Rgba8 {
+			if img.color() == ColorType::Rgba8 {
 				img
 			} else {
 				DynamicImage::ImageRgba8(img.to_rgba8())
-			};
+			}
 		}));
 	}
 
@@ -39,5 +40,5 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 		textures.insert(names[i.0].clone(), i.1.join().unwrap());
 	}
 
-	return textures;
+	textures
 }

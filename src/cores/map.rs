@@ -1,10 +1,8 @@
 use std::fs;
-
 use ahash::HashMap;
 use macroquad::math::Vec2;
+use raylite::Barrier;
 use serde::Deserialize;
-
-use crate::gameplay::doors::Door;
 
 use super::{
 	enemytype::{
@@ -19,6 +17,11 @@ use super::{
 	get_files
 };
 
+use crate::{
+	utils::vec2_to_tuple,
+	gameplay::doors::Door
+};
+
 #[derive(Deserialize)]
 struct MapBuilder {
 	pub points: Vec<Vec2>,
@@ -29,7 +32,7 @@ struct MapBuilder {
 
 #[derive(Clone)]
 pub struct Map {
-	pub points: Vec<Vec2>,
+	pub walls: Vec<Barrier>,
 	pub doors: Vec<Door>,
 	pub enemies: Vec<(EnemyType, Vec2)>,
 	pub npcs: Vec<(NpcType, Vec2)>
@@ -37,20 +40,41 @@ pub struct Map {
 
 impl MapBuilder {
 	pub fn read(dir: String) -> Self {
-		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
 	pub fn build(self) -> Map {
 		let enemytypes = get_enemytypes();
 		let npctypes = get_npctypes();
 
-		return Map {
-			points: self.points,
+		Map {
+			walls: {
+				let mut walls = Vec::new();
+
+				for point in 0..self.points.len() {
+					match self.points.get(point + 1) {
+						Some(_) => walls.push(Barrier {
+							positions: (vec2_to_tuple(
+								self.points.get(point).unwrap()), 
+								vec2_to_tuple(self.points.get(point + 1).unwrap())
+							)
+						}),
+						None => walls.push(Barrier {
+							positions: (
+								vec2_to_tuple(self.points.get(point).unwrap()), 
+								(vec2_to_tuple(self.points.first().unwrap()))
+							)
+						})
+					}
+				}
+
+				walls
+			},
 			doors: self.doors,
 
 			enemies: self.enemies
 				.iter()
-				.map(|enemy| return (
+				.map(|enemy| (
 					enemytypes.get(enemy.0.as_str()).unwrap().clone(),
 					enemy.1
 				))
@@ -58,7 +82,7 @@ impl MapBuilder {
 			
 			npcs: self.npcs
 				.iter()
-				.map(|npc| return (
+				.map(|npc| (
 					npctypes.get(npc.0.as_str()).unwrap().clone(),
 					npc.1
 				))
@@ -78,5 +102,5 @@ pub fn get_maps() -> HashMap<String, Map> {
 		);
 	}
 
-	return maps;
+	maps
 }

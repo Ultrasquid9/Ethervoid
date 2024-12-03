@@ -6,8 +6,8 @@ use std::fs::{
 };
 
 pub mod audio;
-pub mod behavior;
 pub mod enemytype;
+pub mod script;
 pub mod map;
 pub mod npctype;
 pub mod textures;
@@ -47,21 +47,21 @@ pub fn get_files(file_type: String) -> Vec<String> {
 				if read_dir(dir).is_err() && fs::exists(dir).unwrap() {
 					return true
 				}
-				return false
+				false
 			});
 
 			files.append(&mut dirs);
 		}
 	}
 
-	return files;
+	files
 }
 
 /// Turns the provided directory into a name
 fn gen_name(dir: &str) -> String {
 	let split: Vec<&str> = dir.split(&['/', '\\', '.'][..]).collect();
 
-	return format!("{}:{}", split[3], {
+	format!("{}:{}", split[3], {
 		let mut str = String::new();
 
 		for i in 5..split.len() - 1 {
@@ -73,5 +73,5 @@ fn gen_name(dir: &str) -> String {
 		}
 
 		str
-	});
+	})
 }

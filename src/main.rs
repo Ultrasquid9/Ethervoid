@@ -1,16 +1,13 @@
-#![deny(clippy::implicit_return)]
-#![allow(clippy::needless_return)]
-
 use gameplay::gameplay;
-use macroquad::prelude::*;
+use macroquad::window::next_frame;
 use menu::menu;
 
-mod utils;
+mod cores;
 mod gameplay;
 mod menu;
+mod utils;
 
 /// Used to determine what state the game is in.
-/// Eventually, this will hold the main menu and option screens.
 pub enum State {
 	Menu, // The main-menu
 	Gameplay, // In-game
@@ -21,7 +18,7 @@ pub enum State {
 async fn main() {
 	let mut state = State::Menu;
 
-	loop {
+    loop {
 		state = match state {
 			State::Menu => menu().await,
 			State::Gameplay => gameplay().await,

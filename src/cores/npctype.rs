@@ -1,20 +1,16 @@
 use std::fs;
 use ahash::HashMap;
 use macroquad::prelude::rand;
-
-use serde::{
-	Deserialize, 
-	Serialize
-};
-
-use crate::gameplay::npc::{
-	Dialogue, 
-	NpcMovement
-};
+use crate::gameplay::npc::Dialogue;
 
 use super::{
 	gen_name, 
 	get_files
+};
+
+use serde::{
+	Deserialize, 
+	Serialize
 };
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -23,6 +19,12 @@ pub struct Message {
 	unlocked_flags: Vec<String>,
 	probability: u8,
 	text: Vec<Dialogue>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum NpcMovement {
+	Wander(f32),
+	Still
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -35,7 +37,7 @@ pub struct NpcType {
 
 impl NpcType {
 	pub fn read(dir: String) -> Self {
-		return ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap();
+		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 }
 
@@ -46,7 +48,7 @@ impl Message {
 			return false 
 		}
 
-		return true;
+		true
 	}
 
 	// TODO - Make 
@@ -68,5 +70,5 @@ pub fn get_npctypes() -> HashMap<String, NpcType> {
 		);
 	}
 
-	return npcs;
+	npcs
 }

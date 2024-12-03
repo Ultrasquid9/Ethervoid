@@ -1,14 +1,4 @@
-use ahash::HashMap;
-use crate::utils::vec2_to_tuple;
-use macroquad::math::{
-	vec2, 
-	Vec2
-};
-
-use serde::{
-	Deserialize, 
-	Serialize
-};
+use macroquad::math::Vec2;
 
 use raylite::{
 	cast, 
@@ -16,10 +6,19 @@ use raylite::{
 	Ray
 };
 
-use super::{
-	cores::map::Map, 
-	entity::MovableObj, 
-	player::Player
+use crate::utils::{
+	resources::maps::access_map, 
+	vec2_to_tuple
+};
+
+use super::ecs::{
+	behavior::Behavior, 
+	World
+};
+
+use serde::{
+	Deserialize, 
+	Serialize
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
@@ -42,7 +41,7 @@ impl Direction {
 			return true
 		}
 
-		return false
+		false
 	}
 }
 
@@ -57,13 +56,13 @@ impl Door {
 	/// Converts the door into a barrier
 	pub fn to_barrier(&self) -> Barrier {
 		match self.direction {
-			Direction::North | Direction::South => return Barrier {
+			Direction::North | Direction::South => Barrier {
 				positions: (
 					(self.pos.x + 32., self.pos.y),
 					(self.pos.x - 32., self.pos.y)
 				)
 			},
-			Direction::East | Direction::West => return Barrier {
+			Direction::East | Direction::West => Barrier {
 				positions: (
 					(self.pos.x, self.pos.y + 32.),
 					(self.pos.x, self.pos.y - 32.)
@@ -73,17 +72,23 @@ impl Door {
 	}
 
 	/// Checks if the map should be changed, and changes it if it should
-	pub fn try_change_map(
-		&self, 
-		player: &mut Player, 
-		new_pos: Vec2, 
-		camera: &mut Vec2, 
+	pub fn try_change_map(&self, world: &mut World) {
+		let player = world.player.get_mut(0).unwrap();
 
-		maps: &HashMap<String, Map>,
-		current_map: &mut String
-	) {
+		let speed = if let Behavior::Player(behavior) = player.behavior {
+			behavior.speed + 1.
+		} else {
+			panic!("If you are seeing this, the player does not have the player behavior. This is a huge problem. Fortunately, you should probably never see this.")
+		};
+		let mut new_pos = player.obj.pos + match self.direction {
+			Direction::North => Vec2::new(0., -speed),
+			Direction::South => Vec2::new(0., speed),
+			Direction::East => Vec2::new(-speed, 0.),
+			Direction::West => Vec2::new(speed, 0.)
+		};
+
 		let ray = Ray {
-			position: vec2_to_tuple(&player.stats.get_pos()),
+			position: vec2_to_tuple(&player.obj.pos),
 			end_position: vec2_to_tuple(&new_pos)
 		};
 
@@ -91,25 +96,25 @@ impl Door {
 		if cast(&ray, &self.to_barrier()).is_err() {
 			return
 		}
-
-		for i in maps.get(&self.dest).unwrap().doors.clone() {
-			if i.dest != *current_map { continue }
+		
+		for i in access_map(&self.dest).doors.clone() {
+			if i.dest != world.current_map { continue }
 
 			if !i.direction.is_opposing(&self.direction) {
-				panic!("Door in {} does not match direction of door in {}", current_map, self.dest)
+				panic!("Door in {} does not match direction of door in {}", world.current_map, self.dest)
 			}
 
-			*player.stats.edit_pos() = match self.direction {
-				Direction::North | Direction::South => {
-					vec2(player.stats.x(), new_pos.y) - self.pos + i.pos
-				},
-				Direction::East | Direction::West => {
-					vec2(new_pos.x, player.stats.y()) - self.pos + i.pos
-				}
+			new_pos += match self.direction {
+				Direction::North => Vec2::new(0., -speed),
+				Direction::South => Vec2::new(0., speed),
+				Direction::East => Vec2::new(-speed, 0.),
+				Direction::West => Vec2::new(speed, 0.)
 			};
-			*camera = *camera - self.pos + i.pos;
+			player.obj.pos = new_pos - self.pos + i.pos;
 
-			*current_map = self.dest.clone();
+			world.current_map = self.dest.clone();
+			world.populate();
+			return;
 		}
 	}
 }

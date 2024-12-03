@@ -1,6 +1,23 @@
-use macroquad::{
-	math::Vec2, 
-	prelude::rand
+use macroquad::math::Vec2;
+use stecs::prelude::*;
+
+use super::ecs::{
+	sprite::{
+		Frames, 
+		Rotation, 
+		Sprite
+	},
+	behavior::{
+		Behavior, 
+		WanderBehavior
+	}, 
+	obj::Obj
+};
+
+use crate::cores::npctype::{
+	Message, 
+	NpcMovement, 
+	NpcType
 };
 
 use serde::{
@@ -8,47 +25,14 @@ use serde::{
 	Serialize
 };
 
-use crate::utils::{
-	resources::access_texture,
-	get_delta_time
-};
-
-use super::{
-	cores::{ 
-		npctype::{
-			Message,
-			NpcType
-		},
-		map::Map
-	}, 
-	combat::{
-		AttackType, 
-		Owner
-	},
-	draw::texturedobj::{
-		EntityTexture, 
-		TexturedObj
-	}, 
-	entity::{
-		get_axis, 
-		MovableObj
-	}, 
-	ecs::Attacks, 
-	player::Axis
-};
-
-pub struct Npc {
-	pos: Vec2,
-	center_pos: Vec2,
+#[derive(SplitFields)]
+pub struct Npc<'a> {
+	obj: Obj,
+	behavior: Behavior<'a>,
+	sprite: Sprite,
 	
-	pub texture: EntityTexture,
-
 	messages: Vec<Message>,
 	messages_cooldown: f32,
-
-	movement: NpcMovement,
-	movement_cooldown: f32,
-	movement_target: Vec2
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -58,119 +42,31 @@ pub struct Dialogue {
 	text: String
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-pub enum NpcMovement {
-	Wander(f32),
-	Still
-}
-
-impl Npc {
-	pub fn new(npctype: NpcType, pos: Vec2) -> Self {
-		return Self {
-			pos,
-			center_pos: pos,
-
-			texture: EntityTexture::new(access_texture(&npctype.sprite)),
-
-			messages: npctype.messages,
-			messages_cooldown: 0.,
-
-			movement: npctype.movement,
-			movement_cooldown: 0.,
-			movement_target: pos
-		}
-	}
-
-	pub fn update(&mut self, map: &Map, attacks: &Attacks) {
-		self.update_texture();
-		self.movement(map);
-
-		if self.messages_cooldown <= 0. {
-			self.read_message(attacks);
-		} else {
-			self.messages_cooldown -= get_delta_time()
-		}
-	}
-
-	pub fn read_message(&mut self, attacks: &Attacks) {
-		let mut should_read = false;
-		for i in &attacks.io {
-			if i.attack_type == AttackType::Physical
-			&& i.owner == Owner::Player
-			&& i.is_touching(self) {
-				should_read = true;
-				break
-			}
-		}
-
-		if !should_read { return }
-
-		for i in &self.messages {
-			if i.should_read() {
-				i.read();
-				self.messages_cooldown = 10.;
-				break
-			}
-		}
-	}
-
-	fn movement(&mut self, map: &Map) {
-		match self.movement {
-			NpcMovement::Wander(range) => {
-				if self.movement_cooldown > 0. {
-					self.movement_cooldown -= get_delta_time()
-
-				} else if self.pos.distance(self.movement_target) < 5. {
-					self.movement_target = Vec2::new(
-						rand::gen_range(self.center_pos.x - range, self.center_pos.x + range),
-						rand::gen_range(self.center_pos.y - range, self.center_pos.y + range)
-					);
-					self.movement_cooldown = 120.
-
-				} else {
-					let new_pos = self.pos.move_towards(self.movement_target, 2.);
-
-					self.try_move(new_pos, map);
-
-					if self.pos != new_pos {
-						self.movement_target = self.pos
-					}
-				}
+impl Npc<'_> {
+	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
+		let obj = Obj::new(*pos, *pos, 15.);
+		
+		Self {
+			obj,
+			behavior: match npctype.movement {
+				NpcMovement::Wander(range) => Behavior::Wander(WanderBehavior {
+					pos: *pos,
+					range,
+					cooldown: 0.
+				}),
+				NpcMovement::Still => Behavior::None
 			},
-			NpcMovement::Still => ()
+			sprite: Sprite::new(
+				obj, 
+				32,
+				"default:entity/player/player_spritesheet_wip",
+				Rotation::EightWay,
+				Frames::new_entity()
+			),
+
+			messages: npctype.messages.clone(),
+			messages_cooldown: 0.,
 		}
-	}
-}
-
-// Allows the Npc to move
-impl MovableObj for Npc {
-	fn get_size(&self) -> &f32 { return &15. } // Npc size is hardcoded for now
-
-	fn get_pos(&self) -> Vec2 {
-		return self.pos
-	}
-
-	fn edit_pos(&mut self) -> &mut Vec2 {
-		return &mut self.pos
-	}
-}
-
-impl TexturedObj for Npc {
-	fn update_texture(&mut self) {
-		let moving = self.movement_cooldown < 0.;
-
-		let new_axis = if moving {
-			get_axis(self.pos, self.movement_target)
-		} else {
-			(Axis::None, Axis::Negative)
-		};
-
-		self.texture.update(
-			self.pos, 
-			new_axis.0, 
-			new_axis.1, 
-			moving
-		);
 	}
 }
 
