@@ -20,9 +20,9 @@ pub mod script;
 pub mod player;
 
 #[derive(PartialEq, Clone)]
-pub enum Behavior<'a> {
+pub enum Behavior {
 	Player(PlayerBehavior),
-	Enemy(EnemyBehavior<'a>),
+	Enemy(EnemyBehavior),
 	Wander(WanderBehavior),
 	None
 }
@@ -36,9 +36,9 @@ pub struct PlayerBehavior {
 }
 
 #[derive(PartialEq, Clone)]
-pub struct EnemyBehavior<'a> {
-	pub movement: Script<'a>,
-	pub attacks: Vec<Script<'a>>,
+pub struct EnemyBehavior {
+	pub movement: Script,
+	pub attacks: Vec<Script>,
 
 	pub attack_index: usize,
 	pub attack_cooldown: f32,
@@ -73,8 +73,6 @@ pub fn handle_behavior(world: &mut World) {
 				if script_behavior(
 					if behavior.attack_cooldown > 0. {
 						behavior.attack_cooldown -= get_delta_time();
-						behavior.attacks[behavior.attack_index].current_target = obj_player.pos;
-
 						&mut behavior.movement
 					} else {
 						&mut behavior.attacks[behavior.attack_index]

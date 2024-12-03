@@ -45,7 +45,7 @@ pub mod render;
 
 pub const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
-pub async fn draw<'a>(world: &mut World<'a>) {
+pub async fn draw(world: &mut World) {
 	// Draws the background
 	clear_background(Color::from_rgba(
 		46, 

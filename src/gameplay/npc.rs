@@ -26,9 +26,9 @@ use serde::{
 };
 
 #[derive(SplitFields)]
-pub struct Npc<'a> {
+pub struct Npc {
 	obj: Obj,
-	behavior: Behavior<'a>,
+	behavior: Behavior,
 	sprite: Sprite,
 	
 	messages: Vec<Message>,
@@ -42,7 +42,7 @@ pub struct Dialogue {
 	text: String
 }
 
-impl Npc<'_> {
+impl Npc {
 	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
 		let obj = Obj::new(*pos, *pos, 15.);
 		

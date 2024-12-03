@@ -1,1 +1,1 @@
-move_towards(enemy_pos, player_pos, 1.0)
+self_pos.move_towards(player_pos, 1.0)

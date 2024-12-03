@@ -17,10 +17,10 @@ pub mod health;
 pub mod obj;
 pub mod sprite;
 
-pub struct World<'a> {
-	pub player: StructOf<Vec<Player<'a>>>,
-	pub enemies: StructOf<Vec<Enemy<'a>>>,
-	pub npcs: StructOf<Vec<Npc<'a>>>,
+pub struct World {
+	pub player: StructOf<Vec<Player>>,
+	pub enemies: StructOf<Vec<Enemy>>,
+	pub npcs: StructOf<Vec<Npc>>,
 	pub attacks: StructOf<Vec<Attack>>,
 
 	pub current_map: String,
@@ -28,7 +28,7 @@ pub struct World<'a> {
 	pub hitstop: f32
 }
 
-impl World<'_> {
+impl World {
 	/// Populates the world with content from the current map, and clears old content if it exists
 	pub fn populate(&mut self) {
 		// Removing old stuff

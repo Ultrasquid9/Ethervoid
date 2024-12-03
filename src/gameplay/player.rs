@@ -31,10 +31,10 @@ use macroquad::{
 };
 
 #[derive(SplitFields)]
-pub struct Player<'a> {
+pub struct Player {
 	pub health: Health,
 	pub obj: Obj,
-	pub behavior: Behavior<'a>,
+	pub behavior: Behavior,
 	pub sprite: Sprite,
 
 	pub inventory: Inventory
@@ -66,7 +66,7 @@ pub enum Weapon {
 	RadioCannon
 }
 
-impl Player<'_> {
+impl Player {
 	pub fn new() -> Self {
 		let pos = Vec2::new(0., 0.);
 		let obj = Obj::new(pos, pos, 15.);

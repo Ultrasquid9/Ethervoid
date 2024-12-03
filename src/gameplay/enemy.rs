@@ -17,14 +17,14 @@ use super::ecs::{
 };
 
 #[derive(SplitFields)]
-pub struct Enemy<'a> {
+pub struct Enemy {
 	health: Health,
 	obj: Obj,
-	behavior: Behavior<'a>,
+	behavior: Behavior,
 	pub sprite: Sprite,
 }
 
-impl Enemy<'_> {
+impl Enemy {
 	pub fn from_type(enemytype: &EnemyType, pos: &Vec2) -> Self {
 		let obj = Obj::new(*pos, *pos, 15.);
 
