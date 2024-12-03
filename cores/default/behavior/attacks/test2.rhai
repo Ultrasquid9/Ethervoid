@@ -1,7 +1,9 @@
 attacks.push(
 	new_projectile(
 		12.,
-		player_pos
+		self_pos,
+		player_pos,
+		"default:attacks/projectile-enemy"
 	)
 );
 end()

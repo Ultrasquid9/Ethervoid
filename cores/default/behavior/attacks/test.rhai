@@ -1,10 +1,12 @@
-permanent target_pos <= player_pos;
+permanent target_pos <- player_pos;
 
 attacks.push(
 	new_physical(
 		10.,
 		20.,
-		target_pos
+		self_pos,
+		target_pos,
+		"default:attacks/dash"
 	)
 );
 

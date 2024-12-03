@@ -3,6 +3,8 @@ use ahash::HashMap;
 use serde::Deserialize;
 use macroquad::math::Vec2;
 
+use crate::gameplay::{combat::{Attack, Owner}, ecs::obj::Obj};
+
 use super::{
 	gen_name, 
 	get_files, 
@@ -92,12 +94,61 @@ fn init_engine() -> Engine {
 		.register_fn("angle_between", angle_between)
 		.register_fn("move_towards", move_towards)
 		.register_fn("distance_between", distance_between)
+
+		// Functions for creating attacks
+		.register_fn("new_physical", |
+			damage: f32,
+			size,
+			pos: Vec2,
+			target: Vec2,
+			key: &str
+		| Attack::new_physical(
+			Obj::new(pos, target, size),
+			damage, 
+			Owner::Enemy,
+			key
+		))
+
+		.register_fn("new_burst", |
+			damage: f32,
+			size: f32,
+			pos: Vec2,
+			key: &str
+		| Attack::new_burst(
+			Obj::new(pos, pos, size), 
+			damage, 
+			Owner::Enemy,
+			key
+		))
+
+		.register_fn("new_projectile", |
+			damage: f32,
+			pos: Vec2,
+			target: Vec2,
+			key: &str
+		| Attack::new_projectile(
+			Obj::new(pos, target, 10.),
+			damage, 
+			Owner::Enemy,
+			key
+		))
+
+		.register_fn("new_hitscan", |
+			damage: f32,
+			pos: Vec2,
+			target: Vec2,
+			_key: &str
+		| Attack::new_hitscan(
+			Obj::new(pos, target, 6.),
+			damage, 
+			Owner::Enemy
+		))
 		
 		// Hacky method to end the script
 		.register_fn("end", || Vec2::new(999999., 999999.))
 
 		// Custom syntax for setting a variable if it does not already exist
-		.register_custom_syntax([ "permanent", "$ident$", "<=", "$expr$" ], true, |context, inputs| {
+		.register_custom_syntax([ "permanent", "$ident$", "<-", "$expr$" ], true, |context, inputs| {
 			let var_name = inputs[0].get_string_value().unwrap().to_string();
 			let value = context.eval_expression_tree(&inputs[1])?;
 
