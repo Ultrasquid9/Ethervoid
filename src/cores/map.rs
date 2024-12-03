@@ -1,11 +1,8 @@
 use std::fs;
-
 use ahash::HashMap;
 use macroquad::math::Vec2;
 use raylite::Barrier;
 use serde::Deserialize;
-
-use crate::{gameplay::doors::Door, utils::vec2_to_tuple};
 
 use super::{
 	enemytype::{
@@ -18,6 +15,11 @@ use super::{
 	},
 	gen_name, 
 	get_files
+};
+
+use crate::{
+	utils::vec2_to_tuple,
+	gameplay::doors::Door
 };
 
 #[derive(Deserialize)]

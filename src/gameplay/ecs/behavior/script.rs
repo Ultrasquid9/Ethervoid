@@ -1,8 +1,23 @@
-use macroquad::math::{vec2, Vec2};
+use macroquad::math::Vec2;
 use rhai::Dynamic;
-use stecs::{prelude::*, storage::vec::VecFamily};
 
-use crate::{cores::script::Script, gameplay::{combat::{Attack, AttackStructOf, Owner}, ecs::obj::Obj}, utils::get_delta_time};
+use crate::{
+	gameplay::{
+		combat::{
+			Attack, 
+			AttackStructOf, 
+			Owner
+		}, 
+		ecs::obj::Obj
+	}, 
+	utils::get_delta_time,
+	cores::script::Script
+};
+
+use stecs::{
+	storage::vec::VecFamily,
+	prelude::*
+};
 
 /// Reads a script. Returns true if the script has finished, or the Obj could not move
 pub fn script_behavior(
@@ -82,7 +97,7 @@ pub fn script_behavior(
 	// Taking delta time into consideration
 	let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;
 
-	if new_pos != vec2(999999., 999999.) {
+	if new_pos != Vec2::new(999999., 999999.) {
 		obj.update(new_pos);
 		obj.try_move(new_pos, current_map);
 	} else {

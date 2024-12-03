@@ -1,9 +1,22 @@
-use std::sync::{LazyLock, RwLock};
-
 use macroquad::math::Vec2;
-use raylite::{cast, cast_wide, Barrier, Ray};
 
-use crate::utils::{resources::maps::access_map, tuple_to_vec2, vec2_to_tuple};
+use raylite::{
+	cast, 
+	cast_wide, 
+	Barrier, 
+	Ray
+};
+
+use crate::utils::{
+	resources::maps::access_map, 
+	tuple_to_vec2, 
+	vec2_to_tuple
+};
+
+use std::sync::{
+	LazyLock, 
+	RwLock
+};
 
 // For keeping track of the recursion in `try_move`
 static DEPTH: LazyLock<RwLock<u8>> = LazyLock::new(|| RwLock::new(0));

@@ -1,11 +1,44 @@
-use macroquad::{camera::{set_camera, set_default_camera, Camera2D}, color::{Color, BLACK, RED}, math::vec2, shapes::draw_line, text::draw_text, window::{clear_background, screen_height, screen_width}};
 use process::to_texture;
-use render::{draw_bar, draw_tilemap};
 use stecs::prelude::*;
 
-use crate::utils::{camera_scale, resources::{maps::access_map, textures::access_image}};
+use macroquad::{
+	window::{
+		clear_background, 
+		screen_height, 
+		screen_width
+	},
+	camera::{
+		set_camera, 
+		set_default_camera, 
+		Camera2D
+	}, 
+	color::{
+		BLACK, 
+		RED,
+		Color
+	}, 
+	math::vec2, 
+	shapes::draw_line, 
+	text::draw_text
+};
 
-use super::{combat::AttackType, ecs::World};
+use crate::utils::{
+	resources::{
+		maps::access_map, 
+		textures::access_image
+	},
+	camera_scale
+};
+
+use super::{
+	combat::AttackType, 
+	ecs::World
+};
+
+use render::{
+	draw_bar, 
+	draw_tilemap
+};
 
 pub mod process;
 pub mod render;

@@ -1,10 +1,37 @@
-use image::{DynamicImage, Rgba};
 use imageproc::geometric_transformations::rotate_about_center;
-use macroquad::{math::{Rect, Vec2}, texture::DrawTextureParams};
 
-use crate::{gameplay::draw::{process::{downscale, to_texture}, render::render_texture, SCREEN_SCALE}, utils::{get_delta_time, resources::textures::access_image}};
+use crate::{
+	gameplay::draw::{
+		process::{
+			downscale, 
+			to_texture
+		},
+		SCREEN_SCALE, 
+		render::render_texture
+	}, 
+	utils::{
+		resources::textures::access_image,
+		get_delta_time
+	}
+};
 
-use super::obj::{Axis, Obj};
+use macroquad::{
+	math::{
+		Rect, 
+		Vec2
+	}, 
+	texture::DrawTextureParams
+};
+
+use super::obj::{
+	Axis, 
+	Obj
+};
+
+use image::{
+	DynamicImage, 
+	Rgba
+};
 
 #[derive(Clone)]
 pub struct Sprite {

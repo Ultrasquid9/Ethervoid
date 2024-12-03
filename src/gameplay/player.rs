@@ -1,9 +1,34 @@
-use macroquad::{input::mouse_position_local, math::Vec2};
 use stecs::prelude::*;
 
-use crate::utils::{get_mouse_pos, resources::audio::play_random_sound};
+use super::{	
+	ecs::{
+		sprite::{
+			Frames, 
+			Rotation, 
+			Sprite
+		},
+		behavior::{
+			Behavior, 
+			PlayerBehavior
+		}, 
+		health::Health, 
+		obj::Obj
+	},
+	combat::{
+		Attack, 
+		Owner
+	}
+};
 
-use super::{combat::{Attack, Owner}, ecs::{behavior::{Behavior, PlayerBehavior}, health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}}};
+use crate::utils::{
+	resources::audio::play_random_sound,
+	get_mouse_pos
+};
+
+use macroquad::{
+	input::mouse_position_local, 
+	math::Vec2
+};
 
 #[derive(SplitFields)]
 pub struct Player<'a> {

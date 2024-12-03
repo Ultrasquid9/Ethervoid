@@ -1,16 +1,23 @@
+use super::SCREEN_SCALE;
 use futures::future::join_all;
 use raylite::Barrier;
-use super::SCREEN_SCALE;
 
 use macroquad::{
-	color::{BLUE, WHITE}, math::Vec2, shapes::draw_line, texture::{
+	texture::{
 		draw_texture_ex, 
 		DrawTextureParams, 
 		Texture2D
-	}, window::{
+	}, 
+	color::{
+		BLUE, 
+		WHITE
+	}, 
+	window::{
 		screen_height, 
 		screen_width
-	}
+	},
+	shapes::draw_line, 
+	math::Vec2
 };
 
 

@@ -1,15 +1,29 @@
+use macroquad::math::Vec2;
 use stecs::prelude::*;
 
-use macroquad::math::Vec2;
+use super::ecs::{
+	sprite::{
+		Frames, 
+		Rotation, 
+		Sprite
+	},
+	behavior::{
+		Behavior, 
+		WanderBehavior
+	}, 
+	obj::Obj
+};
+
+use crate::cores::npctype::{
+	Message, 
+	NpcMovement, 
+	NpcType
+};
 
 use serde::{
 	Deserialize, 
 	Serialize
 };
-
-use crate::cores::npctype::{Message, NpcMovement, NpcType};
-
-use super::ecs::{behavior::{Behavior, WanderBehavior}, obj::Obj, sprite::{Frames, Rotation, Sprite}};
 
 #[derive(SplitFields)]
 pub struct Npc<'a> {

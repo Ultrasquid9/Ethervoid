@@ -1,10 +1,4 @@
-use crate::utils::{resources::maps::access_map, vec2_to_tuple};
 use macroquad::math::Vec2;
-
-use serde::{
-	Deserialize, 
-	Serialize
-};
 
 use raylite::{
 	cast, 
@@ -12,7 +6,20 @@ use raylite::{
 	Ray
 };
 
-use super::ecs::{behavior::Behavior, World};
+use crate::utils::{
+	resources::maps::access_map, 
+	vec2_to_tuple
+};
+
+use super::ecs::{
+	behavior::Behavior, 
+	World
+};
+
+use serde::{
+	Deserialize, 
+	Serialize
+};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Direction {

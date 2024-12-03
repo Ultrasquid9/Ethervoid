@@ -1,7 +1,10 @@
-use std::sync::{LazyLock, RwLock};
-
 use ahash::HashMap;
 use macroquad::rand;
+
+use std::sync::{
+	LazyLock, 
+	RwLock
+};
 
 use kira::{
 	manager::{

@@ -1,8 +1,18 @@
-use std::sync::{LazyLock, RwLock};
-
 use ahash::HashMap;
 
-use crate::cores::map::{get_maps, Map};
+use std::sync::{
+	LazyLock, 
+	RwLock
+};
+
+use crate::cores::map::{
+	get_maps,
+	Map
+};
+
+/*
+ * Maps
+ */
 
 static MAPS: LazyLock<RwLock<HashMap<String, Map>>> = LazyLock::new(|| RwLock::new(HashMap::default()));
 

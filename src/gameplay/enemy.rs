@@ -1,9 +1,20 @@
 use macroquad::math::Vec2;
 use stecs::prelude::*;
-
 use crate::cores::enemytype::EnemyType;
 
-use super::ecs::{behavior::{Behavior, EnemyBehavior}, health::Health, obj::Obj, sprite::{Frames, Rotation, Sprite}};
+use super::ecs::{
+	sprite::{
+		Frames, 
+		Rotation, 
+		Sprite
+	},
+	behavior::{
+		Behavior, 
+		EnemyBehavior
+	}, 
+	health::Health, 
+	obj::Obj
+};
 
 #[derive(SplitFields)]
 pub struct Enemy<'a> {

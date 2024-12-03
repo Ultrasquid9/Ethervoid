@@ -1,11 +1,20 @@
-use macroquad::{math::Vec2, prelude::rand};
+use super::World;
 use player::player_behavior;
 use script::script_behavior;
 use stecs::prelude::*;
 
-use crate::{cores::script::Script, utils::{get_delta_time, resources::maps::access_map}};
+use crate::{
+	utils::{
+		resources::maps::access_map,
+		get_delta_time
+	},
+	cores::script::Script
+};
 
-use super::World;
+use macroquad::{
+	math::Vec2, 
+	prelude::rand
+};
 
 pub mod script;
 pub mod player;

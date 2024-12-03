@@ -1,17 +1,16 @@
 use std::fs;
 use ahash::HashMap;
 use macroquad::prelude::rand;
-
-use serde::{
-	Deserialize, 
-	Serialize
-};
-
 use crate::gameplay::npc::Dialogue;
 
 use super::{
 	gen_name, 
 	get_files
+};
+
+use serde::{
+	Deserialize, 
+	Serialize
 };
 
 #[derive(Clone, Serialize, Deserialize)]

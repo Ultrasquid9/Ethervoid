@@ -1,11 +1,34 @@
-use combat::{handle_combat, AttackType, Owner};
 use draw::draw;
-use ecs::{behavior::handle_behavior, World};
 use macroquad::window::next_frame;
-use player::{swap_weapons, Player};
 use stecs::prelude::*;
 
-use crate::{utils::{config::Config, get_delta_time, resources::{clean_resources, create_resources}}, State};
+use crate::{
+	utils::{
+		resources::{
+			clean_resources, 
+			create_resources
+		},
+		get_delta_time, 
+		config::Config
+	}, 
+	State
+};
+
+use combat::{
+	handle_combat, 
+	AttackType, 
+	Owner
+};
+
+use ecs::{
+	behavior::handle_behavior, 
+	World
+};
+
+use player::{
+	swap_weapons, 
+	Player
+};
 
 pub mod combat;
 pub mod doors;

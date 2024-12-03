@@ -1,8 +1,16 @@
+use super::PlayerBehavior;
 use macroquad::math::Vec2;
 
-use crate::{gameplay::ecs::obj::{Axis, Obj}, utils::{config::Config, get_delta_time}};
-
-use super::PlayerBehavior;
+use crate::{
+	utils::{
+		get_delta_time,
+		config::Config
+	},
+	gameplay::ecs::obj::{
+		Axis, 
+		Obj
+	}
+};
 
 /// Handles player movement.
 /// Returns true if the player attempted to move but didn't. 

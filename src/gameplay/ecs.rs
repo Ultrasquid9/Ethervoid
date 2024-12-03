@@ -1,8 +1,16 @@
 use stecs::prelude::*;
 
-use crate::utils::{config::Config, resources::maps::access_map};
+use super::{
+	combat::Attack, 
+	enemy::Enemy, 
+	npc::Npc, 
+	player::Player
+};
 
-use super::{combat::Attack, enemy::Enemy, npc::Npc, player::Player};
+use crate::utils::{
+	resources::maps::access_map,
+	config::Config
+};
 
 pub mod behavior;
 pub mod health;

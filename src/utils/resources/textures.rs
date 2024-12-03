@@ -1,13 +1,16 @@
-/*
- *	Textures
- */
-
-use std::sync::{LazyLock, RwLock};
-
 use ahash::HashMap;
 use image::DynamicImage;
 
 use crate::cores::textures::get_textures; 
+
+use std::sync::{
+	LazyLock, 
+	RwLock
+};
+
+/*
+ *	Textures
+ */
 
 static TEXTURES: LazyLock<RwLock<HashMap<String, DynamicImage>>> = LazyLock::new(|| RwLock::new(HashMap::default()));
 

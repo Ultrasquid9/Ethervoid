@@ -1,17 +1,16 @@
 use std::fs;
 use ahash::HashMap;
 use serde::Deserialize;
-
 use macroquad::math::Vec2;
-
-use rhai::{
-	Engine, 
-	Scope
-};
 
 use super::{
 	gen_name, 
 	get_files, 
+};
+
+use rhai::{
+	Engine, 
+	Scope
 };
 
 #[derive(Clone, Deserialize)]

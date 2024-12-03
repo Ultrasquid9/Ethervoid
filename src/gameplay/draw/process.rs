@@ -1,12 +1,10 @@
 use imageproc::image::DynamicImage;
+use macroquad::texture::Texture2D;
 
 use fast_image_resize::{
 	ResizeOptions, 
 	Resizer
 };
-
-use macroquad::texture::Texture2D;
-
 
 /// Downscales the provided image
 pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
