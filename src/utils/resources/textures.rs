@@ -18,8 +18,8 @@ static TEXTURES: LazyLock<RwLock<HashMap<String, DynamicImage>>> = LazyLock::new
 pub(super) fn create_textures() {
 	let textures = get_textures();
 
-	for i in textures {
-		TEXTURES.write().unwrap().insert(i.0, i.1);
+	for (key, texture) in textures {
+		TEXTURES.write().unwrap().insert(key, texture);
 	}
 }
 

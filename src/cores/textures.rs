@@ -36,8 +36,8 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 		}));
 	}
 
-	for i in texture_handles.into_iter().enumerate() {
-		textures.insert(names[i.0].clone(), i.1.join().unwrap());
+	for (index, thread) in texture_handles.into_iter().enumerate() {
+		textures.insert(names[index].clone(), thread.join().unwrap());
 	}
 
 	textures

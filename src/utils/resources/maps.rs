@@ -20,8 +20,8 @@ static MAPS: LazyLock<RwLock<HashMap<String, Map>>> = LazyLock::new(|| RwLock::n
 pub(super) fn create_maps() {
 	let maps = get_maps();
 
-	for i in maps {
-		MAPS.write().unwrap().insert(i.0, i.1);
+	for (key, map) in maps {
+		MAPS.write().unwrap().insert(key, map);
 	}
 }
 

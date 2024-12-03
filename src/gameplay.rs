@@ -39,7 +39,7 @@ pub mod npc;
 pub mod player;
 
 pub async fn gameplay() -> State {
-	unsafe { create_resources(); } // TODO: Clean resources (irrelevant until main menu is reimplemented)
+	unsafe { create_resources(); } // All the resources in the game (textures, maps, etc.)
 
 	let mut world = World {
 		player: Default::default(),

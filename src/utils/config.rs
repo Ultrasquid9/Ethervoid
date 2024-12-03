@@ -14,6 +14,25 @@ use serde::{
 	Serialize
 };
 
+const DEFAULT_CONFIG: &str = "
+(
+	keymap: (
+		up: KeyCode(W),
+		left: KeyCode(A),
+		down: KeyCode(S),
+		right: KeyCode(D),
+		dash: KeyCode(LeftShift),
+
+		sword: MouseButton(Left),
+		gun: MouseButton(Right),
+		change_sword: KeyCode(R),
+		change_gun: KeyCode(F),
+
+		quit: KeyCode(Escape)
+	)
+)
+";
+
 /// The config for the game
 #[derive(Serialize, Deserialize)]
 pub struct Config {
@@ -50,7 +69,15 @@ pub enum Key{
 impl Config {
 	/// Reads the config file 
 	pub fn read(dir: &str) -> Self {
-		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
+		match ron::from_str(
+			&match fs::read_to_string(dir) {
+				Ok(str) => str,
+				Err(_) => DEFAULT_CONFIG.to_string()
+			}
+		) {
+			Ok(config) => config,
+			Err(_) => ron::from_str(DEFAULT_CONFIG).unwrap()
+		}
 	}
 }
 

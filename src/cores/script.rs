@@ -17,12 +17,12 @@ use rhai::{
 pub struct ScriptBuilder(String);
 
 impl ScriptBuilder {
-	/// Creates an attack with the script at the provided directory
+	/// Reads the script at the provided directory
 	pub fn from(dir: String) -> Self {
 		Self(fs::read_to_string(dir).unwrap())
 	}
 
-	/// Creates an attack with the script at the provided directory
+	/// Creates all the neccessary components for the script 
 	pub fn build<'a>(self) -> Script<'a> {
 		Script {
 			current_target: Vec2::new(0., 0.),
@@ -33,8 +33,11 @@ impl ScriptBuilder {
 	}
 }
 
-/// A behavior that can be configured via a script
-/// The lifetime annotation allows the compiler to know that the Script lives as long as its owner does
+/**
+A behavior that can be configured via a script.
+
+The lifetime annotation allows the compiler to know that the Script lives as long as its owner does
+ */
 pub struct Script<'a> {
 	pub current_target: Vec2,
 	pub script: String,

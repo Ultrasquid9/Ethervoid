@@ -22,8 +22,8 @@ pub fn get_audio() -> HashMap<String, StaticSoundData> {
 		}));
 	}
 
-	for i in audio_handles.into_iter().enumerate() {
-		audio.insert(names[i.0].clone(), i.1.join().unwrap());
+	for (index, thread) in audio_handles.into_iter().enumerate() {
+		audio.insert(names[index].clone(), thread.join().unwrap());
 	}
 
 	audio
