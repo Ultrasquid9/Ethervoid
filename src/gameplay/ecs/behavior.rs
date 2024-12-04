@@ -52,12 +52,36 @@ pub struct WanderBehavior {
 	pub cooldown: f32
 }
 
+impl EnemyBehavior {
+	fn change_attack_index(&mut self) {
+		self.attack_cooldown = 40.;
+		self.movement.scope.clear();
+
+		self.attack_index = if self.attack_index >= self.attacks.len() - 1 {
+			0
+		} else {
+			self.attack_index + 1
+		};
+	}
+}
+
 pub fn handle_behavior(world: &mut World) {
 	let obj_player = *world.player.obj.first().unwrap();
 
 	for (obj, behavior) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior)) {
 		if obj.stunned > 0. { 
 			obj.stunned -= get_delta_time();
+
+			if let Behavior::Enemy(behavior) = behavior {
+				if behavior.attack_cooldown <= 0. {
+					behavior.change_attack_index();
+
+					for script in &mut behavior.attacks {
+						script.scope.clear();
+					}
+				}
+			}
+
 			continue;
 		}
 
@@ -81,15 +105,7 @@ pub fn handle_behavior(world: &mut World) {
 					&obj_player, 
 					&mut world.attacks,
 					&world.current_map
-				) {
-					behavior.attack_index = if behavior.attack_index >= behavior.attacks.len() - 1 {
-						0
-					} else {
-						behavior.attack_index + 1
-					};
-
-					behavior.attack_cooldown = 40.;
-				};
+				) { behavior.change_attack_index() };
 			},
 
 			Behavior::Wander(behavior) => {

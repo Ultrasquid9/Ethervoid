@@ -3,12 +3,15 @@ use ahash::HashMap;
 use serde::Deserialize;
 use macroquad::math::Vec2;
 
-use crate::gameplay::{
-	combat::{
-		Attack, 
-		Owner
+use crate::{
+	gameplay::{
+		combat::{
+			Attack, 
+			Owner
+		}, 
+		ecs::obj::Obj
 	}, 
-	ecs::obj::Obj
+	utils::get_delta_time
 };
 
 use rhai::{
@@ -89,6 +92,11 @@ fn init_engine() -> Engine {
 
 	// Some Vec2 built-in methods don't work, since Rhai methods dissallow immutable references.
 	// As such, I have to make shitty copies.
+	fn getter_x(pos: &mut Vec2) -> f32 { pos.x }
+	fn getter_y(pos: &mut Vec2) -> f32 { pos.x }
+	fn setter_x(pos: &mut Vec2, new: f32) { pos.x = new }
+	fn setter_y(pos: &mut Vec2, new: f32) { pos.x = new }
+
 	fn move_towards(pos1: &mut Vec2, pos2: Vec2, distance: f32) -> Vec2 {
 		pos1.move_towards(pos2, distance)
 	}
@@ -102,9 +110,15 @@ fn init_engine() -> Engine {
 	engine
 		// Registerring the Vec2 and functions related to it
 		.register_type_with_name::<Vec2>("position")
+		.register_get_set("x", getter_x, setter_x)
+		.register_get_set("y", getter_y, setter_y)
+		
 		.register_fn("angle_between", angle_between)
 		.register_fn("move_towards", move_towards)
 		.register_fn("distance_between", distance_between)
+
+		// Delta time
+		.register_fn("delta", get_delta_time)
 
 		// Functions for creating attacks
 		.register_fn("new_physical", |
