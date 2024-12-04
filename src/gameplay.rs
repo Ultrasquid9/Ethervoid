@@ -1,6 +1,6 @@
 use draw::draw;
-use macroquad::window::next_frame;
 use stecs::prelude::*;
+use macroquad::prelude::*;
 
 use crate::{
 	utils::{
