@@ -3,15 +3,26 @@ use ahash::HashMap;
 use serde::Deserialize;
 use macroquad::math::Vec2;
 
-use crate::gameplay::{combat::{Attack, Owner}, ecs::obj::Obj};
+use crate::gameplay::{
+	combat::{
+		Attack, 
+		Owner
+	}, 
+	ecs::obj::Obj
+};
+
+use rhai::{
+	Dynamic, 
+	Engine, 
+	EvalAltResult, 
+	FnPtr, 
+	NativeCallContext, 
+	Scope
+};
 
 use super::{
 	gen_name, 
 	get_files, 
-};
-
-use rhai::{
-	Dynamic, Engine, Scope
 };
 
 #[derive(Clone, Deserialize)]
@@ -146,6 +157,32 @@ fn init_engine() -> Engine {
 		
 		// Hacky method to end the script
 		.register_fn("end", || Vec2::new(999999., 999999.))
+
+		// Pipeline operator
+		// IDK if this will ever be used, I just added it for fun 
+		.register_custom_operator("|>", 255).unwrap()
+		.register_fn("|>", |context: NativeCallContext, input: Dynamic, mut func: FnPtr| -> Result<Dynamic, std::boxed::Box<EvalAltResult>> {
+			let mut curried = false;
+			let mut args = func.curry().to_vec();
+
+			for arg in args.iter_mut() {
+				if !arg.is_char() { continue }
+
+				if arg.clone_cast::<char>() == '_' {
+					*arg = input.clone();
+					curried = true;
+				}
+			}
+
+			func.set_curry(Vec::new());
+			func.call_within_context(&context, if curried {
+				args
+			} else { 
+				let mut vec = Vec::new();
+				vec.push(input);
+				vec
+			})
+		})
 
 		// Custom syntax for setting a variable if it does not already exist
 		.register_custom_syntax([ "permanent", "$ident$", "<-", "$expr$" ], true, |context, inputs| {
