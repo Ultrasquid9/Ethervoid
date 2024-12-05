@@ -186,25 +186,21 @@ fn remove_old_attacks(world: &mut World) {
 		}
 
 		atk_to_remove
-	} {
-		world.attacks.remove(to_remove);
-	}
+	} { world.attacks.remove(to_remove); }
 }
 
 /// Handling the player's death (WIP)
 fn try_player_death(world: &mut World) {
-	if {
-		let mut player_is_dead = false;
+	let mut player_is_dead = false;
 
-		for hp in query!(world.player, (&health)) {
-			if hp.should_kill() {
-				player_is_dead = true;
-				break;
-			}
+	for hp in query!(world.player, (&health)) {
+		if hp.should_kill() {
+			player_is_dead = true;
+			break;
 		}
+	}
 
-		player_is_dead
-	} {
+	if player_is_dead {
 		while !world.player.ids.is_empty() {
 			world.player.remove(0);
 		}

@@ -50,7 +50,7 @@ impl ScriptBuilder {
 	}
 
 	/// Creates all the neccessary components for the script 
-	pub fn build<'a>(self) -> Script {
+	pub fn build(self) -> Script {
 		Script {
 			script: self.0,
 			scope: Scope::new(),
@@ -192,8 +192,8 @@ fn init_engine() -> Engine {
 			func.call_within_context(&context, if curried {
 				args
 			} else { 
-				let mut vec = Vec::new();
-				vec.push(input);
+				let mut vec = vec![input];
+				vec.append(&mut args);
 				vec
 			})
 		})

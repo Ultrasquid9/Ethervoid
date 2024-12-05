@@ -232,10 +232,7 @@ fn attack_hitscan(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 
 /// Attempts to parry attacks 
 fn try_parry(world: &mut World) {
-	let attack_ids: Vec<usize> = world.attacks.ids()
-		.into_iter()
-		.map(|i| i)
-		.collect();
+	let attack_ids: Vec<usize> = world.attacks.ids().collect();
 
 	for i in attack_ids.iter().rev() {
 		let atk_1 = world.attacks.get(*i).unwrap();

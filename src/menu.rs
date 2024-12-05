@@ -68,7 +68,7 @@ fn make_skin() -> Skin {
 		.font_size(64)
 		.build();
 
-	return Skin {
+	Skin {
 		label_style,
 
 		..root_ui().default_skin()
