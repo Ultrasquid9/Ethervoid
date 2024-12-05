@@ -32,8 +32,12 @@ use crate::utils::{
 };
 
 use super::{
-	combat::AttackType, 
-	ecs::{sprite::Sprite, World}
+	ecs::{
+		behavior::Behavior,
+		sprite::Sprite, 
+		World
+	},
+	combat::AttackType
 };
 
 use render::{
@@ -104,6 +108,16 @@ pub async fn draw(world: &mut World) {
 
 	set_default_camera();
 
+	// Render script errors (if any are present)
+	let mut err_height = 96.;
+	for behavior in query!(world.enemies, (&behavior)) {
+		let Behavior::Enemy(behavior) = behavior else { continue };
+
+		if let Some(e) = &behavior.err {
+			draw_text(&format!("Script err: {e}"), 32.0, err_height, camera_scale() / 10., RED);
+			err_height += 32.
+		}
+	}
 	 
 	// Drawing a temporary UI
 	draw_text(&format!("{}", world.player.health[0].hp), 32.0, 64.0, camera_scale() / 10., BLACK);

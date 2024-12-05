@@ -1,5 +1,6 @@
 use super::World;
 use player::player_behavior;
+use rhai::EvalAltResult;
 use script::script_behavior;
 use stecs::prelude::*;
 
@@ -35,13 +36,14 @@ pub struct PlayerBehavior {
 	pub is_dashing: bool
 }
 
-#[derive(PartialEq, Clone)]
 pub struct EnemyBehavior {
 	pub movement: Script,
 	pub attacks: Vec<Script>,
 
 	pub attack_index: usize,
 	pub attack_cooldown: f32,
+
+	pub err: Option<Box<EvalAltResult>>
 }
 
 #[derive(PartialEq, Clone)]
@@ -62,6 +64,33 @@ impl EnemyBehavior {
 		} else {
 			self.attack_index + 1
 		};
+	}
+}
+
+impl PartialEq for EnemyBehavior {
+	fn eq(&self, other: &Self) -> bool {
+		if self.movement == other.movement
+		&& self.attacks == other.attacks
+		&& self.attack_index == other.attack_index
+		&& self.attack_cooldown == other.attack_cooldown {
+			true
+		} else {
+			false
+		}
+	}
+}
+
+impl Clone for EnemyBehavior {
+	fn clone(&self) -> Self {
+		Self {
+			movement: self.movement.clone(),
+			attacks: self.attacks.clone(),
+
+			attack_index: self.attack_index,
+			attack_cooldown: self.attack_cooldown,
+
+			err: None
+		}
 	}
 }
 
@@ -94,7 +123,9 @@ pub fn handle_behavior(world: &mut World) {
 			),
 
 			Behavior::Enemy(behavior) => {
-				if script_behavior(
+				if let Some(_) = behavior.err { continue; }
+
+				let result = script_behavior(
 					if behavior.attack_cooldown > 0. {
 						behavior.attack_cooldown -= get_delta_time();
 						&mut behavior.movement
@@ -105,7 +136,17 @@ pub fn handle_behavior(world: &mut World) {
 					&obj_player, 
 					&mut world.attacks,
 					&world.current_map
-				) { behavior.change_attack_index() };
+				);
+
+				match result {
+					Ok(i) if i => behavior.change_attack_index(),
+					Err(e) => {
+						println!("Script error: {e}");
+						behavior.err = Some(e)
+					},
+
+					_ => ()
+				}
 			},
 
 			Behavior::Wander(behavior) => {

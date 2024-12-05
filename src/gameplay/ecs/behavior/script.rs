@@ -1,5 +1,4 @@
 use macroquad::math::Vec2;
-use rhai::Dynamic;
 
 use crate::{
 	gameplay::{
@@ -8,6 +7,11 @@ use crate::{
 	}, 
 	utils::get_delta_time,
 	cores::script::Script
+};
+
+use rhai::{
+	Dynamic, 
+	EvalAltResult
 };
 
 use stecs::{
@@ -22,7 +26,7 @@ pub fn script_behavior(
 	obj_player: &Obj,
 	attacks: &mut AttackStructOf<VecFamily>,
 	current_map: &str
-) -> bool {
+) -> Result<bool, Box<EvalAltResult>> {
 	// Values available in the scope
 	script.scope
 		.push("attacks", Vec::<Dynamic>::new())
@@ -30,10 +34,7 @@ pub fn script_behavior(
 		.push_constant("self_pos", obj.pos);
 
 	// Executing the script
-	let new_pos = match script.engine.eval_with_scope::<Vec2>(&mut script.scope, &script.script) {
-		Ok(new_pos) => new_pos,
-		Err(e) => panic!("Bad script: {}", e)
-	};
+	let new_pos =  script.engine.eval_with_scope::<Vec2>(&mut script.scope, &script.script)?;
 
 	// Getting attacks out of the scope
 	let new_attacks = script.scope
@@ -43,25 +44,25 @@ pub fn script_behavior(
 		attacks.insert( i.clone_cast() );
 	}
 
-	// Removing constants from the scope, to prevent its length from growing exponentially 
+	// Removing constants from the scope, to prevent its length from growing over time 
 	let _ = script.scope.remove::<Dynamic>("player_pos");
 	let _ = script.scope.remove::<Dynamic>("self_pos");
 
 	// Taking delta time into consideration
 	let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;
 
-	if new_pos != Vec2::new(999999., 999999.) {
-		obj.update(new_pos);
-		obj.try_move(new_pos, current_map);
-	} else {
+	if new_pos == Vec2::new(999999., 999999.) {
 		script.scope.clear();
-		return true
+		return Ok(true)
 	}
+
+	obj.update(new_pos);
+	obj.try_move(new_pos, current_map);
 
 	if obj.pos != obj.target {
 		script.scope.clear();
-		true
+		Ok(true)
 	} else {
-		false
+		Ok(false)
 	}
 }

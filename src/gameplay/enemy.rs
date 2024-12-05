@@ -40,7 +40,9 @@ impl Enemy {
 					.collect(),
 
 				attack_index: 0,
-				attack_cooldown: 40.
+				attack_cooldown: 40.,
+
+				err: None
 			}),
 			sprite: Sprite::new(
 				obj, 
