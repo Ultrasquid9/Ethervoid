@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use process::to_texture;
 use stecs::prelude::*;
 
@@ -32,7 +33,7 @@ use crate::utils::{
 
 use super::{
 	combat::AttackType, 
-	ecs::World
+	ecs::{sprite::Sprite, World}
 };
 
 use render::{
@@ -69,8 +70,22 @@ pub async fn draw(world: &mut World) {
 		draw_bar(&bar.to_barrier());
 	}
 
+	// Handling sprites
+	let mut sprites: Vec<&mut Sprite> = Vec::new();
 	for (sprite, obj) in query!([world.player, world.enemies, world.npcs, world.attacks], (&mut sprite, &obj)) {
 		if world.hitstop <= 0. { sprite.update(*obj) }
+		sprites.push(sprite);
+	}
+	sprites.sort_by(|x, y| {
+		if x.obj.pos.y > y.obj.pos.y {
+			Ordering::Greater
+		} else if x.obj.pos.y < y.obj.pos.y {
+			Ordering::Less
+		} else {
+			Ordering::Equal
+		}
+	});
+	for sprite in sprites {
 		sprite.render().await
 	}
 

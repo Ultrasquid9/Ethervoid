@@ -141,11 +141,21 @@ impl Sprite {
 				self.sprite.clone()
 			}),
 			Vec2::new(
-				self.obj.pos.x + if self.rotation != Rotation::Angle { self.sprite.width() as f32 } else { 0. }, 
-				self.obj.pos.y + if self.rotation != Rotation::Angle { self.sprite.height() as f32 } else { 0. }
+				self.obj.pos.x + match self.rotation {
+					Rotation::Angle => 0.,
+					Rotation::Static => self.sprite.width() as f32 / 2.,
+					_ => self.sprite.width() as f32
+				},
+				self.obj.pos.y + match self.rotation {
+					Rotation::Angle => 0.,
+					Rotation::Static => self.sprite.width() as f32 / 2.,
+					_ => self.sprite.height() as f32
+				},
 			), 
 			Some(DrawTextureParams {
-				source: if self.rotation != Rotation::Angle {
+				source: if self.rotation == Rotation::Angle {
+					None
+				} else {
 					Some(
 						Rect::new(
 							x_pos as f32,
@@ -154,7 +164,7 @@ impl Sprite {
 							size as f32
 						)
 					)
-				} else { None },
+				},
 				flip_x: self.obj.axis_horizontal == Axis::Negative && self.rotation == Rotation::EightWay,
 				dest_size: Some(Vec2::new(size as f32 * SCREEN_SCALE, size as f32 * SCREEN_SCALE)),
 				..Default::default()
