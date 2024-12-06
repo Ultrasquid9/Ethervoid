@@ -1,27 +1,7 @@
 use std::cmp::Ordering;
 use process::to_texture;
 use stecs::prelude::*;
-
-use macroquad::{
-	window::{
-		clear_background, 
-		screen_height, 
-		screen_width
-	},
-	camera::{
-		set_camera, 
-		set_default_camera, 
-		Camera2D
-	}, 
-	color::{
-		BLACK, 
-		RED,
-		Color
-	}, 
-	math::vec2, 
-	shapes::draw_line, 
-	text::draw_text
-};
+use macroquad::prelude::*;
 
 use crate::utils::{
 	resources::{
@@ -42,7 +22,8 @@ use super::{
 
 use render::{
 	draw_bar, 
-	draw_tilemap
+	draw_tilemap, 
+	render_text
 };
 
 pub mod process;
@@ -109,16 +90,16 @@ pub async fn draw(world: &mut World) {
 	set_default_camera();
 
 	// Render script errors (if any are present)
-	let mut err_height = 96.;
+	let mut err_height = 128.;
 	for behavior in query!(world.enemies, (&behavior)) {
 		let Behavior::Enemy(behavior) = behavior else { continue };
 
 		if let Some(e) = &behavior.err {
-			draw_text(&format!("Script err: {e}"), 32.0, err_height, camera_scale() / 10., RED);
+			render_text(&format!("Script err: {e}"), Vec2::new(32., err_height), RED).await;
 			err_height += 32.
 		}
 	}
 	 
 	// Drawing a temporary UI
-	draw_text(&format!("{}", world.player.health[0].hp), 32.0, 64.0, camera_scale() / 10., BLACK);
+	render_text(&format!("{}", world.player.health[0].hp), Vec2::new(32., 96.), BLACK).await
 }

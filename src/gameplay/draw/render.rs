@@ -1,25 +1,12 @@
 use super::SCREEN_SCALE;
 use futures::future::join_all;
 use raylite::Barrier;
+use macroquad::prelude::*;
 
-use macroquad::{
-	texture::{
-		draw_texture_ex, 
-		DrawTextureParams, 
-		Texture2D
-	}, 
-	color::{
-		BLUE, 
-		WHITE
-	}, 
-	window::{
-		screen_height, 
-		screen_width
-	},
-	shapes::draw_line, 
-	math::Vec2
+use crate::{
+	menu::FONT, 
+	utils::camera_scale
 };
-
 
 pub async fn draw_tilemap(texture: Texture2D) {
 	let mut futures = Vec::new();
@@ -53,6 +40,17 @@ pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawT
 			}
 		}
 	);
+}
+
+/// Renders text 
+pub async fn render_text(string: &str, pos: Vec2, color: Color) {
+	draw_text_ex(string, pos.x, pos.y, TextParams {
+		font: Some(&FONT),
+		font_size: camera_scale() as u16 / 12,
+		color,
+
+		..Default::default()
+	});
 }
 
 pub fn pixel_offset(base: f32) -> f32 {
