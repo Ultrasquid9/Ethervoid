@@ -118,8 +118,9 @@ pub fn handle_behavior(world: &mut World) {
 			Behavior::Player(behavior) => player_behavior(
 				obj, 
 				behavior,
+				&world.current_map,
 				&world.config,
-				&world.current_map
+				&mut world.input_buffer
 			),
 
 			Behavior::Enemy(behavior) => {

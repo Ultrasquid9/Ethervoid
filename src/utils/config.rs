@@ -2,9 +2,7 @@ use std::fs;
 
 use macroquad::input::{
 	is_key_down, 
-	is_key_pressed, 
 	is_mouse_button_down, 
-	is_mouse_button_pressed, 
 	KeyCode, 
 	MouseButton
 };
@@ -13,6 +11,7 @@ use serde::{
 	Deserialize, 
 	Serialize
 };
+use struct_iterable::Iterable;
 
 const DEFAULT_CONFIG: &str = "
 (
@@ -40,7 +39,7 @@ pub struct Config {
 }
 
 /// The different possible inputs for the player
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Iterable)]
 pub struct KeyMap {
 	pub up: Key,
 	pub down: Key,
@@ -57,7 +56,7 @@ pub struct KeyMap {
 }
 
 /// Contains both keyboard and mouse buttons
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Key{
 	#[serde(with = "KeyCodeSerialize")]
 	KeyCode(KeyCode),
@@ -83,29 +82,15 @@ impl Config {
 
 impl Key {
 	/// Checks if the key is down
-	pub fn is_down(&self) -> bool {
-		match self {
+	pub(super) fn is_down(&self) -> bool {
+		return match self {
 			Self::KeyCode(button) => {
-				if is_key_down(*button) {return true}
+				is_key_down(*button)
 			},
 			Self::MouseButton(button) => {
-				if is_mouse_button_down(*button) {return true}
+				is_mouse_button_down(*button)
 			}
 		}
-		false
-	}
-
-	/// Checks if the key is pressed
-	pub fn is_pressed(&self) -> bool {
-		match self {
-			Self::KeyCode(button) => {
-				if is_key_pressed(*button) {return true}
-			},
-			Self::MouseButton(button) => {
-				if is_mouse_button_pressed(*button) {return true}
-			}
-		}
-		false
 	}
 }
 

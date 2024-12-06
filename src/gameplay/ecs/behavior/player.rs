@@ -3,8 +3,9 @@ use macroquad::math::Vec2;
 
 use crate::{
 	utils::{
-		get_delta_time,
-		config::Config
+		config::Config, 
+		input_buffer::InputBuffer,
+		get_delta_time
 	},
 	gameplay::ecs::obj::{
 		Axis, 
@@ -17,12 +18,13 @@ use crate::{
 pub fn player_behavior(
 	obj: &mut Obj, 
 	behavior: &mut PlayerBehavior, 
+	current_map: &str,
 	config: &Config,
-	current_map: &str
+	input_buffer: &mut InputBuffer
 ) {
 	let mut new_pos = Vec2::new(0., 0.); // The pos to be moved to 
 
-	if !behavior.is_dashing { switch_dir_from_input(config, obj) }
+	if !behavior.is_dashing { switch_dir_from_input(config, input_buffer, obj) }
 	match obj.axis_vertical {
 		Axis::Positive => new_pos.y += 1.,
 		Axis::Negative => new_pos.y -= 1.,
@@ -35,7 +37,7 @@ pub fn player_behavior(
 	}
 
 	// Dashing
-	if config.keymap.dash.is_down() 
+	if input_buffer.was_pressed(&config.keymap.dash)
 	&& behavior.dash_cooldown <= 0.
 	&& new_pos != Vec2::new(0., 0.) {
 		behavior.speed += 12.;
@@ -68,23 +70,25 @@ pub fn player_behavior(
 	}
 }
 
-fn switch_dir_from_input(config: &Config, obj: &mut Obj) {
+fn switch_dir_from_input(config: &Config, input_buffer: &mut InputBuffer, obj: &mut Obj) {
 	// Checks to see if both Up and Down are being held at the same time.
 	// If they are, sets the direction to move based upon the most recently pressed key. 
 	// Otherwise, sets the direction to move based upon the currently pressed key.
-	if config.keymap.up.is_down()
-	&& config.keymap.down.is_down() {
-		if config.keymap.up.is_pressed()
-		&& obj.axis_vertical != Axis::Negative {
-			obj.axis_vertical = Axis::Negative;
-		} 
-		if config.keymap.down.is_pressed()
-		&& obj.axis_vertical != Axis::Positive {
-			obj.axis_vertical = Axis::Positive;
-		} 
-	} else if config.keymap.up.is_down() {
+	if input_buffer.was_pressed(&config.keymap.up)
+	&& input_buffer.was_pressed(&config.keymap.down) {
+
+		if input_buffer.most_recent(
+			&config.keymap.up, 
+			&config.keymap.down
+		) == &config.keymap.up {
+			obj.axis_vertical = Axis::Positive
+		} else {
+			obj.axis_vertical = Axis::Negative	
+		}
+
+	} else if input_buffer.was_pressed(&config.keymap.up) {
 		obj.axis_vertical = Axis::Negative;
-	} else if config.keymap.down.is_down() {
+	} else if input_buffer.was_pressed(&config.keymap.down) {
 		obj.axis_vertical = Axis::Positive;
 	} else {
 		obj.axis_vertical = Axis::None;
@@ -93,19 +97,21 @@ fn switch_dir_from_input(config: &Config, obj: &mut Obj) {
 	// Checks to see if both Left and Right are being held at the same time.
 	// If they are, sets the direction to move based upon the most recently pressed key. 
 	// Otherwise, sets the direction to move based upon the currently pressed key.
-	if config.keymap.left.is_down()
-	&& config.keymap.right.is_down() {
-		if config.keymap.left.is_pressed()
-		&& obj.axis_vertical != Axis::Negative {
-			obj.axis_horizontal = Axis::Negative;
-		} 
-		if config.keymap.right.is_pressed()
-		&& obj.axis_vertical != Axis::Positive {
-			obj.axis_horizontal = Axis::Positive;
-		} 
-	} else if config.keymap.left.is_down() {
+	if input_buffer.was_pressed(&config.keymap.left)
+	&& input_buffer.was_pressed(&config.keymap.right) {
+
+		if input_buffer.most_recent(
+			&config.keymap.left, 
+			&config.keymap.right
+		) == &config.keymap.up {
+			obj.axis_horizontal = Axis::Positive
+		} else {
+			obj.axis_horizontal = Axis::Negative	
+		}
+
+	} else if input_buffer.was_pressed(&config.keymap.left) {
 		obj.axis_horizontal = Axis::Negative;
-	} else if config.keymap.right.is_down() {
+	} else if input_buffer.was_pressed(&config.keymap.right) {
 		obj.axis_horizontal = Axis::Positive;
 	} else {
 		obj.axis_horizontal = Axis::None;

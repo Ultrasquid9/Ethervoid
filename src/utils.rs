@@ -9,6 +9,7 @@ use macroquad::{
 };
 
 pub mod config;
+pub mod input_buffer;
 pub mod resources;
 
 /// Converts inputted Vec2 into a tuple of f32
