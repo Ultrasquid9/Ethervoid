@@ -99,7 +99,6 @@ pub fn handle_behavior(world: &mut World) {
 	let obj_player = *world.player.obj.first().unwrap();
 
 	let attacks = RwLock::new(&mut world.attacks);
-	let input_buffer = RwLock::new(&mut world.input_buffer);
 
 	thread::scope(|scope| {
 		for (obj, behavior) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior)) {
@@ -120,16 +119,13 @@ pub fn handle_behavior(world: &mut World) {
 			}
 
 			match behavior {
-				Behavior::Player(behavior) => {
-					scope.spawn(|| 
-						player_behavior(
-							obj, 
-							behavior,
-							&world.current_map,
-							&world.config,
-							*input_buffer.write().unwrap()
-						)
-					);
+				Behavior::Player(behavior) => { 
+					player_behavior(
+						obj, 
+						behavior,
+						&world.config,
+						&world.current_map,
+					)
 				},
 
 				Behavior::Enemy(behavior) => {

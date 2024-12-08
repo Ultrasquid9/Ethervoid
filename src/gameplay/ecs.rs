@@ -8,9 +8,8 @@ use super::{
 };
 
 use crate::utils::{
-	config::Config, 
-	input_buffer::InputBuffer, 
-	resources::maps::access_map
+	resources::maps::access_map,
+	config::Config
 };
 
 pub mod behavior;
@@ -26,7 +25,6 @@ pub struct World {
 
 	pub current_map: String,
 	pub config: Config,
-	pub input_buffer: InputBuffer,
 	pub hitstop: f32
 }
 

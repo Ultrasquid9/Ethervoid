@@ -11,7 +11,6 @@ use crate::{
 		get_delta_time,  
 		update_delta_time,
 		config::Config,
-		input_buffer::InputBuffer,
 	}, 
 	State
 };
@@ -50,7 +49,6 @@ pub async fn gameplay() -> State {
 		attacks: Default::default(),
 
 		config: Config::read("./config.ron"),
-		input_buffer: InputBuffer::new(),
 		current_map: String::from("default:test"),
 		hitstop: 0.
 	};
@@ -61,7 +59,6 @@ pub async fn gameplay() -> State {
 	loop {
 		update_delta_time();
 		draw(&mut world).await;
-		world.input_buffer.handle_input(&world.config);
 		
 		// Handling hitstop
 		if world.hitstop > 0. {
@@ -101,10 +98,10 @@ pub async fn gameplay() -> State {
 
 		for (inventory, obj) in query!(world.player, (&mut inventory, &obj)) {
 			// Switching weapons
-			if world.input_buffer.was_pressed(&world.config.keymap.change_sword) {
+			if world.config.keymap.change_sword.is_pressed() {
 				inventory.current_sword = swap_weapons(&inventory.current_sword, &inventory.swords);
 			}
-			if world.input_buffer.was_pressed(&world.config.keymap.change_gun) {
+			if world.config.keymap.change_gun.is_pressed() {
 				inventory.current_gun = swap_weapons(&inventory.current_gun, &inventory.guns);
 			}
 
@@ -121,12 +118,10 @@ pub async fn gameplay() -> State {
 			}
 
 			// Creating attacks
-			if world.input_buffer.was_pressed(&world.config.keymap.sword) 
-			&& inventory.swords[inventory.current_sword].cooldown <= 0. {
+			if world.config.keymap.sword.is_down() && inventory.swords[inventory.current_sword].cooldown <= 0. {
 				world.attacks.insert(inventory.attack_sword(obj.pos)); 
 			}
-			if world.input_buffer.was_pressed(&world.config.keymap.gun) 
-			&& inventory.guns[inventory.current_gun].cooldown <= 0. {
+			if world.config.keymap.gun.is_down() && inventory.guns[inventory.current_gun].cooldown <= 0. {
 				world.attacks.insert(inventory.attack_gun(obj.pos)); 
 			}
 		}
@@ -145,7 +140,7 @@ pub async fn gameplay() -> State {
 		try_player_death(&mut world);
 
 		// Quitting the game
-		if world.input_buffer.was_pressed(&world.config.keymap.quit) {
+		if world.config.keymap.quit.is_down() {
 			unsafe{ clean_resources(); }
 			return State::Menu
 		}
