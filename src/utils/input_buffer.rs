@@ -56,7 +56,7 @@ impl InputBuffer {
 		if !self.buffer.contains_key(key1) { return key2 }
 		if !self.buffer.contains_key(key2) { return key1 }
 		
-		if self.buffer.get(&key1).unwrap().1 > self.buffer.get(&key2).unwrap().1 {
+		if self.buffer.get(key1).unwrap().1 > self.buffer.get(key2).unwrap().1 {
 			key1
 		} else {
 			key2

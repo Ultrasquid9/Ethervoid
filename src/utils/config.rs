@@ -83,7 +83,7 @@ impl Config {
 impl Key {
 	/// Checks if the key is down
 	pub(super) fn is_down(&self) -> bool {
-		return match self {
+		match self {
 			Self::KeyCode(button) => {
 				is_key_down(*button)
 			},

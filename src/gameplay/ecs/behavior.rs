@@ -74,14 +74,10 @@ impl EnemyBehavior {
 
 impl PartialEq for EnemyBehavior {
 	fn eq(&self, other: &Self) -> bool {
-		if self.movement == other.movement
+		self.movement == other.movement
 		&& self.attacks == other.attacks
 		&& self.attack_index == other.attack_index
-		&& self.attack_cooldown == other.attack_cooldown {
-			true
-		} else {
-			false
-		}
+		&& self.attack_cooldown == other.attack_cooldown
 	}
 }
 
@@ -137,7 +133,7 @@ pub fn handle_behavior(world: &mut World) {
 				},
 
 				Behavior::Enemy(behavior) => {
-					if let Some(_) = behavior.err { continue; }
+					if behavior.err.is_some() { continue; }
 
 					scope.spawn(|| {
 						let result = script_behavior(
