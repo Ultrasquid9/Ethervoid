@@ -4,10 +4,14 @@ use macroquad::prelude::*;
 
 use crate::{
 	utils::{
-		config::Config, get_delta_time, input_buffer::InputBuffer, resources::{
+		resources::{
 			clean_resources, 
 			create_resources
-		}
+		}, 
+		get_delta_time,  
+		update_delta_time,
+		config::Config,
+		input_buffer::InputBuffer,
 	}, 
 	State
 };
@@ -55,6 +59,7 @@ pub async fn gameplay() -> State {
 	world.populate();
 
 	loop {
+		update_delta_time();
 		draw(&mut world).await;
 		world.input_buffer.handle_input(&world.config);
 		

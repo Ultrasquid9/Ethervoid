@@ -12,6 +12,11 @@ use crate::{
 	cores::script::Script
 };
 
+use std::{
+	sync::RwLock, 
+	thread
+};
+
 use macroquad::{
 	math::Vec2, 
 	prelude::rand
@@ -97,82 +102,93 @@ impl Clone for EnemyBehavior {
 pub fn handle_behavior(world: &mut World) {
 	let obj_player = *world.player.obj.first().unwrap();
 
-	for (obj, behavior) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior)) {
-		if obj.stunned > 0. { 
-			obj.stunned -= get_delta_time();
+	let attacks = RwLock::new(&mut world.attacks);
+	let input_buffer = RwLock::new(&mut world.input_buffer);
 
-			if let Behavior::Enemy(behavior) = behavior {
-				if behavior.attack_cooldown <= 0. {
-					behavior.change_attack_index();
+	thread::scope(|scope| {
+		for (obj, behavior) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior)) {
+			if obj.stunned > 0. { 
+				obj.stunned -= get_delta_time();
 
-					for script in &mut behavior.attacks {
-						script.scope.clear();
+				if let Behavior::Enemy(behavior) = behavior {
+					if behavior.attack_cooldown <= 0. {
+						behavior.change_attack_index();
+
+						for script in &mut behavior.attacks {
+							script.scope.clear();
+						}
 					}
 				}
+
+				continue;
 			}
 
-			continue;
+			match behavior {
+				Behavior::Player(behavior) => {
+					scope.spawn(|| 
+						player_behavior(
+							obj, 
+							behavior,
+							&world.current_map,
+							&world.config,
+							*input_buffer.write().unwrap()
+						)
+					);
+				},
+
+				Behavior::Enemy(behavior) => {
+					if let Some(_) = behavior.err { continue; }
+
+					scope.spawn(|| {
+						let result = script_behavior(
+							if behavior.attack_cooldown > 0. {
+								behavior.attack_cooldown -= get_delta_time();
+								&mut behavior.movement
+							} else {
+								&mut behavior.attacks[behavior.attack_index]
+							}, 
+							obj, 
+							&obj_player, 
+							*attacks.write().unwrap(),
+							&world.current_map
+						);
+
+						match result {
+							Ok(i) if i => behavior.change_attack_index(),
+							Err(e) => {
+								println!("Script error: {e}");
+								behavior.err = Some(e)
+							},
+
+							_ => ()
+						}
+					});
+				},
+
+				Behavior::Wander(behavior) => {
+					if behavior.cooldown > 0. {
+						behavior.cooldown -= get_delta_time();
+						continue;
+					} else if obj.pos.distance(obj.target) < 5. {
+						obj.update(Vec2::new(
+							rand::gen_range(behavior.pos.x - behavior.range, behavior.pos.x + behavior.range),
+							rand::gen_range(behavior.pos.y - behavior.range, behavior.pos.y + behavior.range)
+						));
+						behavior.cooldown = 120.;
+						continue;
+					}
+					let new_pos = obj.pos.move_towards(obj.target, 2. * get_delta_time());
+					obj.try_move(new_pos, &world.current_map);
+
+					if obj.pos != new_pos {
+						obj.target = obj.pos
+					}
+				},
+
+				_ => ()
+			}
 		}
-
-		match behavior {
-			Behavior::Player(behavior) => player_behavior(
-				obj, 
-				behavior,
-				&world.current_map,
-				&world.config,
-				&mut world.input_buffer
-			),
-
-			Behavior::Enemy(behavior) => {
-				if let Some(_) = behavior.err { continue; }
-
-				let result = script_behavior(
-					if behavior.attack_cooldown > 0. {
-						behavior.attack_cooldown -= get_delta_time();
-						&mut behavior.movement
-					} else {
-						&mut behavior.attacks[behavior.attack_index]
-					}, 
-					obj, 
-					&obj_player, 
-					&mut world.attacks,
-					&world.current_map
-				);
-
-				match result {
-					Ok(i) if i => behavior.change_attack_index(),
-					Err(e) => {
-						println!("Script error: {e}");
-						behavior.err = Some(e)
-					},
-
-					_ => ()
-				}
-			},
-
-			Behavior::Wander(behavior) => {
-				if behavior.cooldown > 0. {
-					behavior.cooldown -= get_delta_time();
-					continue;
-				} else if obj.pos.distance(obj.target) < 5. {
-					obj.update(Vec2::new(
-						rand::gen_range(behavior.pos.x - behavior.range, behavior.pos.x + behavior.range),
-						rand::gen_range(behavior.pos.y - behavior.range, behavior.pos.y + behavior.range)
-					));
-					behavior.cooldown = 120.;
-					continue;
-				}
-				let new_pos = obj.pos.move_towards(obj.target, 2. * get_delta_time());
-				obj.try_move(new_pos, &world.current_map);
-
-				if obj.pos != new_pos {
-					obj.target = obj.pos
-				}
-			},
-
-			_ => ()
-		}
-	}
+	});
 
 	for door in access_map(&world.current_map).doors {
 		door.try_change_map(world);

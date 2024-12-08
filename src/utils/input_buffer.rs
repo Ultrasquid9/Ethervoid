@@ -52,7 +52,7 @@ impl InputBuffer {
 		self.buffer.contains_key(key) 
 	}
 
-	pub fn most_recent<'b>(&'b self, key1: &'b Key, key2: &'b Key) -> &Key {
+	pub fn most_recent<'b>(&'b self, key1: &'b Key, key2: &'b Key) -> &'b Key {
 		if !self.buffer.contains_key(key1) { return key2 }
 		if !self.buffer.contains_key(key2) { return key1 }
 		
