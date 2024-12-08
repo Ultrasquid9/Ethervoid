@@ -2,12 +2,8 @@ use imageproc::geometric_transformations::rotate_about_center;
 
 use crate::{
 	gameplay::draw::{
-		process::{
-			downscale, 
-			to_texture
-		},
-		SCREEN_SCALE, 
-		render::render_texture
+		SCREEN_SCALE,
+		process::downscale, 
 	}, 
 	utils::{
 		resources::textures::access_image,
@@ -95,7 +91,7 @@ impl Sprite {
 		self.frames.anim_completed
 	}
 
-	pub async fn render(&self) {
+	pub fn to_render_params(&self) -> (DynamicImage, Vec2, Option<DrawTextureParams>) {
 		let size = if self.rotation == Rotation::EightWay {
 			self.sprite.height() / 5
 		} else {
@@ -124,8 +120,8 @@ impl Sprite {
 			}
 		};
 
-		render_texture(
-			&to_texture(if self.rotation == Rotation::Angle {
+		return(
+			if self.rotation == Rotation::Angle {
 				DynamicImage::ImageRgba8(rotate_about_center(
 					self.sprite.crop_imm(
 						x_pos, 
@@ -139,7 +135,7 @@ impl Sprite {
 				))
 			} else {
 				self.sprite.clone()
-			}),
+			},
 			Vec2::new(
 				self.obj.pos.x + match self.rotation {
 					Rotation::Angle => 0.,
@@ -169,7 +165,7 @@ impl Sprite {
 				dest_size: Some(Vec2::new(size as f32 * SCREEN_SCALE, size as f32 * SCREEN_SCALE)),
 				..Default::default()
 			})
-		).await;
+		);
 	}
 }
 

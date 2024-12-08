@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use process::to_texture;
 use stecs::prelude::*;
 use macroquad::prelude::*;
@@ -20,10 +19,16 @@ use super::{
 	combat::AttackType
 };
 
+use std::{
+	cmp::Ordering, 
+	sync::mpsc, 
+	thread
+};
+
 use render::{
 	draw_bar, 
 	draw_tilemap, 
-	render_text
+	render_text, render_texture
 };
 
 pub mod process;
@@ -55,24 +60,7 @@ pub async fn draw(world: &mut World) {
 		draw_bar(&bar.to_barrier());
 	}
 
-	// Handling sprites
-	let mut sprites: Vec<&mut Sprite> = Vec::new();
-	for (sprite, obj) in query!([world.player, world.enemies, world.npcs, world.attacks], (&mut sprite, &obj)) {
-		if world.hitstop <= 0. { sprite.update(*obj) }
-		sprites.push(sprite);
-	}
-	sprites.sort_by(|x, y| {
-		if x.obj.pos.y > y.obj.pos.y {
-			Ordering::Greater
-		} else if x.obj.pos.y < y.obj.pos.y {
-			Ordering::Less
-		} else {
-			Ordering::Equal
-		}
-	});
-	for sprite in sprites {
-		sprite.render().await
-	}
+	render_sprites(world).await;
 
 	for (atk_type, obj) in query!(world.attacks, (&attack_type, &obj)) {
 		if let AttackType::Hitscan = atk_type {
@@ -102,4 +90,40 @@ pub async fn draw(world: &mut World) {
 	 
 	// Drawing a temporary UI
 	render_text(&format!("{}", world.player.health[0].hp), Vec2::new(32., 96.), BLACK).await
+}
+
+async fn render_sprites(world: &mut World) {
+	// Sorting sprites
+	let mut sprites: Vec<&mut Sprite> = Vec::new();
+	for (sprite, obj) in query!([world.player, world.enemies, world.npcs, world.attacks], (&mut sprite, &obj)) {
+		if world.hitstop <= 0. { sprite.update(*obj) }
+		sprites.push(sprite);
+	}
+	sprites.sort_by(|x, y| {
+		if x.obj.pos.y > y.obj.pos.y {
+			Ordering::Greater
+		} else if x.obj.pos.y < y.obj.pos.y {
+			Ordering::Less
+		} else {
+			Ordering::Equal
+		}
+	});
+
+	// Processing sprites
+	let (transceiver, receiver) = mpsc::channel();
+	thread::scope(|scope| {
+		for sprite in sprites {
+			let transceiver = transceiver.clone();
+
+			scope.spawn(move || {
+				transceiver.send(sprite.to_render_params())
+			});
+		}
+	});
+	drop(transceiver);
+
+	// Rendering sprites
+	for (texture, pos, params) in receiver {
+		render_texture(&to_texture(texture), pos, params).await
+	}
 }
