@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use process::to_texture;
 use stecs::prelude::*;
 use macroquad::prelude::*;
@@ -17,12 +18,6 @@ use super::{
 		World
 	},
 	combat::AttackType
-};
-
-use std::{
-	cmp::Ordering, 
-	sync::mpsc, 
-	thread
 };
 
 use render::{
@@ -110,20 +105,14 @@ async fn render_sprites(world: &mut World) {
 	});
 
 	// Processing sprites
-	let (transceiver, receiver) = mpsc::channel();
-	thread::scope(|scope| {
-		for sprite in sprites {
-			let transceiver = transceiver.clone();
+	let mut stuff = Vec::new();
 
-			scope.spawn(move || {
-				transceiver.send(sprite.to_render_params())
-			});
-		}
+	sprites.iter().for_each(|sprite| {
+		stuff.push(sprite.to_render_params());
 	});
-	drop(transceiver);
 
 	// Rendering sprites
-	for (texture, pos, params) in receiver {
+	for (texture, pos, params) in stuff {
 		render_texture(&to_texture(texture), pos, params).await
 	}
 }

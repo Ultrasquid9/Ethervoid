@@ -1,6 +1,7 @@
-use std::thread;
+use std::sync::mpsc;
 use ahash::HashMap;
 use kira::sound::static_sound::StaticSoundData;
+use rayon::prelude::*;
 
 use super::{
 	gen_name, 
@@ -11,19 +12,21 @@ use super::{
 pub fn get_audio() -> HashMap<String, StaticSoundData> {
 	let mut audio: HashMap<String, StaticSoundData> = HashMap::default();
 
-	let mut audio_handles = Vec::new();
-	let mut names = Vec::new();
+	let (transciever, receiver) = mpsc::channel();
 
-	for i in get_files(String::from("audio")) {
-		names.push(gen_name(&i));
+	get_files("audio".to_string())
+		.par_iter()
+		.for_each(|dir| {
+			let Ok(sound) = StaticSoundData::from_file(dir)
+			else { return };
 
-		audio_handles.push(thread::spawn(move || -> StaticSoundData {
-			StaticSoundData::from_file(i).unwrap()
-		}));
-	}
+			let _ = transciever.send((gen_name(dir), sound));
+		});
 
-	for (index, thread) in audio_handles.into_iter().enumerate() {
-		audio.insert(names[index].clone(), thread.join().unwrap());
+	drop(transciever);
+
+	for (name, sound) in receiver {
+		audio.insert(name, sound);
 	}
 
 	audio

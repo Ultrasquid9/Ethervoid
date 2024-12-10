@@ -3,6 +3,7 @@ use ahash::HashMap;
 use macroquad::math::Vec2;
 use raylite::Barrier;
 use serde::Deserialize;
+use rayon::prelude::*;
 
 use super::{
 	enemytype::{
@@ -39,7 +40,7 @@ pub struct Map {
 }
 
 impl MapBuilder {
-	pub fn read(dir: String) -> Self {
+	pub fn read(dir: &str) -> Self {
 		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
@@ -73,7 +74,7 @@ impl MapBuilder {
 			doors: self.doors,
 
 			enemies: self.enemies
-				.iter()
+				.par_iter()
 				.map(|enemy| (
 					enemytypes.get(enemy.0.as_str()).unwrap().clone(),
 					enemy.1
@@ -81,7 +82,7 @@ impl MapBuilder {
 				.collect(),
 			
 			npcs: self.npcs
-				.iter()
+				.par_iter()
 				.map(|npc| (
 					npctypes.get(npc.0.as_str()).unwrap().clone(),
 					npc.1
@@ -93,14 +94,10 @@ impl MapBuilder {
 
 /// Provides a HashMap containing all Maps
 pub fn get_maps() -> HashMap<String, Map> {
-	let mut maps: HashMap<String, Map> = HashMap::default();
-
-	for i in get_files(String::from("maps")) {
-		maps.insert(
-			gen_name(&i),
-			MapBuilder::read(i).build()
-		);
-	}
+	let maps: HashMap<String, Map> = get_files("maps".to_string())
+		.par_iter()
+		.map(|dir| (gen_name(dir), MapBuilder::read(dir).build()))
+		.collect();
 
 	maps
 }

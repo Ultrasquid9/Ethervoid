@@ -2,6 +2,7 @@ use std::fs;
 use ahash::HashMap;
 use macroquad::prelude::rand;
 use crate::gameplay::npc::Dialogue;
+use rayon::prelude::*;
 
 use super::{
 	gen_name, 
@@ -36,7 +37,7 @@ pub struct NpcType {
 }
 
 impl NpcType {
-	pub fn read(dir: String) -> Self {
+	pub fn read(dir: &str) -> Self {
 		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 }
@@ -61,14 +62,10 @@ impl Message {
 
 /// Provides a HashMap containing all Npc data
 pub fn get_npctypes() -> HashMap<String, NpcType> {
-	let mut npcs: HashMap<String, NpcType> = HashMap::default();
-
-	for i in get_files(String::from("npcs")) {
-		npcs.insert(
-			gen_name(&i),
-			NpcType::read(i)
-		);
-	}
+	let npcs: HashMap<String, NpcType> = get_files("npcs".to_string())
+		.par_iter()
+		.map(|dir| (gen_name(dir), NpcType::read(dir)))
+		.collect();
 
 	npcs
 }

@@ -1,5 +1,6 @@
 use macroquad::math::Vec2;
 use stecs::prelude::*;
+use rayon::prelude::*;
 use crate::cores::enemytype::EnemyType;
 
 use super::ecs::{
@@ -35,7 +36,7 @@ impl Enemy {
 				movement: enemytype.movement.clone().build(),
 
 				attacks: enemytype.attacks
-					.iter()
+					.par_iter()
 					.map(|attack| attack.clone().build())
 					.collect(),
 

@@ -10,11 +10,12 @@ raylite = "0.1"
 walkdir = "2.5"
 ahash = "0.8"
 futures = "0.3"
+rayon = "1.10"
 
 kira = "0.9"
 imageproc = { version = "0.25", default-features = false }
-image = { version = "0.25", default-features = false, features = ["png", "webp"] }
-fast_image_resize = { version = "5.0", features = ["image"] }
+image = { version = "0.25", default-features = false, features = ["png", "avif-native"] }
+fast_image_resize = { version = "5.0", features = ["image", "rayon"] }
 
 rhai = { version = "1.19", features = ["f32_float", "sync"] }
 serde = { version = "1.0", features = ["derive"] }

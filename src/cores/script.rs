@@ -2,6 +2,7 @@ use std::fs;
 use ahash::HashMap;
 use serde::Deserialize;
 use macroquad::math::Vec2;
+use rayon::prelude::*;
 
 use crate::{
 	gameplay::{
@@ -45,7 +46,7 @@ pub struct Script {
 
 impl ScriptBuilder {
 	/// Reads the script at the provided directory
-	pub fn from(dir: String) -> Self {
+	pub fn read(dir: &str) -> Self {
 		Self(fs::read_to_string(dir).unwrap())
 	}
 
@@ -75,16 +76,12 @@ impl Clone for Script {
 
 /// Provides a HashMap containing all Attacks
 pub fn get_scripts() -> HashMap<String, ScriptBuilder> {
-	let mut attacks: HashMap<String, ScriptBuilder> = HashMap::default();
+	let scripts: HashMap<String, ScriptBuilder> = get_files("scripts".to_string())
+		.par_iter()
+		.map(|dir| (gen_name(dir), ScriptBuilder::read(dir)))
+		.collect();
 
-	for i in get_files(String::from("behavior")) {
-		attacks.insert(
-			gen_name(&i),
-			ScriptBuilder::from(i)
-		);
-	}
-
-	attacks
+	scripts
 }
 
 fn init_engine() -> Engine {

@@ -1,6 +1,7 @@
 use std::fs;
 use ahash::HashMap;
 use serde::Deserialize;
+use rayon::prelude::*;
 
 use super::{
 	script::{
@@ -21,7 +22,7 @@ struct EnemyTypeBuilder {
 }
 
 impl EnemyTypeBuilder {
-	pub fn read(dir: String) -> Self {
+	pub fn read(dir: &str) -> Self {
 		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
@@ -34,7 +35,7 @@ impl EnemyTypeBuilder {
 			sprite: self.sprite,
 			movement: scripts.get(&self.movement).unwrap().clone(), 
 			attacks: self.attacks
-				.iter()
+				.par_iter()
 				.map(|attack| scripts.get(attack.as_str()).unwrap().clone())
 				.collect()
 		}
@@ -53,14 +54,10 @@ pub struct EnemyType {
 
 /// Provides a HashMap containing all EnemyTypes
 pub fn get_enemytypes() -> HashMap<String, EnemyType> {
-	let mut enemytypes: HashMap<String, EnemyType> = HashMap::default();
-
-	for i in get_files(String::from("enemies")) {
-		enemytypes.insert(
-			gen_name(&i),
-			EnemyTypeBuilder::read(i).build()
-		);
-	}
+	let enemytypes: HashMap<String, EnemyType> = get_files("enemies".to_string())
+		.par_iter()
+		.map(|dir| (gen_name(dir), EnemyTypeBuilder::read(dir).build()))
+		.collect();
 
 	enemytypes
 }

@@ -1,4 +1,5 @@
 use macroquad::math::Vec2;
+use rayon::prelude::*;
 
 use raylite::{
 	cast, 
@@ -112,7 +113,7 @@ impl Obj {
 				end_position: vec2_to_tuple(&self.target)
 			},
 			&access_map(current_map).doors
-				.iter()
+				.par_iter()
 				.map(|door| door.to_barrier())
 				.collect()
 		).is_ok() { return }
