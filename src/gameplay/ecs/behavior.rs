@@ -1,6 +1,5 @@
 use super::World;
 use player::player_behavior;
-use rhai::EvalAltResult;
 use script::script_behavior;
 use stecs::prelude::*;
 
@@ -13,8 +12,7 @@ use crate::{
 };
 
 use std::{
-	sync::RwLock, 
-	thread
+	error::Error, sync::RwLock, thread
 };
 
 use macroquad::{
@@ -48,7 +46,7 @@ pub struct EnemyBehavior {
 	pub attack_index: usize,
 	pub attack_cooldown: f32,
 
-	pub err: Option<Box<EvalAltResult>>
+	pub err: Option<Box<dyn Error + Send + Sync>>
 }
 
 #[derive(PartialEq, Clone)]
@@ -101,7 +99,7 @@ pub fn handle_behavior(world: &mut World) {
 	let attacks = RwLock::new(&mut world.attacks);
 
 	thread::scope(|scope| {
-		for (obj, behavior) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior)) {
+		for (obj, behavior, sprite) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior, &mut sprite)) {
 			if obj.stunned > 0. { 
 				obj.stunned -= get_delta_time();
 
@@ -141,6 +139,7 @@ pub fn handle_behavior(world: &mut World) {
 							}, 
 							obj, 
 							&obj_player, 
+							sprite,
 							*attacks.write().unwrap(),
 							&world.current_map
 						);

@@ -4,12 +4,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
 	gameplay::draw::{
-		SCREEN_SCALE,
-		process::downscale, 
+		process::downscale, SCREEN_SCALE 
 	}, 
 	utils::{
-		resources::textures::access_image,
-		get_delta_time
+		error::EtherVoidError, get_delta_time, resources::textures::access_image
 	}
 };
 
@@ -91,15 +89,13 @@ impl Sprite {
 
 	pub fn update(&mut self, new_obj: Obj) {
 		if self.current_anim.is_some() {
-			let key = self.current_anim.as_ref().unwrap();
-			self.anims.get_mut(key).unwrap().update();
+			let anim = self.anims.get_mut(self.current_anim.as_ref().unwrap()).unwrap();
 
-			if self.anims.get(key).unwrap().anim_completed {
-				self.anims.get_mut(key).unwrap().reset();
-				self.current_anim = None
+			anim.update();
+
+			if self.rotation != Rotation::EightWay {
+				self.obj = new_obj;
 			}
-
-			self.obj = new_obj;
 			return
 		}
 
@@ -116,6 +112,25 @@ impl Sprite {
 		self.frames.anim_completed
 	}
 
+	pub fn set_new_anim(&mut self, key: String) -> Result<(), Box<EtherVoidError>> {
+		if !self.anims.contains_key(&key) {
+			return Err(Box::new(EtherVoidError::AnimNotFound(key)));
+		}
+
+		self.current_anim = Some(key);
+		
+		self.frames.reset();
+		for (_, anim) in self.anims.iter_mut() {
+			anim.reset();
+		}
+
+		Ok(())
+	}
+
+	pub fn set_default_anim(&mut self) {
+		self.current_anim = None
+	}
+
 	pub fn to_render_params(&self) -> (DynamicImage, Vec2, Option<DrawTextureParams>) {
 		let size = if self.rotation == Rotation::EightWay {
 			self.sprite.height() / 5
@@ -123,7 +138,11 @@ impl Sprite {
 			self.sprite.height()
 		};
 
-		let x_pos = self.frames.get_frame() * size;
+		let x_pos = if self.current_anim.is_some() {
+			self.anims.get(self.current_anim.as_ref().unwrap()).unwrap().get_frame()
+		} else {
+			self.frames.get_frame()
+		} * size;
 
 		let y_pos: u32 = if self.rotation != Rotation::EightWay {
 			0

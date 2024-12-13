@@ -1,17 +1,12 @@
+use std::error::Error;
+use rhai::Dynamic;
 use macroquad::math::Vec2;
 
 use crate::{
-	gameplay::{
+	cores::script::Script, gameplay::{
 		combat::AttackStructOf, 
-		ecs::obj::Obj
-	}, 
-	utils::get_delta_time,
-	cores::script::Script
-};
-
-use rhai::{
-	Dynamic, 
-	EvalAltResult
+		ecs::{obj::Obj, sprite::Sprite}
+	}, utils::get_delta_time
 };
 
 use stecs::{
@@ -24,12 +19,14 @@ pub fn script_behavior(
 	script: &mut Script, 
 	obj: &mut Obj, 
 	obj_player: &Obj,
+	sprite: &mut Sprite,
 	attacks: &mut AttackStructOf<VecFamily>,
 	current_map: &str
-) -> Result<bool, Box<EvalAltResult>> {
+) -> Result<bool, Box<dyn Error + Send + Sync>> {
 	// Values available in the scope
 	script.scope
 		.push("attacks", Vec::<Dynamic>::new())
+		.push("self_current_anim", String::new())
 		.push_constant("player_pos", obj_player.pos)
 		.push_constant("self_pos", obj.pos);
 
@@ -44,6 +41,12 @@ pub fn script_behavior(
 		attacks.insert( i.clone_cast() );
 	}
 
+	// Getting the new animation from the scope
+	let new_anim = script.scope.remove::<String>("self_current_anim");
+	if new_anim.is_some() && new_anim.as_ref().unwrap().len() > 0 {
+		sprite.set_new_anim(new_anim.unwrap())?;
+	}
+
 	// Removing constants from the scope, to prevent its length from growing over time 
 	let _ = script.scope.remove::<Dynamic>("player_pos");
 	let _ = script.scope.remove::<Dynamic>("self_pos");
@@ -52,6 +55,7 @@ pub fn script_behavior(
 	let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;
 
 	if new_pos == Vec2::new(999999., 999999.) {
+		sprite.set_default_anim();
 		script.scope.clear();
 		return Ok(true)
 	}
@@ -60,6 +64,7 @@ pub fn script_behavior(
 	obj.try_move(new_pos, current_map);
 
 	if obj.pos != obj.target {
+		sprite.set_default_anim();
 		script.scope.clear();
 		Ok(true)
 	} else {

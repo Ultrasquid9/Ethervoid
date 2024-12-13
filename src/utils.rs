@@ -11,6 +11,7 @@ use macroquad::{
 };
 
 pub mod config;
+pub mod error;
 pub mod resources;
 
 // Stores the delta time of the given frame. 
