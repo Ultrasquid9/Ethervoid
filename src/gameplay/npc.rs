@@ -1,4 +1,6 @@
+use ahash::HashMap;
 use macroquad::math::Vec2;
+use messages::Message;
 use stecs::prelude::*;
 
 use super::ecs::{
@@ -15,15 +17,11 @@ use super::ecs::{
 };
 
 use crate::cores::npctype::{
-	Message, 
 	NpcMovement, 
 	NpcType
 };
 
-use serde::{
-	Deserialize, 
-	Serialize
-};
+pub mod messages;
 
 #[derive(SplitFields)]
 pub struct Npc {
@@ -33,13 +31,6 @@ pub struct Npc {
 	
 	messages: Vec<Message>,
 	messages_cooldown: f32,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Dialogue {
-	name: String,
-	portrait: String,
-	text: String
 }
 
 impl Npc {
@@ -61,17 +52,12 @@ impl Npc {
 				32,
 				"default:entity/player/player_spritesheet_wip",
 				Rotation::EightWay,
-				Frames::new_entity()
+				Frames::new_entity(),
+				HashMap::default()
 			),
 
 			messages: npctype.messages.clone(),
 			messages_cooldown: 0.,
 		}
 	}
-}
-
-impl Dialogue {
-	/// Reading dialogue
-	/// Note: HIGHLY WIP
-	pub fn read(&self) { println!("{}", self.text) } 
 }

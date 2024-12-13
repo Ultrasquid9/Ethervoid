@@ -1,3 +1,4 @@
+use ahash::HashMap;
 use stecs::prelude::*;
 
 use super::ecs::{
@@ -72,7 +73,8 @@ impl Attack {
 				obj.size as u32, 
 				key, 
 				Rotation::Angle,
-				Frames::new_attack()
+				Frames::new_attack(),
+				HashMap::default()
 			)
 		}
 	}
@@ -93,7 +95,8 @@ impl Attack {
 				obj.size as u32,
 				key,
 				Rotation::Static,
-				Frames::new_attack()
+				Frames::new_attack(),
+				HashMap::default()
 			)
 		}
 	}
@@ -118,7 +121,8 @@ impl Attack {
 				obj.size as u32,
 				key,
 				Rotation::Static,
-				Frames::new_static()
+				Frames::new_static(),
+				HashMap::default()
 			)
 		}
 	}
@@ -139,7 +143,8 @@ impl Attack {
 				obj.size as u32,
 				"default:attacks/projectile-enemy",
 				Rotation::Static,
-				Frames::new_static()
+				Frames::new_static(),
+				HashMap::default()
 			)
 		}
 	}

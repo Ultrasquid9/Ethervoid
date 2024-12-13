@@ -3,6 +3,8 @@ use ahash::HashMap;
 use serde::Deserialize;
 use rayon::prelude::*;
 
+use crate::gameplay::ecs::sprite::Frames;
+
 use super::{
 	script::{
 		get_scripts, 
@@ -18,7 +20,8 @@ struct EnemyTypeBuilder {
 	size: f32,
 	sprite: String,
 	movement: String,
-	attacks: Vec<String>
+	attacks: Vec<String>,
+	anims: HashMap<String, Frames>
 }
 
 impl EnemyTypeBuilder {
@@ -26,9 +29,7 @@ impl EnemyTypeBuilder {
 		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
-	pub fn build(self) -> EnemyType {
-		let scripts = get_scripts();
-
+	pub fn build(self, scripts: &HashMap<String, ScriptBuilder>) -> EnemyType {
 		EnemyType {
 			max_health: self.max_health,
 			size: self.size,
@@ -37,7 +38,8 @@ impl EnemyTypeBuilder {
 			attacks: self.attacks
 				.par_iter()
 				.map(|attack| scripts.get(attack.as_str()).unwrap().clone())
-				.collect()
+				.collect(),
+			anims: self.anims
 		}
 	}
 }
@@ -49,14 +51,17 @@ pub struct EnemyType {
 	pub size: f32,
 	pub sprite: String,
 	pub movement: ScriptBuilder,
-	pub attacks: Vec<ScriptBuilder>
+	pub attacks: Vec<ScriptBuilder>,
+	pub anims: HashMap<String, Frames>
 }
 
 /// Provides a HashMap containing all EnemyTypes
 pub fn get_enemytypes() -> HashMap<String, EnemyType> {
+	let scripts = get_scripts();
+
 	let enemytypes: HashMap<String, EnemyType> = get_files("enemies".to_string())
 		.par_iter()
-		.map(|dir| (gen_name(dir), EnemyTypeBuilder::read(dir).build()))
+		.map(|dir| (gen_name(dir), EnemyTypeBuilder::read(dir).build(&scripts)))
 		.collect();
 
 	enemytypes

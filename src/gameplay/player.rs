@@ -1,3 +1,4 @@
+use ahash::HashMap;
 use stecs::prelude::*;
 
 use super::{	
@@ -85,7 +86,8 @@ impl Player {
 				32,
 				"default:entity/player/player_spritesheet_wip",
 				Rotation::EightWay,
-				Frames::new_entity()
+				Frames::new_entity(),
+				HashMap::default()
 			),
 
 			inventory: Inventory {

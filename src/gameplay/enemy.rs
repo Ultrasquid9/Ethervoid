@@ -50,7 +50,8 @@ impl Enemy {
 				enemytype.size as u32,
 				&enemytype.sprite, 
 				Rotation::EightWay,
-				Frames::new_entity()
+				Frames::new_entity(),
+				enemytype.anims.clone()
 			)
 		}
 	}

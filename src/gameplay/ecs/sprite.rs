@@ -1,4 +1,6 @@
+use ahash::HashMap;
 use imageproc::geometric_transformations::rotate_about_center;
+use serde::{Deserialize, Serialize};
 
 use crate::{
 	gameplay::draw::{
@@ -36,6 +38,9 @@ pub struct Sprite {
 
 	rotation: Rotation,
 	frames: Frames,
+
+	current_anim: Option<String>,
+	anims: HashMap<String, Frames>
 }
 
 #[derive(Clone, PartialEq)]
@@ -47,11 +52,14 @@ pub enum Rotation {
 }
 
 #[derive(Clone)]
+#[derive(Serialize, Deserialize)]
 pub struct Frames {
 	frame_order: Vec<u32>,
 	frame_time: f32,
 
+	#[serde(skip)]
 	anim_time: f32,
+	#[serde(skip)]
 	anim_completed: bool
 }
 
@@ -61,7 +69,8 @@ impl Sprite {
 		_size: u32, 
 		key: &str, 
 		rotation: Rotation, 
-		frames: Frames
+		frames: Frames,
+		anims: HashMap<String, Frames>
 	) -> Self {
 		Self {
 			sprite: if rotation == Rotation::Angle {
@@ -74,10 +83,26 @@ impl Sprite {
 
 			rotation,
 			frames,
+
+			current_anim: None,
+			anims
 		}
 	}
 
 	pub fn update(&mut self, new_obj: Obj) {
+		if self.current_anim.is_some() {
+			let key = self.current_anim.as_ref().unwrap();
+			self.anims.get_mut(key).unwrap().update();
+
+			if self.anims.get(key).unwrap().anim_completed {
+				self.anims.get_mut(key).unwrap().reset();
+				self.current_anim = None
+			}
+
+			self.obj = new_obj;
+			return
+		}
+
 		if self.obj.pos == new_obj.pos 
 		&& self.rotation == Rotation::EightWay {
 			self.frames.reset();
@@ -215,5 +240,16 @@ impl Frames {
 
 	fn get_frame(&self) -> u32 {
 		*self.frame_order.get((self.anim_time / self.frame_time) as usize).unwrap()
+	}
+}
+
+impl Default for Frames {
+	fn default() -> Self {
+		Self {
+			frame_order: vec![],
+			frame_time: 0.,
+			anim_time: 0.,
+			anim_completed: false
+		}
 	}
 }

@@ -6,5 +6,11 @@
 	attacks: [
 		"default:attacks/test",
 		"default:attacks/test2"
-	]
+	],
+	anims: {
+		"toss": (
+			frame_order: [0, 2],
+			frame_time: 12.
+		)
+	}
 )

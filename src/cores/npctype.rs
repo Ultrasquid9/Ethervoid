@@ -1,8 +1,8 @@
 use std::fs;
 use ahash::HashMap;
-use macroquad::prelude::rand;
-use crate::gameplay::npc::Dialogue;
 use rayon::prelude::*;
+
+use crate::gameplay::npc::messages::Message;
 
 use super::{
 	gen_name, 
@@ -13,14 +13,6 @@ use serde::{
 	Deserialize, 
 	Serialize
 };
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Message {
-	required_flags: Vec<String>,
-	unlocked_flags: Vec<String>,
-	probability: u8,
-	text: Vec<Dialogue>,
-}
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum NpcMovement {
@@ -39,24 +31,6 @@ pub struct NpcType {
 impl NpcType {
 	pub fn read(dir: &str) -> Self {
 		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
-	}
-}
-
-impl Message {
-	// TODO - Make
-	pub fn should_read(&self) -> bool {
-		if rand::gen_range(0, 255) > self.probability {
-			return false 
-		}
-
-		true
-	}
-
-	// TODO - Make 
-	pub fn read(&self) {
-		for i in &self.text {
-			i.read();
-		}
 	}
 }
 

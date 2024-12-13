@@ -44,10 +44,7 @@ impl MapBuilder {
 		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
 	}
 
-	pub fn build(self) -> Map {
-		let enemytypes = get_enemytypes();
-		let npctypes = get_npctypes();
-
+	pub fn build(self, enemytypes: &HashMap<String, EnemyType>, npctypes: &HashMap<String, NpcType>) -> Map {
 		Map {
 			walls: {
 				let mut walls = Vec::new();
@@ -94,9 +91,12 @@ impl MapBuilder {
 
 /// Provides a HashMap containing all Maps
 pub fn get_maps() -> HashMap<String, Map> {
+	let enemytypes = get_enemytypes();
+	let npctypes = get_npctypes();
+
 	let maps: HashMap<String, Map> = get_files("maps".to_string())
 		.par_iter()
-		.map(|dir| (gen_name(dir), MapBuilder::read(dir).build()))
+		.map(|dir| (gen_name(dir), MapBuilder::read(dir).build(&enemytypes, &npctypes)))
 		.collect();
 
 	maps
