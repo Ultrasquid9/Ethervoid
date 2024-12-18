@@ -1,4 +1,3 @@
-use std::fs;
 use ahash::HashMap;
 use macroquad::math::Vec2;
 use raylite::Barrier;
@@ -9,13 +8,10 @@ use super::{
 	enemytype::{
 		get_enemytypes, 
 		EnemyType
-	}, 
-	npctype::{
+	}, gen_name, get_files, npctype::{
 		get_npctypes, 
 		NpcType
-	},
-	gen_name, 
-	get_files
+	}, Readable
 };
 
 use crate::{
@@ -39,11 +35,9 @@ pub struct Map {
 	pub npcs: Vec<(NpcType, Vec2)>
 }
 
-impl MapBuilder {
-	pub fn read(dir: &str) -> Self {
-		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
-	}
+impl Readable for MapBuilder {}
 
+impl MapBuilder {
 	pub fn build(self, enemytypes: &HashMap<String, EnemyType>, npctypes: &HashMap<String, NpcType>) -> Map {
 		Map {
 			walls: {
@@ -96,7 +90,14 @@ pub fn get_maps() -> HashMap<String, Map> {
 
 	let maps: HashMap<String, Map> = get_files("maps".to_string())
 		.par_iter()
-		.map(|dir| (gen_name(dir), MapBuilder::read(dir).build(&enemytypes, &npctypes)))
+		.map(|dir| (gen_name(dir), MapBuilder::read(dir)))
+		.filter_map(|(str, mapbuilder)| {
+			if mapbuilder.is_err() {
+				None
+			} else {
+				Some((str, mapbuilder.unwrap().build(&enemytypes, &npctypes)))
+			}
+		})
 		.collect();
 
 	maps

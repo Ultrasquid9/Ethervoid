@@ -1,4 +1,3 @@
-use std::fs;
 use ahash::HashMap;
 use serde::Deserialize;
 use rayon::prelude::*;
@@ -11,7 +10,8 @@ use super::{
 		ScriptBuilder
 	}, 
 	gen_name, 
-	get_files
+	get_files, 
+	Readable
 };
 
 #[derive(Clone, Deserialize)]
@@ -24,11 +24,9 @@ struct EnemyTypeBuilder {
 	anims: HashMap<String, Frames>
 }
 
-impl EnemyTypeBuilder {
-	pub fn read(dir: &str) -> Self {
-		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
-	}
+impl Readable for EnemyTypeBuilder {}
 
+impl EnemyTypeBuilder {
 	pub fn build(self, scripts: &HashMap<String, ScriptBuilder>) -> EnemyType {
 		EnemyType {
 			max_health: self.max_health,
@@ -61,7 +59,14 @@ pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 
 	let enemytypes: HashMap<String, EnemyType> = get_files("enemies".to_string())
 		.par_iter()
-		.map(|dir| (gen_name(dir), EnemyTypeBuilder::read(dir).build(&scripts)))
+		.map(|dir| (gen_name(dir), EnemyTypeBuilder::read(dir)))
+		.filter_map(|(str, enemytypebuilder)| {
+			if enemytypebuilder.is_err() {
+				None
+			} else {
+				Some((str, enemytypebuilder.unwrap().build(&scripts)))
+			}
+		})
 		.collect();
 
 	enemytypes

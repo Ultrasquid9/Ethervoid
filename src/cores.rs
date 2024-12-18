@@ -1,3 +1,5 @@
+use ron::de::SpannedError;
+use serde::Deserialize;
 use walkdir::WalkDir;
 
 use std::fs::{
@@ -72,4 +74,11 @@ fn gen_name(dir: &str) -> String {
 
 		str
 	})
+}
+
+pub trait Readable {
+	fn read(dir: &str) -> Result<Self, SpannedError> where Self: Sized, Self: for<'a> Deserialize<'a> {
+		let file = fs::read_to_string(dir).unwrap();
+		ron::from_str(&file)
+	}
 }

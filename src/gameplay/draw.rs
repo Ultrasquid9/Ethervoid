@@ -105,14 +105,15 @@ async fn render_sprites(world: &mut World) {
 	});
 
 	// Processing sprites
-	let mut stuff = Vec::new();
+	let mut futures = Vec::new();
 
 	sprites.iter().for_each(|sprite| {
-		stuff.push(sprite.to_render_params());
+		futures.push(sprite.to_render_params());
 	});
 
 	// Rendering sprites
-	for (texture, pos, params) in stuff {
-		render_texture(&to_texture(texture), pos, params).await
+	for future in futures {
+		let (texture, pos, params) = future.await;
+		render_texture(&to_texture(texture), pos, params).await;
 	}
 }

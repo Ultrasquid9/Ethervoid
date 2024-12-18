@@ -1,5 +1,4 @@
 use super::SCREEN_SCALE;
-use futures::future::join_all;
 use raylite::Barrier;
 use macroquad::prelude::*;
 
@@ -17,7 +16,9 @@ pub async fn draw_tilemap(texture: Texture2D) {
 		}
 	}
 
-	join_all(futures).await;
+	for future in futures {
+		future.await;
+	}
 }
 
 /// Renders a texture based upon the screen scale

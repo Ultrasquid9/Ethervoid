@@ -131,7 +131,7 @@ impl Sprite {
 		self.current_anim = None
 	}
 
-	pub fn to_render_params(&self) -> (DynamicImage, Vec2, Option<DrawTextureParams>) {
+	pub async fn to_render_params(&self) -> (DynamicImage, Vec2, Option<DrawTextureParams>) {
 		let size = if self.rotation == Rotation::EightWay {
 			self.sprite.height() / 5
 		} else {

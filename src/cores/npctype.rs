@@ -1,4 +1,3 @@
-use std::fs;
 use ahash::HashMap;
 use rayon::prelude::*;
 
@@ -6,7 +5,7 @@ use crate::gameplay::npc::messages::Message;
 
 use super::{
 	gen_name, 
-	get_files
+	get_files, Readable
 };
 
 use serde::{
@@ -28,17 +27,20 @@ pub struct NpcType {
 	pub messages: Vec<Message>
 }
 
-impl NpcType {
-	pub fn read(dir: &str) -> Self {
-		ron::from_str(&fs::read_to_string(dir).unwrap()).unwrap()
-	}
-}
+impl Readable for NpcType {}
 
 /// Provides a HashMap containing all Npc data
 pub fn get_npctypes() -> HashMap<String, NpcType> {
 	let npcs: HashMap<String, NpcType> = get_files("npcs".to_string())
 		.par_iter()
 		.map(|dir| (gen_name(dir), NpcType::read(dir)))
+		.filter_map(|(str, npctype)| {
+			if npctype.is_err() {
+				None
+			} else {
+				Some((str, npctype.unwrap()))
+			}
+		})
 		.collect();
 
 	npcs
