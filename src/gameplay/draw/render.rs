@@ -1,24 +1,23 @@
-use super::SCREEN_SCALE;
 use raylite::Barrier;
 use macroquad::prelude::*;
 
+use super::{
+	SCREEN_SCALE,
+	to_texture
+};
+
 use crate::{
+	cores::map::Map, 
 	menu::FONT, 
 	utils::camera_scale
 };
 
-pub async fn draw_tilemap(texture: Texture2D) {
-	let mut futures = Vec::new();
-
-	for y in (0..screen_height() as isize).step_by(16 * SCREEN_SCALE as usize) {
-		for x in (0..screen_width() as isize).step_by(16 * SCREEN_SCALE as usize) {
-			futures.push(render_texture(&texture, Vec2::new(x as f32, y as f32), None));
-		}
-	}
-
-	for future in futures {
-		future.await;
-	}
+pub async fn draw_map(map: &Map) {
+	render_texture(
+		&to_texture(map.texture.clone()), 
+		vec2(0., 0.), 
+		None
+	).await;
 }
 
 /// Renders a texture based upon the screen scale

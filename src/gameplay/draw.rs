@@ -4,10 +4,7 @@ use stecs::prelude::*;
 use macroquad::prelude::*;
 
 use crate::utils::{
-	resources::{
-		maps::access_map, 
-		textures::access_image
-	},
+	resources::maps::access_map,
 	camera_scale
 };
 
@@ -21,9 +18,7 @@ use super::{
 };
 
 use render::{
-	draw_bar, 
-	draw_tilemap, 
-	render_text, render_texture
+	draw_bar, draw_map, render_text, render_texture
 };
 
 pub mod process;
@@ -46,7 +41,7 @@ pub async fn draw(world: &mut World) {
 		..Default::default()
 	});
 
-	draw_tilemap(to_texture(access_image("default:tiles/grass_test"))).await;
+	draw_map(&access_map(&world.current_map)).await;
 
 	for bar in access_map(&world.current_map).walls {
 		draw_bar(&bar);

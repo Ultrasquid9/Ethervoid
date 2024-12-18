@@ -16,5 +16,17 @@
 			dest: "default:test2"
 		)
 	],
-	npcs: []
+	npcs: [],
+
+	tilemap: (
+		keys: {
+			'A': "default:tiles/grass_test",
+			'B': "default:appl"
+		},
+		tiles: [
+			['A', 'A', 'A'],
+			['A', 'B', 'A'],
+			['A', 'A', 'A']
+		]
+	)
 )
