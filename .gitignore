@@ -1,2 +1,6 @@
 /target
 .buildconfig
+
+# Game log
+output.log
+output.log.old
