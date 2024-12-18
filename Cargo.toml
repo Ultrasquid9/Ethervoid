@@ -11,9 +11,9 @@ walkdir = "2.5"
 ahash = "0.8"
 rayon = "1.10"
 
-fern = "0.7"
+fern = { version = "0.7", features = ["colored"] }
 log = "0.4"
-humantime = "2.1" # Temporary maybe?
+jiff = "0.1"
 
 futures = { version = "0.3", default-features = false, features = ["executor"] }
 

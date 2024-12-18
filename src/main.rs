@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use fern::colors::ColoredLevelConfig;
 use gameplay::gameplay;
 use menu::menu;
 use macroquad::prelude::*;
@@ -17,25 +17,7 @@ pub enum State {
 
 #[macroquad::main("Ethervoid")]
 async fn main() {
-	// Removing old log
-	let _ = std::fs::rename("./output.log", "./output.log.old");
-
-	// Setting up the log 
-	fern::Dispatch::new()
-		.format(|out, message, record| {
-			out.finish(format_args!(
-				"[{} {} {}] {}",
-				humantime::format_rfc3339_seconds(SystemTime::now()),
-				record.level(),
-				record.target(),
-				message
-			))
-		})
-		.level(log::LevelFilter::Debug)
-		.chain(std::io::stdout())
-		.chain(fern::log_file("output.log").unwrap())
-		.apply()
-		.unwrap();
+	log();
 
 	let mut state = State::Menu;
 
@@ -48,4 +30,30 @@ async fn main() {
 
 		next_frame().await
 	}
+}
+
+fn log() {
+	// Renaming old log
+	let _ = std::fs::rename("./output.log", "./output.log.old");
+
+	// Coloring log messages
+	let colors = ColoredLevelConfig::new();
+
+	// Creating new log
+	fern::Dispatch::new()
+		.format(move |out, message, record| {
+			out.finish(format_args!(
+				"[{} {} {}] {}",
+				jiff::Zoned::now().round(jiff::Unit::Second).unwrap(),
+				colors.color(record.level()),
+				record.target(),
+				message
+			))
+		})
+		.level(log::LevelFilter::Warn)
+		.level_for("ethervoid", log::LevelFilter::Debug)
+		.chain(std::io::stdout())
+		.chain(fern::log_file("output.log").unwrap())
+		.apply()
+		.unwrap();
 }
