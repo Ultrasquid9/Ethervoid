@@ -1,7 +1,7 @@
 use fern::colors::ColoredLevelConfig;
 use gameplay::gameplay;
 use menu::menu;
-use macroquad::prelude::*;
+use self::prelude::*;
 
 mod cores;
 mod gameplay;
@@ -37,14 +37,15 @@ fn log() {
 	let _ = std::fs::rename("./output.log", "./output.log.old");
 
 	// Coloring log messages
-	let colors = ColoredLevelConfig::new();
+	let colors = ColoredLevelConfig::new()
+		.info(fern::colors::Color::Green);
 
 	// Creating new log
 	fern::Dispatch::new()
 		.format(move |out, message, record| {
 			out.finish(format_args!(
-				"[{} {} {}] {}",
-				jiff::Zoned::now().round(jiff::Unit::Second).unwrap(),
+				"[{}] [{}] [{}] {}",
+				jiff::Zoned::now().datetime().round(jiff::Unit::Millisecond).unwrap(),
 				colors.color(record.level()),
 				record.target(),
 				message
@@ -56,4 +57,20 @@ fn log() {
 		.chain(fern::log_file("output.log").unwrap())
 		.apply()
 		.unwrap();
+}
+
+pub mod prelude {
+	pub use macroquad::prelude::*;
+	pub use rayon::prelude::*;
+	pub use stecs::prelude::*;
+
+	pub use ahash::HashMap;
+
+	pub use log::{
+		trace,
+		info,
+		warn,
+		debug,
+		error
+	};
 }

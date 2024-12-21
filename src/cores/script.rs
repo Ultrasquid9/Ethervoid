@@ -1,8 +1,6 @@
 use std::fs;
 use ahash::HashMap;
 use serde::Deserialize;
-use macroquad::math::Vec2;
-use rayon::prelude::*;
 
 use crate::{
 	gameplay::{
@@ -12,7 +10,8 @@ use crate::{
 		}, 
 		ecs::obj::Obj
 	}, 
-	utils::get_delta_time
+	utils::get_delta_time,
+	prelude::*
 };
 
 use rhai::{

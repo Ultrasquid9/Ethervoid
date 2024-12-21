@@ -1,9 +1,5 @@
-use ahash::HashMap;
-use image::{DynamicImage, GenericImage};
-use macroquad::math::Vec2;
 use raylite::Barrier;
 use serde::Deserialize;
-use rayon::prelude::*;
 
 use super::{
 	enemytype::{
@@ -20,7 +16,13 @@ use crate::{
 	utils::{
 		resources::textures::access_image, 
 		vec2_to_tuple
-	}
+	},
+	prelude::*
+};
+
+use image::{
+	DynamicImage, 
+	GenericImage
 };
 
 #[derive(Deserialize)]
@@ -132,9 +134,10 @@ pub fn get_maps() -> HashMap<String, Map> {
 		.map(|dir| (gen_name(dir), MapBuilder::read(dir)))
 		.filter_map(|(str, mapbuilder)| {
 			if mapbuilder.is_err() {
-				println!("{}", mapbuilder.err().unwrap());
+				warn!("Map {} failed to load: {}", str, mapbuilder.err().unwrap());
 				None
 			} else {
+				info!("Map {} loaded!", str);
 				Some((str, mapbuilder.unwrap().build(&enemytypes, &npctypes)))
 			}
 		})

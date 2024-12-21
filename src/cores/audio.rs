@@ -1,7 +1,6 @@
 use std::sync::mpsc;
-use ahash::HashMap;
 use kira::sound::static_sound::StaticSoundData;
-use rayon::prelude::*;
+use crate::prelude::*;
 
 use super::{
 	gen_name, 
@@ -17,10 +16,18 @@ pub fn get_audio() -> HashMap<String, StaticSoundData> {
 	get_files("audio".to_string())
 		.par_iter()
 		.for_each(|dir| {
-			let Ok(sound) = StaticSoundData::from_file(dir)
-			else { return };
+			let name: String = gen_name(dir);
+			let sound = StaticSoundData::from_file(dir);
 
-			let _ = transciever.send((gen_name(dir), sound));
+			let Ok(sound) = sound
+			else { 
+				warn!("Audio {} failed to load: {}", name, sound.err().unwrap());
+				return 
+			};
+
+			info!("Audio {} loaded!", name);
+
+			let _ = transciever.send((name, sound));
 		});
 
 	drop(transciever);

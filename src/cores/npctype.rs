@@ -1,7 +1,7 @@
-use ahash::HashMap;
-use rayon::prelude::*;
-
-use crate::gameplay::npc::messages::Message;
+use crate::{
+	gameplay::npc::messages::Message,
+	prelude::*
+};
 
 use super::{
 	gen_name, 
@@ -36,8 +36,10 @@ pub fn get_npctypes() -> HashMap<String, NpcType> {
 		.map(|dir| (gen_name(dir), NpcType::read(dir)))
 		.filter_map(|(str, npctype)| {
 			if npctype.is_err() {
+				warn!("Npc {} failed to load: {}", str, npctype.err().unwrap());
 				None
 			} else {
+				info!("Npc {} loaded!", str);
 				Some((str, npctype.unwrap()))
 			}
 		})

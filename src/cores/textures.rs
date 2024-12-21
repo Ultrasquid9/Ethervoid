@@ -1,12 +1,11 @@
 use std::sync::mpsc;
-use ahash::HashMap;
+use crate::prelude::*;
 
 use imageproc::image::{
 	ColorType, 
 	DynamicImage, 
 	ImageReader
 };
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use super::{
 	gen_name, 
@@ -22,18 +21,21 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 	get_files("sprites".to_string())
 		.par_iter()
 		.for_each(|dir| {
+			let name: String = gen_name(dir);
 			let img = ImageReader::open(dir)
 				.unwrap()
 				.decode();
 
 			let Ok(img) = img 
 			else {
-				println!("{}", img.err().unwrap());
+				warn!("Texture {} failed to load: {}", name, img.err().unwrap());
 				return
 			};
 
+			info!("Texture {} loaded!", name);
+
 			let _ = transciever.send((
-				gen_name(dir), 
+				name, 
 				if img.color() == ColorType::Rgba8 {
 					img
 				} else {

@@ -4,3 +4,8 @@
 # Game log
 output.log
 output.log.old
+
+# Flamegraphs
+perf.data
+perf.data.old
+flamegraph.svg

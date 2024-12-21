@@ -1,8 +1,4 @@
-use ahash::HashMap;
 use serde::Deserialize;
-use rayon::prelude::*;
-
-use crate::gameplay::ecs::sprite::Frames;
 
 use super::{
 	script::{
@@ -12,6 +8,11 @@ use super::{
 	gen_name, 
 	get_files, 
 	Readable
+};
+
+use crate::{
+	gameplay::ecs::sprite::Frames,
+	prelude::*
 };
 
 #[derive(Clone, Deserialize)]
@@ -62,8 +63,10 @@ pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 		.map(|dir| (gen_name(dir), EnemyTypeBuilder::read(dir)))
 		.filter_map(|(str, enemytypebuilder)| {
 			if enemytypebuilder.is_err() {
+				warn!("EnemyType {} failed to load: {}", str, enemytypebuilder.err().unwrap());
 				None
 			} else {
+				info!("EnemyType {} loaded!", str);
 				Some((str, enemytypebuilder.unwrap().build(&scripts)))
 			}
 		})
