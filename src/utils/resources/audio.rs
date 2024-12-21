@@ -1,10 +1,7 @@
 use ahash::HashMap;
 use macroquad::rand;
-
-use std::sync::{
-	LazyLock, 
-	RwLock
-};
+use parking_lot::RwLock;
+use std::sync::LazyLock;
 
 use kira::{
 	manager::{
@@ -29,18 +26,18 @@ pub(super) fn create_sounds() {
 	let sounds = get_audio();
 
 	for (key, sound) in sounds {
-		SOUNDS.write().unwrap().insert(key, sound);
+		SOUNDS.write().insert(key, sound);
 	}
 }
 
 /// Cleans the Sounds HashMap
 pub(super) fn clean_sounds() {
-	SOUNDS.write().unwrap().clear();
+	SOUNDS.write().clear();
 }
 
 /// Plays the sound at the provided key
 pub fn play_sound(key: &str) {
-	MANAGER.write().unwrap().play(SOUNDS.read().unwrap().get(key).unwrap().clone()).unwrap();
+	MANAGER.write().play(SOUNDS.read().get(key).unwrap().clone()).unwrap();
 }
 
 /// Plays a random sound from the provided list of keys 

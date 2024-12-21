@@ -1,9 +1,6 @@
 use ahash::HashMap;
-
-use std::sync::{
-	LazyLock, 
-	RwLock
-};
+use parking_lot::RwLock;
+use std::sync::LazyLock;
 
 use crate::cores::map::{
 	get_maps,
@@ -21,16 +18,16 @@ pub(super) fn create_maps() {
 	let maps = get_maps();
 
 	for (key, map) in maps {
-		MAPS.write().unwrap().insert(key, map);
+		MAPS.write().insert(key, map);
 	}
 }
 
 /// Cleans the map HashMap
 pub(super) fn clean_maps() {
-	MAPS.write().unwrap().clear()
+	MAPS.write().clear()
 }
 
 /// Gets the map at the provided key
 pub fn access_map(key: &str) -> Map {
-	MAPS.read().unwrap().get(key).unwrap().clone()
+	MAPS.read().get(key).unwrap().clone()
 }

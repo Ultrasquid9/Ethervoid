@@ -9,6 +9,7 @@ stecs = "0.1"
 raylite = "0.1"
 walkdir = "2.5"
 ahash = "0.8"
+parking_lot = "0.12"
 rayon = "1.10"
 
 fern = { version = "0.7", features = ["colored"] }
