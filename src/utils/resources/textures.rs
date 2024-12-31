@@ -1,6 +1,7 @@
 use std::sync::LazyLock;
 use ahash::HashMap;
 use image::DynamicImage;
+use log::error;
 use parking_lot::RwLock;
 use crate::cores::textures::get_textures; 
 
@@ -26,5 +27,12 @@ pub(super) fn clean_textures() {
 
 /// Gets the image at the provided key
 pub fn access_image(key: &str) -> DynamicImage {
-	return TEXTURES.read().get(key).unwrap().clone()
+	let thing = TEXTURES.read();
+	let Some(texture) = thing.get(key) 
+	else {
+		error!("Texture {} not found", key);
+		panic!("Texture {} not found", key)
+	};
+
+	return texture.clone()
 }

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use macroquad::math::Vec2;
 
 use raylite::{
@@ -42,6 +44,17 @@ impl Direction {
 		}
 
 		false
+	}
+}
+
+impl Display for Direction {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::North => write!(f, "North"),
+			Self::South => write!(f, "South"),
+			Self::East => write!(f, "East"),
+			Self::West => write!(f, "West")
+		}
 	}
 }
 
@@ -101,7 +114,14 @@ impl Door {
 			if i.dest != world.current_map { continue }
 
 			if !i.direction.is_opposing(&self.direction) {
-				panic!("Door in {} does not match direction of door in {}", world.current_map, self.dest)
+				log::error!(
+					"Door in {} does not match expected direction of door in {}\nDirection of Self: {} \nDirection of other: {}", 
+					world.current_map, 
+					self.dest, 
+					self.direction, 
+					i.direction
+				);
+				return
 			}
 
 			new_pos += match self.direction {

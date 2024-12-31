@@ -1,4 +1,5 @@
 use ahash::HashMap;
+use log::warn;
 use macroquad::rand;
 use parking_lot::RwLock;
 use std::sync::LazyLock;
@@ -37,7 +38,15 @@ pub(super) fn clean_sounds() {
 
 /// Plays the sound at the provided key
 pub fn play_sound(key: &str) {
-	MANAGER.write().play(SOUNDS.read().get(key).unwrap().clone()).unwrap();
+	let thing = SOUNDS.read();
+
+	let Some(sound) = thing.get(key)
+	else {
+		warn!("Sound {} not found", key);
+		return;
+	};
+
+	MANAGER.write().play(sound.clone()).unwrap();
 }
 
 /// Plays a random sound from the provided list of keys 
