@@ -37,6 +37,9 @@ pub struct Sprite {
 	rotation: Rotation,
 	frames: Frames,
 
+	shake: f32,
+	shaking: bool,
+
 	current_anim: Option<String>,
 	anims: HashMap<String, Frames>
 }
@@ -82,12 +85,25 @@ impl Sprite {
 			rotation,
 			frames,
 
+			shake: 0.,
+			shaking: false,
+
 			current_anim: None,
 			anims
 		}
 	}
 
 	pub fn update(&mut self, new_obj: Obj) {
+		if self.shaking {
+			self.shake += get_delta_time();
+
+			if self.shake >= 24. {
+				self.shaking = false;
+			}
+		} else {
+			self.shake = 0.;
+		}
+
 		if self.current_anim.is_some() {
 			let anim = self.anims.get_mut(self.current_anim.as_ref().unwrap()).unwrap();
 
@@ -106,6 +122,10 @@ impl Sprite {
 			self.frames.update(); 
 			self.obj = new_obj;
 		}
+	}
+
+	pub fn shake(&mut self) {
+		self.shaking = true;
 	}
 
 	pub fn anim_completed(&self) -> bool {
@@ -138,7 +158,7 @@ impl Sprite {
 			self.sprite.height()
 		};
 
-		let x_pos = if self.current_anim.is_some() {
+		let mut x_pos = if self.current_anim.is_some() {
 			self.anims.get(self.current_anim.as_ref().unwrap()).unwrap().get_frame()
 		} else {
 			self.frames.get_frame()
@@ -163,6 +183,10 @@ impl Sprite {
 				size * 4       // Up
 			}
 		};
+
+		if self.shaking {
+			x_pos += (self.shake.sin() * 3.) as u32;
+		}
 
 		return(
 			if self.rotation == Rotation::Angle {

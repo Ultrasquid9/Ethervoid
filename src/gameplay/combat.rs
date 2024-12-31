@@ -184,19 +184,20 @@ pub fn handle_combat(world: &mut World) {
 		};
 
 		match atk.owner {
-			Owner::Player => for (obj, hp) in query!(world.enemies, (&mut obj, &mut health)) {
-				func(obj, hp, &mut atk)
+			Owner::Player => for (obj, hp, sprite) in query!(world.enemies, (&mut obj, &mut health, &mut sprite)) {
+				func(obj, hp, sprite, &mut atk)
 			},
-			Owner::Enemy => for (obj, hp) in query!(world.player, (&mut obj, &mut health)) {
-				func(obj, hp, &mut atk)
+			Owner::Enemy => for (obj, hp, sprite) in query!(world.player, (&mut obj, &mut health, &mut sprite)) {
+				func(obj, hp, sprite, &mut atk)
 			},
 		}
 	}
 }
 
-fn attack_physical(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+fn attack_physical(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
 	if *atk.lifetime >= 0. && obj.is_touching(atk.obj) {
 		hp.damage(*atk.damage);
+		sprite.shake();
 
 		if *atk.is_parried {
 			obj.stunned = 40.
@@ -204,7 +205,7 @@ fn attack_physical(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 	}
 }
 
-fn attack_burst(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+fn attack_burst(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
 	// Returns the attack but with double the size
 	let double_size = |obj: &Obj| {
 		let mut to_return = *obj;
@@ -214,25 +215,30 @@ fn attack_burst(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
 	};
 
 	if *atk.lifetime >= 0. && obj.is_touching(&double_size(atk.obj)) {
+		sprite.shake();
 		hp.damage(*atk.damage * (obj.pos.distance(atk.obj.pos) / (atk.obj.size * 2.)));
 	}
 }
 
-fn attack_projectile(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+fn attack_projectile(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
 	if obj.is_touching(atk.obj) {
+		sprite.shake();
 		hp.damage(*atk.damage);
 		*atk.lifetime = 0.;
 	}
 }
 
-fn attack_hitscan(obj: &mut Obj, hp: &mut Health, atk: &mut AttackRefMut) {
+fn attack_hitscan(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
 	if cast_wide(
 		&Ray{
 			position: vec2_to_tuple(&atk.obj.pos), 
 			end_position: vec2_to_tuple(&atk.obj.target)
 		}, 
 		&obj.to_barriers()
-	).is_ok() { hp.damage(*atk.damage) }
+	).is_ok() { 
+		sprite.shake();
+		hp.damage(*atk.damage) 
+	}
 }
 
 /// Attempts to parry attacks 
