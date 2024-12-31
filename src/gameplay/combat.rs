@@ -279,7 +279,7 @@ fn try_parry(world: &mut World) {
 			// 
 			// I know its safe, but the borrow checker shouldn't.
 
-			world.hitstop = 10.;
+			world.hitstop = 16.;
 
 			let atk_1 = &mut world.attacks.get_mut(*i).unwrap();
 			*atk_1.lifetime += get_delta_time();

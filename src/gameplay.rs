@@ -1,4 +1,4 @@
-use draw::draw;
+use draw::{draw, render::darken_screen};
 use stecs::prelude::*;
 use macroquad::prelude::*;
 
@@ -64,6 +64,7 @@ pub async fn gameplay() -> State {
 		if world.hitstop > 0. {
 			world.hitstop -= get_delta_time();
 
+			darken_screen();
 			next_frame().await;
 			continue;
 		}

@@ -69,3 +69,13 @@ pub fn draw_bar(bar: &Barrier) {
 		BLUE
 	);
 }
+
+pub fn darken_screen() {
+	draw_rectangle(
+		0., 
+		0., 
+		screen_width(), 
+		screen_height(), 
+		Color::new(0., 0., 0., 0.25)
+	);
+}
