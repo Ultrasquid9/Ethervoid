@@ -24,7 +24,7 @@ pub struct NpcType {
 	pub name: String,
 	pub sprite: String,
 	pub movement: NpcMovement,
-	pub messages: Vec<Message>
+	pub messages: Box<[Message]>
 }
 
 impl Readable for NpcType {}

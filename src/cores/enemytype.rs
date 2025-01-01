@@ -50,7 +50,7 @@ pub struct EnemyType {
 	pub size: f32,
 	pub sprite: String,
 	pub movement: ScriptBuilder,
-	pub attacks: Vec<ScriptBuilder>,
+	pub attacks: Box<[ScriptBuilder]>,
 	pub anims: HashMap<String, Frames>
 }
 

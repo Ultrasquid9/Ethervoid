@@ -85,8 +85,8 @@ impl Obj {
 	}
 
 	/// Converts the Obj into two barriers, a horizontal and a vertical one 
-	pub fn to_barriers(self) -> Vec<Barrier> {
-		vec![
+	pub fn to_barriers(self) -> [Barrier; 2] {
+		[
 			Barrier {
 				positions: (
 					(self.pos.x + self.size, self.pos.y),
@@ -115,7 +115,7 @@ impl Obj {
 			&access_map(current_map).doors
 				.par_iter()
 				.map(|door| door.to_barrier())
-				.collect()
+				.collect::<Vec<Barrier>>()
 		).is_ok() { return }
 
 		let mut try_slope_movement = false;

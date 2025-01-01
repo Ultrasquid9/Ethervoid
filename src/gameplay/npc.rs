@@ -29,7 +29,7 @@ pub struct Npc {
 	behavior: Behavior,
 	sprite: Sprite,
 	
-	messages: Vec<Message>,
+	messages: Box<[Message]>,
 	messages_cooldown: f32,
 }
 

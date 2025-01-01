@@ -31,7 +31,7 @@ pub fn script_behavior(
 		.push_constant("self_pos", obj.pos);
 
 	// Executing the script
-	let new_pos =  script.engine.eval_with_scope::<Vec2>(&mut script.scope, &script.script)?;
+	let new_pos = script.engine.eval_ast_with_scope::<Vec2>(&mut script.scope, &script.script)?;
 
 	// Getting attacks out of the scope
 	let new_attacks = script.scope

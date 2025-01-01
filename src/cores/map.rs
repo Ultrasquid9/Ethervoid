@@ -42,10 +42,10 @@ struct MapTexture {
 
 #[derive(Clone)]
 pub struct Map {
-	pub walls: Vec<Barrier>,
-	pub doors: Vec<Door>,
-	pub enemies: Vec<(EnemyType, Vec2)>,
-	pub npcs: Vec<(NpcType, Vec2)>,
+	pub walls: Box<[Barrier]>,
+	pub doors: Box<[Door]>,
+	pub enemies: Box<[(EnemyType, Vec2)]>,
+	pub npcs: Box<[(NpcType, Vec2)]>,
 	pub texture: DynamicImage
 }
 
@@ -74,9 +74,9 @@ impl MapBuilder {
 					}
 				}
 
-				walls
+				walls.into_boxed_slice()
 			},
-			doors: self.doors,
+			doors: self.doors.into_boxed_slice(),
 
 			enemies: self.enemies
 				.par_iter()

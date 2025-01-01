@@ -41,7 +41,7 @@ pub struct PlayerBehavior {
 
 pub struct EnemyBehavior {
 	pub movement: Script,
-	pub attacks: Vec<Script>,
+	pub attacks: Box<[Script]>,
 
 	pub attack_index: usize,
 	pub attack_cooldown: f32,
@@ -72,8 +72,7 @@ impl EnemyBehavior {
 
 impl PartialEq for EnemyBehavior {
 	fn eq(&self, other: &Self) -> bool {
-		self.movement == other.movement
-		&& self.attacks == other.attacks
+		self.attacks.len() == other.attacks.len()
 		&& self.attack_index == other.attack_index
 		&& self.attack_cooldown == other.attack_cooldown
 	}

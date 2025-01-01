@@ -20,7 +20,7 @@ use rhai::{
 	EvalAltResult, 
 	FnPtr, 
 	NativeCallContext, 
-	Scope
+	Scope, AST
 };
 
 use super::{
@@ -37,7 +37,7 @@ A behavior that can be configured via a script.
 The lifetime annotation allows the compiler to know that the Script lives as long as its owner does
  */
 pub struct Script {
-	pub script: String,
+	pub script: AST,
 	pub scope: Scope<'static>,
 	pub engine: Engine
 }
@@ -51,18 +51,20 @@ impl ScriptBuilder {
 
 	/// Creates all the neccessary components for the script 
 	pub fn build(self) -> Script {
+		let engine = init_engine();
+		
 		Script {
-			script: self.0,
+			script: engine.compile(self.0).unwrap(),
 			scope: Scope::new(),
 			engine: init_engine()
 		}
 	}
 }
-
+/* 
 impl PartialEq for Script {
 	fn eq(&self, other: &Self) -> bool { self.script == other.script }
 }
-
+ */
 impl Clone for Script {
 	fn clone(&self) -> Self {
 		Self {
