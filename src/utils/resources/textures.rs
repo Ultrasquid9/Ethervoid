@@ -1,9 +1,10 @@
 use std::sync::LazyLock;
 use ahash::HashMap;
 use image::DynamicImage;
+use imageproc::rgba_image;
 use log::error;
 use parking_lot::RwLock;
-use crate::cores::textures::get_textures; 
+use crate::{cores::textures::get_textures, gameplay::draw::process::downscale}; 
 
 /*
  *	Textures
@@ -31,7 +32,13 @@ pub fn access_image(key: &str) -> DynamicImage {
 	let Some(texture) = thing.get(key) 
 	else {
 		error!("Texture {} not found", key);
-		panic!("Texture {} not found", key)
+		return downscale(
+			DynamicImage::ImageRgba8(rgba_image!(
+				[0,0,0,255],[255,0,255,255];
+				[255,0,255,255],[0,0,0,255]
+			)), 
+			16
+		)
 	};
 
 	return texture.clone()

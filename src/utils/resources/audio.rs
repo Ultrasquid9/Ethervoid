@@ -1,5 +1,5 @@
 use ahash::HashMap;
-use log::warn;
+use log::error;
 use macroquad::rand;
 use parking_lot::RwLock;
 use std::sync::LazyLock;
@@ -42,7 +42,7 @@ pub fn play_sound(key: &str) {
 
 	let Some(sound) = thing.get(key)
 	else {
-		warn!("Sound {} not found", key);
+		error!("Sound {} not found", key);
 		return;
 	};
 

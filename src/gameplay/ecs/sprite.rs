@@ -1,6 +1,4 @@
 use ahash::HashMap;
-use imageproc::geometric_transformations::rotate_about_center;
-use serde::{Deserialize, Serialize};
 
 use crate::{
 	gameplay::draw::{
@@ -19,14 +17,22 @@ use macroquad::{
 	texture::DrawTextureParams
 };
 
+use imageproc::{
+	image::{
+		Rgba, 
+		DynamicImage
+	},
+	geometric_transformations::rotate_about_center
+};
+
+use serde::{
+	Deserialize, 
+	Serialize
+};
+
 use super::obj::{
 	Axis, 
 	Obj
-};
-
-use image::{
-	DynamicImage, 
-	Rgba
 };
 
 #[derive(Clone)]
@@ -37,8 +43,7 @@ pub struct Sprite {
 	rotation: Rotation,
 	frames: Frames,
 
-	shake: f32,
-	shaking: bool,
+	shaking: f32,
 
 	current_anim: Option<String>,
 	anims: HashMap<String, Frames>
@@ -85,8 +90,7 @@ impl Sprite {
 			rotation,
 			frames,
 
-			shake: 0.,
-			shaking: false,
+			shaking: 0.,
 
 			current_anim: None,
 			anims
@@ -94,14 +98,8 @@ impl Sprite {
 	}
 
 	pub fn update(&mut self, new_obj: Obj) {
-		if self.shaking {
-			self.shake += get_delta_time();
-
-			if self.shake >= 24. {
-				self.shaking = false;
-			}
-		} else {
-			self.shake = 0.;
+		if self.shaking > 0. {
+			self.shaking -= get_delta_time();
 		}
 
 		if self.current_anim.is_some() {
@@ -125,7 +123,7 @@ impl Sprite {
 	}
 
 	pub fn shake(&mut self) {
-		self.shaking = true;
+		self.shaking = 20.;
 	}
 
 	pub fn anim_completed(&self) -> bool {
@@ -164,7 +162,7 @@ impl Sprite {
 			self.frames.get_frame()
 		} * size;
 
-		let y_pos: u32 = if self.rotation != Rotation::EightWay {
+		let mut y_pos = if self.rotation != Rotation::EightWay {
 			0
 		} else {
 			// There is definitely a far better way to do this
@@ -184,9 +182,12 @@ impl Sprite {
 			}
 		};
 
-		if self.shaking {
-			x_pos += (self.shake.sin() * 3.) as u32;
+		if self.shaking > 0. {
+			x_pos += (self.shaking.sin() * 3.) as u32;
 		}
+
+		x_pos = x_pos.clamp(0, self.sprite.width() - 1);
+		y_pos = y_pos.clamp(0, self.sprite.height() - 1);
 
 		return(
 			if self.rotation == Rotation::Angle {
