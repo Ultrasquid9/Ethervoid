@@ -1,7 +1,11 @@
 use fern::colors::ColoredLevelConfig;
 use gameplay::gameplay;
-use menu::menu;
 use self::prelude::*;
+
+use menu::{
+	menu, 
+	ui::init_ui
+};
 
 mod cores;
 mod gameplay;
@@ -18,6 +22,7 @@ pub enum State {
 #[macroquad::main("Ethervoid")]
 async fn main() {
 	log();
+	init_ui();
 
 	let mut state = State::Menu;
 

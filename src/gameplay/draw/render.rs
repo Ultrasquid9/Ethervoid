@@ -8,7 +8,6 @@ use super::{
 
 use crate::{
 	cores::map::Map, 
-	menu::FONT, 
 	utils::camera_scale
 };
 
@@ -45,7 +44,6 @@ pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawT
 /// Renders text 
 pub async fn render_text(string: &str, pos: Vec2, color: Color) {
 	draw_text_ex(string, pos.x, pos.y, TextParams {
-		font: Some(&FONT),
 		font_size: camera_scale() as u16 / 12,
 		color,
 
