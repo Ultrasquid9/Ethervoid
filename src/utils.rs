@@ -1,4 +1,4 @@
-use std::sync::RwLock;
+use parking_lot::RwLock;
 
 use macroquad::{
 	window::{
@@ -38,12 +38,12 @@ Gets the current delta time, and stores it.
 This is done because Macroquad's `get_frame_time()` function panics in multithreaded scenarios.
  */
 pub fn update_delta_time() {
-	*DELTA_TIME.write().unwrap() = get_frame_time() * 100. * (2./3.)
+	*DELTA_TIME.write() = get_frame_time() * 100. * (2./3.)
 }
 
 /// Gets the delta time
 pub fn get_delta_time() -> f32 {
-	*DELTA_TIME.read().unwrap()
+	*DELTA_TIME.read()
 }
 
 /// Gets the scale that the camera should be rendered at

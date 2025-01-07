@@ -43,10 +43,10 @@ pub async fn draw(world: &mut World) {
 
 	draw_map(&access_map(&world.current_map)).await;
 
-	for bar in access_map(&world.current_map).walls {
+	for bar in access_map(&world.current_map).walls.iter() {
 		draw_bar(&bar);
 	}
-	for bar in access_map(&world.current_map).doors {
+	for bar in access_map(&world.current_map).doors.iter() {
 		draw_bar(&bar.to_barrier());
 	}
 

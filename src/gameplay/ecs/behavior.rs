@@ -1,4 +1,5 @@
 use super::World;
+use parking_lot::RwLock;
 use player::player_behavior;
 use script::script_behavior;
 use stecs::prelude::*;
@@ -12,7 +13,8 @@ use crate::{
 };
 
 use std::{
-	error::Error, sync::RwLock, thread
+	error::Error, 
+	thread
 };
 
 use macroquad::{
@@ -139,7 +141,7 @@ pub fn handle_behavior(world: &mut World) {
 							obj, 
 							&obj_player, 
 							sprite,
-							*attacks.write().unwrap(),
+							*attacks.write(),
 							&world.current_map
 						);
 
@@ -180,7 +182,7 @@ pub fn handle_behavior(world: &mut World) {
 		}
 	});
 
-	for door in access_map(&world.current_map).doors {
+	for door in access_map(&world.current_map).doors.clone() {
 		door.try_change_map(world);
 	}
 }

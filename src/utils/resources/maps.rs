@@ -28,6 +28,8 @@ pub(super) fn clean_maps() {
 }
 
 /// Gets the map at the provided key
-pub fn access_map(key: &str) -> Map {
-	MAPS.read().get(key).unwrap().clone()
+pub fn access_map(key: &str) -> &Map {
+	// Raw pointer fuckery is here to allow returning a reference 
+	// This is an entirely pointless optimization, I just did it because I wanted to 
+	unsafe { (*MAPS.data_ptr()).get(key).unwrap() }
 }

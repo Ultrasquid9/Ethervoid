@@ -1,4 +1,5 @@
 use macroquad::math::Vec2;
+use parking_lot::RwLock;
 use rayon::prelude::*;
 
 use raylite::{
@@ -14,10 +15,7 @@ use crate::utils::{
 	vec2_to_tuple
 };
 
-use std::sync::{
-	LazyLock, 
-	RwLock
-};
+use std::sync::LazyLock;
 
 // For keeping track of the recursion in `try_move`
 static DEPTH: LazyLock<RwLock<u8>> = LazyLock::new(|| RwLock::new(0));
@@ -104,7 +102,7 @@ impl Obj {
 
 	/// Attempts to move the Obj to its current target
 	pub fn try_move(&mut self, new_pos: Vec2, current_map: &str) {
-		let barriers = access_map(current_map).walls;
+		let map = access_map(current_map);
 		
 		// Instantly returns if about to hit a door 
  		if cast_wide(
@@ -112,7 +110,7 @@ impl Obj {
 				position: vec2_to_tuple(&self.pos),
 				end_position: vec2_to_tuple(&self.target)
 			},
-			&access_map(current_map).doors
+			&map.doors
 				.par_iter()
 				.map(|door| door.to_barrier())
 				.collect::<Vec<Barrier>>()
@@ -125,7 +123,7 @@ impl Obj {
 				position: (self.pos.x, self.pos.y),
 				end_position: (new_pos.x, self.pos.y)
 			}, 
-			&barriers
+			&map.walls
 		) {
 			Ok(_) => try_slope_movement = true,
 			_ => self.pos.x = new_pos.x
@@ -136,7 +134,7 @@ impl Obj {
 				position: (self.pos.x, self.pos.y),
 				end_position: (self.pos.x, new_pos.y)
 			}, 
-			&barriers
+			&map.walls
 		) {
 			Ok(_) => try_slope_movement = true,
 			_ => self.pos.y = new_pos.y
@@ -146,11 +144,11 @@ impl Obj {
 		if !try_slope_movement { return }
 
 		// Checking recursion
-		if *DEPTH.read().unwrap() > 0 {
-			*DEPTH.write().unwrap() = 0;
+		if *DEPTH.read() > 0 {
+			*DEPTH.write() = 0;
 			return 
 		} else {
-			*DEPTH.write().unwrap() += 1
+			*DEPTH.write() += 1
 		}
 
 		let mut wall_to_check = Barrier {
@@ -159,7 +157,7 @@ impl Obj {
 			positions: ((0., 0.), (0., 0.)) 
 		};
 
-		for i in barriers {
+		for i in map.walls.iter() {
 			if cast(
 				&Ray {
 					position: (self.pos.x, self.pos.y),
@@ -167,7 +165,7 @@ impl Obj {
 				}, 
 				&i
 			).is_ok() {
-				wall_to_check = i;
+				wall_to_check = *i;
 				break
 			}
 		}
