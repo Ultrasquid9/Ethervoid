@@ -17,19 +17,16 @@ pub mod resources;
 // Stores the delta time of the given frame. 
 static DELTA_TIME: RwLock<f32> = RwLock::new(0.);
 
-/// Converts inputted Vec2 into a tuple of f32
-pub fn vec2_to_tuple(vec: &Vec2) -> (f32, f32) {
-	(vec.x, vec.y)
-}
-
-/// Converts the inputted tuple of f32 into a Vec2
-pub fn tuple_to_vec2(tup: (f32, f32)) -> Vec2 {
-	Vec2::new(tup.0, tup.1)
+pub fn point_to_vec2(point: std::boxed::Box<(dyn raywoke::point::Point + 'static)>) -> Vec2 {
+	let (x, y) = (point.x(), point.y());
+	Vec2::new(x, y)
 }
 
 /// Gets the current position of the mouse
 pub fn get_mouse_pos() -> Vec2 {
-	tuple_to_vec2(mouse_position()) - Vec2::new(screen_width() / 2., screen_height() / 2.)
+	let (x, y) = mouse_position();
+	
+	Vec2::new(x, y) - Vec2::new(screen_width() / 2., screen_height() / 2.)
 }
 
 /**

@@ -1,22 +1,23 @@
-use raylite::Barrier;
+use raywoke::Barrier;
 use serde::Deserialize;
 
 use super::{
 	enemytype::{
 		get_enemytypes, 
 		EnemyType
-	}, gen_name, get_files, npctype::{
+	}, 
+	npctype::{
 		get_npctypes, 
 		NpcType
-	}, Readable
+	},
+	gen_name, 
+	get_files, 
+	Readable
 };
 
 use crate::{
 	gameplay::doors::Door, 
-	utils::{
-		resources::textures::access_image, 
-		vec2_to_tuple
-	},
+	utils::resources::textures::access_image,
 	prelude::*
 };
 
@@ -44,7 +45,7 @@ struct MapTexture {
 pub struct Map {
 	pub walls: Box<[Barrier]>,
 	pub doors: Box<[Door]>,
-	pub enemies: Box<[(EnemyType, Vec2)]>,
+	pub enemies: Box<[(EnemyType, macroquad::math::Vec2)]>,
 	pub npcs: Box<[(NpcType, Vec2)]>,
 	pub texture: DynamicImage
 }
@@ -59,18 +60,16 @@ impl MapBuilder {
 
 				for point in 0..self.points.len() {
 					match self.points.get(point + 1) {
-						Some(_) => walls.push(Barrier {
-							positions: (vec2_to_tuple(
-								self.points.get(point).unwrap()), 
-								vec2_to_tuple(self.points.get(point + 1).unwrap())
+						Some(_) => walls.push(Barrier::new(
+								self.points.get(point).unwrap().clone(), 
+								self.points.get(point + 1).unwrap().clone()
 							)
-						}),
-						None => walls.push(Barrier {
-							positions: (
-								vec2_to_tuple(self.points.get(point).unwrap()), 
-								(vec2_to_tuple(self.points.first().unwrap()))
+						),
+						None => walls.push(Barrier::new(
+								self.points.get(point).unwrap().clone(), 
+								self.points.first().unwrap().clone()
 							)
-						})
+						)
 					}
 				}
 

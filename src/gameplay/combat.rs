@@ -1,5 +1,6 @@
 use ahash::HashMap;
 use stecs::prelude::*;
+use raywoke::prelude::*;
 
 use super::ecs::{
 	sprite::{
@@ -14,13 +15,7 @@ use super::ecs::{
 
 use crate::utils::{
 	get_delta_time, 
-	get_mouse_pos, 
-	vec2_to_tuple
-};
-
-use raylite::{
-	cast_wide, 
-	Ray
+	get_mouse_pos
 };
 
 use rhai::{
@@ -230,10 +225,10 @@ fn attack_projectile(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &
 
 fn attack_hitscan(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
 	if cast_wide(
-		&Ray{
-			position: vec2_to_tuple(&atk.obj.pos), 
-			end_position: vec2_to_tuple(&atk.obj.target)
-		}, 
+		&Ray::new(
+			atk.obj.pos, 
+			atk.obj.target
+		),
 		&obj.to_barriers()
 	).is_ok() { 
 		sprite.shake();

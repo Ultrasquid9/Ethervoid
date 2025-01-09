@@ -1,4 +1,4 @@
-use raylite::Barrier;
+use raywoke::Barrier;
 use macroquad::prelude::*;
 
 use super::{
@@ -59,11 +59,11 @@ pub fn pixel_offset(base: f32) -> f32 {
 /// Probably temporary, may remain for debug
 pub fn draw_bar(bar: &Barrier) {
 	draw_line(
-		bar.positions.0.0, 
-		bar.positions.0.1, 
-		bar.positions.1.0, 
-		bar.positions.1.1, 
-		6., 
+		bar.0.x(),
+		bar.0.y(),
+		bar.1.x(),
+		bar.1.y(),
+		6.,
 		BLUE
 	);
 }

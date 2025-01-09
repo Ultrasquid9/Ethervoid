@@ -1,18 +1,11 @@
 use macroquad::math::Vec2;
 use parking_lot::RwLock;
 use rayon::prelude::*;
-
-use raylite::{
-	cast, 
-	cast_wide, 
-	Barrier, 
-	Ray
-};
+use raywoke::prelude::*;
 
 use crate::utils::{
-	resources::maps::access_map, 
-	tuple_to_vec2, 
-	vec2_to_tuple
+	point_to_vec2, 
+	resources::maps::access_map
 };
 
 use std::sync::LazyLock;
@@ -85,18 +78,14 @@ impl Obj {
 	/// Converts the Obj into two barriers, a horizontal and a vertical one 
 	pub fn to_barriers(self) -> [Barrier; 2] {
 		[
-			Barrier {
-				positions: (
-					(self.pos.x + self.size, self.pos.y),
-					(self.pos.x - self.size, self.pos.y)
-				)
-			},
-			Barrier {
-				positions: (
-					(self.pos.x, self.pos.y + self.size),
-					(self.pos.x, self.pos.y - self.size)
-				)
-			}
+			Barrier::new(
+				(self.pos.x + self.size, self.pos.y),
+				(self.pos.x - self.size, self.pos.y)
+			),
+			Barrier::new(
+				(self.pos.x, self.pos.y + self.size),
+				(self.pos.x, self.pos.y - self.size)
+			)
 		]
 	}
 
@@ -106,10 +95,10 @@ impl Obj {
 		
 		// Instantly returns if about to hit a door 
  		if cast_wide(
-			&Ray {
-				position: vec2_to_tuple(&self.pos),
-				end_position: vec2_to_tuple(&self.target)
-			},
+			&Ray::new(
+				self.pos,
+				self.target
+			),
 			&map.doors
 				.par_iter()
 				.map(|door| door.to_barrier())
@@ -119,10 +108,10 @@ impl Obj {
 		let mut try_slope_movement = false;
 
 		match cast_wide(
-			&Ray {
-				position: (self.pos.x, self.pos.y),
-				end_position: (new_pos.x, self.pos.y)
-			}, 
+			&Ray::new(
+				(self.pos.x, self.pos.y),
+				(new_pos.x, self.pos.y)
+			),
 			&map.walls
 		) {
 			Ok(_) => try_slope_movement = true,
@@ -130,10 +119,10 @@ impl Obj {
 		}
 	
 		match cast_wide(
-			&Ray {
-				position: (self.pos.x, self.pos.y),
-				end_position: (self.pos.x, new_pos.y)
-			}, 
+			&Ray::new(
+				(self.pos.x, self.pos.y),
+				(self.pos.x, new_pos.y)
+			),
 			&map.walls
 		) {
 			Ok(_) => try_slope_movement = true,
@@ -151,32 +140,33 @@ impl Obj {
 			*DEPTH.write() += 1
 		}
 
-		let mut wall_to_check = Barrier {
+		let mut wall_to_check = Barrier::new(
 			// Rust assumes that this variable could possibly be uninitialized,
 			// so I have to set a burner value that is never read. 
-			positions: ((0., 0.), (0., 0.)) 
-		};
+			(0.,0.),
+			(0.,0.)
+		);
 
 		for i in map.walls.iter() {
 			if cast(
-				&Ray {
-					position: (self.pos.x, self.pos.y),
-					end_position: (new_pos.x, new_pos.y)
-				}, 
+				&Ray::new(
+					(self.pos.x, self.pos.y),
+					(new_pos.x, new_pos.y)
+				),
 				&i
 			).is_ok() {
-				wall_to_check = *i;
+				wall_to_check = i.clone();
 				break
 			}
 		}
 
-		if wall_to_check.positions.0.0 == wall_to_check.positions.1.0
-		|| wall_to_check.positions.0.1 == wall_to_check.positions.1.1 {
+		if wall_to_check.0.x() == wall_to_check.1.x()
+		|| wall_to_check.0.y() == wall_to_check.1.y() {
 			return;
 		}
 
-		let point0 = tuple_to_vec2(wall_to_check.positions.0);
-		let point1 = tuple_to_vec2(wall_to_check.positions.1);
+		let point0 = point_to_vec2(wall_to_check.0);
+		let point1 = point_to_vec2(wall_to_check.1);
 
 		let angle0 = (point1.x - point0.x).atan2(point1.y - point0.y);
 		let angle1 = (point0.x - point1.x).atan2(point0.y - point1.y);
