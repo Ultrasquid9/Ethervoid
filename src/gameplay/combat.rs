@@ -2,11 +2,13 @@ use ahash::HashMap;
 use raywoke::prelude::*;
 use stecs::prelude::*;
 
-use super::ecs::{
-	World,
-	health::Health,
-	obj::Obj,
-	sprite::{Frames, Rotation, Sprite},
+use super::{
+	Gameplay,
+	ecs::{
+		health::Health,
+		obj::Obj,
+		sprite::{Frames, Rotation, Sprite},
+	},
 };
 
 use crate::utils::{get_delta_time, get_mouse_pos};
@@ -138,10 +140,10 @@ impl CustomType for Attack {
 	}
 }
 
-pub fn handle_combat(world: &mut World) {
-	try_parry(world);
+pub fn handle_combat(gameplay: &mut Gameplay) {
+	try_parry(gameplay);
 
-	for (_, mut atk) in world.attacks.iter_mut() {
+	for (_, mut atk) in gameplay.world.attacks.iter_mut() {
 		atk.sprite.update(*atk.obj);
 
 		// Handling the lifetime and movement of attacks
@@ -152,7 +154,7 @@ pub fn handle_combat(world: &mut World) {
 				.obj
 				.pos
 				.move_towards(atk.obj.target, get_delta_time() * 5.);
-			atk.obj.try_move(new_pos, &world.current_map);
+			atk.obj.try_move(new_pos, &gameplay.current_map);
 
 			if atk.obj.pos != new_pos {
 				*atk.lifetime = 0.;
@@ -168,13 +170,15 @@ pub fn handle_combat(world: &mut World) {
 
 		match atk.owner {
 			Owner::Player => {
-				for (obj, hp, sprite) in query!(world.enemies, (&mut obj, &mut health, &mut sprite))
+				for (obj, hp, sprite) in
+					query!(gameplay.world.enemies, (&mut obj, &mut health, &mut sprite))
 				{
 					func(obj, hp, sprite, &mut atk)
 				}
 			}
 			Owner::Enemy => {
-				for (obj, hp, sprite) in query!(world.player, (&mut obj, &mut health, &mut sprite))
+				for (obj, hp, sprite) in
+					query!(gameplay.world.player, (&mut obj, &mut health, &mut sprite))
 				{
 					func(obj, hp, sprite, &mut atk)
 				}
@@ -218,18 +222,23 @@ fn attack_projectile(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &
 }
 
 fn attack_hitscan(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
-	if cast_wide(&Ray::new(atk.obj.pos.as_vec2(), atk.obj.target.as_vec2()), &obj.to_barriers()).is_ok() {
+	if cast_wide(
+		&Ray::new(atk.obj.pos.as_vec2(), atk.obj.target.as_vec2()),
+		&obj.to_barriers(),
+	)
+	.is_ok()
+	{
 		sprite.shake();
 		hp.damage(*atk.damage)
 	}
 }
 
 /// Attempts to parry attacks
-fn try_parry(world: &mut World) {
-	let attack_ids: Vec<usize> = world.attacks.ids().collect();
+fn try_parry(gameplay: &mut Gameplay) {
+	let attack_ids: Vec<usize> = gameplay.world.attacks.ids().collect();
 
 	for i in attack_ids.iter().rev() {
-		let atk_1 = world.attacks.get(*i).unwrap();
+		let atk_1 = gameplay.world.attacks.get(*i).unwrap();
 
 		if *atk_1.attack_type != AttackType::Physical || *atk_1.is_parried {
 			continue;
@@ -240,7 +249,7 @@ fn try_parry(world: &mut World) {
 				continue;
 			}
 
-			let atk_2 = world.attacks.get(*j).unwrap();
+			let atk_2 = gameplay.world.attacks.get(*j).unwrap();
 
 			if !atk_2.obj.is_touching(atk_1.obj) || *atk_2.is_parried {
 				continue;
@@ -264,9 +273,9 @@ fn try_parry(world: &mut World) {
 			//
 			// I know its safe, but the borrow checker shouldn't.
 
-			world.hitstop = 16.;
+			gameplay.hitstop = 16.;
 
-			let atk_1 = &mut world.attacks.get_mut(*i).unwrap();
+			let atk_1 = &mut gameplay.world.attacks.get_mut(*i).unwrap();
 			*atk_1.lifetime += get_delta_time();
 			*atk_1.is_parried = true;
 
@@ -274,7 +283,7 @@ fn try_parry(world: &mut World) {
 			let new_damage = *atk_1.damage;
 			let new_target = atk_1.obj.target;
 
-			let atk_2 = &mut world.attacks.get_mut(*j).unwrap();
+			let atk_2 = &mut gameplay.world.attacks.get_mut(*j).unwrap();
 			*atk_2.owner = new_owner;
 			*atk_2.damage += new_damage;
 			*atk_2.is_parried = true;

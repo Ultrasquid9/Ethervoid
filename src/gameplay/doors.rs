@@ -4,7 +4,7 @@ use std::fmt::Display;
 
 use crate::utils::resources::maps::access_map;
 
-use super::ecs::{World, behavior::Behavior};
+use super::{Gameplay, ecs::behavior::Behavior};
 
 use serde::{Deserialize, Serialize};
 
@@ -66,8 +66,8 @@ impl Door {
 	}
 
 	/// Checks if the map should be changed, and changes it if it should
-	pub fn try_change_map(&self, world: &mut World) {
-		let player = world.player.get_mut(0).unwrap();
+	pub fn try_change_map(&self, gameplay: &mut Gameplay) {
+		let player = gameplay.world.player.get_mut(0).unwrap();
 
 		let speed = if let Behavior::Player(behavior) = player.behavior {
 			behavior.speed + 1.
@@ -92,14 +92,14 @@ impl Door {
 		}
 
 		for i in access_map(&self.dest).doors.clone() {
-			if i.dest != world.current_map {
+			if i.dest != gameplay.current_map {
 				continue;
 			}
 
 			if !i.direction.is_opposing(&self.direction) {
 				log::error!(
 					"Door in {} does not match expected direction of door in {}\nDirection of Self: {} \nDirection of other: {}",
-					world.current_map,
+					gameplay.current_map,
 					self.dest,
 					self.direction,
 					i.direction
@@ -115,8 +115,8 @@ impl Door {
 			};
 			player.obj.pos = new_pos - self.pos + i.pos;
 
-			world.current_map = self.dest.clone();
-			world.populate();
+			gameplay.current_map = self.dest.clone();
+			gameplay.world.populate(&gameplay.current_map);
 			return;
 		}
 	}

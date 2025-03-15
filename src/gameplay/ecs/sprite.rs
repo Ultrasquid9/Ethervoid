@@ -6,7 +6,7 @@ use crate::{
 };
 
 use macroquad::{
-	math::{Rect, Vec2, DVec2},
+	math::{DVec2, Rect, Vec2},
 	texture::DrawTextureParams,
 };
 
@@ -183,7 +183,8 @@ impl Sprite {
 						.crop_imm(x_pos, y_pos, size, size)
 						.as_rgba8()
 						.unwrap(),
-					(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x) as f32,
+					(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x)
+						as f32,
 					imageproc::geometric_transformations::Interpolation::Nearest,
 					Rgba([0, 0, 0, 0]),
 				))

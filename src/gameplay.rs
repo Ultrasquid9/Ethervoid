@@ -26,48 +26,40 @@ pub mod enemy;
 pub mod npc;
 pub mod player;
 
-pub async fn gameplay() -> State {
-	unsafe {
-		create_resources();
-	} // All the resources in the game (textures, maps, etc.)
+pub struct Gameplay {
+	pub world: World,
+	pub hitstop: f64,
+	pub current_map: String,
+	pub config: Config, // TODO: Make Global
+}
 
-	let mut world = World {
-		player: Default::default(),
-		enemies: Default::default(),
-		npcs: Default::default(),
-		attacks: Default::default(),
-
-		config: Config::read("./config.ron"),
-		current_map: String::from("default:test"),
-		hitstop: 0.,
-	};
-
-	world.player.insert(Player::new());
-	world.populate();
-
-	loop {
-		update_delta_time();
-		draw(&mut world).await;
-
-		// Handling hitstop
-		if world.hitstop > 0. {
-			world.hitstop -= get_delta_time();
-
-			darken_screen();
-			next_frame().await;
-			continue;
+impl Gameplay {
+	fn new() -> Gameplay {
+		Gameplay {
+			world: World {
+				player: Default::default(),
+				enemies: Default::default(),
+				npcs: Default::default(),
+				attacks: Default::default(),
+			},
+			hitstop: 0.,
+			current_map: String::from("default:test"),
+			config: Config::read("./config.ron"),
 		}
+	}
 
-		// NPC Dialogue (WIP)
+	fn npc_dialogue(&mut self) {
 		for (obj, messages, messages_cooldown) in
-			query!(world.npcs, (&obj, &messages, &mut messages_cooldown))
+			query!(self.world.npcs, (&obj, &messages, &mut messages_cooldown))
 		{
 			if *messages_cooldown > 0. {
 				*messages_cooldown -= get_delta_time();
 				continue;
 			}
 
-			for (atk_obj, atk_type, owner) in query!(world.attacks, (&obj, &attack_type, &owner)) {
+			for (atk_obj, atk_type, owner) in
+				query!(self.world.attacks, (&obj, &attack_type, &owner))
+			{
 				if !atk_obj.is_touching(obj)
 					|| *atk_type == AttackType::Projectile
 					|| *atk_type == AttackType::Hitscan
@@ -85,16 +77,15 @@ pub async fn gameplay() -> State {
 				}
 			}
 		}
+	}
 
-		// Attacking
-		handle_combat(&mut world);
-
-		for (inventory, obj) in query!(world.player, (&mut inventory, &obj)) {
+	fn change_weapon(&mut self) {
+		for (inventory, obj) in query!(self.world.player, (&mut inventory, &obj)) {
 			// Switching weapons
-			if world.config.keymap.change_sword.is_pressed() {
+			if self.config.keymap.change_sword.is_pressed() {
 				inventory.current_sword = swap_weapons(&inventory.current_sword, &inventory.swords);
 			}
-			if world.config.keymap.change_gun.is_pressed() {
+			if self.config.keymap.change_gun.is_pressed() {
 				inventory.current_gun = swap_weapons(&inventory.current_gun, &inventory.guns);
 			}
 
@@ -111,33 +102,127 @@ pub async fn gameplay() -> State {
 			}
 
 			// Creating attacks
-			if world.config.keymap.sword.is_down()
+			if self.config.keymap.sword.is_down()
 				&& inventory.swords[inventory.current_sword].cooldown <= 0.
 			{
-				world.attacks.insert(inventory.attack_sword(obj.pos));
+				self.world.attacks.insert(inventory.attack_sword(obj.pos));
 			}
-			if world.config.keymap.gun.is_down()
+			if self.config.keymap.gun.is_down()
 				&& inventory.guns[inventory.current_gun].cooldown <= 0.
 			{
-				world.attacks.insert(inventory.attack_gun(obj.pos));
+				self.world.attacks.insert(inventory.attack_gun(obj.pos));
+			}
+		}
+	}
+
+	fn update_health(&mut self) {
+		for hp in query!([self.world.player, self.world.enemies], (&mut health)) {
+			hp.update();
+		}
+	}
+
+	/// Handling the player's death (WIP)
+	fn try_player_death(&mut self) {
+		let mut player_is_dead = false;
+
+		for hp in query!(self.world.player, (&health)) {
+			if hp.should_kill() {
+				player_is_dead = true;
+				break;
 			}
 		}
 
-		// Updating health (this is primarily for i-frames)
-		for hp in query!([world.player, world.enemies], (&mut health)) {
-			hp.update();
+		if player_is_dead {
+			while !self.world.player.ids.is_empty() {
+				self.world.player.remove(0);
+			}
+
+			self.world.player.insert(Player::new());
+
+			self.world.populate(&self.current_map);
+		}
+	}
+
+	/// Handling old attacks
+	fn remove_old_attacks(&mut self) {
+		let mut to_remove: usize = 0;
+		while {
+			let mut atk_to_remove = false;
+
+			for (index, atk) in self.world.attacks.iter() {
+				if match atk.attack_type {
+					AttackType::Physical | AttackType::Burst => atk.sprite.anim_completed(),
+					_ => *atk.lifetime <= 0.,
+				} {
+					to_remove = index;
+					atk_to_remove = true;
+					break;
+				}
+			}
+
+			atk_to_remove
+		} {
+			self.world.attacks.remove(to_remove);
+		}
+	}
+
+	/// Handling dead enemies.
+	/// TODO: Death animation
+	fn remove_dead_enemies(&mut self) {
+		let mut to_remove: usize = 0;
+		while {
+			let mut enemy_to_remove = false;
+
+			for (index, enemy) in self.world.enemies.iter() {
+				if enemy.health.should_kill() {
+					to_remove = index;
+					enemy_to_remove = true;
+					break;
+				}
+			}
+
+			enemy_to_remove
+		} {
+			self.world.enemies.remove(to_remove);
+		}
+	}
+}
+
+pub async fn gameplay() -> State {
+	unsafe {
+		create_resources();
+	} // All the resources in the game (textures, maps, etc.)
+
+	let mut gameplay = Gameplay::new();
+
+	gameplay.world.player.insert(Player::new());
+	gameplay.world.populate(&gameplay.current_map);
+
+	loop {
+		update_delta_time();
+		draw(&mut gameplay).await;
+
+		// Handling hitstop
+		if gameplay.hitstop > 0. {
+			gameplay.hitstop -= get_delta_time();
+
+			darken_screen();
+			next_frame().await;
+			continue;
 		}
 
-		// Movement and behavior
-		handle_behavior(&mut world);
+		handle_combat(&mut gameplay);
+		handle_behavior(&mut gameplay);
 
-		// handling dead entities/players and old attacks
-		remove_dead_enemies(&mut world);
-		remove_old_attacks(&mut world);
-		try_player_death(&mut world);
+		gameplay.npc_dialogue();
+		gameplay.change_weapon();
+		gameplay.update_health();
+		gameplay.remove_dead_enemies();
+		gameplay.remove_old_attacks();
+		gameplay.try_player_death();
 
 		// Quitting the game
-		if world.config.keymap.quit.is_down() {
+		if gameplay.config.keymap.quit.is_down() {
 			unsafe {
 				clean_resources();
 			}
@@ -145,71 +230,5 @@ pub async fn gameplay() -> State {
 		}
 
 		next_frame().await
-	}
-}
-
-/// Handling dead enemies.
-/// TODO: Death animation
-fn remove_dead_enemies(world: &mut World) {
-	let mut to_remove: usize = 0;
-	while {
-		let mut enemy_to_remove = false;
-
-		for (index, enemy) in world.enemies.iter() {
-			if enemy.health.should_kill() {
-				to_remove = index;
-				enemy_to_remove = true;
-				break;
-			}
-		}
-
-		enemy_to_remove
-	} {
-		world.enemies.remove(to_remove);
-	}
-}
-
-/// Handling old attacks
-fn remove_old_attacks(world: &mut World) {
-	let mut to_remove: usize = 0;
-	while {
-		let mut atk_to_remove = false;
-
-		for (index, atk) in world.attacks.iter() {
-			if match atk.attack_type {
-				AttackType::Physical | AttackType::Burst => atk.sprite.anim_completed(),
-				_ => *atk.lifetime <= 0.,
-			} {
-				to_remove = index;
-				atk_to_remove = true;
-				break;
-			}
-		}
-
-		atk_to_remove
-	} {
-		world.attacks.remove(to_remove);
-	}
-}
-
-/// Handling the player's death (WIP)
-fn try_player_death(world: &mut World) {
-	let mut player_is_dead = false;
-
-	for hp in query!(world.player, (&health)) {
-		if hp.should_kill() {
-			player_is_dead = true;
-			break;
-		}
-	}
-
-	if player_is_dead {
-		while !world.player.ids.is_empty() {
-			world.player.remove(0);
-		}
-
-		world.player.insert(Player::new());
-
-		world.populate();
 	}
 }

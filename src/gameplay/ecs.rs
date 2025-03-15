@@ -2,7 +2,7 @@ use stecs::prelude::*;
 
 use super::{combat::Attack, enemy::Enemy, npc::Npc, player::Player};
 
-use crate::utils::{config::Config, resources::maps::access_map};
+use crate::utils::resources::maps::access_map;
 
 pub mod behavior;
 pub mod health;
@@ -14,15 +14,15 @@ pub struct World {
 	pub enemies: StructOf<Vec<Enemy>>,
 	pub npcs: StructOf<Vec<Npc>>,
 	pub attacks: StructOf<Vec<Attack>>,
-
+	/*
 	pub current_map: String,
 	pub config: Config,
-	pub hitstop: f64,
+	pub hitstop: f64, */
 }
 
 impl World {
 	/// Populates the world with content from the current map, and clears old content if it exists
-	pub fn populate(&mut self) {
+	pub fn populate(&mut self, current_map: &str) {
 		// Removing old stuff
 
 		while !self.enemies.ids.is_empty() {
@@ -39,11 +39,11 @@ impl World {
 
 		// Adding new stuff
 
-		for (enemy, pos) in access_map(&self.current_map).enemies.iter() {
+		for (enemy, pos) in access_map(current_map).enemies.iter() {
 			let _ = self.enemies.insert(Enemy::from_type(enemy, pos));
 		}
 
-		for (npc, pos) in access_map(&self.current_map).npcs.iter() {
+		for (npc, pos) in access_map(current_map).npcs.iter() {
 			let _ = self.npcs.insert(Npc::from_type(npc, pos));
 		}
 	}

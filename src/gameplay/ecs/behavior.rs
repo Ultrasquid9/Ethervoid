@@ -1,4 +1,3 @@
-use super::World;
 use parking_lot::RwLock;
 use player::player_behavior;
 use script::script_behavior;
@@ -6,6 +5,7 @@ use stecs::prelude::*;
 
 use crate::{
 	cores::script::Script,
+	gameplay::Gameplay,
 	utils::{get_delta_time, resources::maps::access_map},
 };
 
@@ -85,14 +85,18 @@ impl Clone for EnemyBehavior {
 	}
 }
 
-pub fn handle_behavior(world: &mut World) {
-	let obj_player = *world.player.obj.first().unwrap();
+pub fn handle_behavior(gameplay: &mut Gameplay) {
+	let obj_player = *gameplay.world.player.obj.first().unwrap();
 
-	let attacks = RwLock::new(&mut world.attacks);
+	let attacks = RwLock::new(&mut gameplay.world.attacks);
 
 	thread::scope(|scope| {
 		for (obj, behavior, sprite) in query!(
-			[world.player, world.enemies, world.npcs],
+			[
+				gameplay.world.player,
+				gameplay.world.enemies,
+				gameplay.world.npcs
+			],
 			(&mut obj, &mut behavior, &mut sprite)
 		) {
 			if obj.stunned > 0. {
@@ -113,7 +117,7 @@ pub fn handle_behavior(world: &mut World) {
 
 			match behavior {
 				Behavior::Player(behavior) => {
-					player_behavior(obj, behavior, &world.config, &world.current_map)
+					player_behavior(obj, behavior, &gameplay.config, &gameplay.current_map)
 				}
 
 				Behavior::Enemy(behavior) => {
@@ -133,7 +137,7 @@ pub fn handle_behavior(world: &mut World) {
 							&obj_player,
 							sprite,
 							*attacks.write(),
-							&world.current_map,
+							&gameplay.current_map,
 						);
 
 						match result {
@@ -167,7 +171,7 @@ pub fn handle_behavior(world: &mut World) {
 						continue;
 					}
 					let new_pos = obj.pos.move_towards(obj.target, 2. * get_delta_time());
-					obj.try_move(new_pos, &world.current_map);
+					obj.try_move(new_pos, &gameplay.current_map);
 
 					if obj.pos != new_pos {
 						obj.target = obj.pos
@@ -179,7 +183,7 @@ pub fn handle_behavior(world: &mut World) {
 		}
 	});
 
-	for door in access_map(&world.current_map).doors.clone() {
-		door.try_change_map(world);
+	for door in access_map(&gameplay.current_map).doors.clone() {
+		door.try_change_map(gameplay);
 	}
 }
