@@ -1,19 +1,11 @@
 use serde::Deserialize;
 
 use super::{
-	script::{
-		get_scripts, 
-		ScriptBuilder
-	}, 
-	gen_name, 
-	get_files, 
-	Readable
+	Readable, gen_name, get_files,
+	script::{ScriptBuilder, get_scripts},
 };
 
-use crate::{
-	gameplay::ecs::sprite::Frames,
-	prelude::*
-};
+use crate::{gameplay::ecs::sprite::Frames, prelude::*};
 
 #[derive(Clone, Deserialize)]
 struct EnemyTypeBuilder {
@@ -22,7 +14,7 @@ struct EnemyTypeBuilder {
 	sprite: String,
 	movement: String,
 	attacks: Vec<String>,
-	anims: HashMap<String, Frames>
+	anims: HashMap<String, Frames>,
 }
 
 impl Readable for EnemyTypeBuilder {}
@@ -33,12 +25,13 @@ impl EnemyTypeBuilder {
 			max_health: self.max_health,
 			size: self.size,
 			sprite: self.sprite,
-			movement: scripts.get(&self.movement).unwrap().clone(), 
-			attacks: self.attacks
+			movement: scripts.get(&self.movement).unwrap().clone(),
+			attacks: self
+				.attacks
 				.par_iter()
 				.map(|attack| scripts.get(attack.as_str()).unwrap().clone())
 				.collect(),
-			anims: self.anims
+			anims: self.anims,
 		}
 	}
 }
@@ -51,7 +44,7 @@ pub struct EnemyType {
 	pub sprite: String,
 	pub movement: ScriptBuilder,
 	pub attacks: Box<[ScriptBuilder]>,
-	pub anims: HashMap<String, Frames>
+	pub anims: HashMap<String, Frames>,
 }
 
 /// Provides a HashMap containing all EnemyTypes
@@ -63,7 +56,11 @@ pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 		.map(|dir| (gen_name(dir), EnemyTypeBuilder::read(dir)))
 		.filter_map(|(str, enemytypebuilder)| {
 			if enemytypebuilder.is_err() {
-				warn!("EnemyType {} failed to load: {}", str, enemytypebuilder.err().unwrap());
+				warn!(
+					"EnemyType {} failed to load: {}",
+					str,
+					enemytypebuilder.err().unwrap()
+				);
 				None
 			} else {
 				info!("EnemyType {} loaded!", str);

@@ -1,39 +1,23 @@
 use ahash::HashMap;
 
 use crate::{
-	gameplay::draw::{
-		process::downscale, SCREEN_SCALE 
-	}, 
-	utils::{
-		error::EtherVoidError, get_delta_time, resources::textures::access_image
-	}
+	gameplay::draw::{SCREEN_SCALE, process::downscale},
+	utils::{error::EtherVoidError, get_delta_time, resources::textures::access_image},
 };
 
 use macroquad::{
-	math::{
-		Rect, 
-		Vec2
-	}, 
-	texture::DrawTextureParams
+	math::{Rect, Vec2},
+	texture::DrawTextureParams,
 };
 
 use imageproc::{
-	image::{
-		Rgba, 
-		DynamicImage
-	},
-	geometric_transformations::rotate_about_center
+	geometric_transformations::rotate_about_center,
+	image::{DynamicImage, Rgba},
 };
 
-use serde::{
-	Deserialize, 
-	Serialize
-};
+use serde::{Deserialize, Serialize};
 
-use super::obj::{
-	Axis, 
-	Obj
-};
+use super::obj::{Axis, Obj};
 
 #[derive(Clone)]
 pub struct Sprite {
@@ -46,7 +30,7 @@ pub struct Sprite {
 	shaking: f32,
 
 	current_anim: Option<String>,
-	anims: HashMap<String, Frames>
+	anims: HashMap<String, Frames>,
 }
 
 #[derive(Clone, PartialEq)]
@@ -54,11 +38,10 @@ pub struct Sprite {
 pub enum Rotation {
 	Angle,
 	EightWay,
-	Static
+	Static,
 }
 
-#[derive(Clone)]
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Frames {
 	frame_order: Vec<u32>,
 	frame_time: f32,
@@ -66,25 +49,24 @@ pub struct Frames {
 	#[serde(skip)]
 	anim_time: f32,
 	#[serde(skip)]
-	anim_completed: bool
+	anim_completed: bool,
 }
 
 impl Sprite {
 	pub fn new(
-		obj: Obj, 
-		_size: u32, 
-		key: &str, 
-		rotation: Rotation, 
+		obj: Obj,
+		_size: u32,
+		key: &str,
+		rotation: Rotation,
 		frames: Frames,
-		anims: HashMap<String, Frames>
+		anims: HashMap<String, Frames>,
 	) -> Self {
 		Self {
 			sprite: if rotation == Rotation::Angle {
-				downscale(
-					access_image(key),
-					obj.size as u32
-				)
-			} else { access_image(key) },
+				downscale(access_image(key), obj.size as u32)
+			} else {
+				access_image(key)
+			},
 			obj,
 
 			rotation,
@@ -93,7 +75,7 @@ impl Sprite {
 			shaking: 0.,
 
 			current_anim: None,
-			anims
+			anims,
 		}
 	}
 
@@ -103,21 +85,23 @@ impl Sprite {
 		}
 
 		if self.current_anim.is_some() {
-			let anim = self.anims.get_mut(self.current_anim.as_ref().unwrap()).unwrap();
+			let anim = self
+				.anims
+				.get_mut(self.current_anim.as_ref().unwrap())
+				.unwrap();
 
 			anim.update();
 
 			if self.rotation != Rotation::EightWay {
 				self.obj = new_obj;
 			}
-			return
+			return;
 		}
 
-		if self.obj.pos == new_obj.pos 
-		&& self.rotation == Rotation::EightWay {
+		if self.obj.pos == new_obj.pos && self.rotation == Rotation::EightWay {
 			self.frames.reset();
 		} else {
-			self.frames.update(); 
+			self.frames.update();
 			self.obj = new_obj;
 		}
 	}
@@ -136,7 +120,7 @@ impl Sprite {
 		}
 
 		self.current_anim = Some(key);
-		
+
 		self.frames.reset();
 		for (_, anim) in self.anims.iter_mut() {
 			anim.reset();
@@ -157,7 +141,10 @@ impl Sprite {
 		};
 
 		let mut x_pos = if self.current_anim.is_some() {
-			self.anims.get(self.current_anim.as_ref().unwrap()).unwrap().get_frame()
+			self.anims
+				.get(self.current_anim.as_ref().unwrap())
+				.unwrap()
+				.get_frame()
 		} else {
 			self.frames.get_frame()
 		} * size;
@@ -166,19 +153,19 @@ impl Sprite {
 			0
 		} else {
 			// There is definitely a far better way to do this
-			// I apologize to whoever has to deal with this in the future 
+			// I apologize to whoever has to deal with this in the future
 			if self.obj.axis_horizontal != Axis::None && self.obj.axis_vertical != Axis::None {
 				if self.obj.axis_vertical == Axis::Positive {
-					size       // Diagonal up
+					size // Diagonal up
 				} else {
-					size * 3   // Diagonal down
+					size * 3 // Diagonal down
 				}
 			} else if self.obj.axis_horizontal != Axis::None {
-				size * 2       // Left/right
+				size * 2 // Left/right
 			} else if self.obj.axis_vertical == Axis::Positive {
-				0              // Down
+				0 // Down
 			} else {
-				size * 4       // Up
+				size * 4 // Up
 			}
 		};
 
@@ -189,51 +176,53 @@ impl Sprite {
 		x_pos = x_pos.clamp(0, self.sprite.width() - 1);
 		y_pos = y_pos.clamp(0, self.sprite.height() - 1);
 
-		return(
+		return (
 			if self.rotation == Rotation::Angle {
 				DynamicImage::ImageRgba8(rotate_about_center(
-					self.sprite.crop_imm(
-						x_pos, 
-						y_pos, 
-						size, 
-						size
-					).as_rgba8().unwrap(), 
+					self.sprite
+						.crop_imm(x_pos, y_pos, size, size)
+						.as_rgba8()
+						.unwrap(),
 					(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x),
-					imageproc::geometric_transformations::Interpolation::Nearest, 
-					Rgba([0, 0, 0, 0])
+					imageproc::geometric_transformations::Interpolation::Nearest,
+					Rgba([0, 0, 0, 0]),
 				))
 			} else {
 				self.sprite.clone()
 			},
 			Vec2::new(
-				self.obj.pos.x + match self.rotation {
-					Rotation::Angle => 0.,
-					Rotation::Static => self.sprite.width() as f32 / 2.,
-					_ => self.sprite.width() as f32
-				},
-				self.obj.pos.y + match self.rotation {
-					Rotation::Angle => 0.,
-					Rotation::Static => self.sprite.width() as f32 / 2.,
-					_ => self.sprite.height() as f32
-				},
-			), 
+				self.obj.pos.x
+					+ match self.rotation {
+						Rotation::Angle => 0.,
+						Rotation::Static => self.sprite.width() as f32 / 2.,
+						_ => self.sprite.width() as f32,
+					},
+				self.obj.pos.y
+					+ match self.rotation {
+						Rotation::Angle => 0.,
+						Rotation::Static => self.sprite.width() as f32 / 2.,
+						_ => self.sprite.height() as f32,
+					},
+			),
 			Some(DrawTextureParams {
 				source: if self.rotation == Rotation::Angle {
 					None
 				} else {
-					Some(
-						Rect::new(
-							x_pos as f32,
-							y_pos as f32,
-							size as f32,
-							size as f32
-						)
-					)
+					Some(Rect::new(
+						x_pos as f32,
+						y_pos as f32,
+						size as f32,
+						size as f32,
+					))
 				},
-				flip_x: self.obj.axis_horizontal == Axis::Negative && self.rotation == Rotation::EightWay,
-				dest_size: Some(Vec2::new(size as f32 * SCREEN_SCALE, size as f32 * SCREEN_SCALE)),
+				flip_x: self.obj.axis_horizontal == Axis::Negative
+					&& self.rotation == Rotation::EightWay,
+				dest_size: Some(Vec2::new(
+					size as f32 * SCREEN_SCALE,
+					size as f32 * SCREEN_SCALE,
+				)),
 				..Default::default()
-			})
+			}),
 		);
 	}
 }
@@ -245,7 +234,7 @@ impl Frames {
 			frame_time: 16.,
 
 			anim_time: 0.,
-			anim_completed: false
+			anim_completed: false,
 		}
 	}
 
@@ -255,7 +244,7 @@ impl Frames {
 			frame_time: 4.,
 
 			anim_time: 0.,
-			anim_completed: false
+			anim_completed: false,
 		}
 	}
 
@@ -265,7 +254,7 @@ impl Frames {
 			frame_time: 0.,
 
 			anim_time: 0.,
-			anim_completed: false
+			anim_completed: false,
 		}
 	}
 
@@ -283,7 +272,10 @@ impl Frames {
 	}
 
 	fn get_frame(&self) -> u32 {
-		*self.frame_order.get((self.anim_time / self.frame_time) as usize).unwrap()
+		*self
+			.frame_order
+			.get((self.anim_time / self.frame_time) as usize)
+			.unwrap()
 	}
 }
 
@@ -293,7 +285,7 @@ impl Default for Frames {
 			frame_order: vec![],
 			frame_time: 0.,
 			anim_time: 0.,
-			anim_completed: false
+			anim_completed: false,
 		}
 	}
 }

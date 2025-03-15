@@ -1,9 +1,6 @@
 use macroquad::prelude::*;
 
-use serde::{
-	Deserialize, 
-	Serialize
-};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Message {
@@ -17,20 +14,20 @@ pub struct Message {
 pub struct Dialogue {
 	name: String,
 	portrait: String,
-	text: String
+	text: String,
 }
 
 impl Message {
 	// TODO - Make
 	pub fn should_read(&self) -> bool {
 		if rand::gen_range(0, 255) > self.probability {
-			return false 
+			return false;
 		}
 
 		true
 	}
 
-	// TODO - Make 
+	// TODO - Make
 	pub fn read(&self) {
 		for i in &self.text {
 			i.read();
@@ -41,5 +38,7 @@ impl Message {
 impl Dialogue {
 	/// Reading dialogue
 	/// Note: HIGHLY WIP
-	pub fn read(&self) { println!("{}", self.text) } 
+	pub fn read(&self) {
+		println!("{}", self.text)
+	}
 }

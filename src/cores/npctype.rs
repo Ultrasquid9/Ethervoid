@@ -1,22 +1,13 @@
-use crate::{
-	gameplay::npc::messages::Message,
-	prelude::*
-};
+use crate::{gameplay::npc::messages::Message, prelude::*};
 
-use super::{
-	gen_name, 
-	get_files, Readable
-};
+use super::{Readable, gen_name, get_files};
 
-use serde::{
-	Deserialize, 
-	Serialize
-};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum NpcMovement {
 	Wander(f32),
-	Still
+	Still,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -24,7 +15,7 @@ pub struct NpcType {
 	pub name: String,
 	pub sprite: String,
 	pub movement: NpcMovement,
-	pub messages: Box<[Message]>
+	pub messages: Box<[Message]>,
 }
 
 impl Readable for NpcType {}

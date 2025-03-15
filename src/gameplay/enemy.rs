@@ -1,20 +1,13 @@
-use macroquad::math::Vec2;
-use stecs::prelude::*;
-use rayon::prelude::*;
 use crate::cores::enemytype::EnemyType;
+use macroquad::math::Vec2;
+use rayon::prelude::*;
+use stecs::prelude::*;
 
 use super::ecs::{
-	sprite::{
-		Frames, 
-		Rotation, 
-		Sprite
-	},
-	behavior::{
-		Behavior, 
-		EnemyBehavior
-	}, 
-	health::Health, 
-	obj::Obj
+	behavior::{Behavior, EnemyBehavior},
+	health::Health,
+	obj::Obj,
+	sprite::{Frames, Rotation, Sprite},
 };
 
 #[derive(SplitFields)]
@@ -35,7 +28,8 @@ impl Enemy {
 			behavior: Behavior::Enemy(EnemyBehavior {
 				movement: enemytype.movement.clone().build(),
 
-				attacks: enemytype.attacks
+				attacks: enemytype
+					.attacks
 					.par_iter()
 					.map(|attack| attack.clone().build())
 					.collect(),
@@ -43,16 +37,16 @@ impl Enemy {
 				attack_index: 0,
 				attack_cooldown: 40.,
 
-				err: None
+				err: None,
 			}),
 			sprite: Sprite::new(
-				obj, 
+				obj,
 				enemytype.size as u32,
-				&enemytype.sprite, 
+				&enemytype.sprite,
 				Rotation::EightWay,
 				Frames::new_entity(),
-				enemytype.anims.clone()
-			)
+				enemytype.anims.clone(),
+			),
 		}
 	}
 }

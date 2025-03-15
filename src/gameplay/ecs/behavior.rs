@@ -5,32 +5,23 @@ use script::script_behavior;
 use stecs::prelude::*;
 
 use crate::{
-	utils::{
-		resources::maps::access_map,
-		get_delta_time
-	},
-	cores::script::Script
+	cores::script::Script,
+	utils::{get_delta_time, resources::maps::access_map},
 };
 
-use std::{
-	error::Error, 
-	thread
-};
+use std::{error::Error, thread};
 
-use macroquad::{
-	math::Vec2, 
-	prelude::rand
-};
+use macroquad::{math::Vec2, prelude::rand};
 
-pub mod script;
 pub mod player;
+pub mod script;
 
 #[derive(PartialEq, Clone)]
 pub enum Behavior {
 	Player(PlayerBehavior),
 	Enemy(EnemyBehavior),
 	Wander(WanderBehavior),
-	None
+	None,
 }
 
 #[derive(PartialEq, Clone)]
@@ -38,7 +29,7 @@ pub struct PlayerBehavior {
 	pub speed: f32,
 
 	pub dash_cooldown: f32,
-	pub is_dashing: bool
+	pub is_dashing: bool,
 }
 
 pub struct EnemyBehavior {
@@ -48,7 +39,7 @@ pub struct EnemyBehavior {
 	pub attack_index: usize,
 	pub attack_cooldown: f32,
 
-	pub err: Option<Box<dyn Error + Send + Sync>>
+	pub err: Option<Box<dyn Error + Send + Sync>>,
 }
 
 #[derive(PartialEq, Clone)]
@@ -56,7 +47,7 @@ pub struct WanderBehavior {
 	pub pos: Vec2,
 	pub range: f32,
 
-	pub cooldown: f32
+	pub cooldown: f32,
 }
 
 impl EnemyBehavior {
@@ -75,8 +66,8 @@ impl EnemyBehavior {
 impl PartialEq for EnemyBehavior {
 	fn eq(&self, other: &Self) -> bool {
 		self.attacks.len() == other.attacks.len()
-		&& self.attack_index == other.attack_index
-		&& self.attack_cooldown == other.attack_cooldown
+			&& self.attack_index == other.attack_index
+			&& self.attack_cooldown == other.attack_cooldown
 	}
 }
 
@@ -89,7 +80,7 @@ impl Clone for EnemyBehavior {
 			attack_index: self.attack_index,
 			attack_cooldown: self.attack_cooldown,
 
-			err: None
+			err: None,
 		}
 	}
 }
@@ -100,8 +91,11 @@ pub fn handle_behavior(world: &mut World) {
 	let attacks = RwLock::new(&mut world.attacks);
 
 	thread::scope(|scope| {
-		for (obj, behavior, sprite) in query!([world.player, world.enemies, world.npcs], (&mut obj, &mut behavior, &mut sprite)) {
-			if obj.stunned > 0. { 
+		for (obj, behavior, sprite) in query!(
+			[world.player, world.enemies, world.npcs],
+			(&mut obj, &mut behavior, &mut sprite)
+		) {
+			if obj.stunned > 0. {
 				obj.stunned -= get_delta_time();
 
 				if let Behavior::Enemy(behavior) = behavior {
@@ -118,17 +112,14 @@ pub fn handle_behavior(world: &mut World) {
 			}
 
 			match behavior {
-				Behavior::Player(behavior) => { 
-					player_behavior(
-						obj, 
-						behavior,
-						&world.config,
-						&world.current_map,
-					)
-				},
+				Behavior::Player(behavior) => {
+					player_behavior(obj, behavior, &world.config, &world.current_map)
+				}
 
 				Behavior::Enemy(behavior) => {
-					if behavior.err.is_some() { continue; }
+					if behavior.err.is_some() {
+						continue;
+					}
 
 					scope.spawn(|| {
 						let result = script_behavior(
@@ -137,12 +128,12 @@ pub fn handle_behavior(world: &mut World) {
 								&mut behavior.movement
 							} else {
 								&mut behavior.attacks[behavior.attack_index]
-							}, 
-							obj, 
-							&obj_player, 
+							},
+							obj,
+							&obj_player,
 							sprite,
 							*attacks.write(),
-							&world.current_map
+							&world.current_map,
 						);
 
 						match result {
@@ -150,12 +141,12 @@ pub fn handle_behavior(world: &mut World) {
 							Err(e) => {
 								println!("Script error: {e}");
 								behavior.err = Some(e)
-							},
+							}
 
-							_ => ()
+							_ => (),
 						}
 					});
-				},
+				}
 
 				Behavior::Wander(behavior) => {
 					if behavior.cooldown > 0. {
@@ -163,8 +154,14 @@ pub fn handle_behavior(world: &mut World) {
 						continue;
 					} else if obj.pos.distance(obj.target) < 5. {
 						obj.update(Vec2::new(
-							rand::gen_range(behavior.pos.x - behavior.range, behavior.pos.x + behavior.range),
-							rand::gen_range(behavior.pos.y - behavior.range, behavior.pos.y + behavior.range)
+							rand::gen_range(
+								behavior.pos.x - behavior.range,
+								behavior.pos.x + behavior.range,
+							),
+							rand::gen_range(
+								behavior.pos.y - behavior.range,
+								behavior.pos.y + behavior.range,
+							),
 						));
 						behavior.cooldown = 120.;
 						continue;
@@ -175,9 +172,9 @@ pub fn handle_behavior(world: &mut World) {
 					if obj.pos != new_pos {
 						obj.target = obj.pos
 					}
-				},
+				}
 
-				_ => ()
+				_ => (),
 			}
 		}
 	});

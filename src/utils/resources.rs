@@ -1,17 +1,8 @@
-use audio::{
-	clean_sounds, 
-	create_sounds
-};
+use audio::{clean_sounds, create_sounds};
 
-use maps::{
-	clean_maps, 
-	create_maps
-};
+use maps::{clean_maps, create_maps};
 
-use textures::{
-	clean_textures, 
-	create_textures
-};
+use textures::{clean_textures, create_textures};
 
 pub mod audio;
 pub mod maps;

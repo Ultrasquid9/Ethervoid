@@ -1,25 +1,16 @@
-use std::cmp::Ordering;
-use process::to_texture;
-use stecs::prelude::*;
 use macroquad::prelude::*;
+use process::to_texture;
+use std::cmp::Ordering;
+use stecs::prelude::*;
 
-use crate::utils::{
-	resources::maps::access_map,
-	camera_scale
-};
+use crate::utils::{camera_scale, resources::maps::access_map};
 
 use super::{
-	ecs::{
-		behavior::Behavior,
-		sprite::Sprite, 
-		World
-	},
-	combat::AttackType
+	combat::AttackType,
+	ecs::{World, behavior::Behavior, sprite::Sprite},
 };
 
-use render::{
-	draw_bar, draw_map, render_text, render_texture
-};
+use render::{draw_bar, draw_map, render_text, render_texture};
 
 pub mod process;
 pub mod render;
@@ -28,15 +19,13 @@ pub const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
 
 pub async fn draw(world: &mut World) {
 	// Draws the background
-	clear_background(Color::from_rgba(
-		46, 
-		34, 
-		47, 
-		255
-	)); 
+	clear_background(Color::from_rgba(46, 34, 47, 255));
 
 	set_camera(&Camera2D {
-		zoom: vec2(1. / camera_scale(), screen_width() / screen_height() / camera_scale()),
+		zoom: vec2(
+			1. / camera_scale(),
+			screen_width() / screen_height() / camera_scale(),
+		),
 		target: world.player.obj.first().unwrap().pos,
 		..Default::default()
 	});
@@ -55,12 +44,12 @@ pub async fn draw(world: &mut World) {
 	for (atk_type, obj) in query!(world.attacks, (&attack_type, &obj)) {
 		if let AttackType::Hitscan = atk_type {
 			draw_line(
-				obj.pos.x, 
-				obj.pos.y, 
-				obj.target.x, 
-				obj.target.y, 
-				obj.size, 
-				RED
+				obj.pos.x,
+				obj.pos.y,
+				obj.target.x,
+				obj.target.y,
+				obj.size,
+				RED,
 			);
 		}
 	}
@@ -70,23 +59,35 @@ pub async fn draw(world: &mut World) {
 	// Render script errors (if any are present)
 	let mut err_height = 128.;
 	for behavior in query!(world.enemies, (&behavior)) {
-		let Behavior::Enemy(behavior) = behavior else { continue };
+		let Behavior::Enemy(behavior) = behavior else {
+			continue;
+		};
 
 		if let Some(e) = &behavior.err {
 			render_text(&format!("Script err: {e}"), Vec2::new(32., err_height), RED).await;
 			err_height += 32.
 		}
 	}
-	 
+
 	// Drawing a temporary UI
-	render_text(&format!("{}", world.player.health[0].hp), Vec2::new(32., 96.), BLACK).await
+	render_text(
+		&format!("{}", world.player.health[0].hp),
+		Vec2::new(32., 96.),
+		BLACK,
+	)
+	.await
 }
 
 async fn render_sprites(world: &mut World) {
 	// Sorting sprites
 	let mut sprites: Vec<&mut Sprite> = Vec::new();
-	for (sprite, obj) in query!([world.player, world.enemies, world.npcs, world.attacks], (&mut sprite, &obj)) {
-		if world.hitstop <= 0. { sprite.update(*obj) }
+	for (sprite, obj) in query!(
+		[world.player, world.enemies, world.npcs, world.attacks],
+		(&mut sprite, &obj)
+	) {
+		if world.hitstop <= 0. {
+			sprite.update(*obj)
+		}
 		sprites.push(sprite);
 	}
 	sprites.sort_by(|x, y| {

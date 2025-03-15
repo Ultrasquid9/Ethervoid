@@ -4,22 +4,12 @@ use messages::Message;
 use stecs::prelude::*;
 
 use super::ecs::{
-	sprite::{
-		Frames, 
-		Rotation, 
-		Sprite
-	},
-	behavior::{
-		Behavior, 
-		WanderBehavior
-	}, 
-	obj::Obj
+	behavior::{Behavior, WanderBehavior},
+	obj::Obj,
+	sprite::{Frames, Rotation, Sprite},
 };
 
-use crate::cores::npctype::{
-	NpcMovement, 
-	NpcType
-};
+use crate::cores::npctype::{NpcMovement, NpcType};
 
 pub mod messages;
 
@@ -28,7 +18,7 @@ pub struct Npc {
 	obj: Obj,
 	behavior: Behavior,
 	sprite: Sprite,
-	
+
 	messages: Box<[Message]>,
 	messages_cooldown: f32,
 }
@@ -36,24 +26,24 @@ pub struct Npc {
 impl Npc {
 	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
 		let obj = Obj::new(*pos, *pos, 15.);
-		
+
 		Self {
 			obj,
 			behavior: match npctype.movement {
 				NpcMovement::Wander(range) => Behavior::Wander(WanderBehavior {
 					pos: *pos,
 					range,
-					cooldown: 0.
+					cooldown: 0.,
 				}),
-				NpcMovement::Still => Behavior::None
+				NpcMovement::Still => Behavior::None,
 			},
 			sprite: Sprite::new(
-				obj, 
+				obj,
 				32,
 				"default:entity/player/player_spritesheet_wip",
 				Rotation::EightWay,
 				Frames::new_entity(),
-				HashMap::default()
+				HashMap::default(),
 			),
 
 			messages: npctype.messages.clone(),

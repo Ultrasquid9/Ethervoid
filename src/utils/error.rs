@@ -1,20 +1,17 @@
 use std::{
-	fmt::{
-		Debug, 
-		Display
-	},
-	error::Error 
+	error::Error,
+	fmt::{Debug, Display},
 };
 
 #[derive(Clone)]
 pub enum EtherVoidError {
-	AnimNotFound(String)
+	AnimNotFound(String),
 }
 
 impl EtherVoidError {
 	fn do_the_formatting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::AnimNotFound(e) => write!(f, "Anim Not Found: \"{e}\" is not a known animation")
+			Self::AnimNotFound(e) => write!(f, "Anim Not Found: \"{e}\" is not a known animation"),
 		}
 	}
 }

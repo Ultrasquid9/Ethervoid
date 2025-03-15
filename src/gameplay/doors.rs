@@ -1,37 +1,31 @@
-use std::fmt::Display;
 use macroquad::math::Vec2;
 use raywoke::prelude::*;
+use std::fmt::Display;
 
 use crate::utils::resources::maps::access_map;
 
-use super::ecs::{
-	behavior::Behavior, 
-	World
-};
+use super::ecs::{World, behavior::Behavior};
 
-use serde::{
-	Deserialize, 
-	Serialize
-};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Direction {
-	North, 
+	North,
 	South,
-	East, 
-	West
+	East,
+	West,
 }
 
 impl Direction {
-	/// Checks if the provided direction is opposite of the current one 
+	/// Checks if the provided direction is opposite of the current one
 	fn is_opposing(&self, other: &Self) -> bool {
 		let dirs = [self, other];
 
 		if dirs.contains(&&Self::North) && dirs.contains(&&Self::South) {
-			return true
+			return true;
 		}
 		if dirs.contains(&&Self::East) && dirs.contains(&&Self::West) {
-			return true
+			return true;
 		}
 
 		false
@@ -44,7 +38,7 @@ impl Display for Direction {
 			Self::North => write!(f, "North"),
 			Self::South => write!(f, "South"),
 			Self::East => write!(f, "East"),
-			Self::West => write!(f, "West")
+			Self::West => write!(f, "West"),
 		}
 	}
 }
@@ -53,7 +47,7 @@ impl Display for Direction {
 pub struct Door {
 	direction: Direction,
 	pos: Vec2,
-	dest: String
+	dest: String,
 }
 
 impl Door {
@@ -62,12 +56,12 @@ impl Door {
 		match self.direction {
 			Direction::North | Direction::South => Barrier::new(
 				(self.pos.x + 32., self.pos.y),
-				(self.pos.x - 32., self.pos.y)
+				(self.pos.x - 32., self.pos.y),
 			),
 			Direction::East | Direction::West => Barrier::new(
 				(self.pos.x, self.pos.y + 32.),
-				(self.pos.x, self.pos.y - 32.)
-			)
+				(self.pos.x, self.pos.y - 32.),
+			),
 		}
 	}
 
@@ -78,44 +72,46 @@ impl Door {
 		let speed = if let Behavior::Player(behavior) = player.behavior {
 			behavior.speed + 1.
 		} else {
-			panic!("If you are seeing this, the player does not have the player behavior. This is a huge problem. Fortunately, you should probably never see this.")
+			panic!(
+				"If you are seeing this, the player does not have the player behavior. This is a huge problem. Fortunately, you should probably never see this."
+			)
 		};
-		let mut new_pos = player.obj.pos + match self.direction {
-			Direction::North => Vec2::new(0., -speed),
-			Direction::South => Vec2::new(0., speed),
-			Direction::East => Vec2::new(-speed, 0.),
-			Direction::West => Vec2::new(speed, 0.)
-		};
+		let mut new_pos = player.obj.pos
+			+ match self.direction {
+				Direction::North => Vec2::new(0., -speed),
+				Direction::South => Vec2::new(0., speed),
+				Direction::East => Vec2::new(-speed, 0.),
+				Direction::West => Vec2::new(speed, 0.),
+			};
 
-		let ray = Ray::new(
-			player.obj.pos,
-			new_pos
-		);
+		let ray = Ray::new(player.obj.pos, new_pos);
 
 		// The player has not touched the door, so the map should not be changed
 		if cast(&ray, &self.to_barrier()).is_err() {
-			return
+			return;
 		}
-		
+
 		for i in access_map(&self.dest).doors.clone() {
-			if i.dest != world.current_map { continue }
+			if i.dest != world.current_map {
+				continue;
+			}
 
 			if !i.direction.is_opposing(&self.direction) {
 				log::error!(
-					"Door in {} does not match expected direction of door in {}\nDirection of Self: {} \nDirection of other: {}", 
-					world.current_map, 
-					self.dest, 
-					self.direction, 
+					"Door in {} does not match expected direction of door in {}\nDirection of Self: {} \nDirection of other: {}",
+					world.current_map,
+					self.dest,
+					self.direction,
 					i.direction
 				);
-				return
+				return;
 			}
 
 			new_pos += match self.direction {
 				Direction::North => Vec2::new(0., -speed),
 				Direction::South => Vec2::new(0., speed),
 				Direction::East => Vec2::new(-speed, 0.),
-				Direction::West => Vec2::new(speed, 0.)
+				Direction::West => Vec2::new(speed, 0.),
 			};
 			player.obj.pos = new_pos - self.pos + i.pos;
 

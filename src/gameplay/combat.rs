@@ -1,27 +1,17 @@
 use ahash::HashMap;
-use stecs::prelude::*;
 use raywoke::prelude::*;
+use stecs::prelude::*;
 
 use super::ecs::{
-	sprite::{
-		Frames, 
-		Rotation, 
-		Sprite
-	}, 
-	health::Health, 
-	obj::Obj, 
-	World
+	World,
+	health::Health,
+	obj::Obj,
+	sprite::{Frames, Rotation, Sprite},
 };
 
-use crate::utils::{
-	get_delta_time, 
-	get_mouse_pos
-};
+use crate::utils::{get_delta_time, get_mouse_pos};
 
-use rhai::{
-	CustomType, 
-	TypeBuilder
-};
+use rhai::{CustomType, TypeBuilder};
 
 #[derive(Clone, SplitFields)]
 pub struct Attack {
@@ -34,13 +24,13 @@ pub struct Attack {
 	damage: f32,
 	lifetime: f32,
 
-	pub sprite: Sprite
+	pub sprite: Sprite,
 }
 
 #[derive(Clone, PartialEq)]
 pub enum Owner {
 	Player,
-	Enemy
+	Enemy,
 }
 
 #[derive(Clone, PartialEq)]
@@ -48,7 +38,7 @@ pub enum AttackType {
 	Physical,
 	Burst,
 	Projectile,
-	Hitscan
+	Hitscan,
 }
 
 impl Attack {
@@ -64,13 +54,13 @@ impl Attack {
 			lifetime: 2.,
 
 			sprite: Sprite::new(
-				obj, 
-				obj.size as u32, 
-				key, 
+				obj,
+				obj.size as u32,
+				key,
 				Rotation::Angle,
 				Frames::new_attack(),
-				HashMap::default()
-			)
+				HashMap::default(),
+			),
 		}
 	}
 
@@ -91,18 +81,14 @@ impl Attack {
 				key,
 				Rotation::Static,
 				Frames::new_attack(),
-				HashMap::default()
-			)
+				HashMap::default(),
+			),
 		}
 	}
 
 	pub fn new_projectile(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
 		Attack {
-			obj: Obj::new(
-				obj.pos, 
-				((obj.target - obj.pos) * 999.) + obj.pos, 
-				obj.size
-			),
+			obj: Obj::new(obj.pos, ((obj.target - obj.pos) * 999.) + obj.pos, obj.size),
 
 			owner,
 			is_parried: false,
@@ -117,8 +103,8 @@ impl Attack {
 				key,
 				Rotation::Static,
 				Frames::new_static(),
-				HashMap::default()
-			)
+				HashMap::default(),
+			),
 		}
 	}
 
@@ -139,8 +125,8 @@ impl Attack {
 				"default:attacks/projectile-enemy",
 				Rotation::Static,
 				Frames::new_static(),
-				HashMap::default()
-			)
+				HashMap::default(),
+			),
 		}
 	}
 }
@@ -148,8 +134,7 @@ impl Attack {
 // Allows Attacks to be created by scripts
 impl CustomType for Attack {
 	fn build(mut builder: TypeBuilder<Self>) {
-		builder
-			.with_name("attack");
+		builder.with_name("attack");
 	}
 }
 
@@ -159,13 +144,16 @@ pub fn handle_combat(world: &mut World) {
 	for (_, mut atk) in world.attacks.iter_mut() {
 		atk.sprite.update(*atk.obj);
 
-		// Handling the lifetime and movement of attacks 
+		// Handling the lifetime and movement of attacks
 		if *atk.attack_type != AttackType::Projectile {
 			*atk.lifetime -= get_delta_time()
 		} else {
-			let new_pos = atk.obj.pos.move_towards(atk.obj.target, get_delta_time() * 5.);	
+			let new_pos = atk
+				.obj
+				.pos
+				.move_towards(atk.obj.target, get_delta_time() * 5.);
 			atk.obj.try_move(new_pos, &world.current_map);
-		
+
 			if atk.obj.pos != new_pos {
 				*atk.lifetime = 0.;
 			}
@@ -175,16 +163,22 @@ pub fn handle_combat(world: &mut World) {
 			AttackType::Physical => attack_physical,
 			AttackType::Burst => attack_burst,
 			AttackType::Projectile => attack_projectile,
-			AttackType::Hitscan => attack_hitscan
+			AttackType::Hitscan => attack_hitscan,
 		};
 
 		match atk.owner {
-			Owner::Player => for (obj, hp, sprite) in query!(world.enemies, (&mut obj, &mut health, &mut sprite)) {
-				func(obj, hp, sprite, &mut atk)
-			},
-			Owner::Enemy => for (obj, hp, sprite) in query!(world.player, (&mut obj, &mut health, &mut sprite)) {
-				func(obj, hp, sprite, &mut atk)
-			},
+			Owner::Player => {
+				for (obj, hp, sprite) in query!(world.enemies, (&mut obj, &mut health, &mut sprite))
+				{
+					func(obj, hp, sprite, &mut atk)
+				}
+			}
+			Owner::Enemy => {
+				for (obj, hp, sprite) in query!(world.player, (&mut obj, &mut health, &mut sprite))
+				{
+					func(obj, hp, sprite, &mut atk)
+				}
+			}
 		}
 	}
 }
@@ -224,54 +218,50 @@ fn attack_projectile(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &
 }
 
 fn attack_hitscan(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
-	if cast_wide(
-		&Ray::new(
-			atk.obj.pos, 
-			atk.obj.target
-		),
-		&obj.to_barriers()
-	).is_ok() { 
+	if cast_wide(&Ray::new(atk.obj.pos, atk.obj.target), &obj.to_barriers()).is_ok() {
 		sprite.shake();
-		hp.damage(*atk.damage) 
+		hp.damage(*atk.damage)
 	}
 }
 
-/// Attempts to parry attacks 
+/// Attempts to parry attacks
 fn try_parry(world: &mut World) {
 	let attack_ids: Vec<usize> = world.attacks.ids().collect();
 
 	for i in attack_ids.iter().rev() {
 		let atk_1 = world.attacks.get(*i).unwrap();
 
-		if *atk_1.attack_type != AttackType::Physical
-		|| *atk_1.is_parried {
+		if *atk_1.attack_type != AttackType::Physical || *atk_1.is_parried {
 			continue;
 		}
 
 		for j in attack_ids.iter().rev() {
-			if *i == *j { continue }
+			if *i == *j {
+				continue;
+			}
 
 			let atk_2 = world.attacks.get(*j).unwrap();
 
-			if !atk_2.obj.is_touching(atk_1.obj)
-			|| *atk_2.is_parried {
+			if !atk_2.obj.is_touching(atk_1.obj) || *atk_2.is_parried {
 				continue;
 			}
 
 			match atk_2.attack_type {
 				// Physical attacks should not be able to parry themselves
 				AttackType::Physical => {
-					if atk_1.owner == atk_2.owner { continue }
+					if atk_1.owner == atk_2.owner {
+						continue;
+					}
 				}
 				// Burst and hitscan attacks cannot be parried
 				AttackType::Burst | AttackType::Hitscan => continue,
 
-				_ => ()
+				_ => (),
 			}
 
-			// I have no clue why the borrow checker approved of 
+			// I have no clue why the borrow checker approved of
 			// the following code.
-			// 
+			//
 			// I know its safe, but the borrow checker shouldn't.
 
 			world.hitstop = 16.;
@@ -299,11 +289,11 @@ fn try_parry(world: &mut World) {
 					*atk_2.attack_type = AttackType::Hitscan;
 					atk_2.obj.target = match atk_2.owner {
 						Owner::Player => get_mouse_pos() * 999.,
-						Owner::Enemy => new_target * 999.
+						Owner::Enemy => new_target * 999.,
 					};
 				}
 
-				_ => panic!("How did a non-parryable attack end up here?")
+				_ => panic!("How did a non-parryable attack end up here?"),
 			}
 
 			break;

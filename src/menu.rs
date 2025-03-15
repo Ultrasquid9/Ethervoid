@@ -6,7 +6,7 @@ pub mod ui;
 
 /// The main menu of the game
 pub async fn menu() -> State {
-	let mut to_return: Option<State> = None; // The state that will be returned to Main 
+	let mut to_return: Option<State> = None; // The state that will be returned to Main
 
 	// The menu
 	loop {
@@ -30,7 +30,9 @@ pub async fn menu() -> State {
 		yakui_macroquad::finish();
 		yakui_macroquad::draw();
 
-		if let Some(state) = to_return { return state }
+		if let Some(state) = to_return {
+			return state;
+		}
 
 		next_frame().await
 	}

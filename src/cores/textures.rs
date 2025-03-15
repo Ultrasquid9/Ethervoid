@@ -1,16 +1,9 @@
-use std::sync::mpsc;
 use crate::prelude::*;
+use std::sync::mpsc;
 
-use imageproc::image::{
-	ColorType, 
-	DynamicImage, 
-	ImageReader
-};
+use imageproc::image::{ColorType, DynamicImage, ImageReader};
 
-use super::{
-	gen_name, 
-	get_files
-};
+use super::{gen_name, get_files};
 
 /// Provides a HashMap containing all Textures
 pub fn get_textures() -> HashMap<String, DynamicImage> {
@@ -18,31 +11,26 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 
 	let (transciever, receiver) = mpsc::channel();
 
-	get_files("sprites".to_string())
-		.par_iter()
-		.for_each(|dir| {
-			let name: String = gen_name(dir);
-			let img = ImageReader::open(dir)
-				.unwrap()
-				.decode();
+	get_files("sprites".to_string()).par_iter().for_each(|dir| {
+		let name: String = gen_name(dir);
+		let img = ImageReader::open(dir).unwrap().decode();
 
-			let Ok(img) = img 
-			else {
-				warn!("Texture {} failed to load: {}", name, img.err().unwrap());
-				return
-			};
+		let Ok(img) = img else {
+			warn!("Texture {} failed to load: {}", name, img.err().unwrap());
+			return;
+		};
 
-			info!("Texture {} loaded!", name);
+		info!("Texture {} loaded!", name);
 
-			let _ = transciever.send((
-				name, 
-				if img.color() == ColorType::Rgba8 {
-					img
-				} else {
-					DynamicImage::ImageRgba8(img.to_rgba8())
-				}
-			));
-		});
+		let _ = transciever.send((
+			name,
+			if img.color() == ColorType::Rgba8 {
+				img
+			} else {
+				DynamicImage::ImageRgba8(img.to_rgba8())
+			},
+		));
+	});
 
 	drop(transciever);
 

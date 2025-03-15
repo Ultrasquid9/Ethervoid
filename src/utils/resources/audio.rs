@@ -5,22 +5,20 @@ use parking_lot::RwLock;
 use std::sync::LazyLock;
 
 use kira::{
-	manager::{
-		AudioManager, 
-		AudioManagerSettings, 
-		DefaultBackend
-	}, 
-	sound::static_sound::StaticSoundData
+	AudioManager, AudioManagerSettings, DefaultBackend, sound::static_sound::StaticSoundData,
 };
 
 use crate::cores::audio::get_audio;
 
 /*
  *	Audio
- */ 
+ */
 
-static MANAGER: LazyLock<RwLock<AudioManager>> = LazyLock::new(|| RwLock::new(AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap()));
-static SOUNDS: LazyLock<RwLock<HashMap<String, StaticSoundData>>> = LazyLock::new(|| RwLock::new(HashMap::default()));
+static MANAGER: LazyLock<RwLock<AudioManager>> = LazyLock::new(|| {
+	RwLock::new(AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap())
+});
+static SOUNDS: LazyLock<RwLock<HashMap<String, StaticSoundData>>> =
+	LazyLock::new(|| RwLock::new(HashMap::default()));
 
 /// Populates the Sounds HashMap
 pub(super) fn create_sounds() {
@@ -40,8 +38,7 @@ pub(super) fn clean_sounds() {
 pub fn play_sound(key: &str) {
 	let thing = SOUNDS.read();
 
-	let Some(sound) = thing.get(key)
-	else {
+	let Some(sound) = thing.get(key) else {
 		error!("Sound {} not found", key);
 		return;
 	};
@@ -49,7 +46,7 @@ pub fn play_sound(key: &str) {
 	MANAGER.write().play(sound.clone()).unwrap();
 }
 
-/// Plays a random sound from the provided list of keys 
+/// Plays a random sound from the provided list of keys
 pub fn play_random_sound(keys: &[&str]) {
 	play_sound(keys[rand::gen_range(0, keys.len() - 1)]);
 }

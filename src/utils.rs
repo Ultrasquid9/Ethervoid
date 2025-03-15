@@ -1,20 +1,17 @@
 use parking_lot::RwLock;
 
 use macroquad::{
-	window::{
-		screen_height, 
-		screen_width
-	},
-	input::mouse_position, 
+	input::mouse_position,
+	math::Vec2,
 	time::get_frame_time,
-	math::Vec2
+	window::{screen_height, screen_width},
 };
 
 pub mod config;
 pub mod error;
 pub mod resources;
 
-// Stores the delta time of the given frame. 
+// Stores the delta time of the given frame.
 static DELTA_TIME: RwLock<f32> = RwLock::new(0.);
 
 pub fn point_to_vec2(point: std::boxed::Box<(dyn raywoke::point::Point + 'static)>) -> Vec2 {
@@ -25,7 +22,7 @@ pub fn point_to_vec2(point: std::boxed::Box<(dyn raywoke::point::Point + 'static
 /// Gets the current position of the mouse
 pub fn get_mouse_pos() -> Vec2 {
 	let (x, y) = mouse_position();
-	
+
 	Vec2::new(x, y) - Vec2::new(screen_width() / 2., screen_height() / 2.)
 }
 
@@ -35,7 +32,7 @@ Gets the current delta time, and stores it.
 This is done because Macroquad's `get_frame_time()` function panics in multithreaded scenarios.
  */
 pub fn update_delta_time() {
-	*DELTA_TIME.write() = get_frame_time() * 100. * (2./3.)
+	*DELTA_TIME.write() = get_frame_time() * 100. * (2. / 3.)
 }
 
 /// Gets the delta time

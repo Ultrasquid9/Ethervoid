@@ -1,10 +1,7 @@
 use imageproc::image::DynamicImage;
 use macroquad::texture::Texture2D;
 
-use fast_image_resize::{
-	ResizeOptions, 
-	Resizer
-};
+use fast_image_resize::{ResizeOptions, Resizer};
 
 /// Downscales the provided image
 pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
@@ -15,19 +12,21 @@ pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
 	};
 
 	let mut downscaled_img = DynamicImage::new_rgba8(
-		(img.width() / smallest_side) * size, 
-		(img.height() / smallest_side) * size
+		(img.width() / smallest_side) * size,
+		(img.height() / smallest_side) * size,
 	);
 
-	let mut resizer =  Resizer::new();
-	resizer.resize(
-		&img, 
-		&mut downscaled_img, 
-		&Some(ResizeOptions {
-			algorithm: fast_image_resize::ResizeAlg::Nearest,
-			..Default::default()
-		})
-	).unwrap();
+	let mut resizer = Resizer::new();
+	resizer
+		.resize(
+			&img,
+			&mut downscaled_img,
+			&Some(ResizeOptions {
+				algorithm: fast_image_resize::ResizeAlg::Nearest,
+				..Default::default()
+			}),
+		)
+		.unwrap();
 
 	downscaled_img
 }

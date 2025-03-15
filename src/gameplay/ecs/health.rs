@@ -1,16 +1,13 @@
 use crate::utils::get_delta_time;
 
-pub struct Health{
+pub struct Health {
 	pub hp: f32,
-	i_frames: f32
+	i_frames: f32,
 }
 
 impl Health {
 	pub fn new(hp: f32) -> Self {
-		Self {
-			hp,
-			i_frames: 0.
-		}
+		Self { hp, i_frames: 0. }
 	}
 
 	pub fn update(&mut self) {

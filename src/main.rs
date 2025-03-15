@@ -1,11 +1,8 @@
+use self::prelude::*;
 use fern::colors::ColoredLevelConfig;
 use gameplay::gameplay;
-use self::prelude::*;
 
-use menu::{
-	menu, 
-	ui::init_ui
-};
+use menu::{menu, ui::init_ui};
 
 mod cores;
 mod gameplay;
@@ -14,9 +11,9 @@ mod utils;
 
 /// Used to determine what state the game is in.
 pub enum State {
-	Menu, // The main-menu
+	Menu,     // The main-menu
 	Gameplay, // In-game
-	Quit // Exiting the gamej
+	Quit,     // Exiting the gamej
 }
 
 #[macroquad::main("Ethervoid")]
@@ -26,11 +23,11 @@ async fn main() {
 
 	let mut state = State::Menu;
 
-    loop {
+	loop {
 		state = match state {
 			State::Menu => menu().await,
 			State::Gameplay => gameplay().await,
-			State::Quit => return
+			State::Quit => return,
 		};
 
 		next_frame().await
@@ -42,15 +39,17 @@ fn log() {
 	let _ = std::fs::rename("./output.log", "./output.log.old");
 
 	// Coloring log messages
-	let colors = ColoredLevelConfig::new()
-		.info(fern::colors::Color::Green);
+	let colors = ColoredLevelConfig::new().info(fern::colors::Color::Green);
 
 	// Creating new log
 	fern::Dispatch::new()
 		.format(move |out, message, record| {
 			out.finish(format_args!(
 				"[{}] [{}] [{}] {}",
-				jiff::Zoned::now().datetime().round(jiff::Unit::Millisecond).unwrap(),
+				jiff::Zoned::now()
+					.datetime()
+					.round(jiff::Unit::Millisecond)
+					.unwrap(),
 				colors.color(record.level()),
 				record.target(),
 				message
@@ -71,11 +70,5 @@ pub mod prelude {
 
 	pub use ahash::HashMap;
 
-	pub use log::{
-		trace,
-		info,
-		warn,
-		debug,
-		error
-	};
+	pub use log::{debug, error, info, trace, warn};
 }

@@ -2,29 +2,15 @@ use raywoke::Barrier;
 use serde::Deserialize;
 
 use super::{
-	enemytype::{
-		get_enemytypes, 
-		EnemyType
-	}, 
-	npctype::{
-		get_npctypes, 
-		NpcType
-	},
-	gen_name, 
-	get_files, 
-	Readable
+	Readable,
+	enemytype::{EnemyType, get_enemytypes},
+	gen_name, get_files,
+	npctype::{NpcType, get_npctypes},
 };
 
-use crate::{
-	gameplay::doors::Door, 
-	utils::resources::textures::access_image,
-	prelude::*
-};
+use crate::{gameplay::doors::Door, prelude::*, utils::resources::textures::access_image};
 
-use image::{
-	DynamicImage, 
-	GenericImage
-};
+use image::{DynamicImage, GenericImage};
 
 #[derive(Deserialize)]
 struct MapBuilder {
@@ -32,13 +18,13 @@ struct MapBuilder {
 	doors: Vec<Door>,
 	enemies: Vec<(String, Vec2)>,
 	npcs: Vec<(String, Vec2)>,
-	tilemap: MapTexture
+	tilemap: MapTexture,
 }
 
 #[derive(Deserialize)]
 struct MapTexture {
 	keys: HashMap<char, String>,
-	tiles: Vec<Vec<char>>
+	tiles: Vec<Vec<char>>,
 }
 
 #[derive(Clone)]
@@ -47,13 +33,17 @@ pub struct Map {
 	pub doors: Box<[Door]>,
 	pub enemies: Box<[(EnemyType, macroquad::math::Vec2)]>,
 	pub npcs: Box<[(NpcType, Vec2)]>,
-	pub texture: DynamicImage
+	pub texture: DynamicImage,
 }
 
 impl Readable for MapBuilder {}
 
 impl MapBuilder {
-	pub fn build(self, enemytypes: &HashMap<String, EnemyType>, npctypes: &HashMap<String, NpcType>) -> Map {
+	pub fn build(
+		self,
+		enemytypes: &HashMap<String, EnemyType>,
+		npctypes: &HashMap<String, NpcType>,
+	) -> Map {
 		Map {
 			walls: {
 				let mut walls = Vec::new();
@@ -61,15 +51,13 @@ impl MapBuilder {
 				for point in 0..self.points.len() {
 					match self.points.get(point + 1) {
 						Some(_) => walls.push(Barrier::new(
-								self.points.get(point).unwrap().clone(), 
-								self.points.get(point + 1).unwrap().clone()
-							)
-						),
+							self.points.get(point).unwrap().clone(),
+							self.points.get(point + 1).unwrap().clone(),
+						)),
 						None => walls.push(Barrier::new(
-								self.points.get(point).unwrap().clone(), 
-								self.points.first().unwrap().clone()
-							)
-						)
+							self.points.get(point).unwrap().clone(),
+							self.points.first().unwrap().clone(),
+						)),
 					}
 				}
 
@@ -77,23 +65,19 @@ impl MapBuilder {
 			},
 			doors: self.doors.into_boxed_slice(),
 
-			enemies: self.enemies
+			enemies: self
+				.enemies
 				.par_iter()
-				.map(|enemy| (
-					enemytypes.get(enemy.0.as_str()).unwrap().clone(),
-					enemy.1
-				))
-				.collect(),
-			
-			npcs: self.npcs
-				.par_iter()
-				.map(|npc| (
-					npctypes.get(npc.0.as_str()).unwrap().clone(),
-					npc.1
-				))
+				.map(|enemy| (enemytypes.get(enemy.0.as_str()).unwrap().clone(), enemy.1))
 				.collect(),
 
-			texture: self.tilemap.to_texture()
+			npcs: self
+				.npcs
+				.par_iter()
+				.map(|npc| (npctypes.get(npc.0.as_str()).unwrap().clone(), npc.1))
+				.collect(),
+
+			texture: self.tilemap.to_texture(),
 		}
 	}
 }
@@ -101,8 +85,8 @@ impl MapBuilder {
 impl MapTexture {
 	fn to_texture(self) -> DynamicImage {
 		let mut texture = DynamicImage::new_rgba8(
-			(self.tiles[0].len() * 16) as u32, 
-			(self.tiles.len() * 16) as u32
+			(self.tiles[0].len() * 16) as u32,
+			(self.tiles.len() * 16) as u32,
 		);
 
 		for i in 0..self.tiles.len() {
@@ -112,9 +96,9 @@ impl MapTexture {
 				let index_hor = i * 16;
 
 				let _ = texture.copy_from(
-					&access_image(self.keys.get(key).unwrap()), 
-					index_hor as u32, 
-					index_vert as u32
+					&access_image(self.keys.get(key).unwrap()),
+					index_hor as u32,
+					index_vert as u32,
 				);
 			}
 		}

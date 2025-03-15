@@ -1,35 +1,22 @@
 use draw::{draw, render::darken_screen};
-use stecs::prelude::*;
 use macroquad::prelude::*;
+use stecs::prelude::*;
 
 use crate::{
+	State,
 	utils::{
-		resources::{
-			clean_resources, 
-			create_resources
-		}, 
-		get_delta_time,  
-		update_delta_time,
 		config::Config,
-	}, 
-	State
+		get_delta_time,
+		resources::{clean_resources, create_resources},
+		update_delta_time,
+	},
 };
 
-use combat::{
-	handle_combat, 
-	AttackType, 
-	Owner
-};
+use combat::{AttackType, Owner, handle_combat};
 
-use ecs::{
-	behavior::handle_behavior, 
-	World
-};
+use ecs::{World, behavior::handle_behavior};
 
-use player::{
-	swap_weapons, 
-	Player
-};
+use player::{Player, swap_weapons};
 
 pub mod combat;
 pub mod doors;
@@ -40,7 +27,9 @@ pub mod npc;
 pub mod player;
 
 pub async fn gameplay() -> State {
-	unsafe { create_resources(); } // All the resources in the game (textures, maps, etc.)
+	unsafe {
+		create_resources();
+	} // All the resources in the game (textures, maps, etc.)
 
 	let mut world = World {
 		player: Default::default(),
@@ -50,7 +39,7 @@ pub async fn gameplay() -> State {
 
 		config: Config::read("./config.ron"),
 		current_map: String::from("default:test"),
-		hitstop: 0.
+		hitstop: 0.,
 	};
 
 	world.player.insert(Player::new());
@@ -59,7 +48,7 @@ pub async fn gameplay() -> State {
 	loop {
 		update_delta_time();
 		draw(&mut world).await;
-		
+
 		// Handling hitstop
 		if world.hitstop > 0. {
 			world.hitstop -= get_delta_time();
@@ -70,17 +59,20 @@ pub async fn gameplay() -> State {
 		}
 
 		// NPC Dialogue (WIP)
-		for (obj, messages, messages_cooldown) in query!(world.npcs, (&obj, &messages, &mut messages_cooldown)) {
-			if *messages_cooldown > 0. { 
+		for (obj, messages, messages_cooldown) in
+			query!(world.npcs, (&obj, &messages, &mut messages_cooldown))
+		{
+			if *messages_cooldown > 0. {
 				*messages_cooldown -= get_delta_time();
-				continue 
+				continue;
 			}
 
 			for (atk_obj, atk_type, owner) in query!(world.attacks, (&obj, &attack_type, &owner)) {
-				if !atk_obj.is_touching(obj) 
-				|| *atk_type == AttackType::Projectile
-				|| *atk_type == AttackType::Hitscan
-				|| *owner != Owner::Player {
+				if !atk_obj.is_touching(obj)
+					|| *atk_type == AttackType::Projectile
+					|| *atk_type == AttackType::Hitscan
+					|| *owner != Owner::Player
+				{
 					continue;
 				}
 
@@ -88,7 +80,7 @@ pub async fn gameplay() -> State {
 					if message.should_read() {
 						message.read();
 						*messages_cooldown = 10.;
-						break
+						break;
 					}
 				}
 			}
@@ -119,11 +111,15 @@ pub async fn gameplay() -> State {
 			}
 
 			// Creating attacks
-			if world.config.keymap.sword.is_down() && inventory.swords[inventory.current_sword].cooldown <= 0. {
-				world.attacks.insert(inventory.attack_sword(obj.pos)); 
+			if world.config.keymap.sword.is_down()
+				&& inventory.swords[inventory.current_sword].cooldown <= 0.
+			{
+				world.attacks.insert(inventory.attack_sword(obj.pos));
 			}
-			if world.config.keymap.gun.is_down() && inventory.guns[inventory.current_gun].cooldown <= 0. {
-				world.attacks.insert(inventory.attack_gun(obj.pos)); 
+			if world.config.keymap.gun.is_down()
+				&& inventory.guns[inventory.current_gun].cooldown <= 0.
+			{
+				world.attacks.insert(inventory.attack_gun(obj.pos));
 			}
 		}
 
@@ -134,16 +130,18 @@ pub async fn gameplay() -> State {
 
 		// Movement and behavior
 		handle_behavior(&mut world);
-		
-		// handling dead entities/players and old attacks 
+
+		// handling dead entities/players and old attacks
 		remove_dead_enemies(&mut world);
 		remove_old_attacks(&mut world);
 		try_player_death(&mut world);
 
 		// Quitting the game
 		if world.config.keymap.quit.is_down() {
-			unsafe{ clean_resources(); }
-			return State::Menu
+			unsafe {
+				clean_resources();
+			}
+			return State::Menu;
 		}
 
 		next_frame().await
@@ -180,7 +178,7 @@ fn remove_old_attacks(world: &mut World) {
 		for (index, atk) in world.attacks.iter() {
 			if match atk.attack_type {
 				AttackType::Physical | AttackType::Burst => atk.sprite.anim_completed(),
-				_ => *atk.lifetime <= 0.
+				_ => *atk.lifetime <= 0.,
 			} {
 				to_remove = index;
 				atk_to_remove = true;
@@ -189,7 +187,9 @@ fn remove_old_attacks(world: &mut World) {
 		}
 
 		atk_to_remove
-	} { world.attacks.remove(to_remove); }
+	} {
+		world.attacks.remove(to_remove);
+	}
 }
 
 /// Handling the player's death (WIP)
