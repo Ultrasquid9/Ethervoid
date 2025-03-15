@@ -17,7 +17,7 @@ pub struct World {
 
 	pub current_map: String,
 	pub config: Config,
-	pub hitstop: f32,
+	pub hitstop: f64,
 }
 
 impl World {

@@ -1,4 +1,4 @@
-use macroquad::math::Vec2;
+use macroquad::math::DVec2;
 use rhai::Dynamic;
 use std::error::Error;
 
@@ -33,7 +33,7 @@ pub fn script_behavior(
 	// Executing the script
 	let new_pos = script
 		.engine
-		.eval_ast_with_scope::<Vec2>(&mut script.scope, &script.script)?;
+		.eval_ast_with_scope::<DVec2>(&mut script.scope, &script.script)?;
 
 	// Getting attacks out of the scope
 	let new_attacks = script
@@ -57,7 +57,7 @@ pub fn script_behavior(
 	// Taking delta time into consideration
 	let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;
 
-	if new_pos == Vec2::new(999999., 999999.) {
+	if new_pos == DVec2::new(999999., 999999.) {
 		sprite.set_default_anim();
 		script.scope.clear();
 		return Ok(true);

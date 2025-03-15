@@ -1,4 +1,4 @@
-use macroquad::math::Vec2;
+use macroquad::math::DVec2;
 use raywoke::prelude::*;
 use std::fmt::Display;
 
@@ -46,7 +46,7 @@ impl Display for Direction {
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub struct Door {
 	direction: Direction,
-	pos: Vec2,
+	pos: DVec2,
 	dest: String,
 }
 
@@ -78,13 +78,13 @@ impl Door {
 		};
 		let mut new_pos = player.obj.pos
 			+ match self.direction {
-				Direction::North => Vec2::new(0., -speed),
-				Direction::South => Vec2::new(0., speed),
-				Direction::East => Vec2::new(-speed, 0.),
-				Direction::West => Vec2::new(speed, 0.),
+				Direction::North => DVec2::new(0., -speed),
+				Direction::South => DVec2::new(0., speed),
+				Direction::East => DVec2::new(-speed, 0.),
+				Direction::West => DVec2::new(speed, 0.),
 			};
 
-		let ray = Ray::new(player.obj.pos, new_pos);
+		let ray = Ray::new(player.obj.pos.as_vec2(), new_pos.as_vec2());
 
 		// The player has not touched the door, so the map should not be changed
 		if cast(&ray, &self.to_barrier()).is_err() {
@@ -108,10 +108,10 @@ impl Door {
 			}
 
 			new_pos += match self.direction {
-				Direction::North => Vec2::new(0., -speed),
-				Direction::South => Vec2::new(0., speed),
-				Direction::East => Vec2::new(-speed, 0.),
-				Direction::West => Vec2::new(speed, 0.),
+				Direction::North => DVec2::new(0., -speed),
+				Direction::South => DVec2::new(0., speed),
+				Direction::East => DVec2::new(-speed, 0.),
+				Direction::West => DVec2::new(speed, 0.),
 			};
 			player.obj.pos = new_pos - self.pos + i.pos;
 

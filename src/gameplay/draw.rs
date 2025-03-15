@@ -15,7 +15,7 @@ use render::{draw_bar, draw_map, render_text, render_texture};
 pub mod process;
 pub mod render;
 
-pub const SCREEN_SCALE: f32 = 3.; // TODO: make configurable
+pub const SCREEN_SCALE: f64 = 3.; // TODO: make configurable
 
 pub async fn draw(world: &mut World) {
 	// Draws the background
@@ -23,10 +23,10 @@ pub async fn draw(world: &mut World) {
 
 	set_camera(&Camera2D {
 		zoom: vec2(
-			1. / camera_scale(),
-			screen_width() / screen_height() / camera_scale(),
+			1. / camera_scale() as f32,
+			screen_width() / screen_height() / camera_scale() as f32,
 		),
-		target: world.player.obj.first().unwrap().pos,
+		target: world.player.obj.first().unwrap().pos.as_vec2(),
 		..Default::default()
 	});
 
@@ -44,11 +44,11 @@ pub async fn draw(world: &mut World) {
 	for (atk_type, obj) in query!(world.attacks, (&attack_type, &obj)) {
 		if let AttackType::Hitscan = atk_type {
 			draw_line(
-				obj.pos.x,
-				obj.pos.y,
-				obj.target.x,
-				obj.target.y,
-				obj.size,
+				obj.pos.x as f32,
+				obj.pos.y as f32,
+				obj.target.x as f32,
+				obj.target.y as f32,
+				obj.size as f32,
 				RED,
 			);
 		}
@@ -64,7 +64,7 @@ pub async fn draw(world: &mut World) {
 		};
 
 		if let Some(e) = &behavior.err {
-			render_text(&format!("Script err: {e}"), Vec2::new(32., err_height), RED).await;
+			render_text(&format!("Script err: {e}"), DVec2::new(32., err_height), RED).await;
 			err_height += 32.
 		}
 	}
@@ -72,7 +72,7 @@ pub async fn draw(world: &mut World) {
 	// Drawing a temporary UI
 	render_text(
 		&format!("{}", world.player.health[0].hp),
-		Vec2::new(32., 96.),
+		DVec2::new(32., 96.),
 		BLACK,
 	)
 	.await

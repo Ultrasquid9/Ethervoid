@@ -23,7 +23,7 @@ imageproc = { version = "0.25", default-features = false }
 image = { version = "0.25", default-features = false, features = ["png", "avif-native"] }
 fast_image_resize = { version = "5.1", features = ["image", "rayon"] }
 
-rhai = { version = "1.21", features = ["f32_float", "sync"] }
+rhai = { version = "1.21", features = ["sync"] }
 serde = { version = "1.0", features = ["derive"] }
 ron = "0.8"
 

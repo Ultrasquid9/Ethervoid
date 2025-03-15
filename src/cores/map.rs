@@ -16,8 +16,8 @@ use image::{DynamicImage, GenericImage};
 struct MapBuilder {
 	points: Vec<Vec2>,
 	doors: Vec<Door>,
-	enemies: Vec<(String, Vec2)>,
-	npcs: Vec<(String, Vec2)>,
+	enemies: Vec<(String, DVec2)>,
+	npcs: Vec<(String, DVec2)>,
 	tilemap: MapTexture,
 }
 
@@ -31,8 +31,8 @@ struct MapTexture {
 pub struct Map {
 	pub walls: Box<[Barrier]>,
 	pub doors: Box<[Door]>,
-	pub enemies: Box<[(EnemyType, macroquad::math::Vec2)]>,
-	pub npcs: Box<[(NpcType, Vec2)]>,
+	pub enemies: Box<[(EnemyType, macroquad::math::DVec2)]>,
+	pub npcs: Box<[(NpcType, DVec2)]>,
 	pub texture: DynamicImage,
 }
 

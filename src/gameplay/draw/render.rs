@@ -6,14 +6,14 @@ use super::{SCREEN_SCALE, to_texture};
 use crate::{cores::map::Map, utils::camera_scale};
 
 pub async fn draw_map(map: &Map) {
-	render_texture(&to_texture(map.texture.clone()), vec2(0., 0.), None).await;
+	render_texture(&to_texture(map.texture.clone()), dvec2(0., 0.), None).await;
 }
 
 /// Renders a texture based upon the screen scale
-pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawTextureParams>) {
-	let scale = Vec2::new(
-		texture.width() * SCREEN_SCALE,
-		texture.height() * SCREEN_SCALE,
+pub async fn render_texture(texture: &Texture2D, pos: DVec2, params: Option<DrawTextureParams>) {
+	let scale = DVec2::new(
+		texture.width() as f64 * SCREEN_SCALE,
+		texture.height() as f64 * SCREEN_SCALE,
 	);
 
 	draw_texture_ex(
@@ -24,7 +24,7 @@ pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawT
 		match params {
 			Option::Some(params) => params,
 			Option::None => DrawTextureParams {
-				dest_size: Some(scale),
+				dest_size: Some(scale.as_vec2()),
 				..Default::default()
 			},
 		},
@@ -32,11 +32,11 @@ pub async fn render_texture(texture: &Texture2D, pos: Vec2, params: Option<DrawT
 }
 
 /// Renders text
-pub async fn render_text(string: &str, pos: Vec2, color: Color) {
+pub async fn render_text(string: &str, pos: DVec2, color: Color) {
 	draw_text_ex(
 		string,
-		pos.x,
-		pos.y,
+		pos.x as f32,
+		pos.y as f32,
 		TextParams {
 			font_size: camera_scale() as u16 / 12,
 			color,
@@ -46,8 +46,8 @@ pub async fn render_text(string: &str, pos: Vec2, color: Color) {
 	);
 }
 
-pub fn pixel_offset(base: f32) -> f32 {
-	(base / SCREEN_SCALE).round() * SCREEN_SCALE
+pub fn pixel_offset(base: f64) -> f32 {
+	((base / SCREEN_SCALE).round() * SCREEN_SCALE) as f32
 }
 
 /// Draws a Barrier

@@ -13,7 +13,7 @@ use super::{
 
 use crate::utils::{get_mouse_pos, resources::audio::play_random_sound};
 
-use macroquad::{input::mouse_position_local, math::Vec2};
+use macroquad::{input::mouse_position_local, math::DVec2};
 
 #[derive(SplitFields)]
 pub struct Player {
@@ -36,7 +36,7 @@ pub struct Inventory {
 pub struct WeaponInfo {
 	pub weapon: Weapon,
 	pub unlocked: bool,
-	pub cooldown: f32,
+	pub cooldown: f64,
 }
 
 pub enum Weapon {
@@ -53,7 +53,7 @@ pub enum Weapon {
 
 impl Player {
 	pub fn new() -> Self {
-		let pos = Vec2::new(0., 0.);
+		let pos = DVec2::new(0., 0.);
 		let obj = Obj::new(pos, pos, 15.);
 
 		Self {
@@ -118,7 +118,7 @@ impl Player {
 
 impl Inventory {
 	// Gets a sword attack based upon the currently selected sword
-	pub fn attack_sword(&mut self, pos: Vec2) -> Attack {
+	pub fn attack_sword(&mut self, pos: DVec2) -> Attack {
 		match self.swords[self.current_sword].weapon {
 			Weapon::Sword => {
 				play_random_sound(&[
@@ -129,7 +129,7 @@ impl Inventory {
 
 				self.swords[self.current_sword].cooldown = 16.;
 				Attack::new_physical(
-					Obj::new(pos, pos + mouse_position_local(), 36.),
+					Obj::new(pos, pos + mouse_position_local().as_dvec2(), 36.),
 					10.,
 					Owner::Player,
 					"default:attacks/slash",
@@ -159,7 +159,7 @@ impl Inventory {
 	}
 
 	// Gets a gun attack based upon the currently selected gun
-	pub fn attack_gun(&mut self, pos: Vec2) -> Attack {
+	pub fn attack_gun(&mut self, pos: DVec2) -> Attack {
 		match self.guns[self.current_gun].weapon {
 			Weapon::Pistol => {
 				self.guns[self.current_gun].cooldown = 16.;

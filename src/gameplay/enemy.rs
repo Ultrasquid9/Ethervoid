@@ -1,5 +1,5 @@
 use crate::cores::enemytype::EnemyType;
-use macroquad::math::Vec2;
+use macroquad::math::DVec2;
 use rayon::prelude::*;
 use stecs::prelude::*;
 
@@ -19,7 +19,7 @@ pub struct Enemy {
 }
 
 impl Enemy {
-	pub fn from_type(enemytype: &EnemyType, pos: &Vec2) -> Self {
+	pub fn from_type(enemytype: &EnemyType, pos: &DVec2) -> Self {
 		let obj = Obj::new(*pos, *pos, 15.);
 
 		Self {

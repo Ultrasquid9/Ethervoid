@@ -21,8 +21,8 @@ pub struct Attack {
 	pub is_parried: bool,
 
 	pub attack_type: AttackType,
-	damage: f32,
-	lifetime: f32,
+	damage: f64,
+	lifetime: f64,
 
 	pub sprite: Sprite,
 }
@@ -42,7 +42,7 @@ pub enum AttackType {
 }
 
 impl Attack {
-	pub fn new_physical(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
+	pub fn new_physical(obj: Obj, damage: f64, owner: Owner, key: &str) -> Attack {
 		Attack {
 			obj,
 
@@ -64,7 +64,7 @@ impl Attack {
 		}
 	}
 
-	pub fn new_burst(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
+	pub fn new_burst(obj: Obj, damage: f64, owner: Owner, key: &str) -> Attack {
 		Attack {
 			obj,
 
@@ -86,7 +86,7 @@ impl Attack {
 		}
 	}
 
-	pub fn new_projectile(obj: Obj, damage: f32, owner: Owner, key: &str) -> Attack {
+	pub fn new_projectile(obj: Obj, damage: f64, owner: Owner, key: &str) -> Attack {
 		Attack {
 			obj: Obj::new(obj.pos, ((obj.target - obj.pos) * 999.) + obj.pos, obj.size),
 
@@ -108,7 +108,7 @@ impl Attack {
 		}
 	}
 
-	pub fn new_hitscan(obj: Obj, damage: f32, owner: Owner) -> Attack {
+	pub fn new_hitscan(obj: Obj, damage: f64, owner: Owner) -> Attack {
 		Attack {
 			obj,
 
@@ -218,7 +218,7 @@ fn attack_projectile(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &
 }
 
 fn attack_hitscan(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
-	if cast_wide(&Ray::new(atk.obj.pos, atk.obj.target), &obj.to_barriers()).is_ok() {
+	if cast_wide(&Ray::new(atk.obj.pos.as_vec2(), atk.obj.target.as_vec2()), &obj.to_barriers()).is_ok() {
 		sprite.shake();
 		hp.damage(*atk.damage)
 	}

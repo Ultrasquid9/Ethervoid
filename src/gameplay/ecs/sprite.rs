@@ -6,7 +6,7 @@ use crate::{
 };
 
 use macroquad::{
-	math::{Rect, Vec2},
+	math::{Rect, Vec2, DVec2},
 	texture::DrawTextureParams,
 };
 
@@ -27,7 +27,7 @@ pub struct Sprite {
 	rotation: Rotation,
 	frames: Frames,
 
-	shaking: f32,
+	shaking: f64,
 
 	current_anim: Option<String>,
 	anims: HashMap<String, Frames>,
@@ -44,10 +44,10 @@ pub enum Rotation {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Frames {
 	frame_order: Vec<u32>,
-	frame_time: f32,
+	frame_time: f64,
 
 	#[serde(skip)]
-	anim_time: f32,
+	anim_time: f64,
 	#[serde(skip)]
 	anim_completed: bool,
 }
@@ -133,7 +133,7 @@ impl Sprite {
 		self.current_anim = None
 	}
 
-	pub async fn to_render_params(&self) -> (DynamicImage, Vec2, Option<DrawTextureParams>) {
+	pub async fn to_render_params(&self) -> (DynamicImage, DVec2, Option<DrawTextureParams>) {
 		let size = if self.rotation == Rotation::EightWay {
 			self.sprite.height() / 5
 		} else {
@@ -183,25 +183,25 @@ impl Sprite {
 						.crop_imm(x_pos, y_pos, size, size)
 						.as_rgba8()
 						.unwrap(),
-					(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x),
+					(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x) as f32,
 					imageproc::geometric_transformations::Interpolation::Nearest,
 					Rgba([0, 0, 0, 0]),
 				))
 			} else {
 				self.sprite.clone()
 			},
-			Vec2::new(
+			DVec2::new(
 				self.obj.pos.x
 					+ match self.rotation {
 						Rotation::Angle => 0.,
-						Rotation::Static => self.sprite.width() as f32 / 2.,
-						_ => self.sprite.width() as f32,
+						Rotation::Static => self.sprite.width() as f64 / 2.,
+						_ => self.sprite.width() as f64,
 					},
 				self.obj.pos.y
 					+ match self.rotation {
 						Rotation::Angle => 0.,
-						Rotation::Static => self.sprite.width() as f32 / 2.,
-						_ => self.sprite.height() as f32,
+						Rotation::Static => self.sprite.width() as f64 / 2.,
+						_ => self.sprite.height() as f64,
 					},
 			),
 			Some(DrawTextureParams {
@@ -218,8 +218,8 @@ impl Sprite {
 				flip_x: self.obj.axis_horizontal == Axis::Negative
 					&& self.rotation == Rotation::EightWay,
 				dest_size: Some(Vec2::new(
-					size as f32 * SCREEN_SCALE,
-					size as f32 * SCREEN_SCALE,
+					size as f32 * SCREEN_SCALE as f32,
+					size as f32 * SCREEN_SCALE as f32,
 				)),
 				..Default::default()
 			}),

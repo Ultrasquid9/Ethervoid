@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum NpcMovement {
-	Wander(f32),
+	Wander(f64),
 	Still,
 }
 

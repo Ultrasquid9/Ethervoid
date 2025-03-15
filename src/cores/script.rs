@@ -74,34 +74,34 @@ pub fn get_scripts() -> HashMap<String, ScriptBuilder> {
 fn init_engine() -> Engine {
 	let mut engine = Engine::new();
 
-	// Some Vec2 built-in methods don't work, since Rhai methods dissallow immutable references.
+	// Some DVec2 built-in methods don't work, since Rhai methods dissallow immutable references.
 	// As such, I have to make shitty copies.
-	fn getter_x(pos: &mut Vec2) -> f32 {
+	fn getter_x(pos: &mut DVec2) -> f64 {
 		pos.x
 	}
-	fn getter_y(pos: &mut Vec2) -> f32 {
+	fn getter_y(pos: &mut DVec2) -> f64 {
 		pos.x
 	}
-	fn setter_x(pos: &mut Vec2, new: f32) {
+	fn setter_x(pos: &mut DVec2, new: f64) {
 		pos.x = new
 	}
-	fn setter_y(pos: &mut Vec2, new: f32) {
+	fn setter_y(pos: &mut DVec2, new: f64) {
 		pos.x = new
 	}
 
-	fn move_towards(pos1: &mut Vec2, pos2: Vec2, distance: f32) -> Vec2 {
+	fn move_towards(pos1: &mut DVec2, pos2: DVec2, distance: f64) -> DVec2 {
 		pos1.move_towards(pos2, distance)
 	}
-	fn distance_between(pos1: &mut Vec2, pos2: Vec2) -> f32 {
+	fn distance_between(pos1: &mut DVec2, pos2: DVec2) -> f64 {
 		pos1.distance(pos2)
 	}
-	fn angle_between(pos1: &mut Vec2, pos2: Vec2) -> f32 {
+	fn angle_between(pos1: &mut DVec2, pos2: DVec2) -> f64 {
 		(pos2.y - pos1.y).atan2(pos2.x - pos1.x)
 	}
 
 	engine
-		// Registerring the Vec2 and functions related to it
-		.register_type_with_name::<Vec2>("position")
+		// Registerring the DVec2 and functions related to it
+		.register_type_with_name::<DVec2>("position")
 		.register_get_set("x", getter_x, setter_x)
 		.register_get_set("y", getter_y, setter_y)
 		.register_fn("angle_between", angle_between)
@@ -112,30 +112,30 @@ fn init_engine() -> Engine {
 		// Functions for creating attacks
 		.register_fn(
 			"new_physical",
-			|damage: f32, size, pos: Vec2, target: Vec2, key: &str| {
+			|damage: f64, size, pos: DVec2, target: DVec2, key: &str| {
 				Attack::new_physical(Obj::new(pos, target, size), damage, Owner::Enemy, key)
 			},
 		)
 		.register_fn(
 			"new_burst",
-			|damage: f32, size: f32, pos: Vec2, key: &str| {
+			|damage: f64, size: f64, pos: DVec2, key: &str| {
 				Attack::new_burst(Obj::new(pos, pos, size), damage, Owner::Enemy, key)
 			},
 		)
 		.register_fn(
 			"new_projectile",
-			|damage: f32, pos: Vec2, target: Vec2, key: &str| {
+			|damage: f64, pos: DVec2, target: DVec2, key: &str| {
 				Attack::new_projectile(Obj::new(pos, target, 10.), damage, Owner::Enemy, key)
 			},
 		)
 		.register_fn(
 			"new_hitscan",
-			|damage: f32, pos: Vec2, target: Vec2, _key: &str| {
+			|damage: f64, pos: DVec2, target: DVec2, _key: &str| {
 				Attack::new_hitscan(Obj::new(pos, target, 6.), damage, Owner::Enemy)
 			},
 		)
 		// Hacky method to end the script
-		.register_fn("end", || Vec2::new(999999., 999999.))
+		.register_fn("end", || DVec2::new(999999., 999999.))
 		// Pipeline operator
 		// IDK if this will ever be used, I just added it for fun
 		.register_custom_operator("|>", 255)

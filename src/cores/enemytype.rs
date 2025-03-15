@@ -9,8 +9,8 @@ use crate::{gameplay::ecs::sprite::Frames, prelude::*};
 
 #[derive(Clone, Deserialize)]
 struct EnemyTypeBuilder {
-	max_health: f32,
-	size: f32,
+	max_health: f64,
+	size: f64,
 	sprite: String,
 	movement: String,
 	attacks: Vec<String>,
@@ -39,8 +39,8 @@ impl EnemyTypeBuilder {
 /// A struct containing the stats of an enemy type
 #[derive(Clone)]
 pub struct EnemyType {
-	pub max_health: f32,
-	pub size: f32,
+	pub max_health: f64,
+	pub size: f64,
 	pub sprite: String,
 	pub movement: ScriptBuilder,
 	pub attacks: Box<[ScriptBuilder]>,

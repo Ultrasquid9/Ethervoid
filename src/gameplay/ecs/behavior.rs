@@ -11,7 +11,7 @@ use crate::{
 
 use std::{error::Error, thread};
 
-use macroquad::{math::Vec2, prelude::rand};
+use macroquad::{math::DVec2, prelude::rand};
 
 pub mod player;
 pub mod script;
@@ -26,9 +26,9 @@ pub enum Behavior {
 
 #[derive(PartialEq, Clone)]
 pub struct PlayerBehavior {
-	pub speed: f32,
+	pub speed: f64,
 
-	pub dash_cooldown: f32,
+	pub dash_cooldown: f64,
 	pub is_dashing: bool,
 }
 
@@ -37,17 +37,17 @@ pub struct EnemyBehavior {
 	pub attacks: Box<[Script]>,
 
 	pub attack_index: usize,
-	pub attack_cooldown: f32,
+	pub attack_cooldown: f64,
 
 	pub err: Option<Box<dyn Error + Send + Sync>>,
 }
 
 #[derive(PartialEq, Clone)]
 pub struct WanderBehavior {
-	pub pos: Vec2,
-	pub range: f32,
+	pub pos: DVec2,
+	pub range: f64,
 
-	pub cooldown: f32,
+	pub cooldown: f64,
 }
 
 impl EnemyBehavior {
@@ -153,7 +153,7 @@ pub fn handle_behavior(world: &mut World) {
 						behavior.cooldown -= get_delta_time();
 						continue;
 					} else if obj.pos.distance(obj.target) < 5. {
-						obj.update(Vec2::new(
+						obj.update(DVec2::new(
 							rand::gen_range(
 								behavior.pos.x - behavior.range,
 								behavior.pos.x + behavior.range,

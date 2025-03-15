@@ -1,5 +1,5 @@
 use ahash::HashMap;
-use macroquad::math::Vec2;
+use macroquad::math::DVec2;
 use messages::Message;
 use stecs::prelude::*;
 
@@ -20,11 +20,11 @@ pub struct Npc {
 	sprite: Sprite,
 
 	messages: Box<[Message]>,
-	messages_cooldown: f32,
+	messages_cooldown: f64,
 }
 
 impl Npc {
-	pub fn from_type(npctype: &NpcType, pos: &Vec2) -> Self {
+	pub fn from_type(npctype: &NpcType, pos: &DVec2) -> Self {
 		let obj = Obj::new(*pos, *pos, 15.);
 
 		Self {
