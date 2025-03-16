@@ -138,6 +138,22 @@ pub fn goal_behavior(
 	attacks: &mut AttackStructOf<VecFamily>,
 	current_map: &str,
 ) {
+	// Macro to execute a function and check if it returns an error
+	macro_rules! maybe {
+		($name:pat, $result:expr) => {
+			let result = $result;
+			if let Err(e) = result {
+				error!("{}", e);
+				behavior.err = Some(e);
+				return;
+			}
+			let $name = result.unwrap();
+		};
+		($result:expr) => {
+			maybe!(_, $result);
+		};
+	}
+
 	if behavior.err.is_some() {
 		return;
 	}
@@ -149,21 +165,10 @@ pub fn goal_behavior(
 
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {
-		let result = behavior.goals[index].update(obj_self, sprite, attacks, current_map);
-		if let Err(e) = result {
-			error!("{}", e);
-			behavior.err = Some(e);
-			return;
-		}
+		maybe!(behavior.goals[index].update(obj_self, sprite, attacks, current_map));
+		maybe!(should_stop, behavior.goals[index].should_stop(sprite));
 
-		let result = behavior.goals[index].should_stop(sprite);
-		if let Err(e) = result {
-			error!("{}", e);
-			behavior.err = Some(e);
-			return;
-		}
-
-		if result.unwrap() {
+		if should_stop {
 			behavior.prev_goal = behavior.goals[index].name.clone();
 			behavior.index = None
 		}
@@ -185,11 +190,6 @@ pub fn goal_behavior(
 			continue;
 		}
 
-		let result = behavior.goals[index].init();
-		if let Err(e) = result {
-			error!("{}", e);
-			behavior.err = Some(e);
-		}
-		return;
+		maybe!(behavior.goals[index].init());
 	}
 }

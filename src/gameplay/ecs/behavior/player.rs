@@ -2,7 +2,10 @@ use macroquad::math::DVec2;
 
 use crate::{
 	gameplay::ecs::obj::{Axis, Obj},
-	utils::{config::Config, get_delta_time},
+	utils::{
+		config::{Config, Key},
+		get_delta_time,
+	},
 };
 
 #[derive(PartialEq, Clone)]
@@ -70,39 +73,34 @@ pub fn player_behavior(
 }
 
 fn switch_dir_from_input(config: &Config, obj: &mut Obj) {
-	// Checks to see if both Up and Down are being held at the same time.
-	// If they are, sets the direction to move based upon the most recently pressed key.
-	// Otherwise, sets the direction to move based upon the currently pressed key.
-	if config.keymap.up.is_down() && config.keymap.down.is_down() {
-		if config.keymap.up.is_pressed() && obj.axis_vertical != Axis::Negative {
-			obj.axis_vertical = Axis::Negative;
+	// Checks to see if both key1 and key2 are being held at the same time.
+	// If they are, sets the direction of the axis based upon the most recently pressed key.
+	// Otherwise, sets the direction of the axis based upon the currently pressed key.
+	fn io(key1: &Key, key2: &Key, axis: &mut Axis) {
+		if key1.is_down() && key2.is_down() {
+			if key1.is_pressed() && *axis != Axis::Negative {
+				*axis = Axis::Negative;
+			}
+			if key2.is_pressed() && *axis != Axis::Positive {
+				*axis = Axis::Positive;
+			}
+		} else if key1.is_down() {
+			*axis = Axis::Negative;
+		} else if key2.is_down() {
+			*axis = Axis::Positive;
+		} else {
+			*axis = Axis::None;
 		}
-		if config.keymap.down.is_pressed() && obj.axis_vertical != Axis::Positive {
-			obj.axis_vertical = Axis::Positive;
-		}
-	} else if config.keymap.up.is_down() {
-		obj.axis_vertical = Axis::Negative;
-	} else if config.keymap.down.is_down() {
-		obj.axis_vertical = Axis::Positive;
-	} else {
-		obj.axis_vertical = Axis::None;
 	}
 
-	// Checks to see if both Left and Right are being held at the same time.
-	// If they are, sets the direction to move based upon the most recently pressed key.
-	// Otherwise, sets the direction to move based upon the currently pressed key.
-	if config.keymap.left.is_down() && config.keymap.right.is_down() {
-		if config.keymap.left.is_pressed() && obj.axis_vertical != Axis::Negative {
-			obj.axis_horizontal = Axis::Negative;
-		}
-		if config.keymap.right.is_pressed() && obj.axis_vertical != Axis::Positive {
-			obj.axis_horizontal = Axis::Positive;
-		}
-	} else if config.keymap.left.is_down() {
-		obj.axis_horizontal = Axis::Negative;
-	} else if config.keymap.right.is_down() {
-		obj.axis_horizontal = Axis::Positive;
-	} else {
-		obj.axis_horizontal = Axis::None;
-	}
+	io(
+		&config.keymap.up,
+		&config.keymap.down,
+		&mut obj.axis_vertical,
+	);
+	io(
+		&config.keymap.left,
+		&config.keymap.right,
+		&mut obj.axis_horizontal,
+	);
 }
