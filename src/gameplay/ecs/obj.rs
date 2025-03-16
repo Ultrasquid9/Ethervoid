@@ -144,7 +144,7 @@ impl Obj {
 		for i in map.walls.iter() {
 			if cast(
 				&Ray::new((self.pos.x, self.pos.y), (new_pos.x, new_pos.y)),
-				&i,
+				i,
 			)
 			.is_ok()
 			{

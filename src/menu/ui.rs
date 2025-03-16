@@ -2,7 +2,7 @@ use std::sync::LazyLock;
 
 use yakui::font::{Font, FontName, FontSettings, Fonts};
 
-pub const FONT: LazyLock<FontName> = LazyLock::new(|| FontName::new("PixeloidMono"));
+pub static FONT: LazyLock<FontName> = LazyLock::new(|| FontName::new("PixeloidMono"));
 
 pub fn init_ui() {
 	yakui_macroquad::cfg(|cfg| {

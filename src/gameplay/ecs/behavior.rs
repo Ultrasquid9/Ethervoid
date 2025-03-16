@@ -12,8 +12,8 @@ use std::{error::Error, thread};
 
 use macroquad::{math::DVec2, prelude::rand};
 
-pub mod player;
 pub mod goal;
+pub mod player;
 
 #[derive(PartialEq, Clone)]
 pub enum Behavior {
@@ -56,7 +56,7 @@ impl Clone for GoalBehavior {
 	fn clone(&self) -> Self {
 		Self {
 			goals: self.goals.clone(),
-			index: self.index.clone(),
+			index: self.index,
 			err: None,
 		}
 	}
@@ -91,12 +91,9 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 				}
 
 				Behavior::Goal(behavior) => {
-					// Probably not the most performant way to do it 
+					// Probably not the most performant way to do it
 					for script in behavior.goals.iter_mut() {
-						script.update_constants(
-							&obj, 
-							&obj_player
-						);
+						script.update_constants(obj, &obj_player);
 					}
 
 					// Updates the current goal, and checks it it should be stopped
@@ -124,7 +121,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 						continue;
 					}
 
-					// Checks each goal to see if they should be started, and selects the first valid one 
+					// Checks each goal to see if they should be started, and selects the first valid one
 					for index in 0..behavior.goals.len() {
 						let result = behavior.goals[index].should_start();
 						if let Err(e) = result {

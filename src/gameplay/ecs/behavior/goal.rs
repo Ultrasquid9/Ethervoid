@@ -7,20 +7,13 @@ use crate::{
 		combat::AttackStructOf,
 		ecs::{obj::Obj, sprite::Sprite},
 	},
-	utils::{
-		error:: Result,
-		get_delta_time,
-	},
+	utils::{error::Result, get_delta_time},
 };
 
 use stecs::{prelude::*, storage::vec::VecFamily};
 
 impl Goal {
-	pub fn update_constants(
-		&mut self,
-		obj_self: &Obj,
-		obj_player: &Obj
-	) {
+	pub fn update_constants(&mut self, obj_self: &Obj, obj_player: &Obj) {
 		// Removing the constants if they exist, to prevent the scope from growing exponentially
 		_ = self.scope.remove::<Dynamic>("player_pos");
 		_ = self.scope.remove::<Dynamic>("self_pos");
@@ -36,7 +29,7 @@ impl Goal {
 			self.engine
 				.call_fn::<bool>(&mut self.scope, &self.script, "should_start", ())?;
 
-		return Ok(result);
+		Ok(result)
 	}
 
 	pub fn should_stop(&mut self, sprite: &mut Sprite) -> Result<bool> {
@@ -47,14 +40,14 @@ impl Goal {
 		if x {
 			self.scope.clear();
 			sprite.set_default_anim();
-			return Ok(true);
+			Ok(true)
 		} else {
-			return Ok(false);
+			Ok(false)
 		}
 	}
 
 	pub fn init(&mut self) -> Result<()> {
-		_ = self.engine.call_fn_with_options::<()>(
+		self.engine.call_fn_with_options::<()>(
 			CallFnOptions::new().eval_ast(false).rewind_scope(false),
 			&mut self.scope,
 			&self.script,
@@ -93,7 +86,7 @@ impl Goal {
 
 		// Getting the new animation from the scope
 		let new_anim = self.scope.remove::<String>("current_anim");
-		if new_anim.is_some() && new_anim.as_ref().unwrap().len() > 0 {
+		if new_anim.is_some() && !new_anim.as_ref().unwrap().is_empty() {
 			sprite.set_new_anim(new_anim.unwrap())?;
 		}
 

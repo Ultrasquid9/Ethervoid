@@ -176,7 +176,7 @@ impl Sprite {
 		x_pos = x_pos.clamp(0, self.sprite.width() - 1);
 		y_pos = y_pos.clamp(0, self.sprite.height() - 1);
 
-		return (
+		(
 			if self.rotation == Rotation::Angle {
 				DynamicImage::ImageRgba8(rotate_about_center(
 					self.sprite
@@ -224,7 +224,7 @@ impl Sprite {
 				)),
 				..Default::default()
 			}),
-		);
+		)
 	}
 }
 

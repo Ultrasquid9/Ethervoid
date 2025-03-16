@@ -6,9 +6,9 @@ use std::fs::{self, read_dir};
 
 pub mod audio;
 pub mod enemytype;
+pub mod goal;
 pub mod map;
 pub mod npctype;
-pub mod goal;
 pub mod textures;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores

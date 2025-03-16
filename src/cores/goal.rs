@@ -18,7 +18,6 @@ use super::{gen_name, get_files};
 #[derive(Clone, Deserialize)]
 pub struct GoalBuilder(String);
 
-
 /// A goal that can be configured via a script.
 pub struct Goal {
 	pub script: AST,
@@ -95,7 +94,6 @@ fn init_engine() -> Engine {
 	engine
 		// Disabling "eval" (this was recommended by the Rhai docs)
 		.disable_symbol("eval")
-
 		// Registerring the DVec2 and functions related to it
 		.register_type_with_name::<DVec2>("position")
 		.register_get_set("x", getter_x, setter_x)
@@ -103,10 +101,8 @@ fn init_engine() -> Engine {
 		.register_fn("angle_between", angle_between)
 		.register_fn("move_towards", move_towards)
 		.register_fn("distance_between", distance_between)
-
 		// Delta time
 		.register_fn("delta", get_delta_time)
-
 		// Functions for creating attacks
 		.register_fn(
 			"new_physical",
@@ -132,7 +128,6 @@ fn init_engine() -> Engine {
 				Attack::new_hitscan(Obj::new(pos, target, 6.), damage, Owner::Enemy)
 			},
 		)
-
 		// Pipeline operator
 		// IDK if this will ever be used, I just added it for fun
 		.register_custom_operator("|>", 255)

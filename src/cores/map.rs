@@ -14,7 +14,7 @@ use image::{DynamicImage, GenericImage};
 
 #[derive(Deserialize)]
 struct MapBuilder {
-	points: Vec<Vec2>,
+	points: Vec<DVec2>,
 	doors: Vec<Door>,
 	enemies: Vec<(String, DVec2)>,
 	npcs: Vec<(String, DVec2)>,
@@ -31,7 +31,7 @@ struct MapTexture {
 pub struct Map {
 	pub walls: Box<[Barrier]>,
 	pub doors: Box<[Door]>,
-	pub enemies: Box<[(EnemyType, macroquad::math::DVec2)]>,
+	pub enemies: Box<[(EnemyType, DVec2)]>,
 	pub npcs: Box<[(NpcType, DVec2)]>,
 	pub texture: DynamicImage,
 }
@@ -51,12 +51,12 @@ impl MapBuilder {
 				for point in 0..self.points.len() {
 					match self.points.get(point + 1) {
 						Some(_) => walls.push(Barrier::new(
-							self.points.get(point).unwrap().clone(),
-							self.points.get(point + 1).unwrap().clone(),
+							self.points.get(point).unwrap().as_vec2(),
+							self.points.get(point + 1).unwrap().as_vec2(),
 						)),
 						None => walls.push(Barrier::new(
-							self.points.get(point).unwrap().clone(),
-							self.points.first().unwrap().clone(),
+							self.points.get(point).unwrap().as_vec2(),
+							self.points.first().unwrap().as_vec2(),
 						)),
 					}
 				}
@@ -68,13 +68,13 @@ impl MapBuilder {
 			enemies: self
 				.enemies
 				.par_iter()
-				.map(|enemy| (enemytypes.get(enemy.0.as_str()).unwrap().clone(), enemy.1))
+				.map(|(name, pos)| (enemytypes.get(name.as_str()).unwrap().clone(), *pos))
 				.collect(),
 
 			npcs: self
 				.npcs
 				.par_iter()
-				.map(|npc| (npctypes.get(npc.0.as_str()).unwrap().clone(), npc.1))
+				.map(|(name, pos)| (npctypes.get(name.as_str()).unwrap().clone(), *pos))
 				.collect(),
 
 			texture: self.tilemap.to_texture(),
@@ -83,7 +83,7 @@ impl MapBuilder {
 }
 
 impl MapTexture {
-	fn to_texture(self) -> DynamicImage {
+	fn to_texture(&self) -> DynamicImage {
 		let mut texture = DynamicImage::new_rgba8(
 			(self.tiles[0].len() * 16) as u32,
 			(self.tiles.len() * 16) as u32,

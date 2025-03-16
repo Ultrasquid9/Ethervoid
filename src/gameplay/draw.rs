@@ -31,13 +31,13 @@ pub async fn draw(gameplay: &mut Gameplay) {
 		..Default::default()
 	});
 
-	draw_map(&access_map(&gameplay.current_map)).await;
+	draw_map(access_map(&gameplay.current_map)).await;
 
 	for bar in access_map(&gameplay.current_map).walls.iter() {
-		draw_bar(&bar);
+		draw_bar(bar);
 	}
-	for bar in access_map(&gameplay.current_map).doors.iter() {
-		draw_bar(&bar.to_barrier());
+	for door in access_map(&gameplay.current_map).doors.iter() {
+		draw_bar(&door.to_barrier());
 	}
 
 	render_sprites(gameplay).await;

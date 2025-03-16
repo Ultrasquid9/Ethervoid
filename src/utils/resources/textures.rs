@@ -41,5 +41,5 @@ pub fn access_image(key: &str) -> DynamicImage {
 		);
 	};
 
-	return texture.clone();
+	texture.clone()
 }
