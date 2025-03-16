@@ -1,5 +1,6 @@
 use std::fs;
 
+use log::error;
 use macroquad::input::{
 	KeyCode, MouseButton, is_key_down, is_key_pressed, is_mouse_button_down,
 	is_mouse_button_pressed,
@@ -64,10 +65,16 @@ impl Config {
 	pub fn read(dir: &str) -> Self {
 		match ron::from_str(&match fs::read_to_string(dir) {
 			Ok(str) => str,
-			Err(_) => DEFAULT_CONFIG.to_string(),
+			Err(e) => {
+				error!("Error when reading config: {e}");
+				DEFAULT_CONFIG.to_string()
+			}
 		}) {
 			Ok(config) => config,
-			Err(_) => ron::from_str(DEFAULT_CONFIG).unwrap(),
+			Err(e) => {
+				error!("Error when deserializing config: {e}");
+				ron::from_str(DEFAULT_CONFIG).unwrap()
+			}
 		}
 	}
 }
