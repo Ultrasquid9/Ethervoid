@@ -8,7 +8,7 @@ pub mod audio;
 pub mod enemytype;
 pub mod map;
 pub mod npctype;
-pub mod script;
+pub mod goal;
 pub mod textures;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores

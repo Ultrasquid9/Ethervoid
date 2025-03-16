@@ -2,15 +2,15 @@
 	max_health: 32,
 	size: 15,
 	sprite: "default:entity/player/player_spritesheet_wip",
-	movement: "default:movement/move_towards_player",
-	attacks: [
+	goals: [
 		"default:attacks/test",
-		"default:attacks/test2"
+		"default:attacks/test2",
+		"default:movement/move_towards_player",
 	],
 	anims: {
 		"toss": (
-			frame_order: [0, 2],
-			frame_time: 2.
+			frame_order: [ 0 ],
+			frame_time: 999.
 		)
 	}
 )

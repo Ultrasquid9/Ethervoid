@@ -60,7 +60,7 @@ pub async fn draw(gameplay: &mut Gameplay) {
 	// Render script errors (if any are present)
 	let mut err_height = 128.;
 	for behavior in query!(gameplay.world.enemies, (&behavior)) {
-		let Behavior::Enemy(behavior) = behavior else {
+		let Behavior::Goal(behavior) = behavior else {
 			continue;
 		};
 

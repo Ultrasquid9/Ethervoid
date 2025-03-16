@@ -1,10 +1,9 @@
 use parking_lot::RwLock;
 use player::player_behavior;
-use script::script_behavior;
 use stecs::prelude::*;
 
 use crate::{
-	cores::script::Script,
+	cores::goal::Goal,
 	gameplay::Gameplay,
 	utils::{get_delta_time, resources::maps::access_map},
 };
@@ -14,12 +13,12 @@ use std::{error::Error, thread};
 use macroquad::{math::DVec2, prelude::rand};
 
 pub mod player;
-pub mod script;
+pub mod goal;
 
 #[derive(PartialEq, Clone)]
 pub enum Behavior {
 	Player(PlayerBehavior),
-	Enemy(EnemyBehavior),
+	Goal(GoalBehavior),
 	Wander(WanderBehavior),
 	None,
 }
@@ -32,12 +31,9 @@ pub struct PlayerBehavior {
 	pub is_dashing: bool,
 }
 
-pub struct EnemyBehavior {
-	pub movement: Script,
-	pub attacks: Box<[Script]>,
-
-	pub attack_index: usize,
-	pub attack_cooldown: f64,
+pub struct GoalBehavior {
+	pub goals: Box<[Goal]>,
+	pub index: Option<usize>,
 
 	pub err: Option<Box<dyn Error + Send + Sync>>,
 }
@@ -50,36 +46,17 @@ pub struct WanderBehavior {
 	pub cooldown: f64,
 }
 
-impl EnemyBehavior {
-	fn change_attack_index(&mut self) {
-		self.attack_cooldown = 40.;
-		self.movement.scope.clear();
-
-		self.attack_index = if self.attack_index >= self.attacks.len() - 1 {
-			0
-		} else {
-			self.attack_index + 1
-		};
-	}
-}
-
-impl PartialEq for EnemyBehavior {
+impl PartialEq for GoalBehavior {
 	fn eq(&self, other: &Self) -> bool {
-		self.attacks.len() == other.attacks.len()
-			&& self.attack_index == other.attack_index
-			&& self.attack_cooldown == other.attack_cooldown
+		self.index == other.index
 	}
 }
 
-impl Clone for EnemyBehavior {
+impl Clone for GoalBehavior {
 	fn clone(&self) -> Self {
 		Self {
-			movement: self.movement.clone(),
-			attacks: self.attacks.clone(),
-
-			attack_index: self.attack_index,
-			attack_cooldown: self.attack_cooldown,
-
+			goals: self.goals.clone(),
+			index: self.index.clone(),
 			err: None,
 		}
 	}
@@ -87,10 +64,9 @@ impl Clone for EnemyBehavior {
 
 pub fn handle_behavior(gameplay: &mut Gameplay) {
 	let obj_player = *gameplay.world.player.obj.first().unwrap();
-
 	let attacks = RwLock::new(&mut gameplay.world.attacks);
 
-	thread::scope(|scope| {
+	thread::scope(|_scope| {
 		for (obj, behavior, sprite) in query!(
 			[
 				gameplay.world.player,
@@ -102,14 +78,8 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 			if obj.stunned > 0. {
 				obj.stunned -= get_delta_time();
 
-				if let Behavior::Enemy(behavior) = behavior {
-					if behavior.attack_cooldown <= 0. {
-						behavior.change_attack_index();
-
-						for script in &mut behavior.attacks {
-							script.scope.clear();
-						}
-					}
+				if let Behavior::Goal(behavior) = behavior {
+					behavior.index = None
 				}
 
 				continue;
@@ -120,36 +90,60 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 					player_behavior(obj, behavior, &gameplay.config, &gameplay.current_map)
 				}
 
-				Behavior::Enemy(behavior) => {
-					if behavior.err.is_some() {
-						continue;
+				Behavior::Goal(behavior) => {
+					// Probably not the most performant way to do it 
+					for script in behavior.goals.iter_mut() {
+						script.update_constants(
+							&obj, 
+							&obj_player
+						);
 					}
 
-					scope.spawn(|| {
-						let result = script_behavior(
-							if behavior.attack_cooldown > 0. {
-								behavior.attack_cooldown -= get_delta_time();
-								&mut behavior.movement
-							} else {
-								&mut behavior.attacks[behavior.attack_index]
-							},
+					// Updates the current goal, and checks it it should be stopped
+					if let Some(index) = behavior.index {
+						let result = behavior.goals[index].update(
 							obj,
-							&obj_player,
 							sprite,
 							*attacks.write(),
 							&gameplay.current_map,
 						);
-
-						match result {
-							Ok(i) if i => behavior.change_attack_index(),
-							Err(e) => {
-								println!("Script error: {e}");
-								behavior.err = Some(e)
-							}
-
-							_ => (),
+						if let Err(e) = result {
+							behavior.err = Some(e);
+							continue;
 						}
-					});
+
+						let result = behavior.goals[index].should_stop(sprite);
+						if let Err(e) = result {
+							behavior.err = Some(e);
+							continue;
+						}
+
+						if result.unwrap() {
+							behavior.index = None
+						}
+						continue;
+					}
+
+					// Checks each goal to see if they should be started, and selects the first valid one 
+					for index in 0..behavior.goals.len() {
+						let result = behavior.goals[index].should_start();
+						if let Err(e) = result {
+							behavior.err = Some(e);
+							continue;
+						}
+
+						if result.unwrap() {
+							behavior.index = Some(index)
+						} else {
+							continue;
+						}
+
+						let result = behavior.goals[index].init();
+						if let Err(e) = result {
+							behavior.err = Some(e);
+						}
+						break;
+					}
 				}
 
 				Behavior::Wander(behavior) => {

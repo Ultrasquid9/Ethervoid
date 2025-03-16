@@ -16,42 +16,35 @@ use rhai::{AST, Dynamic, Engine, EvalAltResult, FnPtr, NativeCallContext, Scope}
 use super::{gen_name, get_files};
 
 #[derive(Clone, Deserialize)]
-pub struct ScriptBuilder(String);
+pub struct GoalBuilder(String);
 
-/**
-A behavior that can be configured via a script.
 
-The lifetime annotation allows the compiler to know that the Script lives as long as its owner does
- */
-pub struct Script {
+/// A goal that can be configured via a script.
+pub struct Goal {
 	pub script: AST,
 	pub scope: Scope<'static>,
 	pub engine: Engine,
 }
 
-impl ScriptBuilder {
+impl GoalBuilder {
 	/// Reads the script at the provided directory
 	pub fn read(dir: &str) -> Self {
 		Self(fs::read_to_string(dir).unwrap())
 	}
 
 	/// Creates all the neccessary components for the script
-	pub fn build(self) -> Script {
+	pub fn build(self) -> Goal {
 		let engine = init_engine();
 
-		Script {
+		Goal {
 			script: engine.compile(self.0).unwrap(),
 			scope: Scope::new(),
 			engine: init_engine(),
 		}
 	}
 }
-/*
-impl PartialEq for Script {
-	fn eq(&self, other: &Self) -> bool { self.script == other.script }
-}
- */
-impl Clone for Script {
+
+impl Clone for Goal {
 	fn clone(&self) -> Self {
 		Self {
 			script: self.script.clone(),
@@ -61,14 +54,14 @@ impl Clone for Script {
 	}
 }
 
-/// Provides a HashMap containing all Attacks
-pub fn get_scripts() -> HashMap<String, ScriptBuilder> {
-	let scripts: HashMap<String, ScriptBuilder> = get_files("scripts".to_string())
+/// Provides a HashMap containing all Goals
+pub fn get_goals() -> HashMap<String, GoalBuilder> {
+	let goals: HashMap<String, GoalBuilder> = get_files("goals".to_string())
 		.par_iter()
-		.map(|dir| (gen_name(dir), ScriptBuilder::read(dir)))
+		.map(|dir| (gen_name(dir), GoalBuilder::read(dir)))
 		.collect();
 
-	scripts
+	goals
 }
 
 fn init_engine() -> Engine {
@@ -100,6 +93,9 @@ fn init_engine() -> Engine {
 	}
 
 	engine
+		// Disabling "eval" (this was recommended by the Rhai docs)
+		.disable_symbol("eval")
+
 		// Registerring the DVec2 and functions related to it
 		.register_type_with_name::<DVec2>("position")
 		.register_get_set("x", getter_x, setter_x)
@@ -107,8 +103,10 @@ fn init_engine() -> Engine {
 		.register_fn("angle_between", angle_between)
 		.register_fn("move_towards", move_towards)
 		.register_fn("distance_between", distance_between)
+
 		// Delta time
 		.register_fn("delta", get_delta_time)
+
 		// Functions for creating attacks
 		.register_fn(
 			"new_physical",
@@ -134,8 +132,7 @@ fn init_engine() -> Engine {
 				Attack::new_hitscan(Obj::new(pos, target, 6.), damage, Owner::Enemy)
 			},
 		)
-		// Hacky method to end the script
-		.register_fn("end", || DVec2::new(999999., 999999.))
+
 		// Pipeline operator
 		// IDK if this will ever be used, I just added it for fun
 		.register_custom_operator("|>", 255)
@@ -145,7 +142,7 @@ fn init_engine() -> Engine {
 			|context: NativeCallContext,
 			 input: Dynamic,
 			 mut func: FnPtr|
-			 -> Result<Dynamic, std::boxed::Box<EvalAltResult>> {
+			 -> std::result::Result<Dynamic, Box<EvalAltResult>> {
 				let mut curried = false;
 				let mut args = func.curry().to_vec();
 
@@ -172,22 +169,7 @@ fn init_engine() -> Engine {
 					},
 				)
 			},
-		)
-		// Custom syntax for setting a variable if it does not already exist
-		.register_custom_syntax(
-			["permanent", "$ident$", "<-", "$expr$"],
-			true,
-			|context, inputs| {
-				let var_name = inputs[0].get_string_value().unwrap().to_string();
-				let value = context.eval_expression_tree(&inputs[1])?;
-
-				if !context.scope().contains(&var_name) {
-					context.scope_mut().push(var_name, value);
-				}
-				Ok(Dynamic::UNIT)
-			},
-		)
-		.unwrap();
+		);
 
 	engine
 }
