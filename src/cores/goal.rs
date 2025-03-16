@@ -16,10 +16,14 @@ use rhai::{AST, Dynamic, Engine, EvalAltResult, FnPtr, NativeCallContext, Scope}
 use super::{gen_name, get_files};
 
 #[derive(Clone, Deserialize)]
-pub struct GoalBuilder(String);
+pub struct GoalBuilder {
+	name: String,
+	script: String,
+}
 
 /// A goal that can be configured via a script.
 pub struct Goal {
+	pub name: String,
 	pub script: AST,
 	pub scope: Scope<'static>,
 	pub engine: Engine,
@@ -27,8 +31,11 @@ pub struct Goal {
 
 impl GoalBuilder {
 	/// Reads the script at the provided directory
-	pub fn read(dir: &str) -> Self {
-		Self(fs::read_to_string(dir).unwrap())
+	pub fn read(name: String, dir: &str) -> Self {
+		Self {
+			name,
+			script: fs::read_to_string(dir).unwrap(),
+		}
 	}
 
 	/// Creates all the neccessary components for the script
@@ -36,7 +43,8 @@ impl GoalBuilder {
 		let engine = init_engine();
 
 		Goal {
-			script: engine.compile(self.0).unwrap(),
+			name: self.name,
+			script: engine.compile(self.script).unwrap(),
 			scope: Scope::new(),
 			engine: init_engine(),
 		}
@@ -46,6 +54,7 @@ impl GoalBuilder {
 impl Clone for Goal {
 	fn clone(&self) -> Self {
 		Self {
+			name: self.name.clone(),
 			script: self.script.clone(),
 			scope: self.scope.clone(),
 			engine: init_engine(),
@@ -57,7 +66,10 @@ impl Clone for Goal {
 pub fn get_goals() -> HashMap<String, GoalBuilder> {
 	let goals: HashMap<String, GoalBuilder> = get_files("goals".to_string())
 		.par_iter()
-		.map(|dir| (gen_name(dir), GoalBuilder::read(dir)))
+		.map(|dir| {
+			let name = gen_name(dir);
+			(name.clone(), GoalBuilder::read(name, dir))
+		})
 		.collect();
 
 	goals

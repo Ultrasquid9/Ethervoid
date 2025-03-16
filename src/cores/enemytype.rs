@@ -46,7 +46,7 @@ pub struct EnemyType {
 
 /// Provides a HashMap containing all EnemyTypes
 pub fn get_enemytypes() -> HashMap<String, EnemyType> {
-	let scripts = get_goals();
+	let goals = get_goals();
 
 	let enemytypes: HashMap<String, EnemyType> = get_files("enemies".to_string())
 		.par_iter()
@@ -61,7 +61,7 @@ pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 				None
 			} else {
 				info!("EnemyType {} loaded!", str);
-				Some((str, enemytypebuilder.unwrap().build(&scripts)))
+				Some((str, enemytypebuilder.unwrap().build(&goals)))
 			}
 		})
 		.collect();

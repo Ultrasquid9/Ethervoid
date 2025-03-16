@@ -1,3 +1,6 @@
+use std::error::Error;
+
+use log::error;
 use macroquad::math::DVec2;
 use rhai::{CallFnOptions, Dynamic};
 
@@ -12,19 +15,46 @@ use crate::{
 
 use stecs::{prelude::*, storage::vec::VecFamily};
 
+pub struct GoalBehavior {
+	pub goals: Box<[Goal]>,
+	pub prev_goal: String,
+	pub index: Option<usize>,
+
+	pub err: Option<Box<dyn Error + Send + Sync>>,
+}
+
+impl PartialEq for GoalBehavior {
+	fn eq(&self, other: &Self) -> bool {
+		self.index == other.index && self.prev_goal == other.prev_goal
+	}
+}
+
+impl Clone for GoalBehavior {
+	fn clone(&self) -> Self {
+		Self {
+			goals: self.goals.clone(),
+			prev_goal: self.prev_goal.clone(),
+			index: self.index,
+			err: None,
+		}
+	}
+}
+
 impl Goal {
-	pub fn update_constants(&mut self, obj_self: &Obj, obj_player: &Obj) {
+	fn update_constants(&mut self, obj_self: &Obj, obj_player: &Obj, prev_goal: String) {
 		// Removing the constants if they exist, to prevent the scope from growing exponentially
 		_ = self.scope.remove::<Dynamic>("player_pos");
 		_ = self.scope.remove::<Dynamic>("self_pos");
+		_ = self.scope.remove::<Dynamic>("prev_goal");
 
 		// Re-adding the constants with updated values
 		self.scope
+			.push_constant("prev_goal", prev_goal)
 			.push_constant("pos_self", obj_self.pos)
 			.push_constant("pos_player", obj_player.pos);
 	}
 
-	pub fn should_start(&mut self) -> Result<bool> {
+	fn should_start(&mut self) -> Result<bool> {
 		let result =
 			self.engine
 				.call_fn::<bool>(&mut self.scope, &self.script, "should_start", ())?;
@@ -32,7 +62,7 @@ impl Goal {
 		Ok(result)
 	}
 
-	pub fn should_stop(&mut self, sprite: &mut Sprite) -> Result<bool> {
+	fn should_stop(&mut self, sprite: &mut Sprite) -> Result<bool> {
 		let x = self
 			.engine
 			.call_fn::<bool>(&mut self.scope, &self.script, "should_stop", ())?;
@@ -46,7 +76,7 @@ impl Goal {
 		}
 	}
 
-	pub fn init(&mut self) -> Result<()> {
+	fn init(&mut self) -> Result<()> {
 		self.engine.call_fn_with_options::<()>(
 			CallFnOptions::new().eval_ast(false).rewind_scope(false),
 			&mut self.scope,
@@ -58,7 +88,7 @@ impl Goal {
 		Ok(())
 	}
 
-	pub fn update(
+	fn update(
 		&mut self,
 		obj: &mut Obj,
 		sprite: &mut Sprite,
@@ -97,5 +127,69 @@ impl Goal {
 		obj.try_move(new_pos, current_map);
 
 		Ok(())
+	}
+}
+
+pub fn goal_behavior(
+	behavior: &mut GoalBehavior,
+	obj_self: &mut Obj,
+	obj_player: &Obj,
+	sprite: &mut Sprite,
+	attacks: &mut AttackStructOf<VecFamily>,
+	current_map: &str,
+) {
+	if behavior.err.is_some() {
+		return;
+	}
+
+	// Probably not the most performant way to do it
+	for script in behavior.goals.iter_mut() {
+		script.update_constants(obj_self, obj_player, behavior.prev_goal.clone());
+	}
+
+	// Updates the current goal, and checks it it should be stopped
+	if let Some(index) = behavior.index {
+		let result = behavior.goals[index].update(obj_self, sprite, attacks, current_map);
+		if let Err(e) = result {
+			error!("{}", e);
+			behavior.err = Some(e);
+			return;
+		}
+
+		let result = behavior.goals[index].should_stop(sprite);
+		if let Err(e) = result {
+			error!("{}", e);
+			behavior.err = Some(e);
+			return;
+		}
+
+		if result.unwrap() {
+			behavior.prev_goal = behavior.goals[index].name.clone();
+			behavior.index = None
+		}
+		return;
+	}
+
+	// Checks each goal to see if they should be started, and selects the first valid one
+	for index in 0..behavior.goals.len() {
+		let result = behavior.goals[index].should_start();
+		if let Err(e) = result {
+			error!("{}", e);
+			behavior.err = Some(e);
+			continue;
+		}
+
+		if result.unwrap() {
+			behavior.index = Some(index)
+		} else {
+			continue;
+		}
+
+		let result = behavior.goals[index].init();
+		if let Err(e) = result {
+			error!("{}", e);
+			behavior.err = Some(e);
+		}
+		return;
 	}
 }

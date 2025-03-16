@@ -5,10 +5,8 @@ use raywoke::prelude::*;
 
 use crate::utils::{point_to_vec2, resources::maps::access_map};
 
-use std::sync::LazyLock;
-
 // For keeping track of the recursion in `try_move`
-static DEPTH: LazyLock<RwLock<u8>> = LazyLock::new(|| RwLock::new(0));
+static DEPTH: RwLock<u8> = RwLock::new(0);
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Axis {

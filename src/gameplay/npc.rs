@@ -4,7 +4,7 @@ use messages::Message;
 use stecs::prelude::*;
 
 use super::ecs::{
-	behavior::{Behavior, WanderBehavior},
+	behavior::{Behavior, wander::WanderBehavior},
 	obj::Obj,
 	sprite::{Frames, Rotation, Sprite},
 };

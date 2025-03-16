@@ -4,7 +4,7 @@ use rayon::prelude::*;
 use stecs::prelude::*;
 
 use super::ecs::{
-	behavior::{Behavior, GoalBehavior},
+	behavior::{Behavior, goal::GoalBehavior},
 	health::Health,
 	obj::Obj,
 	sprite::{Frames, Rotation, Sprite},
@@ -31,6 +31,8 @@ impl Enemy {
 					.par_iter()
 					.map(|goal| goal.clone().build())
 					.collect(),
+
+				prev_goal: "none".to_owned(),
 
 				index: None,
 				err: None,

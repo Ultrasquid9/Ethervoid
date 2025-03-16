@@ -1,4 +1,8 @@
 fn should_start() {
+	if prev_goal == "default:attacks/test2" {
+		return false
+	}
+
 	let dist = pos_self.distance_between(pos_player);
 	dist.round() % 2 == 0
 }

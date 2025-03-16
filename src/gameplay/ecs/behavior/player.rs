@@ -1,4 +1,3 @@
-use super::PlayerBehavior;
 use macroquad::math::DVec2;
 
 use crate::{
@@ -6,8 +5,15 @@ use crate::{
 	utils::{config::Config, get_delta_time},
 };
 
+#[derive(PartialEq, Clone)]
+pub struct PlayerBehavior {
+	pub speed: f64,
+
+	pub dash_cooldown: f64,
+	pub is_dashing: bool,
+}
+
 /// Handles player movement.
-/// Returns true if the player attempted to move but didn't.
 pub fn player_behavior(
 	obj: &mut Obj,
 	behavior: &mut PlayerBehavior,

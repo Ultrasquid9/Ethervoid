@@ -4,7 +4,7 @@ use stecs::prelude::*;
 use super::{
 	combat::{Attack, Owner},
 	ecs::{
-		behavior::{Behavior, PlayerBehavior},
+		behavior::{Behavior, player::PlayerBehavior},
 		health::Health,
 		obj::Obj,
 		sprite::{Frames, Rotation, Sprite},
