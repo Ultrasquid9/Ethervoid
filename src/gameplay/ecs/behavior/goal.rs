@@ -191,5 +191,6 @@ pub fn goal_behavior(
 		}
 
 		maybe!(behavior.goals[index].init());
+		return;
 	}
 }

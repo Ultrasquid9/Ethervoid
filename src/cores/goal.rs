@@ -1,4 +1,5 @@
 use ahash::HashMap;
+use log::{debug, info};
 use serde::Deserialize;
 use std::fs;
 
@@ -106,6 +107,9 @@ fn init_engine() -> Engine {
 	engine
 		// Disabling "eval" (this was recommended by the Rhai docs)
 		.disable_symbol("eval")
+		// Altering the built-in print methods
+		.on_print(|s| info!("{s}"))
+		.on_debug(|s, _, _| debug!("{s}"))
 		// Registerring the DVec2 and functions related to it
 		.register_type_with_name::<DVec2>("position")
 		.register_get_set("x", getter_x, setter_x)
