@@ -57,7 +57,6 @@ impl Attack {
 
 			sprite: Sprite::new(
 				obj,
-				obj.size as u32,
 				key,
 				Rotation::Angle,
 				Frames::new_attack(),
@@ -79,7 +78,6 @@ impl Attack {
 
 			sprite: Sprite::new(
 				obj,
-				obj.size as u32,
 				key,
 				Rotation::Static,
 				Frames::new_attack(),
@@ -101,7 +99,6 @@ impl Attack {
 
 			sprite: Sprite::new(
 				obj,
-				obj.size as u32,
 				key,
 				Rotation::Static,
 				Frames::new_static(),
@@ -123,7 +120,6 @@ impl Attack {
 
 			sprite: Sprite::new(
 				obj,
-				obj.size as u32,
 				"default:attacks/projectile-enemy",
 				Rotation::Static,
 				Frames::new_static(),

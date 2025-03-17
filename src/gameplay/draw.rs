@@ -104,9 +104,9 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 		sprites.push(sprite);
 	}
 	sprites.sort_by(|x, y| {
-		if x.obj.pos.y > y.obj.pos.y {
+		if x.obj().pos.y > y.obj().pos.y {
 			Ordering::Greater
-		} else if x.obj.pos.y < y.obj.pos.y {
+		} else if x.obj().pos.y < y.obj().pos.y {
 			Ordering::Less
 		} else {
 			Ordering::Equal
@@ -116,7 +116,7 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 	// Processing sprites
 	let mut futures = Vec::new();
 
-	sprites.iter().for_each(|sprite| {
+	sprites.iter_mut().for_each(|sprite| {
 		futures.push(sprite.to_render_params());
 	});
 

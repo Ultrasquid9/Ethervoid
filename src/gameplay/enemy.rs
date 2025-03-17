@@ -20,7 +20,7 @@ pub struct Enemy {
 
 impl Enemy {
 	pub fn from_type(enemytype: &EnemyType, pos: &DVec2) -> Self {
-		let obj = Obj::new(*pos, *pos, 15.);
+		let obj = Obj::new(*pos, *pos, enemytype.size);
 
 		Self {
 			health: Health::new(enemytype.max_health),
@@ -39,7 +39,6 @@ impl Enemy {
 			}),
 			sprite: Sprite::new(
 				obj,
-				enemytype.size as u32,
 				&enemytype.sprite,
 				Rotation::EightWay,
 				Frames::new_entity(),

@@ -67,7 +67,6 @@ impl Player {
 			}),
 			sprite: Sprite::new(
 				obj,
-				32,
 				"default:entity/player/player_spritesheet_wip",
 				Rotation::EightWay,
 				Frames::new_entity(),

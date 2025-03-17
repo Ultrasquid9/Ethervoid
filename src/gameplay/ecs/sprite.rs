@@ -21,8 +21,10 @@ use super::obj::{Axis, Obj};
 
 #[derive(Clone)]
 pub struct Sprite {
-	pub sprite: DynamicImage,
-	pub obj: Obj,
+	sprite: DynamicImage,
+	obj: Obj,
+
+	cache: Option<(u32, DynamicImage)>,
 
 	rotation: Rotation,
 	frames: Frames,
@@ -55,7 +57,6 @@ pub struct Frames {
 impl Sprite {
 	pub fn new(
 		obj: Obj,
-		_size: u32,
 		key: &str,
 		rotation: Rotation,
 		frames: Frames,
@@ -68,6 +69,8 @@ impl Sprite {
 				access_image(key)
 			},
 			obj,
+
+			cache: None,
 
 			rotation,
 			frames,
@@ -106,6 +109,10 @@ impl Sprite {
 		}
 	}
 
+	pub fn obj(&self) -> Obj {
+		self.obj
+	}
+
 	pub fn shake(&mut self) {
 		self.shaking = 20.;
 	}
@@ -133,7 +140,7 @@ impl Sprite {
 		self.current_anim = None
 	}
 
-	pub async fn to_render_params(&self) -> (DynamicImage, DVec2, Option<DrawTextureParams>) {
+	pub async fn to_render_params(&mut self) -> (DynamicImage, DVec2, Option<DrawTextureParams>) {
 		let size = if self.rotation == Rotation::EightWay {
 			self.sprite.height() / 5
 		} else {
@@ -178,16 +185,7 @@ impl Sprite {
 
 		(
 			if self.rotation == Rotation::Angle {
-				DynamicImage::ImageRgba8(rotate_about_center(
-					self.sprite
-						.crop_imm(x_pos, y_pos, size, size)
-						.as_rgba8()
-						.unwrap(),
-					(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x)
-						as f32,
-					imageproc::geometric_transformations::Interpolation::Nearest,
-					Rgba([0, 0, 0, 0]),
-				))
+				self.texture_angle(x_pos, y_pos)
 			} else {
 				self.sprite.clone()
 			},
@@ -225,6 +223,31 @@ impl Sprite {
 				..Default::default()
 			}),
 		)
+	}
+
+	fn texture_angle(&mut self, x_pos: u32, y_pos: u32) -> DynamicImage {
+		if let Some((old_pos, texture)) = &self.cache {
+			if *old_pos == x_pos {
+				return texture.clone()
+			} else {
+				self.cache = None
+			}
+		}
+
+		let img = DynamicImage::ImageRgba8(rotate_about_center(
+			self.sprite
+				.crop_imm(x_pos, y_pos, self.sprite.height(), self.sprite.height())
+				.as_rgba8()
+				.unwrap(),
+			(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x)
+				as f32,
+			imageproc::geometric_transformations::Interpolation::Nearest,
+			Rgba([0, 0, 0, 0]),
+		));
+
+		self.cache = Some((x_pos, img.clone()));
+
+		img
 	}
 }
 
