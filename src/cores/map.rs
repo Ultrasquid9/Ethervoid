@@ -14,7 +14,7 @@ use image::{DynamicImage, GenericImage};
 
 #[derive(Deserialize)]
 struct MapBuilder {
-	points: Vec<DVec2>,
+	walls: Vec<Vec<DVec2>>,
 	doors: Vec<Door>,
 	enemies: Vec<(String, DVec2)>,
 	npcs: Vec<(String, DVec2)>,
@@ -29,7 +29,7 @@ struct MapTexture {
 
 #[derive(Clone)]
 pub struct Map {
-	pub walls: Box<[Barrier]>,
+	pub walls: Box<[Box<[Barrier]>]>,
 	pub doors: Box<[Door]>,
 	pub enemies: Box<[(EnemyType, DVec2)]>,
 	pub npcs: Box<[(NpcType, DVec2)]>,
@@ -46,19 +46,25 @@ impl MapBuilder {
 	) -> Map {
 		Map {
 			walls: {
-				let mut walls = Vec::new();
+				let mut walls = vec![];
 
-				for point in 0..self.points.len() {
-					match self.points.get(point + 1) {
-						Some(_) => walls.push(Barrier::new(
-							self.points.get(point).unwrap().as_vec2(),
-							self.points.get(point + 1).unwrap().as_vec2(),
-						)),
-						None => walls.push(Barrier::new(
-							self.points.get(point).unwrap().as_vec2(),
-							self.points.first().unwrap().as_vec2(),
-						)),
+				for wall in self.walls {
+					let mut vec = vec![];
+
+					for point in 0..wall.len() {
+						match wall.get(point + 1) {
+							Some(_) => vec.push(Barrier::new(
+								wall.get(point).unwrap().as_vec2(),
+								wall.get(point + 1).unwrap().as_vec2(),
+							)),
+							None => vec.push(Barrier::new(
+								wall.get(point).unwrap().as_vec2(),
+								wall.first().unwrap().as_vec2(),
+							)),
+						}
 					}
+
+					walls.push(vec.into_boxed_slice());
 				}
 
 				walls.into_boxed_slice()

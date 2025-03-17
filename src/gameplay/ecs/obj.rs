@@ -101,28 +101,40 @@ impl Obj {
 			return;
 		}
 
-		let mut try_slope_movement = false;
+		let mut ok_x = true;
+		let mut ok_y = true;
 
-		match cast_wide(
-			&Ray::new((self.pos.x, self.pos.y), (new_pos.x, self.pos.y)),
-			&map.walls,
-		) {
-			Ok(_) => try_slope_movement = true,
-			_ => self.pos.x = new_pos.x,
+		for wall in &map.walls {
+			if cast_wide(
+				&Ray::new((self.pos.x, self.pos.y), (new_pos.x, self.pos.y)),
+				wall,
+			)
+			.is_ok()
+			{
+				ok_x = false
+			}
+
+			if cast_wide(
+				&Ray::new((self.pos.x, self.pos.y), (self.pos.x, new_pos.y)),
+				wall,
+			)
+			.is_ok()
+			{
+				ok_y = false
+			}
 		}
 
-		match cast_wide(
-			&Ray::new((self.pos.x, self.pos.y), (self.pos.x, new_pos.y)),
-			&map.walls,
-		) {
-			Ok(_) => try_slope_movement = true,
-			_ => self.pos.y = new_pos.y,
+		if ok_x {
+			self.pos.x = new_pos.x
+		}
+		if ok_y {
+			self.pos.y = new_pos.y
+		}
+		if ok_x && ok_y {
+			return;
 		}
 
 		// Everything beyond this point is for handling slopes
-		if !try_slope_movement {
-			return;
-		}
 
 		// Checking recursion
 		if *DEPTH.read() > 0 {
@@ -139,15 +151,17 @@ impl Obj {
 			(0., 0.),
 		);
 
-		for i in map.walls.iter() {
-			if cast(
-				&Ray::new((self.pos.x, self.pos.y), (new_pos.x, new_pos.y)),
-				i,
-			)
-			.is_ok()
-			{
-				wall_to_check = i.clone();
-				break;
+		'out: for wall in &map.walls {
+			for bar in wall {
+				if cast(
+					&Ray::new((self.pos.x, self.pos.y), (new_pos.x, new_pos.y)),
+					bar,
+				)
+				.is_ok()
+				{
+					wall_to_check = bar.clone();
+					break 'out;
+				}
 			}
 		}
 

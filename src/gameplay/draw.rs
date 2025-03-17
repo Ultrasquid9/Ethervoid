@@ -33,8 +33,10 @@ pub async fn draw(gameplay: &mut Gameplay) {
 
 	draw_map(access_map(&gameplay.current_map)).await;
 
-	for bar in access_map(&gameplay.current_map).walls.iter() {
-		draw_bar(bar);
+	for wall in &access_map(&gameplay.current_map).walls {
+		for bar in wall {
+			draw_bar(bar);
+		}
 	}
 	for door in access_map(&gameplay.current_map).doors.iter() {
 		draw_bar(&door.to_barrier());
