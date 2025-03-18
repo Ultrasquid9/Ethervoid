@@ -17,7 +17,7 @@ pub mod resources;
 static DELTA_TIME: RwLock<f64> = RwLock::new(0.);
 
 pub fn point_to_vec2(point: std::boxed::Box<(dyn raywoke::point::Point + 'static)>) -> DVec2 {
-	let (x, y) = (point.x(), point.y()).tup_f64();
+	let (x, y) = point.tup_f64();
 	DVec2::new(x, y)
 }
 

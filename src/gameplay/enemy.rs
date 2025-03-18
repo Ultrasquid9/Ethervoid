@@ -1,4 +1,5 @@
 use crate::cores::{enemytype::EnemyType, goal::Goal};
+use log::warn;
 use macroquad::math::DVec2;
 use rayon::prelude::*;
 use stecs::prelude::*;
@@ -29,7 +30,15 @@ impl Enemy {
 				goals: enemytype
 					.goals
 					.par_iter()
-					.map(|key| Goal::new(key))
+					.filter_map(|key| {
+						let opt = Goal::new(key);
+
+						if opt.is_none() {
+							warn!("Goal {key} not found")
+						}
+
+						opt
+					})
 					.collect(),
 
 				prev_goal: "none".to_owned(),

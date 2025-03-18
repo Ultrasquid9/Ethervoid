@@ -7,11 +7,9 @@ use super::{Resource, resource};
 static GOALS: Resource<AST> = resource();
 
 pub(super) fn create_goals() {
-	*GOALS.write() = get_goals();
-}
-
-pub(super) fn clean_goals() {
-	(*GOALS.write()).clear();
+	let mut access = GOALS.write();
+	access.clear();
+	*access = get_goals();
 }
 
 pub fn goal_exists(key: &str) -> bool {

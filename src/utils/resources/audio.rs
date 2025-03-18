@@ -22,16 +22,9 @@ static SOUNDS: Resource<StaticSoundData> = resource();
 
 /// Populates the Sounds HashMap
 pub(super) fn create_sounds() {
-	let sounds = get_audio();
-
-	for (key, sound) in sounds {
-		SOUNDS.write().insert(key, sound);
-	}
-}
-
-/// Cleans the Sounds HashMap
-pub(super) fn clean_sounds() {
-	SOUNDS.write().clear();
+	let mut access = SOUNDS.write();
+	access.clear();
+	*access = get_audio();
 }
 
 /// Plays the sound at the provided key

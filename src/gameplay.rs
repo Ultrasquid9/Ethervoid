@@ -4,12 +4,7 @@ use stecs::prelude::*;
 
 use crate::{
 	State,
-	utils::{
-		config::Config,
-		get_delta_time,
-		resources::{clean_resources, create_resources},
-		update_delta_time,
-	},
+	utils::{config::Config, get_delta_time, resources::create_resources, update_delta_time},
 };
 
 use combat::{AttackType, Owner, handle_combat};
@@ -189,9 +184,8 @@ impl Gameplay {
 }
 
 pub async fn gameplay() -> State {
-	unsafe {
-		create_resources();
-	} // All the resources in the game (textures, maps, etc.)
+	// Locates and creates all the resources in the game (textures, maps, etc.)
+	create_resources();
 
 	let mut gameplay = Gameplay::new();
 
@@ -223,9 +217,6 @@ pub async fn gameplay() -> State {
 
 		// Quitting the game
 		if gameplay.config.keymap.quit.is_down() {
-			unsafe {
-				clean_resources();
-			}
 			return State::Menu;
 		}
 

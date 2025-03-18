@@ -24,13 +24,13 @@ pub struct Goal {
 }
 
 impl Goal {
-	pub fn new(key: &str) -> Goal {
-		Goal {
+	pub fn new(key: &str) -> Option<Goal> {
+		Some(Goal {
 			name: key.to_owned(),
-			script: access_goal(key).unwrap(),
+			script: access_goal(key)?,
 			scope: Scope::new(),
 			engine: init_engine(),
-		}
+		})
 	}
 }
 

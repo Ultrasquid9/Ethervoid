@@ -73,7 +73,8 @@ impl Config {
 			Ok(config) => config,
 			Err(e) => {
 				error!("Error when deserializing config: {e}");
-				ron::from_str(DEFAULT_CONFIG).unwrap()
+				ron::from_str(DEFAULT_CONFIG)
+					.expect("Default config should be able to be deserialized")
 			}
 		}
 	}

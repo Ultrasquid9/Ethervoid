@@ -10,16 +10,9 @@ static MAPS: Resource<Map> = resource();
 
 /// Populates the map HashMap
 pub(super) fn create_maps() {
-	let maps = get_maps();
-
-	for (key, map) in maps {
-		MAPS.write().insert(key, map);
-	}
-}
-
-/// Cleans the map HashMap
-pub(super) fn clean_maps() {
-	MAPS.write().clear()
+	let mut access = MAPS.write();
+	access.clear();
+	*access = get_maps();
 }
 
 /// Gets the map at the provided key

@@ -13,16 +13,9 @@ static TEXTURES: Resource<DynamicImage> = resource();
 
 /// Populates the texture HashMap
 pub(super) fn create_textures() {
-	let textures = get_textures();
-
-	for (key, texture) in textures {
-		TEXTURES.write().insert(key, texture);
-	}
-}
-
-/// Cleans the texture HashMap
-pub(super) fn clean_textures() {
-	TEXTURES.write().clear()
+	let mut access = TEXTURES.write();
+	access.clear();
+	*access = get_textures();
 }
 
 /// Gets the image at the provided key

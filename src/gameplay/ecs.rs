@@ -14,37 +14,30 @@ pub struct World {
 	pub enemies: StructOf<Vec<Enemy>>,
 	pub npcs: StructOf<Vec<Npc>>,
 	pub attacks: StructOf<Vec<Attack>>,
-	/*
-	pub current_map: String,
-	pub config: Config,
-	pub hitstop: f64, */
 }
 
 impl World {
 	/// Populates the world with content from the current map, and clears old content if it exists
 	pub fn populate(&mut self, current_map: &str) {
+		macro_rules! clear {
+			( $( $field:expr ),+ ) => {
+				$(
+					while $field.ids.is_empty() {
+						$field.remove(0);
+					}
+				)+
+			};
+		}
+
 		// Removing old stuff
-
-		while !self.enemies.ids.is_empty() {
-			self.enemies.remove(0);
-		}
-
-		while !self.npcs.ids.is_empty() {
-			self.npcs.remove(0);
-		}
-
-		while !self.attacks.ids.is_empty() {
-			self.attacks.remove(0);
-		}
+		clear![self.enemies, self.npcs, self.attacks];
 
 		// Adding new stuff
-
 		for (enemy, pos) in access_map(current_map).enemies.iter() {
-			let _ = self.enemies.insert(Enemy::from_type(enemy, pos));
+			_ = self.enemies.insert(Enemy::from_type(enemy, pos));
 		}
-
 		for (npc, pos) in access_map(current_map).npcs.iter() {
-			let _ = self.npcs.insert(Npc::from_type(npc, pos));
+			_ = self.npcs.insert(Npc::from_type(npc, pos));
 		}
 	}
 }
