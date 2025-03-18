@@ -1,7 +1,11 @@
+use std::sync::LazyLock;
+
+use ahash::HashMap;
 use audio::{clean_sounds, create_sounds};
 
 use maps::{clean_maps, create_maps};
 
+use parking_lot::RwLock;
 use textures::{clean_textures, create_textures};
 
 pub mod audio;
@@ -10,6 +14,14 @@ pub mod textures;
 
 // This module contains globally available resources
 // Everyone always says "don't do this" so fuck you I did
+
+/// Stores a globally available resource
+type Resource<T> = LazyLock<RwLock<HashMap<String, T>>>;
+
+/// Creates a blank resource
+const fn resource<T>() -> Resource<T> {
+	LazyLock::new(|| RwLock::new(HashMap::default()))
+}
 
 /**
 Populates global resources.

@@ -1,15 +1,12 @@
-use ahash::HashMap;
-use parking_lot::RwLock;
-use std::sync::LazyLock;
-
 use crate::cores::map::{Map, get_maps};
+
+use super::{resource, Resource};
 
 /*
  * Maps
  */
 
-static MAPS: LazyLock<RwLock<HashMap<String, Map>>> =
-	LazyLock::new(|| RwLock::new(HashMap::default()));
+static MAPS: Resource<Map> = resource();
 
 /// Populates the map HashMap
 pub(super) fn create_maps() {

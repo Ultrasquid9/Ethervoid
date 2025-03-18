@@ -1,4 +1,3 @@
-use ahash::HashMap;
 use log::error;
 use macroquad::rand;
 use parking_lot::RwLock;
@@ -10,6 +9,8 @@ use kira::{
 
 use crate::cores::audio::get_audio;
 
+use super::{resource, Resource};
+
 /*
  *	Audio
  */
@@ -17,8 +18,7 @@ use crate::cores::audio::get_audio;
 static MANAGER: LazyLock<RwLock<AudioManager>> = LazyLock::new(|| {
 	RwLock::new(AudioManager::<DefaultBackend>::new(AudioManagerSettings::default()).unwrap())
 });
-static SOUNDS: LazyLock<RwLock<HashMap<String, StaticSoundData>>> =
-	LazyLock::new(|| RwLock::new(HashMap::default()));
+static SOUNDS: Resource<StaticSoundData> = resource();
 
 /// Populates the Sounds HashMap
 pub(super) fn create_sounds() {

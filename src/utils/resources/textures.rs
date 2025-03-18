@@ -1,17 +1,15 @@
 use crate::{cores::textures::get_textures, gameplay::draw::process::downscale};
-use ahash::HashMap;
 use image::DynamicImage;
 use imageproc::rgba_image;
 use log::error;
-use parking_lot::RwLock;
-use std::sync::LazyLock;
+
+use super::{resource, Resource};
 
 /*
  *	Textures
  */
 
-static TEXTURES: LazyLock<RwLock<HashMap<String, DynamicImage>>> =
-	LazyLock::new(|| RwLock::new(HashMap::default()));
+static TEXTURES: Resource<DynamicImage> = resource();
 
 /// Populates the texture HashMap
 pub(super) fn create_textures() {
