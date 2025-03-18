@@ -19,7 +19,7 @@ fn update() {
 
 	if countdown <= 0. {
 		attacks.push(
-			new_projectile(
+			attack_projectile(
 				12.,
 				pos_self,
 				pos_player,

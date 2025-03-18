@@ -15,9 +15,8 @@ pub mod textures;
 pub fn get_files(file_type: String) -> Vec<String> {
 	// This function took way too long to write
 
-	let mut files: Vec<String> = Vec::new(); // The complete directory of a file
-
-	let mut paths: Vec<String> = Vec::new(); // The paths of different cores
+	let mut files = vec![]; // The complete directory of a file
+	let mut paths = vec![]; // The paths of different cores
 
 	for i in fs::read_dir("./cores").unwrap() {
 		paths.push(i.unwrap().file_name().to_string_lossy().into_owned());
@@ -32,7 +31,7 @@ pub fn get_files(file_type: String) -> Vec<String> {
 			// The directory to be scanned
 			let dir = j.unwrap().path().to_string_lossy().into_owned();
 			// Directories that will be appended to `files` and returned
-			let mut dirs = Vec::new();
+			let mut dirs = vec![];
 
 			for entry in WalkDir::new(&dir) {
 				dirs.push(
@@ -46,13 +45,7 @@ pub fn get_files(file_type: String) -> Vec<String> {
 			}
 
 			// Removing "leftover" entries
-			dirs.retain(|dir| {
-				if read_dir(dir).is_err() && fs::exists(dir).unwrap() {
-					return true;
-				}
-				false
-			});
-
+			dirs.retain(|dir| read_dir(dir).is_err() && fs::exists(dir).unwrap_or(false));
 			files.append(&mut dirs);
 		}
 	}

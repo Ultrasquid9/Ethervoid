@@ -1,7 +1,7 @@
 import "default:movement/test_mod" as test;
 
 fn should_start() {
-	print(test::TEST);
+	print(true ? [test::TEST, "false"]);
 	true
 }
 

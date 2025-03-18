@@ -70,7 +70,8 @@ pub fn get_goals() -> HashMap<String, AST> {
 }
 
 fn init_engine() -> Engine {
-	let mut engine = Engine::new();
+	// Output of custom operators
+	type OperatorResult = std::result::Result<Dynamic, Box<EvalAltResult>>;
 
 	// Some DVec2 built-in methods don't work, since Rhai methods dissallow immutable references.
 	// As such, I have to make shitty copies.
@@ -97,6 +98,7 @@ fn init_engine() -> Engine {
 		(pos2.y - pos1.y).atan2(pos2.x - pos1.x)
 	}
 
+	let mut engine = Engine::new();
 	engine
 		// Allowing modules
 		.set_module_resolver(EvoidResolver)
@@ -114,7 +116,7 @@ fn init_engine() -> Engine {
 		.register_type_with_name::<DVec2>("position")
 		.register_get_set("x", getter_x, setter_x)
 		.register_get_set("y", getter_y, setter_y)
-		.register_fn("new_position", |x: f64, y: f64| dvec2(x, y))
+		.register_fn("position", |x: f64, y: f64| dvec2(x, y))
 		.register_fn("angle_between", angle_between)
 		.register_fn("move_towards", move_towards)
 		.register_fn("distance_between", distance_between)
@@ -122,39 +124,49 @@ fn init_engine() -> Engine {
 		.register_fn("delta", get_delta_time)
 		// Functions for creating attacks
 		.register_fn(
-			"new_physical",
+			"attack_physical",
 			|damage: f64, size, pos: DVec2, target: DVec2, key: &str| {
 				Attack::new_physical(Obj::new(pos, target, size), damage, Owner::Enemy, key)
 			},
 		)
 		.register_fn(
-			"new_burst",
+			"attack_burst",
 			|damage: f64, size: f64, pos: DVec2, key: &str| {
 				Attack::new_burst(Obj::new(pos, pos, size), damage, Owner::Enemy, key)
 			},
 		)
 		.register_fn(
-			"new_projectile",
+			"attack_projectile",
 			|damage: f64, pos: DVec2, target: DVec2, key: &str| {
 				Attack::new_projectile(Obj::new(pos, target, 10.), damage, Owner::Enemy, key)
 			},
 		)
 		.register_fn(
-			"new_hitscan",
+			"attack_hitscan",
 			|damage: f64, pos: DVec2, target: DVec2, _key: &str| {
 				Attack::new_hitscan(Obj::new(pos, target, 6.), damage, Owner::Enemy)
 			},
 		)
+		// Ternary operator
+		// Uses an array for the input, since custom operators are somewhat limited
+		.register_custom_operator("?", 131)
+		.unwrap()
+		.register_fn("?", |input: bool, array: Vec<Dynamic>| -> OperatorResult {
+			let output = array.get(if input { 0 } else { 1 });
+
+			let Some(output) = output else {
+				return Ok(Dynamic::from(()));
+			};
+
+			return Ok(output.clone());
+		})
 		// Pipeline operator
 		// IDK if this will ever be used, I just added it for fun
 		.register_custom_operator("|>", 255)
 		.unwrap()
 		.register_fn(
 			"|>",
-			|context: NativeCallContext,
-			 input: Dynamic,
-			 mut func: FnPtr|
-			 -> std::result::Result<Dynamic, Box<EvalAltResult>> {
+			|context: NativeCallContext, input: Dynamic, mut func: FnPtr| -> OperatorResult {
 				let mut curried = false;
 				let mut args = func.curry().to_vec();
 
@@ -169,7 +181,7 @@ fn init_engine() -> Engine {
 					}
 				}
 
-				func.set_curry(Vec::new());
+				func.set_curry(vec![]);
 				func.call_within_context(
 					&context,
 					if curried {
@@ -193,7 +205,6 @@ mod mod_resolver {
 
 	use crate::utils::resources::goals::access_goal;
 
-	#[derive(Clone, PartialEq)]
 	pub struct EvoidResolver;
 
 	impl ModuleResolver for EvoidResolver {

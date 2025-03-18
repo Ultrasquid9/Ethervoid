@@ -13,7 +13,7 @@ fn init() {
 
 fn update() {
 	attacks.push(
-		new_physical(
+		attack_physical(
 			10.,
 			20.,
 			pos_self,

@@ -88,7 +88,7 @@ pub async fn draw(gameplay: &mut Gameplay) {
 
 async fn render_sprites(gameplay: &mut Gameplay) {
 	// Sorting sprites
-	let mut sprites: Vec<&mut Sprite> = Vec::new();
+	let mut sprites: Vec<&mut Sprite> = vec![];
 	for (sprite, obj) in query!(
 		[
 			gameplay.world.player,
@@ -114,7 +114,7 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 	});
 
 	// Processing sprites
-	let mut futures = Vec::new();
+	let mut futures = vec![];
 
 	sprites.iter_mut().for_each(|sprite| {
 		futures.push(sprite.to_render_params());
