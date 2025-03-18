@@ -1,6 +1,6 @@
 use crate::cores::map::{Map, get_maps};
 
-use super::{resource, Resource};
+use super::{Resource, resource};
 
 /*
  * Maps

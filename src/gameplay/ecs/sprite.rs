@@ -228,7 +228,7 @@ impl Sprite {
 	fn texture_angle(&mut self, x_pos: u32, y_pos: u32) -> DynamicImage {
 		if let Some((old_pos, texture)) = &self.cache {
 			if *old_pos == x_pos {
-				return texture.clone()
+				return texture.clone();
 			} else {
 				self.cache = None
 			}
@@ -239,8 +239,7 @@ impl Sprite {
 				.crop_imm(x_pos, y_pos, self.sprite.height(), self.sprite.height())
 				.as_rgba8()
 				.unwrap(),
-			(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x)
-				as f32,
+			(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x) as f32,
 			imageproc::geometric_transformations::Interpolation::Nearest,
 			Rgba([0, 0, 0, 0]),
 		));

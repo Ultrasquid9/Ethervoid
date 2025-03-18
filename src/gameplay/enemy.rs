@@ -1,4 +1,4 @@
-use crate::cores::enemytype::EnemyType;
+use crate::cores::{enemytype::EnemyType, goal::Goal};
 use macroquad::math::DVec2;
 use rayon::prelude::*;
 use stecs::prelude::*;
@@ -29,7 +29,7 @@ impl Enemy {
 				goals: enemytype
 					.goals
 					.par_iter()
-					.map(|goal| goal.clone().build())
+					.map(|key| Goal::new(key))
 					.collect(),
 
 				prev_goal: "none".to_owned(),

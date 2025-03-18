@@ -3,7 +3,7 @@ use image::DynamicImage;
 use imageproc::rgba_image;
 use log::error;
 
-use super::{resource, Resource};
+use super::{Resource, resource};
 
 /*
  *	Textures

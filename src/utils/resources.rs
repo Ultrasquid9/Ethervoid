@@ -3,12 +3,14 @@ use std::sync::LazyLock;
 use ahash::HashMap;
 use audio::{clean_sounds, create_sounds};
 
+use goals::{clean_goals, create_goals};
 use maps::{clean_maps, create_maps};
 
 use parking_lot::RwLock;
 use textures::{clean_textures, create_textures};
 
 pub mod audio;
+pub mod goals;
 pub mod maps;
 pub mod textures;
 
@@ -31,6 +33,7 @@ NOTE: Please ensure you call `clean_resources()` when quitting the game.
 pub unsafe fn create_resources() {
 	create_sounds();
 	create_textures();
+	create_goals();
 	create_maps();
 }
 
@@ -42,5 +45,6 @@ NOTE: THIS DELETES ALL RESOURCES. ONLY CALL WHEN QUITTING THE GAME.
 pub unsafe fn clean_resources() {
 	clean_sounds();
 	clean_textures();
+	clean_goals();
 	clean_maps();
 }

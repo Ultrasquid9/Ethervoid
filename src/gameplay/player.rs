@@ -153,7 +153,7 @@ impl Inventory {
 				)
 			}
 
-			_ => panic!("Bad weapon"),
+			_ => unreachable!("Gun in Sword position"),
 		}
 	}
 
@@ -180,7 +180,7 @@ impl Inventory {
 				Attack::new_hitscan(Obj::new(pos, get_mouse_pos() * 999., 6.), 6., Owner::Player)
 			}
 
-			_ => panic!("Bad weapon"),
+			_ => unreachable!("Sword in Gun position"),
 		}
 	}
 }

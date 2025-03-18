@@ -9,7 +9,7 @@ use kira::{
 
 use crate::cores::audio::get_audio;
 
-use super::{resource, Resource};
+use super::{Resource, resource};
 
 /*
  *	Audio

@@ -298,7 +298,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 					};
 				}
 
-				_ => panic!("How did a non-parryable attack end up here?"),
+				_ => unreachable!("How did a non-parryable attack end up here?"),
 			}
 
 			break;

@@ -72,8 +72,12 @@ impl Door {
 		let speed = if let Behavior::Player(behavior) = player.behavior {
 			behavior.speed + 1.
 		} else {
-			panic!(
-				"If you are seeing this, the player does not have the player behavior. This is a huge problem. Fortunately, you should probably never see this."
+			unreachable!(
+				"
+				If you are seeing this, the player does not have the player behavior. 
+				This is a huge problem. 
+				Fortunately, you should probably never see this.
+				"
 			)
 		};
 		let mut new_pos = player.obj.pos

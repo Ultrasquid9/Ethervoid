@@ -1,7 +1,6 @@
 use ahash::HashMap;
-use log::{debug, info};
-use serde::Deserialize;
-use std::fs;
+use log::{debug, error, info, trace, warn};
+use mod_resolver::EvoidResolver;
 
 use crate::{
 	gameplay::{
@@ -9,18 +8,12 @@ use crate::{
 		ecs::obj::Obj,
 	},
 	prelude::*,
-	utils::get_delta_time,
+	utils::{error::Result, get_delta_time, resources::goals::access_goal},
 };
 
 use rhai::{AST, Dynamic, Engine, EvalAltResult, FnPtr, NativeCallContext, Scope};
 
 use super::{gen_name, get_files};
-
-#[derive(Clone, Deserialize)]
-pub struct GoalBuilder {
-	name: String,
-	script: String,
-}
 
 /// A goal that can be configured via a script.
 pub struct Goal {
@@ -30,22 +23,11 @@ pub struct Goal {
 	pub engine: Engine,
 }
 
-impl GoalBuilder {
-	/// Reads the script at the provided directory
-	pub fn read(name: String, dir: &str) -> Self {
-		Self {
-			name,
-			script: fs::read_to_string(dir).unwrap(),
-		}
-	}
-
-	/// Creates all the neccessary components for the script
-	pub fn build(self) -> Goal {
-		let engine = init_engine();
-
+impl Goal {
+	pub fn new(key: &str) -> Goal {
 		Goal {
-			name: self.name,
-			script: engine.compile(self.script).unwrap(),
+			name: key.to_owned(),
+			script: access_goal(key).unwrap(),
 			scope: Scope::new(),
 			engine: init_engine(),
 		}
@@ -64,12 +46,23 @@ impl Clone for Goal {
 }
 
 /// Provides a HashMap containing all Goals
-pub fn get_goals() -> HashMap<String, GoalBuilder> {
-	let goals: HashMap<String, GoalBuilder> = get_files("goals".to_string())
+pub fn get_goals() -> HashMap<String, AST> {
+	let engine = init_engine();
+	let goals = get_files("goals".to_string())
 		.par_iter()
 		.map(|dir| {
-			let name = gen_name(dir);
-			(name.clone(), GoalBuilder::read(name, dir))
+			Ok((
+				gen_name(dir),
+				engine.compile(std::fs::read_to_string(dir)?)?,
+			))
+		})
+		.filter_map(|result: Result<(String, AST)>| {
+			if let Err(e) = result {
+				warn!("Failed to compile goal: {e}");
+				None
+			} else {
+				result.ok()
+			}
 		})
 		.collect();
 
@@ -105,15 +98,23 @@ fn init_engine() -> Engine {
 	}
 
 	engine
+		// Allowing modules
+		.set_module_resolver(EvoidResolver)
 		// Disabling "eval" (this was recommended by the Rhai docs)
 		.disable_symbol("eval")
-		// Altering the built-in print methods
+		// Disabling throwing exceptions
+		.disable_symbol("throw")
+		// Altering the built-in print methods and adding the remaining log types
 		.on_print(|s| info!("{s}"))
-		.on_debug(|s, _, _| debug!("{s}"))
+		.on_debug(|s: &str, _, _| debug!("{s}"))
+		.register_fn("trace", |s: &str| trace!("{s}"))
+		.register_fn("warn", |s: &str| warn!("{s}"))
+		.register_fn("error", |s: &str| error!("{s}"))
 		// Registerring the DVec2 and functions related to it
 		.register_type_with_name::<DVec2>("position")
 		.register_get_set("x", getter_x, setter_x)
 		.register_get_set("y", getter_y, setter_y)
+		.register_fn("new_position", |x: f64, y: f64| dvec2(x, y))
 		.register_fn("angle_between", angle_between)
 		.register_fn("move_towards", move_towards)
 		.register_fn("distance_between", distance_between)
@@ -183,4 +184,35 @@ fn init_engine() -> Engine {
 		);
 
 	engine
+}
+
+mod mod_resolver {
+	use std::sync::Arc;
+
+	use rhai::{EvalAltResult, Module, ModuleResolver, Scope};
+
+	use crate::utils::resources::goals::access_goal;
+
+	#[derive(Clone, PartialEq)]
+	pub struct EvoidResolver;
+
+	impl ModuleResolver for EvoidResolver {
+		fn resolve(
+			&self,
+			engine: &rhai::Engine,
+			_source: Option<&str>,
+			path: &str,
+			pos: rhai::Position,
+		) -> std::result::Result<Arc<Module>, Box<EvalAltResult>> {
+			if let Some(ast) = access_goal(path) {
+				return Ok(Arc::new(Module::eval_ast_as_new(
+					Scope::new(),
+					&ast,
+					engine,
+				)?));
+			}
+
+			Err(EvalAltResult::ErrorModuleNotFound(path.into(), pos).into())
+		}
+	}
 }
