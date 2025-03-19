@@ -4,6 +4,7 @@ use ahash::HashMap;
 use audio::create_sounds;
 
 use goals::create_goals;
+use log::info;
 use maps::create_maps;
 
 use parking_lot::RwLock;
@@ -31,4 +32,5 @@ pub fn create_resources() {
 	create_textures();
 	create_goals();
 	create_maps();
+	info!("All resources loaded!");
 }

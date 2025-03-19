@@ -22,7 +22,7 @@ impl World {
 		macro_rules! clear {
 			( $( $field:expr ),+ ) => {
 				$(
-					while $field.ids.is_empty() {
+					while !$field.ids.is_empty() {
 						$field.remove(0);
 					}
 				)+
