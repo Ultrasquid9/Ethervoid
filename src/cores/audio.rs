@@ -14,14 +14,17 @@ pub fn get_audio() -> HashMap<String, StaticSoundData> {
 		let name: String = gen_name(dir);
 		let sound = StaticSoundData::from_file(dir);
 
-		let Ok(sound) = sound else {
-			warn!("Audio {} failed to load: {}", name, sound.err().unwrap());
-			return;
+		let sound = match sound {
+			Ok(sound) => sound,
+			Err(e) => {
+				warn!("Audio {name} failed to load: {e}");
+				return;
+			}
 		};
 
 		info!("Audio {} loaded!", name);
 
-		let _ = transciever.send((name, sound));
+		_ = transciever.send((name, sound));
 	});
 
 	drop(transciever);

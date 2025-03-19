@@ -51,17 +51,17 @@ pub fn get_goals() -> HashMap<String, AST> {
 	let goals = get_files("goals".to_string())
 		.par_iter()
 		.map(|dir| {
-			Ok((
-				gen_name(dir),
-				engine.compile(std::fs::read_to_string(dir)?)?,
-			))
+			let maybe_ast = || Ok(engine.compile(std::fs::read_to_string(dir)?)?);
+			(gen_name(dir), maybe_ast())
 		})
-		.filter_map(|result: Result<(String, AST)>| {
-			if let Err(e) = result {
-				warn!("Failed to compile goal: {e}");
+		.filter_map(|(name, result): (String, Result<AST>)| match result {
+			Err(e) => {
+				warn!("Failed to compile goal {name}: {e}");
 				None
-			} else {
-				result.ok()
+			}
+			Ok(ast) => {
+				info!("Goal {name} compiled!");
+				Some((name, ast))
 			}
 		})
 		.collect();
@@ -150,7 +150,7 @@ fn init_engine() -> Engine {
 		// Ternary operator
 		// Uses an array for the input, since custom operators are somewhat limited
 		.register_custom_operator("?", 131)
-		.unwrap()
+		.expect("Should never fail")
 		.register_fn("?", |input: bool, array: Vec<Dynamic>| -> OperatorResult {
 			let output = array.get(if input { 0 } else { 1 });
 
@@ -163,7 +163,7 @@ fn init_engine() -> Engine {
 		// Pipeline operator
 		// IDK if this will ever be used, I just added it for fun
 		.register_custom_operator("|>", 255)
-		.unwrap()
+		.expect("Should never fail")
 		.register_fn(
 			"|>",
 			|context: NativeCallContext, input: Dynamic, mut func: FnPtr| -> OperatorResult {

@@ -101,7 +101,7 @@ impl MapTexture {
 			for (i, key) in self.tiles[i].iter().enumerate() {
 				let index_hor = i * 16;
 
-				let _ = texture.copy_from(
+				_ = texture.copy_from(
 					&access_image(self.keys.get(key).unwrap()),
 					index_hor as u32,
 					index_vert as u32,
@@ -121,13 +121,14 @@ pub fn get_maps() -> HashMap<String, Map> {
 	let maps: HashMap<String, Map> = get_files("maps".to_string())
 		.par_iter()
 		.map(|dir| (gen_name(dir), MapBuilder::read(dir)))
-		.filter_map(|(str, mapbuilder)| {
-			if mapbuilder.is_err() {
-				warn!("Map {} failed to load: {}", str, mapbuilder.err().unwrap());
+		.filter_map(|(str, result)| match result {
+			Err(e) => {
+				warn!("Map {str} failed to load: {e}");
 				None
-			} else {
-				info!("Map {} loaded!", str);
-				Some((str, mapbuilder.unwrap().build(&enemytypes, &npctypes)))
+			}
+			Ok(map) => {
+				info!("Map {str} loaded!");
+				Some((str, map.build(&enemytypes, &npctypes)))
 			}
 		})
 		.collect();

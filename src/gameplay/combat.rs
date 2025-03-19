@@ -234,7 +234,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 	let attack_ids: Vec<usize> = gameplay.world.attacks.ids().collect();
 
 	for i in attack_ids.iter().rev() {
-		let atk_1 = gameplay.world.attacks.get(*i).unwrap();
+		let atk_1 = gameplay.world.attacks.get(*i).expect("Attack should exist");
 
 		if *atk_1.attack_type != AttackType::Physical || *atk_1.is_parried {
 			continue;
@@ -245,7 +245,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 				continue;
 			}
 
-			let atk_2 = gameplay.world.attacks.get(*j).unwrap();
+			let atk_2 = gameplay.world.attacks.get(*j).expect("Attack should exist");
 
 			if !atk_2.obj.is_touching(atk_1.obj) || *atk_2.is_parried {
 				continue;

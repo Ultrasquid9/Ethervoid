@@ -140,17 +140,15 @@ pub fn goal_behavior(
 ) {
 	// Macro to execute a function and check if it returns an error
 	macro_rules! maybe {
-		($name:pat, $result:expr) => {
-			let result = $result;
-			if let Err(e) = result {
-				error!("{}", e);
-				behavior.err = Some(e);
-				return;
-			}
-			let $name = result.unwrap();
-		};
 		($result:expr) => {
-			maybe!(_, $result);
+			match $result {
+				Err(e) => {
+					error!("{e}");
+					behavior.err = Some(e);
+					return;
+				}
+				Ok(ok) => ok,
+			}
 		};
 	}
 
@@ -166,7 +164,7 @@ pub fn goal_behavior(
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {
 		maybe!(behavior.goals[index].update(obj_self, sprite, attacks, current_map));
-		maybe!(should_stop, behavior.goals[index].should_stop(sprite));
+		let should_stop = maybe!(behavior.goals[index].should_stop(sprite));
 
 		if should_stop {
 			behavior.prev_goal = behavior.goals[index].name.clone();

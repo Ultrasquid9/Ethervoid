@@ -24,7 +24,12 @@ pub enum Behavior {
 }
 
 pub fn handle_behavior(gameplay: &mut Gameplay) {
-	let obj_player = *gameplay.world.player.obj.first().unwrap();
+	let obj_player = *gameplay
+		.world
+		.player
+		.obj
+		.first()
+		.expect("Player should exist");
 	let attacks = RwLock::new(&mut gameplay.world.attacks);
 
 	thread::scope(|scope| {

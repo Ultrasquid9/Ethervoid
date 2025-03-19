@@ -26,7 +26,7 @@ pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
 				..Default::default()
 			}),
 		)
-		.unwrap();
+		.expect("Source and target images should both be Rgba8");
 
 	downscaled_img
 }

@@ -47,10 +47,10 @@ pub fn camera_scale() -> f64 {
 	screen_width() as f64 / screen_height() as f64 * 512.
 }
 
-/// Initiates the logger
+/// Initiates the logger. Should do nothing if already called. 
 pub fn init_log() {
 	// Renaming old log
-	let _ = std::fs::rename("./output.log", "./output.log.old");
+	_ = std::fs::rename("./output.log", "./output.log.old");
 
 	// Coloring log messages
 	let colors = ColoredLevelConfig::new().info(fern::colors::Color::Green);
@@ -63,7 +63,7 @@ pub fn init_log() {
 				jiff::Zoned::now()
 					.datetime()
 					.round(jiff::Unit::Millisecond)
-					.unwrap(),
+					.expect("Should only fail if rounding to days or higher"),
 				colors.color(record.level()),
 				record.target(),
 				message
@@ -74,5 +74,5 @@ pub fn init_log() {
 		.chain(std::io::stdout())
 		.chain(fern::log_file("output.log").unwrap())
 		.apply()
-		.unwrap();
+		.unwrap_or(());
 }

@@ -25,13 +25,14 @@ pub fn get_npctypes() -> HashMap<String, NpcType> {
 	let npcs: HashMap<String, NpcType> = get_files("npcs".to_string())
 		.par_iter()
 		.map(|dir| (gen_name(dir), NpcType::read(dir)))
-		.filter_map(|(str, npctype)| {
-			if npctype.is_err() {
-				warn!("Npc {} failed to load: {}", str, npctype.err().unwrap());
+		.filter_map(|(str, result)| match result {
+			Err(e) => {
+				warn!("Npc {str} failed to load: {e}");
 				None
-			} else {
-				info!("Npc {} loaded!", str);
-				Some((str, npctype.unwrap()))
+			}
+			Ok(npctype) => {
+				info!("Npc {str} loaded!");
+				Some((str, npctype))
 			}
 		})
 		.collect();

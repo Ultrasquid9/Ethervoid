@@ -1,8 +1,10 @@
-use ron::de::SpannedError;
+use std::fs::{self, read_dir};
+
+use log::error;
 use serde::Deserialize;
 use walkdir::WalkDir;
 
-use std::fs::{self, read_dir};
+use crate::utils::error::Result;
 
 pub mod audio;
 pub mod enemytype;
@@ -13,35 +15,38 @@ pub mod textures;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: String) -> Vec<String> {
+	macro_rules! maybe {
+		($result:expr) => {
+			match $result {
+				Ok(ok) => ok,
+				Err(e) => {
+					error!("{e}");
+					continue;
+				}
+			}
+		};
+	}
+
 	// This function took way too long to write
 
 	let mut files = vec![]; // The complete directory of a file
 	let mut paths = vec![]; // The paths of different cores
 
-	for i in fs::read_dir("./cores").unwrap() {
-		paths.push(i.unwrap().file_name().to_string_lossy().into_owned());
+	for result in read_dir("./cores").expect("Cores directory should exist") {
+		paths.push(maybe!(result).file_name().to_string_lossy().into_owned());
 	}
 
-	for i in paths {
-		if fs::read_dir(format!("./cores/{}/{}", i, file_type).as_str()).is_err() {
-			continue;
-		}
+	for path in paths {
+		let iter = maybe!(read_dir(format!("./cores/{path}/{file_type}").as_str()));
 
-		for j in fs::read_dir(format!("./cores/{}/{}", i, file_type).as_str()).unwrap() {
+		for result in iter {
 			// The directory to be scanned
-			let dir = j.unwrap().path().to_string_lossy().into_owned();
+			let dir = maybe!(result).path().to_string_lossy().into_owned();
 			// Directories that will be appended to `files` and returned
 			let mut dirs = vec![];
 
-			for entry in WalkDir::new(&dir) {
-				dirs.push(
-					entry
-						.as_ref()
-						.unwrap()
-						.path()
-						.to_string_lossy()
-						.into_owned(),
-				);
+			for result in WalkDir::new(&dir) {
+				dirs.push(maybe!(result).path().to_string_lossy().into_owned());
 			}
 
 			// Removing "leftover" entries
@@ -73,12 +78,12 @@ fn gen_name(dir: &str) -> String {
 }
 
 pub trait Readable {
-	fn read(dir: &str) -> Result<Self, SpannedError>
+	fn read(dir: &str) -> Result<Self>
 	where
 		Self: Sized,
 		Self: for<'a> Deserialize<'a>,
 	{
-		let file = fs::read_to_string(dir).unwrap();
-		ron::from_str(&file)
+		let file = fs::read_to_string(dir)?;
+		Ok(ron::from_str(&file)?)
 	}
 }
