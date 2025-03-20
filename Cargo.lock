@@ -530,12 +530,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dyn-clone"
-version = "1.0.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c7a8fb8a9fbf66c1f703fe16184d10ca0ee9d23be5b4436400408ba54a95005"
-
-[[package]]
 name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1621,13 +1615,11 @@ dependencies = [
 
 [[package]]
 name = "raywoke"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9193809669bce24678ada09e98bd03c2e8cfe0d30664ab9c73a20d5e8b2d6a0d"
+checksum = "a7bf202bde87d511f9da1aba032868a6d52f2ec4392dffe1f39c9de14a4edd89"
 dependencies = [
- "dyn-clone",
  "glam 0.29.2",
- "yakui",
 ]
 
 [[package]]

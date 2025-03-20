@@ -1,8 +1,9 @@
+use log::error;
 use macroquad::math::DVec2;
 use raywoke::prelude::*;
 use std::fmt::Display;
 
-use crate::utils::resources::maps::access_map;
+use crate::utils::{resources::maps::access_map, tup_vec::Tup64};
 
 use super::{Gameplay, ecs::behavior::Behavior};
 
@@ -67,7 +68,10 @@ impl Door {
 
 	/// Checks if the map should be changed, and changes it if it should
 	pub fn try_change_map(&self, gameplay: &mut Gameplay) {
-		let player = gameplay.world.player.get_mut(0).unwrap();
+		let Some(player) = gameplay.world.player.get_mut(0) else {
+			error!("Player not found");
+			return;
+		};
 
 		let speed = if let Behavior::Player(behavior) = player.behavior {
 			behavior.speed + 1.
@@ -88,7 +92,7 @@ impl Door {
 				Direction::West => DVec2::new(speed, 0.),
 			};
 
-		let ray = Ray::new(player.obj.pos.as_vec2(), new_pos.as_vec2());
+		let ray = Ray::new(player.obj.tup64(), new_pos.tup64());
 
 		// The player has not touched the door, so the map should not be changed
 		if cast(&ray, &self.to_barrier()).is_err() {

@@ -11,7 +11,7 @@ use super::{
 	},
 };
 
-use crate::utils::{get_delta_time, get_mouse_pos};
+use crate::utils::{get_delta_time, get_mouse_pos, tup_vec::Tup64};
 
 use rhai::{CustomType, TypeBuilder};
 
@@ -219,7 +219,7 @@ fn attack_projectile(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &
 
 fn attack_hitscan(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut AttackRefMut) {
 	if cast_wide(
-		&Ray::new(atk.obj.pos.as_vec2(), atk.obj.target.as_vec2()),
+		&Ray::new(atk.obj.pos.tup64(), atk.obj.target.tup64()),
 		&obj.to_barriers(),
 	)
 	.is_ok()

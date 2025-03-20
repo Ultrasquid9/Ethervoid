@@ -1,31 +1,22 @@
 use fern::colors::ColoredLevelConfig;
 use parking_lot::RwLock;
 
-use macroquad::{
-	input::mouse_position,
-	math::DVec2,
-	time::get_frame_time,
-	window::{screen_height, screen_width},
-};
+use macroquad::prelude::*;
 use raywoke::point::Point;
+use tup_vec::DV2;
 
 pub mod config;
 pub mod error;
 pub mod resources;
+pub mod tup_vec;
 
 // Stores the delta time of the given frame.
 static DELTA_TIME: RwLock<f64> = RwLock::new(0.);
 
-pub fn point_to_vec2(point: std::boxed::Box<(dyn raywoke::point::Point + 'static)>) -> DVec2 {
-	let (x, y) = point.tup_f64();
-	DVec2::new(x, y)
-}
-
 /// Gets the current position of the mouse
 pub fn get_mouse_pos() -> DVec2 {
-	let (x, y) = mouse_position().tup_f64();
-
-	DVec2::new(x, y) - DVec2::new(screen_width() as f64 / 2., screen_height() as f64 / 2.)
+	let calc = |f: f32| f as f64 / 2.;
+	mouse_position().tup_f64().dvec2() - dvec2(calc(screen_width()), calc(screen_height()))
 }
 
 /**
@@ -47,7 +38,7 @@ pub fn camera_scale() -> f64 {
 	screen_width() as f64 / screen_height() as f64 * 512.
 }
 
-/// Initiates the logger. Should do nothing if already called. 
+/// Initiates the logger. Should do nothing if already called.
 pub fn init_log() {
 	// Renaming old log
 	_ = std::fs::rename("./output.log", "./output.log.old");

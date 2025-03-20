@@ -8,7 +8,7 @@ use super::{
 	npctype::{NpcType, get_npctypes},
 };
 
-use crate::{gameplay::doors::Door, prelude::*, utils::resources::textures::access_image};
+use crate::{gameplay::doors::Door, prelude::*, utils::{resources::textures::access_image, tup_vec::Tup64}};
 
 use image::{DynamicImage, GenericImage};
 
@@ -54,12 +54,12 @@ impl MapBuilder {
 					for point in 0..wall.len() {
 						match wall.get(point + 1) {
 							Some(_) => vec.push(Barrier::new(
-								wall.get(point).unwrap().as_vec2(),
-								wall.get(point + 1).unwrap().as_vec2(),
+								wall.get(point).unwrap().tup64(),
+								wall.get(point + 1).unwrap().tup64(),
 							)),
 							None => vec.push(Barrier::new(
-								wall.get(point).unwrap().as_vec2(),
-								wall.first().unwrap().as_vec2(),
+								wall.get(point).unwrap().tup64(),
+								wall.first().unwrap().tup64(),
 							)),
 						}
 					}

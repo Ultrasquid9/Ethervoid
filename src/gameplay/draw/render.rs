@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-use raywoke::Barrier;
+use raywoke::prelude::*;
 
 use super::{SCREEN_SCALE, to_texture};
 
@@ -53,7 +53,7 @@ pub fn pixel_offset(base: f64) -> f32 {
 /// Draws a Barrier
 /// Probably temporary, may remain for debug
 pub fn draw_bar(bar: &Barrier) {
-	draw_line(bar.0.x(), bar.0.y(), bar.1.x(), bar.1.y(), 6., BLUE);
+	draw_line(bar.0.x() as f32, bar.0.y() as f32, bar.1.x() as f32, bar.1.y() as f32, 6., BLUE);
 }
 
 pub fn darken_screen() {
