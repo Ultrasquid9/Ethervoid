@@ -140,7 +140,7 @@ impl Sprite {
 		self.current_anim = None
 	}
 
-	pub async fn to_render_params(&mut self) -> (Texture2D, DVec2, Option<DrawTextureParams>) {
+	pub async fn as_render_params(&mut self) -> (Texture2D, DVec2, Option<DrawTextureParams>) {
 		let size = if self.rotation == Rotation::EightWay {
 			self.sprite.height() / 5
 		} else {

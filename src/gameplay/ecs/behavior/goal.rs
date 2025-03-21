@@ -124,7 +124,7 @@ impl Goal {
 		let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;
 
 		obj.update(new_pos);
-		obj.try_move(new_pos, current_map);
+		obj.try_move(&new_pos, current_map);
 
 		Ok(())
 	}

@@ -1,5 +1,5 @@
 (
-	max_health: 32,
+	max_health: 16,
 	size: 15,
 	sprite: "default:entity/player/player_spritesheet_wip",
 	goals: [

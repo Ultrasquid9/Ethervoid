@@ -158,7 +158,7 @@ fn init_engine() -> Engine {
 				return Ok(Dynamic::from(()));
 			};
 
-			return Ok(output.clone());
+			Ok(output.clone())
 		})
 		// Pipeline operator
 		// IDK if this will ever be used, I just added it for fun

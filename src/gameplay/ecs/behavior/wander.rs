@@ -29,7 +29,7 @@ pub fn wander_behavior(behavior: &mut WanderBehavior, obj: &mut Obj, current_map
 		return;
 	}
 	let new_pos = obj.pos.move_towards(obj.target, 2. * get_delta_time());
-	obj.try_move(new_pos, current_map);
+	obj.try_move(&new_pos, current_map);
 
 	if obj.pos != new_pos {
 		obj.target = obj.pos

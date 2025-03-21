@@ -65,7 +65,7 @@ pub fn player_behavior(
 		behavior.speed = 1.0;
 	} else {
 		obj.update(new_pos.normalize() * behavior.speed * get_delta_time() + obj.pos);
-		obj.try_move(obj.target, current_map);
+		obj.try_move(&obj.target.clone(), current_map);
 	}
 }
 

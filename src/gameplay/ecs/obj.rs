@@ -1,7 +1,12 @@
 use macroquad::math::DVec2;
 use raywoke::prelude::*;
 
-use crate::utils::{resources::maps::access_map, tup_vec::Tup64};
+use crate::utils::{
+	resources::maps::access_map,
+	tup_vec::{DV2, Tup64},
+};
+
+const DEFAULT_BAR: Barrier = Barrier((0., 0.), (0., 0.));
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Axis {
@@ -78,7 +83,7 @@ impl Obj {
 	}
 
 	/// Attempts to move the Obj to its current target
-	pub fn try_move(&mut self, new_pos: DVec2, current_map: &str) {
+	pub fn try_move(&mut self, new_pos: &DVec2, current_map: &str) {
 		let map = access_map(current_map);
 
 		// Instantly returns if about to hit a door
@@ -91,43 +96,32 @@ impl Obj {
 			return;
 		}
 
-		let mut ok_x = true;
-		let mut ok_y = true;
+		let mut ok = true;
 
 		for wall in &map.walls {
-			let check = |x: f64, y: f64| cast_wide(&Ray::new(self.tup64(), (x, y)), wall).is_ok();
-
-			if check(new_pos.x, self.pos.y) {
-				ok_x = false;
-			}
-			if check(self.pos.x, new_pos.y) {
-				ok_y = false;
+			if cast_wide(&Ray::new(self.tup64(), new_pos.tup64()), wall).is_ok() {
+				ok = false;
+				break;
 			}
 		}
 
-		if ok_x {
-			self.pos.x = new_pos.x;
-		}
-		if ok_y {
-			self.pos.y = new_pos.y;
-		}
-		if ok_x.eq(&ok_y) {
+		if ok {
+			self.pos = *new_pos;
 			return;
 		}
 
-		// Checking recursion
+		// Checking/handling recursion
 		if self.depth > 1 {
 			self.depth = 0;
-			return;
 		} else {
 			self.depth += 1;
 			self.try_handle_angle(new_pos, current_map);
 		}
 	}
 
-	fn try_handle_angle(&mut self, new_pos: DVec2, current_map: &str) {
+	fn try_handle_angle(&mut self, new_pos: &DVec2, current_map: &str) {
 		let map = access_map(current_map);
-		let mut to_check = Barrier::new((0., 0.), (0., 0.));
+		let mut to_check = DEFAULT_BAR;
 
 		for wall in &map.walls {
 			for bar in wall {
@@ -137,34 +131,36 @@ impl Obj {
 			}
 		}
 
-		if to_check.0.x() == to_check.1.x() || to_check.0.y() == to_check.1.y() {
+		if to_check.0 == DEFAULT_BAR.0 && to_check.1 == DEFAULT_BAR.1 {
 			return;
 		}
 
-		let point0 = to_check.0;
-		let point1 = to_check.1;
+		let point0 = to_check.0.dvec2();
+		let point1 = to_check.1.dvec2();
 
-		let angle0 = (point1.x() - point0.x()).atan2(point1.y() - point0.y());
-		let angle1 = (point0.x() - point1.x()).atan2(point0.y() - point1.y());
+		fn atan2(p0: &DVec2, p1: &DVec2) -> f64 {
+			(p1.y - p0.y).atan2(p1.x - p0.x)
+		}
 
-		let check_dist =
-			|angle: f64, pos: DVec2| (DVec2::from_angle(angle) + self.pos).distance(pos);
+		let angle0 = atan2(&point1, &point0);
+		let angle1 = atan2(&point0, &point1);
+		let angle2 = atan2(&self.pos, new_pos);
 
-		let angle = if check_dist(angle0, new_pos) < check_dist(angle1, new_pos) {
-			angle0
+		let target = if (angle0 - angle2).abs() > (angle1 - angle2).abs() {
+			point1
 		} else {
-			angle1
+			point0
 		};
 
-		// Newer pos
-		let new_pos = DVec2::from_angle(angle) * self.pos.distance(new_pos);
-
-		self.try_move(self.pos + new_pos, current_map);
+		self.try_move(
+			&self.pos.move_towards(target, self.pos.distance(*new_pos)),
+			current_map,
+		);
 	}
 }
 
 impl Tup64 for Obj {
-	fn tup64(self: &Self) -> (f64, f64) {
+	fn tup64(&self) -> (f64, f64) {
 		self.pos.tup64()
 	}
 }

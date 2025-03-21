@@ -83,15 +83,15 @@ mod unsafe_delta_time {
 		}
 
 		/// Gets the stored value.
-		/// 
-		/// Should be safe, as no values are changed. 
+		///
+		/// Should be safe, as no values are changed.
 		pub fn get(&self) -> f64 {
 			unsafe { *self.0.get() }
 		}
 
-		/// Sets the stored value. 
-		/// 
-		/// Likely unsafe if called from multiple threads, so don't do that please. 
+		/// Sets the stored value.
+		///
+		/// Likely unsafe if called from multiple threads, so don't do that please.
 		pub fn set(&self, new: f64) {
 			unsafe { *self.0.get() = new }
 		}

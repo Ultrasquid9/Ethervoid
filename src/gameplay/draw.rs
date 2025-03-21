@@ -116,7 +116,7 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 	let mut futures = vec![];
 
 	sprites.iter_mut().for_each(|sprite| {
-		futures.push(sprite.to_render_params());
+		futures.push(sprite.as_render_params());
 	});
 
 	// Rendering sprites

@@ -150,7 +150,7 @@ pub fn handle_combat(gameplay: &mut Gameplay) {
 				.obj
 				.pos
 				.move_towards(atk.obj.target, get_delta_time() * 5.);
-			atk.obj.try_move(new_pos, &gameplay.current_map);
+			atk.obj.try_move(&new_pos, &gameplay.current_map);
 
 			if atk.obj.pos != new_pos {
 				*atk.lifetime = 0.;

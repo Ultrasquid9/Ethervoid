@@ -1,29 +1,24 @@
 (
 	walls: [
 		[
-			(-120, -120),
-			(-100, 100),
-			(160, 160),
-			(100, -100)
-		],
-		[
-			(-12, -12),
-			(-10, 10),
-			(16, 16),
-			(10, -10)
+			(-100, -100),
+			(-120, 120),
+			(100, 100),
+			(140, -140)
 		]
 	],
-	enemies: [],
+	enemies: [
+		("default:test", (30, 30)),
+		("default:test", (-30, -30))
+	],
 	doors: [
 		(
-			direction: North,
-			pos: (-80, -80),
+			direction: South,
+			pos: (80, 80),
 			dest: "default:test"
 		)
 	],
-	npcs: [
-		("default:test", (30, 30))
-	],
+	npcs: [],
 
 	tilemap: (
 		keys: {
