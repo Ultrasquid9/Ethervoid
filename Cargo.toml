@@ -9,7 +9,6 @@ stecs = "0.1"
 walkdir = "2.5"
 ahash = "0.8"
 parking_lot = "0.12"
-rayon = "1.10"
 
 yakui-macroquad = "0.4"
 yakui = "0.3"

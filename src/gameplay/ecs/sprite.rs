@@ -1,14 +1,14 @@
 use ahash::HashMap;
 
 use crate::{
-	gameplay::draw::{SCREEN_SCALE, process::downscale},
+	gameplay::draw::{
+		SCREEN_SCALE,
+		process::{downscale, to_texture},
+	},
 	utils::{error::EtherVoidError, get_delta_time, resources::textures::access_image},
 };
 
-use macroquad::{
-	math::{DVec2, Rect, Vec2},
-	texture::DrawTextureParams,
-};
+use macroquad::prelude::*;
 
 use imageproc::{
 	geometric_transformations::rotate_about_center,
@@ -24,7 +24,7 @@ pub struct Sprite {
 	sprite: DynamicImage,
 	obj: Obj,
 
-	cache: Option<(u32, DynamicImage)>,
+	cache: Option<(u32, Texture2D)>,
 
 	rotation: Rotation,
 	frames: Frames,
@@ -64,7 +64,7 @@ impl Sprite {
 	) -> Self {
 		Self {
 			sprite: if rotation == Rotation::Angle {
-				downscale(access_image(key), obj.size as u32)
+				downscale(&access_image(key), obj.size as u32)
 			} else {
 				access_image(key)
 			},
@@ -140,7 +140,7 @@ impl Sprite {
 		self.current_anim = None
 	}
 
-	pub async fn to_render_params(&mut self) -> (DynamicImage, DVec2, Option<DrawTextureParams>) {
+	pub async fn to_render_params(&mut self) -> (Texture2D, DVec2, Option<DrawTextureParams>) {
 		let size = if self.rotation == Rotation::EightWay {
 			self.sprite.height() / 5
 		} else {
@@ -187,9 +187,9 @@ impl Sprite {
 			if self.rotation == Rotation::Angle {
 				self.texture_angle(x_pos, y_pos)
 			} else {
-				self.sprite.clone()
+				self.texture_non_angle()
 			},
-			DVec2::new(
+			dvec2(
 				self.obj.pos.x
 					+ match self.rotation {
 						Rotation::Angle => 0.,
@@ -216,7 +216,7 @@ impl Sprite {
 				},
 				flip_x: self.obj.axis_horizontal == Axis::Negative
 					&& self.rotation == Rotation::EightWay,
-				dest_size: Some(Vec2::new(
+				dest_size: Some(vec2(
 					size as f32 * SCREEN_SCALE as f32,
 					size as f32 * SCREEN_SCALE as f32,
 				)),
@@ -225,7 +225,7 @@ impl Sprite {
 		)
 	}
 
-	fn texture_angle(&mut self, x_pos: u32, y_pos: u32) -> DynamicImage {
+	fn texture_angle(&mut self, x_pos: u32, y_pos: u32) -> Texture2D {
 		if let Some((old_pos, texture)) = &self.cache {
 			if *old_pos == x_pos {
 				return texture.clone();
@@ -234,7 +234,7 @@ impl Sprite {
 			}
 		}
 
-		let img = DynamicImage::ImageRgba8(rotate_about_center(
+		let img = to_texture(&DynamicImage::ImageRgba8(rotate_about_center(
 			self.sprite
 				.crop_imm(x_pos, y_pos, self.sprite.height(), self.sprite.height())
 				.as_rgba8()
@@ -242,11 +242,21 @@ impl Sprite {
 			(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x) as f32,
 			imageproc::geometric_transformations::Interpolation::Nearest,
 			Rgba([0, 0, 0, 0]),
-		));
+		)));
 
 		self.cache = Some((x_pos, img.clone()));
 
 		img
+	}
+
+	fn texture_non_angle(&mut self) -> Texture2D {
+		if let Some((_, texture)) = &self.cache {
+			return texture.clone();
+		}
+
+		let texture = to_texture(&self.sprite);
+		self.cache = Some((0, texture.clone()));
+		texture
 	}
 }
 

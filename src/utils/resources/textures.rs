@@ -24,7 +24,7 @@ pub fn access_image(key: &str) -> DynamicImage {
 	let Some(texture) = thing.get(key) else {
 		error!("Texture {} not found", key);
 		return downscale(
-			DynamicImage::ImageRgba8(rgba_image!(
+			&DynamicImage::ImageRgba8(rgba_image!(
 				[0,0,0,255],[255,0,255,255];
 				[255,0,255,255],[0,0,0,255]
 			)),

@@ -36,7 +36,6 @@ async fn main() {
 
 pub mod prelude {
 	pub use macroquad::prelude::*;
-	pub use rayon::prelude::*;
 	pub use stecs::prelude::*;
 
 	pub use ahash::HashMap;

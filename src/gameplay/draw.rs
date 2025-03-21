@@ -1,5 +1,4 @@
 use macroquad::prelude::*;
-use process::to_texture;
 use std::cmp::Ordering;
 use stecs::prelude::*;
 
@@ -123,6 +122,6 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 	// Rendering sprites
 	for future in futures {
 		let (texture, pos, params) = future.await;
-		render_texture(&to_texture(texture), pos, params).await;
+		render_texture(&texture, pos, params).await;
 	}
 }

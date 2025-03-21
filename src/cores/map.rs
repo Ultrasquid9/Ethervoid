@@ -8,7 +8,11 @@ use super::{
 	npctype::{NpcType, get_npctypes},
 };
 
-use crate::{gameplay::doors::Door, prelude::*, utils::{resources::textures::access_image, tup_vec::Tup64}};
+use crate::{
+	gameplay::{doors::Door, draw::process::to_texture},
+	prelude::*,
+	utils::{resources::textures::access_image, tup_vec::Tup64},
+};
 
 use image::{DynamicImage, GenericImage};
 
@@ -33,7 +37,7 @@ pub struct Map {
 	pub doors: Box<[Door]>,
 	pub enemies: Box<[(EnemyType, DVec2)]>,
 	pub npcs: Box<[(NpcType, DVec2)]>,
-	pub texture: DynamicImage,
+	pub texture: Texture2D,
 }
 
 impl Readable for MapBuilder {}
@@ -73,13 +77,13 @@ impl MapBuilder {
 
 			enemies: self
 				.enemies
-				.par_iter()
+				.iter()
 				.map(|(name, pos)| (enemytypes.get(name.as_str()).unwrap().clone(), *pos))
 				.collect(),
 
 			npcs: self
 				.npcs
-				.par_iter()
+				.iter()
 				.map(|(name, pos)| (npctypes.get(name.as_str()).unwrap().clone(), *pos))
 				.collect(),
 
@@ -89,7 +93,7 @@ impl MapBuilder {
 }
 
 impl MapTexture {
-	fn to_texture(&self) -> DynamicImage {
+	fn to_texture(&self) -> Texture2D {
 		let mut texture = DynamicImage::new_rgba8(
 			(self.tiles[0].len() * 16) as u32,
 			(self.tiles.len() * 16) as u32,
@@ -109,7 +113,7 @@ impl MapTexture {
 			}
 		}
 
-		texture
+		to_texture(&texture)
 	}
 }
 
@@ -118,8 +122,8 @@ pub fn get_maps() -> HashMap<String, Map> {
 	let enemytypes = get_enemytypes();
 	let npctypes = get_npctypes();
 
-	let maps: HashMap<String, Map> = get_files("maps".to_string())
-		.par_iter()
+	get_files("maps".to_string())
+		.iter()
 		.map(|dir| (gen_name(dir), MapBuilder::read(dir)))
 		.filter_map(|(str, result)| match result {
 			Err(e) => {
@@ -131,7 +135,5 @@ pub fn get_maps() -> HashMap<String, Map> {
 				Some((str, map.build(&enemytypes, &npctypes)))
 			}
 		})
-		.collect();
-
-	maps
+		.collect()
 }

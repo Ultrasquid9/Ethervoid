@@ -13,7 +13,6 @@ const CENTER: DVec2 = DVec2::new(0., 0.);
 #[derive(PartialEq, Clone)]
 pub struct PlayerBehavior {
 	pub speed: f64,
-
 	pub dash_cooldown: f64,
 	pub is_dashing: bool,
 }
@@ -30,16 +29,13 @@ pub fn player_behavior(
 	if !behavior.is_dashing {
 		switch_dir_from_input(config, obj)
 	}
-	match obj.axis_vertical {
-		Axis::Positive => new_pos.y += 1.,
-		Axis::Negative => new_pos.y -= 1.,
-		Axis::None => (),
-	}
-	match obj.axis_horizontal {
-		Axis::Positive => new_pos.x += 1.,
-		Axis::Negative => new_pos.x -= 1.,
-		Axis::None => (),
-	}
+	let axis = |axis: &Axis, f: &mut f64| match axis {
+		Axis::Positive => *f += 1.,
+		Axis::Negative => *f -= 1.,
+		_ => (),
+	};
+	axis(&obj.axis_vertical, &mut new_pos.y);
+	axis(&obj.axis_horizontal, &mut new_pos.x);
 
 	// Dashing
 	if config.keymap.dash.is_down() && behavior.dash_cooldown <= 0. && new_pos != CENTER {

@@ -4,7 +4,7 @@ use macroquad::texture::Texture2D;
 use fast_image_resize::{ResizeOptions, Resizer};
 
 /// Downscales the provided image
-pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
+pub fn downscale(img: &DynamicImage, size: u32) -> DynamicImage {
 	let smallest_side = if img.width() < img.height() {
 		img.width()
 	} else {
@@ -19,7 +19,7 @@ pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
 	let mut resizer = Resizer::new();
 	resizer
 		.resize(
-			&img,
+			img,
 			&mut downscaled_img,
 			&Some(ResizeOptions {
 				algorithm: fast_image_resize::ResizeAlg::Nearest,
@@ -32,7 +32,7 @@ pub fn downscale(img: DynamicImage, size: u32) -> DynamicImage {
 }
 
 /// Transforms a `DynamicImage` into a `Texture2D`
-pub fn to_texture(img: DynamicImage) -> Texture2D {
+pub fn to_texture(img: &DynamicImage) -> Texture2D {
 	let texture = Texture2D::from_rgba8(img.width() as u16, img.height() as u16, img.as_bytes());
 	texture.set_filter(macroquad::texture::FilterMode::Nearest);
 	texture

@@ -20,7 +20,7 @@ impl Readable for EnemyType {}
 /// Provides a HashMap containing all EnemyTypes
 pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 	let enemytypes: HashMap<String, EnemyType> = get_files("enemies".to_string())
-		.par_iter()
+		.iter()
 		.map(|dir| (gen_name(dir), EnemyType::read(dir)))
 		.filter_map(|(str, result)| match result {
 			Err(e) => {

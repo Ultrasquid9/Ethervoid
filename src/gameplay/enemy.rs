@@ -1,7 +1,6 @@
 use crate::cores::{enemytype::EnemyType, goal::Goal};
 use log::warn;
 use macroquad::math::DVec2;
-use rayon::prelude::*;
 use stecs::prelude::*;
 
 use super::ecs::{
@@ -29,7 +28,7 @@ impl Enemy {
 			behavior: Behavior::Goal(GoalBehavior {
 				goals: enemytype
 					.goals
-					.par_iter()
+					.iter()
 					.filter_map(|key| {
 						let opt = Goal::new(key);
 

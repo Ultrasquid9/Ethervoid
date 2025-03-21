@@ -1,11 +1,7 @@
 use macroquad::math::DVec2;
-use rayon::prelude::*;
 use raywoke::prelude::*;
 
-use crate::utils::{
-	resources::maps::access_map,
-	tup_vec::Tup64,
-};
+use crate::utils::{resources::maps::access_map, tup_vec::Tup64};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Axis {
@@ -86,15 +82,12 @@ impl Obj {
 		let map = access_map(current_map);
 
 		// Instantly returns if about to hit a door
-		if cast_wide(
-			&Ray::new(self.tup64(), new_pos.tup64()),
-			&map.doors
-				.par_iter()
-				.map(|door| door.to_barrier())
-				.collect::<Vec<Barrier>>(),
-		)
-		.is_ok()
-		{
+		let bars = &map
+			.doors
+			.iter()
+			.map(|door| door.to_barrier())
+			.collect::<Vec<_>>();
+		if cast_wide(&Ray::new(self.tup64(), new_pos.tup64()), bars).is_ok() {
 			return;
 		}
 

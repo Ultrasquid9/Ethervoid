@@ -10,7 +10,7 @@ pub fn get_audio() -> HashMap<String, StaticSoundData> {
 
 	let (transciever, receiver) = mpsc::channel();
 
-	get_files("audio".to_string()).par_iter().for_each(|dir| {
+	get_files("audio".to_string()).iter().for_each(|dir| {
 		let name: String = gen_name(dir);
 		let sound = StaticSoundData::from_file(dir);
 

@@ -49,7 +49,7 @@ impl Clone for Goal {
 pub fn get_goals() -> HashMap<String, AST> {
 	let engine = init_engine();
 	let goals = get_files("goals".to_string())
-		.par_iter()
+		.iter()
 		.map(|dir| {
 			let maybe_ast = || Ok(engine.compile(std::fs::read_to_string(dir)?)?);
 			(gen_name(dir), maybe_ast())

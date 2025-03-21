@@ -10,7 +10,7 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 	let mut textures: HashMap<String, DynamicImage> = HashMap::default();
 	let (transciever, receiver) = mpsc::channel();
 
-	get_files("sprites".to_string()).par_iter().for_each(|dir| {
+	get_files("sprites".to_string()).iter().for_each(|dir| {
 		let name: String = gen_name(dir);
 
 		macro_rules! maybe {

@@ -157,9 +157,9 @@ pub fn goal_behavior(
 	}
 
 	// Probably not the most performant way to do it
-	for script in behavior.goals.iter_mut() {
-		script.update_constants(obj_self, obj_player, behavior.prev_goal.clone());
-	}
+	behavior.goals.iter_mut().for_each(|script| {
+		script.update_constants(obj_self, obj_player, behavior.prev_goal.clone())
+	});
 
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {

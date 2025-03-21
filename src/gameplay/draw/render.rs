@@ -1,12 +1,12 @@
 use macroquad::prelude::*;
 use raywoke::prelude::*;
 
-use super::{SCREEN_SCALE, to_texture};
+use super::SCREEN_SCALE;
 
 use crate::{cores::map::Map, utils::camera_scale};
 
 pub async fn draw_map(map: &Map) {
-	render_texture(&to_texture(map.texture.clone()), dvec2(0., 0.), None).await;
+	render_texture(&map.texture.clone(), dvec2(0., 0.), None).await;
 }
 
 /// Renders a texture based upon the screen scale
@@ -53,7 +53,14 @@ pub fn pixel_offset(base: f64) -> f32 {
 /// Draws a Barrier
 /// Probably temporary, may remain for debug
 pub fn draw_bar(bar: &Barrier) {
-	draw_line(bar.0.x() as f32, bar.0.y() as f32, bar.1.x() as f32, bar.1.y() as f32, 6., BLUE);
+	draw_line(
+		bar.0.x() as f32,
+		bar.0.y() as f32,
+		bar.1.x() as f32,
+		bar.1.y() as f32,
+		6.,
+		BLUE,
+	);
 }
 
 pub fn darken_screen() {
