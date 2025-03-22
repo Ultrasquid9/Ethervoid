@@ -9,12 +9,14 @@ Ethervoid is a top-down character action metroidvania, inspired by Hollow Knight
 ## Contributing
 Please see the [style guide (WIP)](./style_guide.md) for information on how to follow the project's coding standards. Fair warning: as the primary developer of this project is new to coding and very inexperienced, expect messy and unreadable code. 
 
-Contributions must be under the Artistic 2.0 License, or another license that allows relicensing to Artistic 2.0. This is to allow the game to be released on platforms where releasing the source code is not possible (This will be useful if a console port ever becomes a possibility). Contributions with no specified license will be assumed to be under the Apache 2.0 License. 
+Contributions must be under the Artistic 2.0 License, or another license that allows relicensing to Artistic 2.0. This is to allow the game to be released on platforms where releasing the source code is not possible (This will be useful if a console port ever becomes a possibility). Contributions with no specified license will be assumed to be under the Artistic 2.0 License. 
 
 ## Building
 ### Windows
+Note: Windows is currently untested. 
 - Download Rust.
 - Download the project source code through your git client of choice.
+- Download `dav1d`
 - Enter the directory containing the source files with your terminal, and run `cargo build --release`.
 
 ### Linux 

@@ -1587,9 +1587,9 @@ dependencies = [
 
 [[package]]
 name = "raywoke"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c63706a51e720814a144aa83799dbd75597140169c3032d739b3cd4d9cbaa171"
+checksum = "638874f7fd06a81b8f385b28297f191d09c47bb9180b2298340216766cc0ded7"
 dependencies = [
  "glam 0.30.1",
 ]
