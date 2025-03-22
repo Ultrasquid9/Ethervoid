@@ -22,7 +22,7 @@ const DEFAULT_CONFIG: &str = "
 		change_sword: KeyCode(R),
 		change_gun: KeyCode(F),
 
-		quit: KeyCode(Escape)
+		pause: KeyCode(Escape)
 	)
 )
 ";
@@ -47,7 +47,7 @@ pub struct KeyMap {
 	pub change_sword: Key,
 	pub change_gun: Key,
 
-	pub quit: Key,
+	pub pause: Key,
 }
 
 /// Contains both keyboard and mouse buttons

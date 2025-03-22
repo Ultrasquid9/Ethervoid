@@ -29,9 +29,9 @@ const fn resource<T>() -> Resource<T> {
 /// Populates global resources, removing ones that were previously present.
 pub fn create_resources() {
 	std::thread::scope(|scope| {
-		scope.spawn(|| create_textures());
-		scope.spawn(|| create_sounds());
-		scope.spawn(|| create_goals());
+		scope.spawn(create_textures);
+		scope.spawn(create_sounds);
+		scope.spawn(create_goals);
 	});
 	create_maps();
 	info!("All resources loaded!");

@@ -1,7 +1,7 @@
 use self::prelude::*;
 use gameplay::gameplay;
 
-use menu::menu;
+use menu::{init_ui, main::menu};
 use utils::init_log;
 
 mod cores;
@@ -18,7 +18,8 @@ pub enum State {
 
 #[macroquad::main("Ethervoid")]
 async fn main() {
-	init_log();
+	init_log().await;
+	init_ui().await;
 
 	let mut state = State::Menu;
 

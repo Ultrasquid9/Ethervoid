@@ -4,6 +4,7 @@ use stecs::prelude::*;
 
 use crate::{
 	State,
+	menu::pause::menu,
 	utils::{config::Config, get_delta_time, resources::create_resources, update_delta_time},
 };
 
@@ -23,8 +24,9 @@ pub mod player;
 
 pub struct Gameplay {
 	pub world: World,
-	pub hitstop: f64,
 	pub current_map: String,
+	pub hitstop: f64,
+	pub paused: bool,
 	pub config: Config, // TODO: Make Global
 }
 
@@ -37,8 +39,9 @@ impl Gameplay {
 				npcs: Default::default(),
 				attacks: Default::default(),
 			},
-			hitstop: 0.,
 			current_map: String::from("default:test"),
+			hitstop: 0.,
+			paused: false,
 			config: Config::read("./config.ron"),
 		}
 	}
@@ -196,9 +199,25 @@ pub async fn gameplay() -> State {
 		update_delta_time();
 		draw(&mut gameplay).await;
 
-		// Handling hitstop
-		if gameplay.hitstop > 0. {
-			gameplay.hitstop -= get_delta_time();
+		// Pausing/hitstop
+		if gameplay.config.keymap.pause.is_pressed() {
+			gameplay.paused = !gameplay.paused;
+		}
+		if gameplay.hitstop > 0. || gameplay.paused {
+			if gameplay.hitstop > 0. {
+				gameplay.hitstop -= get_delta_time();
+			}
+
+			if gameplay.paused {
+				let state = menu().await;
+
+				if let Some(state) = state {
+					match state {
+						State::Gameplay => gameplay.paused = false,
+						state => return state,
+					}
+				}
+			}
 
 			darken_screen();
 			next_frame().await;
@@ -214,11 +233,6 @@ pub async fn gameplay() -> State {
 		gameplay.remove_dead_enemies();
 		gameplay.remove_old_attacks();
 		gameplay.try_player_death();
-
-		// Quitting the game
-		if gameplay.config.keymap.quit.is_down() {
-			return State::Menu;
-		}
 
 		next_frame().await
 	}

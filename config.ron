@@ -11,6 +11,6 @@
 		change_sword: KeyCode(R),
 		change_gun: KeyCode(F),
 
-		quit: KeyCode(Escape)
+		pause: KeyCode(Escape)
 	)
 )

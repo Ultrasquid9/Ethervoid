@@ -40,7 +40,7 @@ pub fn camera_scale() -> f64 {
 }
 
 /// Initiates the logger. Should do nothing if already called.
-pub fn init_log() {
+pub async fn init_log() {
 	// Renaming old log
 	_ = std::fs::rename("./output.log", "./output.log.old");
 

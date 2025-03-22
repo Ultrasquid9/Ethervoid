@@ -3,6 +3,7 @@
 	- Translation support
 
 - UI
+	- Better button system
 	- Proper skin 
 	- Proper title screen
 		- Title
@@ -10,8 +11,7 @@
 			- Parralax? (use static image if too hard)
 
 - Pause Menu
-	- Pausing
-	- Menu
+	- Fix animated sprites
 	- Settings Editor
 
 - Saving/Loading
