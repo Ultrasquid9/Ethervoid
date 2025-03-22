@@ -10,9 +10,6 @@ walkdir = "2.5"
 ahash = "0.8"
 parking_lot = "0.12"
 
-yakui-macroquad = "0.4"
-yakui = "0.3"
-
 fern = { version = "0.7", features = ["colored"] }
 log = "0.4"
 jiff = "0.2"

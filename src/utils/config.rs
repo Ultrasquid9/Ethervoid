@@ -252,5 +252,6 @@ enum KeyCodeSerialize {
 	RightAlt = 65_514,
 	RightSuper = 65_516,
 	Menu = 65_383,
+	Back = 0xff04,
 	Unknown = 511,
 }
