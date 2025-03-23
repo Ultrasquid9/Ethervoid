@@ -26,6 +26,15 @@ const fn resource<T>() -> Resource<T> {
 	LazyLock::new(|| RwLock::new(HashMap::default()))
 }
 
+/// Gets a reference to the item stored in the resource at the given key
+fn get_resource_ref<'a, T>(resource: &'a Resource<T>, key: &str) -> Option<&'a T> {
+	// Raw pointer fuckery is here to allow returning a reference instead of cloning.
+	//
+	// Safely reading from a RwLock is slightly expensive and doesn't play well with references,
+	// so this instead gets a raw pointer to the inner data and immediately dereferences it. 
+	unsafe { (*resource.data_ptr()).get(key) }
+}
+
 /// Populates global resources, removing ones that were previously present.
 pub fn create_resources() {
 	std::thread::scope(|scope| {
@@ -33,6 +42,6 @@ pub fn create_resources() {
 		scope.spawn(create_sounds);
 		scope.spawn(create_goals);
 	});
-	create_maps();
+	create_maps(); // Maps depend on the existance of the other resources
 	info!("All resources loaded!");
 }

@@ -1,14 +1,17 @@
+use std::sync::OnceLock;
+
 use crate::{cores::textures::get_textures, gameplay::draw::process::downscale};
 use image::DynamicImage;
 use imageproc::rgba_image;
 use log::error;
 
-use super::{Resource, resource};
+use super::{Resource, get_resource_ref, resource};
 
 /*
  *	Textures
  */
 
+static ERR_TEXTURE: OnceLock<DynamicImage> = OnceLock::new();
 static TEXTURES: Resource<DynamicImage> = resource();
 
 /// Populates the texture HashMap
@@ -19,18 +22,20 @@ pub(super) fn create_textures() {
 }
 
 /// Gets the image at the provided key
-pub fn access_image(key: &str) -> DynamicImage {
-	let thing = TEXTURES.read();
-	let Some(texture) = thing.get(key) else {
+pub fn access_image(key: &str) -> &DynamicImage {
+	if let Some(texture) = get_resource_ref(&TEXTURES, key) {
+		texture
+	} else {
 		error!("Texture {} not found", key);
-		return downscale(
-			&DynamicImage::ImageRgba8(rgba_image!(
-				[0,0,0,255],[255,0,255,255];
-				[255,0,255,255],[0,0,0,255]
-			)),
-			16,
-		);
-	};
 
-	texture.clone()
+		return ERR_TEXTURE.get_or_init(|| {
+			downscale(
+				&DynamicImage::ImageRgba8(rgba_image!(
+					[0,0,0,255],[255,0,255,255];
+					[255,0,255,255],[0,0,0,255]
+				)),
+				16,
+			)
+		});
+	}
 }

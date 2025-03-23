@@ -1,6 +1,6 @@
 use crate::cores::map::{Map, get_maps};
 
-use super::{Resource, resource};
+use super::{Resource, get_resource_ref, resource};
 
 /*
  * Maps
@@ -17,7 +17,5 @@ pub(super) fn create_maps() {
 
 /// Gets the map at the provided key
 pub fn access_map(key: &str) -> &Map {
-	// Raw pointer fuckery is here to allow returning a reference
-	// This is an entirely pointless optimization, I just did it because I wanted to
-	unsafe { (*MAPS.data_ptr()).get(key).unwrap() }
+	get_resource_ref(&MAPS, key).unwrap() // TODO: Replace unwrap with proper error handling
 }

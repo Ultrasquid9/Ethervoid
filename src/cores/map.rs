@@ -48,6 +48,25 @@ impl MapBuilder {
 		enemytypes: &HashMap<String, EnemyType>,
 		npctypes: &HashMap<String, NpcType>,
 	) -> Map {
+		// Handles the iterator chain for enemies/npcs
+		fn iter_thing<T: Clone>(
+			input: Vec<(String, DVec2)>,
+			hashmap: &HashMap<String, T>,
+			type_name: &str,
+		) -> Box<[(T, DVec2)]> {
+			input
+				.iter()
+				.map(|(name, pos)| (name, hashmap.get(name.as_str()), pos))
+				.filter_map(|(name, opt, pos)| match opt {
+					Some(t) => Some((t.clone(), *pos)),
+					None => {
+						error!("{type_name} {name} not found! Skipping...");
+						None
+					}
+				})
+				.collect()
+		}
+
 		Map {
 			walls: {
 				let mut walls = vec![];
@@ -75,17 +94,8 @@ impl MapBuilder {
 			},
 			doors: self.doors.into_boxed_slice(),
 
-			enemies: self
-				.enemies
-				.iter()
-				.map(|(name, pos)| (enemytypes.get(name.as_str()).unwrap().clone(), *pos))
-				.collect(),
-
-			npcs: self
-				.npcs
-				.iter()
-				.map(|(name, pos)| (npctypes.get(name.as_str()).unwrap().clone(), *pos))
-				.collect(),
+			enemies: iter_thing(self.enemies, enemytypes, "EnemyType"),
+			npcs: iter_thing(self.npcs, npctypes, "NpcType"),
 
 			texture: self.tilemap.to_texture(),
 		}
@@ -106,7 +116,7 @@ impl MapTexture {
 				let index_hor = i * 16;
 
 				_ = texture.copy_from(
-					&access_image(self.keys.get(key).unwrap()),
+					access_image(self.keys.get(key).unwrap()),
 					index_hor as u32,
 					index_vert as u32,
 				);

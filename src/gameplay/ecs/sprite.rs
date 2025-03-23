@@ -66,7 +66,7 @@ impl Sprite {
 			sprite: if rotation == Rotation::Angle {
 				downscale(&access_image(key), obj.size as u32)
 			} else {
-				access_image(key)
+				access_image(key).clone()
 			},
 			obj,
 

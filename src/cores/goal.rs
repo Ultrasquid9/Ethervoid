@@ -27,7 +27,7 @@ impl Goal {
 	pub fn new(key: &str) -> Option<Goal> {
 		Some(Goal {
 			name: key.to_owned(),
-			script: access_goal(key)?,
+			script: access_goal(key)?.clone(),
 			scope: Scope::new(),
 			engine: init_engine(),
 		})
