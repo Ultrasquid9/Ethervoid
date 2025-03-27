@@ -46,7 +46,7 @@ impl Npc {
 			),
 
 			messages: npctype.messages.clone(),
-			messages_cooldown: 0.,
+			messages_cooldown: 10.,
 		}
 	}
 }

@@ -26,7 +26,14 @@ pub async fn draw(gameplay: &mut Gameplay) {
 			1. / camera_scale() as f32,
 			screen_width() / screen_height() / camera_scale() as f32,
 		),
-		target: gameplay.world.player.obj.first().expect("Player should exist").pos.as_vec2(),
+		target: gameplay
+			.world
+			.player
+			.obj
+			.first()
+			.expect("Player should exist")
+			.pos
+			.as_vec2(),
 		..Default::default()
 	});
 

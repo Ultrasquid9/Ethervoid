@@ -1,3 +1,6 @@
+- Bugfixes
+	- Broken wall sliding in some cases
+
 - NPCs
 	- Dialogue UI
 	- Translation support

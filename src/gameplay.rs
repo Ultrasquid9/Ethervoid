@@ -1,10 +1,11 @@
 use draw::{draw, render::darken_screen};
 use macroquad::prelude::*;
+use npc::messages::Message;
 use stecs::prelude::*;
 
 use crate::{
 	State,
-	menu::pause::menu,
+	menu::{dialogue, pause},
 	utils::{config::Config, get_delta_time, resources::create_resources, update_delta_time},
 };
 
@@ -25,6 +26,7 @@ pub mod player;
 pub struct Gameplay {
 	pub world: World,
 	pub current_map: String,
+	pub current_message: Option<Message>,
 	pub hitstop: f64,
 	pub paused: bool,
 	pub config: Config, // TODO: Make Global
@@ -40,13 +42,32 @@ impl Gameplay {
 				attacks: Default::default(),
 			},
 			current_map: String::from("default:test"),
+			current_message: None,
 			hitstop: 0.,
 			paused: false,
 			config: Config::read("./config.ron"),
 		}
 	}
 
-	fn npc_dialogue(&mut self) {
+	fn should_darken(&self) -> bool {
+		self.hitstop > 0. || self.paused || self.current_message.is_some()
+	}
+
+	fn pause(&mut self) {
+		if self.current_message.is_some() {
+			return;
+		}
+
+		if self.config.keymap.pause.is_pressed() {
+			self.paused = !self.paused;
+		}
+	}
+
+	fn get_npc_dialogue(&mut self) {
+		if self.current_message.is_some() {
+			return;
+		}
+
 		for (obj, messages, messages_cooldown) in
 			query!(self.world.npcs, (&obj, &messages, &mut messages_cooldown))
 		{
@@ -68,12 +89,30 @@ impl Gameplay {
 
 				for message in messages {
 					if message.should_read() {
-						message.read();
+						self.current_message = Some(message.clone());
 						*messages_cooldown = 10.;
 						break;
 					}
 				}
 			}
+		}
+	}
+
+	async fn read_npc_dialogue(&mut self) {
+		let Some(message) = &mut self.current_message else {
+			return;
+		};
+
+		dialogue::menu(message).await;
+
+		if message.should_stop() {
+			self.current_message = None
+		}
+	}
+
+	fn hitstop(&mut self) {
+		if self.hitstop > 0. {
+			self.hitstop -= get_delta_time();
 		}
 	}
 
@@ -199,17 +238,16 @@ pub async fn gameplay() -> State {
 		update_delta_time();
 		draw(&mut gameplay).await;
 
-		// Pausing/hitstop
-		if gameplay.config.keymap.pause.is_pressed() {
-			gameplay.paused = !gameplay.paused;
-		}
-		if gameplay.hitstop > 0. || gameplay.paused {
-			if gameplay.hitstop > 0. {
-				gameplay.hitstop -= get_delta_time();
-			}
+		// Anything that pauses normal gameplay goes here
+		gameplay.pause();
+		gameplay.get_npc_dialogue();
+
+		if gameplay.should_darken() {
+			gameplay.read_npc_dialogue().await;
+			gameplay.hitstop();
 
 			if gameplay.paused {
-				let state = menu().await;
+				let state = pause::menu().await;
 
 				if let Some(state) = state {
 					match state {
@@ -224,10 +262,10 @@ pub async fn gameplay() -> State {
 			continue;
 		}
 
+		// Normal gameplay continues
 		handle_combat(&mut gameplay);
 		handle_behavior(&mut gameplay);
 
-		gameplay.npc_dialogue();
 		gameplay.change_weapon();
 		gameplay.update_health();
 		gameplay.remove_dead_enemies();

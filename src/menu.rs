@@ -2,6 +2,7 @@ use std::sync::OnceLock;
 
 use macroquad::{prelude::*, ui::*};
 
+pub mod dialogue;
 pub mod main;
 pub mod pause;
 

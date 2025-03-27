@@ -31,7 +31,7 @@ fn get_resource_ref<'a, T>(resource: &'a Resource<T>, key: &str) -> Option<&'a T
 	// Raw pointer fuckery is here to allow returning a reference instead of cloning.
 	//
 	// Safely reading from a RwLock is slightly expensive and doesn't play well with references,
-	// so this instead gets a raw pointer to the inner data and immediately dereferences it. 
+	// so this instead gets a raw pointer to the inner data and immediately dereferences it.
 	unsafe { (*resource.data_ptr()).get(key) }
 }
 
