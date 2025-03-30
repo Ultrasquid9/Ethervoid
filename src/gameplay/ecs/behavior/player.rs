@@ -12,7 +12,6 @@ const CENTER: DVec2 = DVec2::new(0., 0.);
 
 #[derive(PartialEq, Clone)]
 pub struct PlayerBehavior {
-	pub speed: f64,
 	pub dash_cooldown: f64,
 	pub is_dashing: bool,
 }
@@ -39,12 +38,12 @@ pub fn player_behavior(
 
 	// Dashing
 	if config.keymap.dash.is_down() && behavior.dash_cooldown <= 0. && new_pos != CENTER {
-		behavior.speed += 12.;
+		obj.speed += 12.;
 		behavior.dash_cooldown += 70.;
 	} else if behavior.dash_cooldown > 0. {
 		if behavior.dash_cooldown > 55. {
 			behavior.is_dashing = true;
-			behavior.speed = 12.;
+			obj.speed = 12.;
 		} else {
 			behavior.is_dashing = false;
 		}
@@ -52,19 +51,19 @@ pub fn player_behavior(
 	}
 
 	// Makes the player build up speed over time, rather than instantly starting at max speed
-	if behavior.speed < 3.5 && new_pos != CENTER {
-		behavior.speed += behavior.speed / 6.;
+	if obj.speed < 3.5 && new_pos != CENTER {
+		obj.speed += obj.speed / 6.;
 	}
 
 	// Makes the player slow down if their speed is high
-	if behavior.speed > 4.5 {
-		behavior.speed /= 1.5;
+	if obj.speed > 4.5 {
+		obj.speed /= 1.5;
 	}
 
 	if new_pos == CENTER {
-		behavior.speed = 1.0;
+		obj.speed = 1.0;
 	} else {
-		obj.update(new_pos.normalize() * behavior.speed * get_delta_time() + obj.pos);
+		obj.update((new_pos.normalize() * get_delta_time()) + obj.pos);
 		obj.try_move(&obj.target.clone(), current_map);
 	}
 }

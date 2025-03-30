@@ -5,7 +5,7 @@ use std::fmt::Display;
 
 use crate::utils::{resources::maps::access_map, tup_vec::Tup64};
 
-use super::{Gameplay, ecs::behavior::Behavior};
+use super::Gameplay;
 
 use serde::{Deserialize, Serialize};
 
@@ -73,17 +73,8 @@ impl Door {
 			return;
 		};
 
-		let speed = if let Behavior::Player(behavior) = player.behavior {
-			behavior.speed + 1.
-		} else {
-			unreachable!(
-				"
-				If you are seeing this, the player does not have the player behavior. 
-				This is a huge problem. 
-				Fortunately, you should probably never see this.
-				"
-			)
-		};
+		let speed = player.obj.speed + 1.;
+
 		let mut new_pos = player.obj.pos
 			+ match self.direction {
 				Direction::North => DVec2::new(0., -speed),

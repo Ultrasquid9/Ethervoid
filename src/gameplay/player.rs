@@ -60,8 +60,6 @@ impl Player {
 			health: Health::new(100.),
 			obj,
 			behavior: Behavior::Player(PlayerBehavior {
-				speed: 1.,
-
 				dash_cooldown: 0.,
 				is_dashing: false,
 			}),

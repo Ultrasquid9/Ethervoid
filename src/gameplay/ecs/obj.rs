@@ -19,14 +19,15 @@ pub enum Axis {
 pub struct Obj {
 	pub pos: DVec2,
 	pub target: DVec2,
-
-	pub stunned: f64,
-	pub depth: u8,
+	pub size: f64,
 
 	pub axis_horizontal: Axis,
 	pub axis_vertical: Axis,
 
-	pub size: f64,
+	pub speed: f64,
+	pub stunned: f64,
+
+	pub depth: u8,
 }
 
 impl Obj {
@@ -34,14 +35,15 @@ impl Obj {
 		Self {
 			pos,
 			target,
-
-			stunned: 0.,
-			depth: 0,
+			size,
 
 			axis_horizontal: Axis::None,
 			axis_vertical: Axis::None,
 
-			size,
+			speed: 1.,
+			stunned: 0.,
+
+			depth: 0,
 		}
 	}
 
@@ -96,8 +98,16 @@ impl Obj {
 			return;
 		}
 
-		let mut ok = true;
+		// Handling speed
+		let new_pos = if self.depth == 0 {
+			((*new_pos - self.pos) * self.speed) + self.pos
+		} else if self.depth == 1 {
+			((*new_pos - self.pos) / 2.) + self.pos
+		} else {
+			*new_pos
+		};
 
+		let mut ok = true;
 		for wall in &map.walls {
 			if cast_wide(&Ray::new(self.tup64(), new_pos.tup64()), wall).is_ok() {
 				ok = false;
@@ -106,7 +116,8 @@ impl Obj {
 		}
 
 		if ok {
-			self.pos = *new_pos;
+			self.pos = new_pos;
+			self.depth = 0;
 			return;
 		}
 
@@ -115,7 +126,7 @@ impl Obj {
 			self.depth = 0;
 		} else {
 			self.depth += 1;
-			self.try_handle_angle(new_pos, current_map);
+			self.try_handle_angle(&new_pos, current_map);
 		}
 	}
 
