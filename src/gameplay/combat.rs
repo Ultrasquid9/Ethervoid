@@ -164,21 +164,17 @@ pub fn handle_combat(gameplay: &mut Gameplay) {
 			AttackType::Hitscan => attack_hitscan,
 		};
 
+		macro_rules! attack {
+			($field:expr) => {
+				for (obj, hp, sprite) in query!($field, (&mut obj, &mut health, &mut sprite)) {
+					func(obj, hp, sprite, &mut atk)
+				}
+			};
+		}
+
 		match atk.owner {
-			Owner::Player => {
-				for (obj, hp, sprite) in
-					query!(gameplay.world.enemies, (&mut obj, &mut health, &mut sprite))
-				{
-					func(obj, hp, sprite, &mut atk)
-				}
-			}
-			Owner::Enemy => {
-				for (obj, hp, sprite) in
-					query!(gameplay.world.player, (&mut obj, &mut health, &mut sprite))
-				{
-					func(obj, hp, sprite, &mut atk)
-				}
-			}
+			Owner::Player => attack!(gameplay.world.enemies),
+			Owner::Enemy => attack!(gameplay.world.player),
 		}
 	}
 }
