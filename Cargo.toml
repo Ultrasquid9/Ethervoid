@@ -15,8 +15,8 @@ log = "0.4"
 jiff = "0.2"
 
 kira = "0.10"
-imageproc = { version = "0.25", default-features = false }
-image = { version = "0.25", default-features = false, features = ["png", "avif-native"] }
+imageproc = "0.25"
+image = { version = "0.25", features = ["avif-native"] }
 fast_image_resize = { version = "5.1", features = ["image", "rayon"] }
 
 rhai = { version = "1.21", features = ["sync"] }
