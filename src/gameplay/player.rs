@@ -183,12 +183,12 @@ impl Inventory {
 	}
 }
 
-pub fn swap_weapons(current_weapon: &usize, weapons: &[WeaponInfo]) -> usize {
-	let mut to_return: usize = *current_weapon;
+pub fn swap_weapons(current_weapon: usize, weapons: &[WeaponInfo]) -> usize {
+	let mut to_return: usize = current_weapon;
 
 	loop {
 		to_return += 1;
-		if *current_weapon >= weapons.len() - 1 {
+		if current_weapon >= weapons.len() - 1 {
 			to_return = 0;
 		}
 

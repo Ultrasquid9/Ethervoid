@@ -64,7 +64,7 @@ impl Sprite {
 	) -> Self {
 		Self {
 			sprite: if rotation == Rotation::Angle {
-				downscale(&access_image(key), obj.size as u32)
+				downscale(access_image(key), obj.size as u32)
 			} else {
 				access_image(key).clone()
 			},
@@ -129,7 +129,7 @@ impl Sprite {
 		self.current_anim = Some(key);
 
 		self.frames.reset();
-		for (_, anim) in self.anims.iter_mut() {
+		for anim in self.anims.values_mut() {
 			anim.reset();
 		}
 
@@ -137,7 +137,7 @@ impl Sprite {
 	}
 
 	pub fn set_default_anim(&mut self) {
-		self.current_anim = None
+		self.current_anim = None;
 	}
 
 	pub async fn as_render_params(&mut self) -> (Texture2D, DVec2, Option<DrawTextureParams>) {
@@ -156,9 +156,7 @@ impl Sprite {
 			self.frames.get_frame()
 		} * size;
 
-		let mut y_pos = if self.rotation != Rotation::EightWay {
-			0
-		} else {
+		let mut y_pos = if self.rotation == Rotation::EightWay {
 			// There is definitely a far better way to do this
 			// I apologize to whoever has to deal with this in the future
 			if self.obj.axis_horizontal != Axis::None && self.obj.axis_vertical != Axis::None {
@@ -174,6 +172,8 @@ impl Sprite {
 			} else {
 				size * 4 // Up
 			}
+		} else {
+			0
 		};
 
 		if self.shaking > 0. {
@@ -194,7 +194,7 @@ impl Sprite {
 					+ match self.rotation {
 						Rotation::Angle => 0.,
 						Rotation::Static => self.sprite.width() as f64 / 2.,
-						_ => self.sprite.width() as f64,
+						Rotation::EightWay => self.sprite.width() as f64,
 					},
 				self.obj.pos.y
 					+ match self.rotation {
@@ -229,9 +229,8 @@ impl Sprite {
 		if let Some((old_pos, texture)) = &self.cache {
 			if *old_pos == x_pos {
 				return texture.clone();
-			} else {
-				self.cache = None
 			}
+			self.cache = None;
 		}
 
 		let img = to_texture(&DynamicImage::ImageRgba8(rotate_about_center(

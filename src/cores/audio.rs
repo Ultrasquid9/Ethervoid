@@ -10,22 +10,22 @@ pub fn get_audio() -> HashMap<String, StaticSoundData> {
 
 	let (transciever, receiver) = mpsc::channel();
 
-	get_files("audio".to_string()).iter().for_each(|dir| {
-		let name: String = gen_name(dir);
+	for dir in get_files("audio") {
+		let name: String = gen_name(&dir);
 		let sound = StaticSoundData::from_file(dir);
 
 		let sound = match sound {
 			Ok(sound) => sound,
 			Err(e) => {
 				warn!("Audio {name} failed to load: {e}");
-				return;
+				continue;
 			}
 		};
 
-		info!("Audio {} loaded!", name);
+		info!("Audio {name} loaded!");
 
 		_ = transciever.send((name, sound));
-	});
+	}
 
 	drop(transciever);
 

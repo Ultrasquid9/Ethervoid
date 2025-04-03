@@ -50,16 +50,17 @@ impl MapBuilder {
 	) -> Map {
 		// Handles the iterator chain for enemies/npcs
 		fn iter_thing<T: Clone>(
-			input: Vec<(String, DVec2)>,
+			input: &[(String, DVec2)],
 			hashmap: &HashMap<String, T>,
 			type_name: &str,
 		) -> Box<[(T, DVec2)]> {
 			input
 				.iter()
 				.map(|(name, pos)| (name, hashmap.get(name.as_str()), pos))
-				.filter_map(|(name, opt, pos)| match opt {
-					Some(t) => Some((t.clone(), *pos)),
-					None => {
+				.filter_map(|(name, opt, pos)| {
+					if let Some(t) = opt {
+						Some((t.clone(), *pos))
+					} else {
 						error!("{type_name} {name} not found! Skipping...");
 						None
 					}
@@ -94,8 +95,8 @@ impl MapBuilder {
 			},
 			doors: self.doors.into_boxed_slice(),
 
-			enemies: iter_thing(self.enemies, enemytypes, "EnemyType"),
-			npcs: iter_thing(self.npcs, npctypes, "NpcType"),
+			enemies: iter_thing(&self.enemies, enemytypes, "EnemyType"),
+			npcs: iter_thing(&self.npcs, npctypes, "NpcType"),
 
 			texture: self.tilemap.to_texture(),
 		}
@@ -132,7 +133,7 @@ pub fn get_maps() -> HashMap<String, Map> {
 	let enemytypes = get_enemytypes();
 	let npctypes = get_npctypes();
 
-	get_files("maps".to_string())
+	get_files("maps")
 		.iter()
 		.map(|dir| (gen_name(dir), MapBuilder::read(dir)))
 		.filter_map(|(str, result)| match result {

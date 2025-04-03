@@ -30,7 +30,7 @@ async fn main() {
 			State::Quit => return,
 		};
 
-		next_frame().await
+		next_frame().await;
 	}
 }
 

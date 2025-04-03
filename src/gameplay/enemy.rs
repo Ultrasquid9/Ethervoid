@@ -33,7 +33,7 @@ impl Enemy {
 						let opt = Goal::new(key);
 
 						if opt.is_none() {
-							warn!("Goal {key} not found")
+							warn!("Goal {key} not found");
 						}
 
 						opt

@@ -22,7 +22,7 @@ impl Readable for NpcType {}
 
 /// Provides a HashMap containing all Npc data
 pub fn get_npctypes() -> HashMap<String, NpcType> {
-	let npcs: HashMap<String, NpcType> = get_files("npcs".to_string())
+	let npcs: HashMap<String, NpcType> = get_files("npcs")
 		.iter()
 		.map(|dir| (gen_name(dir), NpcType::read(dir)))
 		.filter_map(|(str, result)| match result {

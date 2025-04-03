@@ -7,7 +7,7 @@ pub trait Tup64 {
 }
 
 pub trait DV2 {
-	/// Converts the type into a [DVec2]
+	/// Converts the type into a [`DVec2`]
 	fn dvec2(&self) -> DVec2;
 }
 

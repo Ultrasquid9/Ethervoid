@@ -26,7 +26,7 @@ pub fn player_behavior(
 	let mut new_pos = CENTER; // The pos to be moved to
 
 	if !behavior.is_dashing {
-		switch_dir_from_input(config, obj)
+		switch_dir_from_input(config, obj);
 	}
 	let axis = |axis: &Axis, f: &mut f64| match axis {
 		Axis::Positive => *f += 1.,

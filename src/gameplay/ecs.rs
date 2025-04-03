@@ -1,6 +1,11 @@
 use stecs::prelude::*;
 
-use super::{combat::Attack, enemy::Enemy, npc::Npc, player::Player};
+use super::{
+	combat::{Attack, AttackStructOf},
+	enemy::{Enemy, EnemyStructOf},
+	npc::{Npc, NpcStructOf},
+	player::{Player, PlayerStructOf},
+};
 
 use crate::utils::resources::maps::access_map;
 
@@ -17,6 +22,15 @@ pub struct World {
 }
 
 impl World {
+	pub fn new() -> Self {
+		Self {
+			player: PlayerStructOf::default(),
+			enemies: EnemyStructOf::default(),
+			npcs: NpcStructOf::default(),
+			attacks: AttackStructOf::default(),
+		}
+	}
+
 	/// Populates the world with content from the current map, and clears old content if it exists
 	pub fn populate(&mut self, current_map: &str) {
 		macro_rules! clear {
@@ -33,10 +47,10 @@ impl World {
 		clear![self.enemies, self.npcs, self.attacks];
 
 		// Adding new stuff
-		for (enemy, pos) in access_map(current_map).enemies.iter() {
+		for (enemy, pos) in &access_map(current_map).enemies {
 			_ = self.enemies.insert(Enemy::from_type(enemy, pos));
 		}
-		for (npc, pos) in access_map(current_map).npcs.iter() {
+		for (npc, pos) in &access_map(current_map).npcs {
 			_ = self.npcs.insert(Npc::from_type(npc, pos));
 		}
 	}

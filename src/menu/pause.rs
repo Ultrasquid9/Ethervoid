@@ -11,13 +11,13 @@ pub async fn menu() -> Option<State> {
 	let y_pos = |height: f32| (screen_height() / 2.) + ((screen_height() / 10.) * height);
 
 	if button("Resume", y_pos(-1.)) {
-		to_return = Some(State::Gameplay)
+		to_return = Some(State::Gameplay);
 	}
 	if button("Main Menu", y_pos(0.)) {
-		to_return = Some(State::Menu)
+		to_return = Some(State::Menu);
 	}
 	if button("Quit", y_pos(1.)) {
-		to_return = Some(State::Quit)
+		to_return = Some(State::Quit);
 	}
 
 	to_return

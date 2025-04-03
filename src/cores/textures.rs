@@ -10,15 +10,15 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 	let mut textures: HashMap<String, DynamicImage> = HashMap::default();
 	let (transciever, receiver) = mpsc::channel();
 
-	get_files("sprites".to_string()).iter().for_each(|dir| {
-		let name: String = gen_name(dir);
+	for dir in get_files("sprites") {
+		let name: String = gen_name(&dir);
 
 		macro_rules! maybe {
 			($input:expr) => {
 				match $input {
 					Err(e) => {
 						warn!("Texture {name} failed to load: {e}");
-						return;
+						continue;
 					}
 					Ok(ok) => ok,
 				}
@@ -26,7 +26,7 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 		}
 
 		let img = maybe!(maybe!(ImageReader::open(dir)).decode());
-		info!("Texture {} loaded!", name);
+		info!("Texture {name} loaded!");
 
 		_ = transciever.send((
 			name,
@@ -36,7 +36,7 @@ pub fn get_textures() -> HashMap<String, DynamicImage> {
 				DynamicImage::ImageRgba8(img.to_rgba8())
 			},
 		));
-	});
+	}
 
 	drop(transciever);
 

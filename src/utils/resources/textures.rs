@@ -26,9 +26,9 @@ pub fn access_image(key: &str) -> &DynamicImage {
 	if let Some(texture) = get_resource_ref(&TEXTURES, key) {
 		texture
 	} else {
-		error!("Texture {} not found", key);
+		error!("Texture {key} not found");
 
-		return ERR_TEXTURE.get_or_init(|| {
+		ERR_TEXTURE.get_or_init(|| {
 			downscale(
 				&DynamicImage::ImageRgba8(rgba_image!(
 					[0,0,0,255],[255,0,255,255];
@@ -36,6 +36,6 @@ pub fn access_image(key: &str) -> &DynamicImage {
 				)),
 				16,
 			)
-		});
+		})
 	}
 }

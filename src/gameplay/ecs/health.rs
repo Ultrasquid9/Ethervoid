@@ -12,7 +12,7 @@ impl Health {
 
 	pub fn update(&mut self) {
 		if self.i_frames > 0. {
-			self.i_frames -= get_delta_time()
+			self.i_frames -= get_delta_time();
 		}
 	}
 

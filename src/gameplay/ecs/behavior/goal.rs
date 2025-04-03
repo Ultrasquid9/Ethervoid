@@ -158,7 +158,7 @@ pub fn goal_behavior(
 
 	// Probably not the most performant way to do it
 	behavior.goals.iter_mut().for_each(|script| {
-		script.update_constants(obj_self, obj_player, behavior.prev_goal.clone())
+		script.update_constants(obj_self, obj_player, behavior.prev_goal.clone());
 	});
 
 	// Updates the current goal, and checks it it should be stopped
@@ -167,8 +167,8 @@ pub fn goal_behavior(
 		let should_stop = maybe!(behavior.goals[index].should_stop(sprite));
 
 		if should_stop {
-			behavior.prev_goal = behavior.goals[index].name.clone();
-			behavior.index = None
+			behavior.prev_goal.clone_from(&behavior.goals[index].name);
+			behavior.index = None;
 		}
 		return;
 	}
@@ -177,13 +177,13 @@ pub fn goal_behavior(
 	for index in 0..behavior.goals.len() {
 		let result = behavior.goals[index].should_start();
 		if let Err(e) = result {
-			error!("{}", e);
+			error!("{e}");
 			behavior.err = Some(e);
 			continue;
 		}
 
 		if result.unwrap() {
-			behavior.index = Some(index)
+			behavior.index = Some(index);
 		} else {
 			continue;
 		}

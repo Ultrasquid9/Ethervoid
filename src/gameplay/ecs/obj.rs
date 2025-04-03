@@ -1,9 +1,12 @@
 use macroquad::math::DVec2;
 use raywoke::prelude::*;
 
-use crate::utils::{
-	resources::maps::access_map,
-	tup_vec::{DV2, Tup64},
+use crate::{
+	gameplay::doors::Door,
+	utils::{
+		resources::maps::access_map,
+		tup_vec::{DV2, Tup64},
+	},
 };
 
 const DEFAULT_BAR: Barrier = Barrier((0., 0.), (0., 0.));
@@ -89,11 +92,7 @@ impl Obj {
 		let map = access_map(current_map);
 
 		// Instantly returns if about to hit a door
-		let bars = &map
-			.doors
-			.iter()
-			.map(|door| door.to_barrier())
-			.collect::<Vec<_>>();
+		let bars = &map.doors.iter().map(Door::to_barrier).collect::<Vec<_>>();
 		if cast_wide(&Ray::new(self.tup64(), new_pos.tup64()), bars).is_ok() {
 			return;
 		}

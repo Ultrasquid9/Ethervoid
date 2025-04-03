@@ -48,7 +48,7 @@ impl Clone for Goal {
 /// Provides a HashMap containing all Goals
 pub fn get_goals() -> HashMap<String, AST> {
 	let engine = init_engine();
-	let goals = get_files("goals".to_string())
+	let goals = get_files("goals")
 		.iter()
 		.map(|dir| {
 			let maybe_ast = || Ok(engine.compile(std::fs::read_to_string(dir)?)?);
@@ -82,10 +82,10 @@ fn init_engine() -> Engine {
 		pos.x
 	}
 	fn setter_x(pos: &mut DVec2, new: f64) {
-		pos.x = new
+		pos.x = new;
 	}
 	fn setter_y(pos: &mut DVec2, new: f64) {
-		pos.x = new
+		pos.x = new;
 	}
 
 	fn move_towards(pos1: &mut DVec2, pos2: DVec2, distance: f64) -> DVec2 {
@@ -152,7 +152,7 @@ fn init_engine() -> Engine {
 		.register_custom_operator("?", 131)
 		.expect("Should never fail")
 		.register_fn("?", |input: bool, array: Vec<Dynamic>| -> OperatorResult {
-			let output = array.get(if input { 0 } else { 1 });
+			let output = array.get(usize::from(!input));
 
 			let Some(output) = output else {
 				return Ok(Dynamic::from(()));
@@ -170,7 +170,7 @@ fn init_engine() -> Engine {
 				let mut curried = false;
 				let mut args = func.curry().to_vec();
 
-				for arg in args.iter_mut() {
+				for arg in &mut args {
 					if !arg.is_char() {
 						continue;
 					}
@@ -218,7 +218,7 @@ mod mod_resolver {
 			if let Some(ast) = access_goal(path) {
 				return Ok(Arc::new(Module::eval_ast_as_new(
 					Scope::new(),
-					&ast,
+					ast,
 					engine,
 				)?));
 			}

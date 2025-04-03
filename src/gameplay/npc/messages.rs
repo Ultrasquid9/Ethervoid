@@ -41,9 +41,9 @@ impl Message {
 	/// Increases the index if possible
 	pub fn next(&mut self) {
 		if self.text.get(self.index + 1).is_some() {
-			self.index += 1
+			self.index += 1;
 		} else {
-			self.should_stop = true
+			self.should_stop = true;
 		}
 	}
 

@@ -32,7 +32,7 @@ pub fn play_sound(key: &str) {
 	let thing = SOUNDS.read();
 
 	let Some(sound) = thing.get(key) else {
-		error!("Sound {} not found", key);
+		error!("Sound {key} not found");
 		return;
 	};
 

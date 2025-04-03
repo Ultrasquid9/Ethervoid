@@ -143,9 +143,7 @@ pub fn handle_combat(gameplay: &mut Gameplay) {
 		atk.sprite.update(*atk.obj);
 
 		// Handling the lifetime and movement of attacks
-		if *atk.attack_type != AttackType::Projectile {
-			*atk.lifetime -= get_delta_time()
-		} else {
+		if *atk.attack_type == AttackType::Projectile {
 			let new_pos = atk
 				.obj
 				.pos
@@ -155,6 +153,8 @@ pub fn handle_combat(gameplay: &mut Gameplay) {
 			if atk.obj.pos != new_pos {
 				*atk.lifetime = 0.;
 			}
+		} else {
+			*atk.lifetime -= get_delta_time();
 		}
 
 		let func = match atk.attack_type {
@@ -185,7 +185,7 @@ fn attack_physical(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mu
 		sprite.shake();
 
 		if *atk.is_parried {
-			obj.stunned = 40.
+			obj.stunned = 40.;
 		}
 	}
 }
@@ -221,7 +221,7 @@ fn attack_hitscan(obj: &mut Obj, hp: &mut Health, sprite: &mut Sprite, atk: &mut
 	.is_ok()
 	{
 		sprite.shake();
-		hp.damage(*atk.damage)
+		hp.damage(*atk.damage);
 	}
 }
 

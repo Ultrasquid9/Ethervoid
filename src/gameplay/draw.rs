@@ -44,7 +44,7 @@ pub async fn draw(gameplay: &mut Gameplay) {
 			draw_bar(bar);
 		}
 	}
-	for door in access_map(&gameplay.current_map).doors.iter() {
+	for door in &access_map(&gameplay.current_map).doors {
 		draw_bar(&door.to_barrier());
 	}
 
@@ -79,7 +79,7 @@ pub async fn draw(gameplay: &mut Gameplay) {
 				RED,
 			)
 			.await;
-			err_height += 32.
+			err_height += 32.;
 		}
 	}
 
@@ -89,7 +89,7 @@ pub async fn draw(gameplay: &mut Gameplay) {
 		DVec2::new(32., 96.),
 		BLACK,
 	)
-	.await
+	.await;
 }
 
 async fn render_sprites(gameplay: &mut Gameplay) {
@@ -105,7 +105,7 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 		(&mut sprite, &obj)
 	) {
 		if gameplay.hitstop <= 0. {
-			sprite.update(*obj)
+			sprite.update(*obj);
 		}
 		sprites.push(sprite);
 	}
@@ -122,9 +122,9 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 	// Processing sprites
 	let mut futures = vec![];
 
-	sprites.iter_mut().for_each(|sprite| {
+	for sprite in &mut sprites {
 		futures.push(sprite.as_render_params());
-	});
+	}
 
 	// Rendering sprites
 	for future in futures {

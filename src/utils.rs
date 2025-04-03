@@ -16,7 +16,7 @@ static DELTA_TIME: UnsafeDeltaTime = UnsafeDeltaTime::new();
 
 /// Gets the current position of the mouse
 pub fn get_mouse_pos() -> DVec2 {
-	let calc = |f: f32| f as f64 / 2.;
+	let calc = |f: f32| f64::from(f) / 2.;
 	mouse_position().tup_f64().dvec2() - dvec2(calc(screen_width()), calc(screen_height()))
 }
 
@@ -26,7 +26,7 @@ Gets the current delta time, and stores it.
 This is done because Macroquad's `get_frame_time()` function panics in multithreaded scenarios.
  */
 pub fn update_delta_time() {
-	DELTA_TIME.set(get_frame_time() as f64 * 100. * (2. / 3.));
+	DELTA_TIME.set(f64::from(get_frame_time()) * 100. * (2. / 3.));
 }
 
 /// Gets the delta time
@@ -36,7 +36,7 @@ pub fn get_delta_time() -> f64 {
 
 /// Gets the scale that the camera should be rendered at
 pub fn camera_scale() -> f64 {
-	screen_width() as f64 / screen_height() as f64 * 512.
+	f64::from(screen_width()) / f64::from(screen_height()) * 512.
 }
 
 /// Initiates the logger. Should do nothing if already called.
@@ -59,7 +59,7 @@ pub async fn init_log() {
 				colors.color(record.level()),
 				record.target(),
 				message
-			))
+			));
 		})
 		.level(log::LevelFilter::Warn)
 		.level_for("ethervoid", log::LevelFilter::Debug)

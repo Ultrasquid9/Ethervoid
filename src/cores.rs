@@ -14,7 +14,7 @@ pub mod npctype;
 pub mod textures;
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
-pub fn get_files(file_type: String) -> Vec<String> {
+pub fn get_files(file_type: &str) -> Vec<String> {
 	macro_rules! maybe {
 		($result:expr) => {
 			match $result {

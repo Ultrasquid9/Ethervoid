@@ -35,12 +35,7 @@ pub struct Gameplay {
 impl Gameplay {
 	fn new() -> Gameplay {
 		Gameplay {
-			world: World {
-				player: Default::default(),
-				enemies: Default::default(),
-				npcs: Default::default(),
-				attacks: Default::default(),
-			},
+			world: World::new(),
 			current_map: String::from("default:test"),
 			current_message: None,
 			hitstop: 0.,
@@ -106,7 +101,7 @@ impl Gameplay {
 		dialogue::menu(message).await;
 
 		if message.should_stop() {
-			self.current_message = None
+			self.current_message = None;
 		}
 	}
 
@@ -120,21 +115,21 @@ impl Gameplay {
 		for (inventory, obj) in query!(self.world.player, (&mut inventory, &obj)) {
 			// Switching weapons
 			if self.config.keymap.change_sword.is_pressed() {
-				inventory.current_sword = swap_weapons(&inventory.current_sword, &inventory.swords);
+				inventory.current_sword = swap_weapons(inventory.current_sword, &inventory.swords);
 			}
 			if self.config.keymap.change_gun.is_pressed() {
-				inventory.current_gun = swap_weapons(&inventory.current_gun, &inventory.guns);
+				inventory.current_gun = swap_weapons(inventory.current_gun, &inventory.guns);
 			}
 
 			// Cooldown
-			for sword in inventory.swords.iter_mut() {
+			for sword in &mut inventory.swords {
 				if sword.cooldown >= 0. {
-					sword.cooldown -= get_delta_time()
+					sword.cooldown -= get_delta_time();
 				}
 			}
-			for gun in inventory.guns.iter_mut() {
+			for gun in &mut inventory.guns {
 				if gun.cooldown >= 0. {
-					gun.cooldown -= get_delta_time()
+					gun.cooldown -= get_delta_time();
 				}
 			}
 
@@ -272,6 +267,6 @@ pub async fn gameplay() -> State {
 		gameplay.remove_old_attacks();
 		gameplay.try_player_death();
 
-		next_frame().await
+		next_frame().await;
 	}
 }

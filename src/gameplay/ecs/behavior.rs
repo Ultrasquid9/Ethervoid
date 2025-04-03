@@ -45,7 +45,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 				obj.stunned -= get_delta_time();
 
 				if let Behavior::Goal(behavior) = behavior {
-					behavior.index = None
+					behavior.index = None;
 				}
 
 				continue;
@@ -53,7 +53,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 
 			match behavior {
 				Behavior::Player(behavior) => {
-					player_behavior(obj, &mut *behavior, &gameplay.config, &gameplay.current_map)
+					player_behavior(obj, &mut *behavior, &gameplay.config, &gameplay.current_map);
 				}
 
 				Behavior::Goal(behavior) => {
@@ -65,7 +65,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 							sprite,
 							*attacks.write(),
 							&gameplay.current_map,
-						)
+						);
 					});
 				}
 
@@ -78,7 +78,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 		}
 	});
 
-	for door in access_map(&gameplay.current_map.clone()).doors.iter() {
+	for door in &access_map(&gameplay.current_map.clone()).doors {
 		door.try_change_map(gameplay);
 	}
 }
