@@ -8,27 +8,14 @@ use macroquad::input::{
 
 use serde::{Deserialize, Serialize};
 
-const DEFAULT_CONFIG: Config = Config {
-	keymap: KeyMap {
-		up: Key::KeyCode(KeyCode::W),
-		down: Key::KeyCode(KeyCode::S),
-		left: Key::KeyCode(KeyCode::A),
-		right: Key::KeyCode(KeyCode::D),
-		dash: Key::KeyCode(KeyCode::LeftShift),
-		sword: Key::MouseButton(MouseButton::Left),
-
-		gun: Key::MouseButton(MouseButton::Right),
-		change_sword: Key::KeyCode(KeyCode::R),
-		change_gun: Key::KeyCode(KeyCode::F),
-
-		pause: Key::KeyCode(KeyCode::Escape),
-	},
-};
-
 /// The config for the game
 #[derive(Serialize, Deserialize)]
 pub struct Config {
 	pub keymap: KeyMap,
+
+	// The map where the game starts on a new save
+	// TODO: allow mods to configure this 
+	pub start_map: String
 }
 
 /// The different possible inputs for the player
@@ -65,14 +52,37 @@ impl Config {
 			Ok(str) => str,
 			Err(e) => {
 				error!("Error when reading config: {e}");
-				return DEFAULT_CONFIG;
+				return Self::default();
 			}
 		}) {
 			Ok(config) => config,
 			Err(e) => {
 				error!("Error when deserializing config: {e}");
-				DEFAULT_CONFIG
+				Self::default()
 			}
+		}
+	}
+}
+
+impl Default for Config {
+	fn default() -> Self {
+		Self {
+			keymap: KeyMap {
+				up: Key::KeyCode(KeyCode::W),
+				down: Key::KeyCode(KeyCode::S),
+				left: Key::KeyCode(KeyCode::A),
+				right: Key::KeyCode(KeyCode::D),
+				dash: Key::KeyCode(KeyCode::LeftShift),
+				sword: Key::MouseButton(MouseButton::Left),
+		
+				gun: Key::MouseButton(MouseButton::Right),
+				change_sword: Key::KeyCode(KeyCode::R),
+				change_gun: Key::KeyCode(KeyCode::F),
+		
+				pause: Key::KeyCode(KeyCode::Escape),
+			},
+		
+			start_map: String::from("default:test")
 		}
 	}
 }
@@ -82,34 +92,24 @@ impl Key {
 	pub fn is_down(&self) -> bool {
 		match self {
 			Self::KeyCode(button) => {
-				if is_key_down(*button) {
-					return true;
-				}
+				is_key_down(*button)
 			}
 			Self::MouseButton(button) => {
-				if is_mouse_button_down(*button) {
-					return true;
-				}
+				is_mouse_button_down(*button)
 			}
 		}
-		false
 	}
 
 	/// Checks if the key is pressed
 	pub fn is_pressed(&self) -> bool {
 		match self {
 			Self::KeyCode(button) => {
-				if is_key_pressed(*button) {
-					return true;
-				}
+				is_key_pressed(*button)
 			}
 			Self::MouseButton(button) => {
-				if is_mouse_button_pressed(*button) {
-					return true;
-				}
+				is_mouse_button_pressed(*button)
 			}
 		}
-		false
 	}
 }
 

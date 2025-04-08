@@ -45,7 +45,7 @@ impl Gameplay {
 
 		Gameplay {
 			world: World::new(),
-			current_map: String::from("default:test"),
+			current_map: access_config().start_map.clone(),
 			paused: Paused::None,
 		}
 	}

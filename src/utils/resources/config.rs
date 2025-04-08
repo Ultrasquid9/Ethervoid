@@ -11,6 +11,7 @@ const CONF_DIR: &str = "./config.ron";
 
 static CONFIG: LazyLock<RwLock<Config>> = LazyLock::new(|| RwLock::new(Config::read(CONF_DIR)));
 
+/// Reads the config file
 pub fn read_config() -> Config {
 	Config::read(CONF_DIR)
 }
