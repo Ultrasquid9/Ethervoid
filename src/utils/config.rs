@@ -71,7 +71,7 @@ impl Config {
 			Ok(config) => config,
 			Err(e) => {
 				error!("Error when deserializing config: {e}");
-				return DEFAULT_CONFIG;
+				DEFAULT_CONFIG
 			}
 		}
 	}

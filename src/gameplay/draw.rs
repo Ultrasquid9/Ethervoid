@@ -8,6 +8,7 @@ use super::{
 	Gameplay,
 	combat::AttackType,
 	ecs::{behavior::Behavior, sprite::Sprite},
+	paused::Paused,
 };
 
 use render::{draw_bar, draw_map, render_text, render_texture};
@@ -104,7 +105,7 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 		],
 		(&mut sprite, &obj)
 	) {
-		if gameplay.hitstop <= 0. {
+		if gameplay.paused == Paused::None {
 			sprite.update(*obj);
 		}
 		sprites.push(sprite);

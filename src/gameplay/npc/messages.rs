@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{gameplay::draw::process::to_texture, utils::resources::textures::access_image};
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Message {
 	required_flags: Vec<String>,
 	unlocked_flags: Vec<String>,
@@ -17,7 +17,7 @@ pub struct Message {
 	should_stop: bool,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Dialogue {
 	name: String,
 	portrait: String,

@@ -9,6 +9,7 @@ use super::{
 		obj::Obj,
 		sprite::{Frames, Rotation, Sprite},
 	},
+	paused::Paused,
 };
 
 use crate::utils::{get_delta_time, get_mouse_pos, tup_vec::Tup64};
@@ -265,7 +266,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 			//
 			// I know its safe, but the borrow checker shouldn't.
 
-			gameplay.hitstop = 16.;
+			gameplay.paused = Paused::Hitstop(16.);
 
 			let atk_1 = &mut gameplay.world.attacks.get_mut(*i).unwrap();
 			*atk_1.lifetime += get_delta_time();
