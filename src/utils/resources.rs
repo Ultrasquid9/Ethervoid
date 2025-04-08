@@ -11,6 +11,7 @@ use parking_lot::RwLock;
 use textures::create_textures;
 
 pub mod audio;
+pub mod config;
 pub mod goals;
 pub mod maps;
 pub mod textures;

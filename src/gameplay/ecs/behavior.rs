@@ -6,7 +6,10 @@ use wander::{WanderBehavior, wander_behavior};
 
 use crate::{
 	gameplay::Gameplay,
-	utils::{get_delta_time, resources::maps::access_map},
+	utils::{
+		get_delta_time,
+		resources::{config::access_config, maps::access_map},
+	},
 };
 
 use std::thread;
@@ -53,7 +56,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 
 			match behavior {
 				Behavior::Player(behavior) => {
-					player_behavior(obj, &mut *behavior, &gameplay.config, &gameplay.current_map);
+					player_behavior(obj, &mut *behavior, access_config(), &gameplay.current_map);
 				}
 
 				Behavior::Goal(behavior) => {

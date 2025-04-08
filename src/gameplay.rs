@@ -6,7 +6,14 @@ use stecs::prelude::*;
 use crate::{
 	State,
 	menu::{dialogue, pause},
-	utils::{config::Config, get_delta_time, resources::create_resources, update_delta_time},
+	utils::{
+		get_delta_time,
+		resources::{
+			config::{access_config, read_config, update_config},
+			create_resources,
+		},
+		update_delta_time,
+	},
 };
 
 use combat::{AttackType, Owner, handle_combat};
@@ -29,18 +36,21 @@ pub struct Gameplay {
 	pub current_message: Option<Message>,
 	pub hitstop: f64,
 	pub paused: bool,
-	pub config: Config, // TODO: Make Global
 }
 
 impl Gameplay {
 	fn new() -> Gameplay {
+		// Locates and creates all the resources in the game (textures, maps, etc.)
+		create_resources();
+		// Updates the config
+		update_config(read_config());
+
 		Gameplay {
 			world: World::new(),
 			current_map: String::from("default:test"),
 			current_message: None,
 			hitstop: 0.,
 			paused: false,
-			config: Config::read("./config.ron"),
 		}
 	}
 
@@ -53,7 +63,7 @@ impl Gameplay {
 			return;
 		}
 
-		if self.config.keymap.pause.is_pressed() {
+		if access_config().keymap.pause.is_pressed() {
 			self.paused = !self.paused;
 		}
 	}
@@ -114,10 +124,10 @@ impl Gameplay {
 	fn change_weapon(&mut self) {
 		for (inventory, obj) in query!(self.world.player, (&mut inventory, &obj)) {
 			// Switching weapons
-			if self.config.keymap.change_sword.is_pressed() {
+			if access_config().keymap.change_sword.is_pressed() {
 				inventory.current_sword = swap_weapons(inventory.current_sword, &inventory.swords);
 			}
-			if self.config.keymap.change_gun.is_pressed() {
+			if access_config().keymap.change_gun.is_pressed() {
 				inventory.current_gun = swap_weapons(inventory.current_gun, &inventory.guns);
 			}
 
@@ -134,12 +144,12 @@ impl Gameplay {
 			}
 
 			// Creating attacks
-			if self.config.keymap.sword.is_down()
+			if access_config().keymap.sword.is_down()
 				&& inventory.swords[inventory.current_sword].cooldown <= 0.
 			{
 				self.world.attacks.insert(inventory.attack_sword(obj.pos));
 			}
-			if self.config.keymap.gun.is_down()
+			if access_config().keymap.gun.is_down()
 				&& inventory.guns[inventory.current_gun].cooldown <= 0.
 			{
 				self.world.attacks.insert(inventory.attack_gun(obj.pos));
@@ -221,9 +231,6 @@ impl Gameplay {
 }
 
 pub async fn gameplay() -> State {
-	// Locates and creates all the resources in the game (textures, maps, etc.)
-	create_resources();
-
 	let mut gameplay = Gameplay::new();
 
 	gameplay.world.player.insert(Player::new());

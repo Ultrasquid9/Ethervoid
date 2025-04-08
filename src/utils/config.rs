@@ -8,24 +8,22 @@ use macroquad::input::{
 
 use serde::{Deserialize, Serialize};
 
-const DEFAULT_CONFIG: &str = "
-(
-	keymap: (
-		up: KeyCode(W),
-		left: KeyCode(A),
-		down: KeyCode(S),
-		right: KeyCode(D),
-		dash: KeyCode(LeftShift),
+const DEFAULT_CONFIG: Config = Config {
+	keymap: KeyMap {
+		up: Key::KeyCode(KeyCode::W),
+		down: Key::KeyCode(KeyCode::S),
+		left: Key::KeyCode(KeyCode::A),
+		right: Key::KeyCode(KeyCode::D),
+		dash: Key::KeyCode(KeyCode::LeftShift),
+		sword: Key::MouseButton(MouseButton::Left),
 
-		sword: MouseButton(Left),
-		gun: MouseButton(Right),
-		change_sword: KeyCode(R),
-		change_gun: KeyCode(F),
+		gun: Key::MouseButton(MouseButton::Right),
+		change_sword: Key::KeyCode(KeyCode::R),
+		change_gun: Key::KeyCode(KeyCode::F),
 
-		pause: KeyCode(Escape)
-	)
-)
-";
+		pause: Key::KeyCode(KeyCode::Escape),
+	},
+};
 
 /// The config for the game
 #[derive(Serialize, Deserialize)]
@@ -67,14 +65,13 @@ impl Config {
 			Ok(str) => str,
 			Err(e) => {
 				error!("Error when reading config: {e}");
-				DEFAULT_CONFIG.to_string()
+				return DEFAULT_CONFIG;
 			}
 		}) {
 			Ok(config) => config,
 			Err(e) => {
 				error!("Error when deserializing config: {e}");
-				ron::from_str(DEFAULT_CONFIG)
-					.expect("Default config should be able to be deserialized")
+				return DEFAULT_CONFIG;
 			}
 		}
 	}
