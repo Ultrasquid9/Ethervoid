@@ -1,1 +1,0 @@
-(keymap:(up:KeyCode(W),down:KeyCode(S),left:KeyCode(A),right:KeyCode(D),dash:KeyCode(LeftShift),sword:MouseButton(Left),gun:MouseButton(Right),change_sword:KeyCode(R),change_gun:KeyCode(F),pause:KeyCode(Escape)))

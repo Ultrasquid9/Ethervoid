@@ -5,6 +5,9 @@
 output.log
 output.log.old
 
+# Game config
+config.ron
+
 # Flamegraphs
 perf.data
 perf.data.old
