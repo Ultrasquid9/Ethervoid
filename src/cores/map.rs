@@ -73,18 +73,16 @@ impl MapBuilder {
 				let mut walls = vec![];
 
 				for wall in self.walls {
+					let bar = |start: usize, end: usize| {
+						Barrier::new(wall[start].tup64(), wall[end].tup64())
+					};
+
 					let mut vec = vec![];
 
 					for point in 0..wall.len() {
 						match wall.get(point + 1) {
-							Some(_) => vec.push(Barrier::new(
-								wall.get(point).unwrap().tup64(),
-								wall.get(point + 1).unwrap().tup64(),
-							)),
-							None => vec.push(Barrier::new(
-								wall.get(point).unwrap().tup64(),
-								wall.first().unwrap().tup64(),
-							)),
+							Some(_) => vec.push(bar(point, point + 1)),
+							None => vec.push(bar(point, 0)),
 						}
 					}
 

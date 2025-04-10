@@ -42,32 +42,37 @@ impl Clone for GoalBehavior {
 
 impl Goal {
 	fn update_constants(&mut self, obj_self: &Obj, obj_player: &Obj, prev_goal: String) {
+		// The names of the constants
+		const PREV_GOAL: &str = "prev_goal";
+		const POS_SELF: &str = "pos_self";
+		const POS_PLAYER: &str = "pos_player";
+
 		// Removing the constants if they exist, to prevent the scope from growing exponentially
-		_ = self.scope.remove::<Dynamic>("player_pos");
-		_ = self.scope.remove::<Dynamic>("self_pos");
-		_ = self.scope.remove::<Dynamic>("prev_goal");
+		_ = self.scope.remove::<Dynamic>(PREV_GOAL);
+		_ = self.scope.remove::<Dynamic>(POS_SELF);
+		_ = self.scope.remove::<Dynamic>(POS_PLAYER);
 
 		// Re-adding the constants with updated values
 		self.scope
-			.push_constant("prev_goal", prev_goal)
-			.push_constant("pos_self", obj_self.pos)
-			.push_constant("pos_player", obj_player.pos);
+			.push_constant(PREV_GOAL, prev_goal)
+			.push_constant(POS_SELF, obj_self.pos)
+			.push_constant(POS_PLAYER, obj_player.pos);
 	}
 
 	fn should_start(&mut self) -> Result<bool> {
-		let result =
-			self.engine
-				.call_fn::<bool>(&mut self.scope, &self.script, "should_start", ())?;
+		let res = self
+			.engine
+			.call_fn::<bool>(&mut self.scope, &self.script, "should_start", ())?;
 
-		Ok(result)
+		Ok(res)
 	}
 
 	fn should_stop(&mut self, sprite: &mut Sprite) -> Result<bool> {
-		let x = self
+		let res = self
 			.engine
 			.call_fn::<bool>(&mut self.scope, &self.script, "should_stop", ())?;
 
-		if x {
+		if res {
 			self.scope.clear();
 			sprite.set_default_anim();
 			Ok(true)
@@ -110,8 +115,8 @@ impl Goal {
 			.scope
 			.remove::<Vec<Dynamic>>("attacks")
 			.expect("Attacks not found");
-		for i in new_attacks {
-			attacks.insert(i.clone_cast());
+		for attack in new_attacks {
+			attacks.insert(attack.clone_cast());
 		}
 
 		// Getting the new animation from the scope
@@ -182,7 +187,7 @@ pub fn goal_behavior(
 			continue;
 		}
 
-		if result.unwrap() {
+		if let Ok(true) = result {
 			behavior.index = Some(index);
 		} else {
 			continue;

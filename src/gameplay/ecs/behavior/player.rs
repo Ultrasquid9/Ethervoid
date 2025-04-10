@@ -3,7 +3,7 @@ use macroquad::math::DVec2;
 use crate::{
 	gameplay::ecs::obj::{Axis, Obj},
 	utils::{
-		config::{Config, Key},
+		config::{Config, keymap::Key},
 		get_delta_time,
 	},
 };
