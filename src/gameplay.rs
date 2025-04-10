@@ -53,6 +53,20 @@ impl Gameplay {
 	async fn pause(&mut self) -> Option<State> {
 		if self.paused.is_paused() {
 			darken_screen();
+
+			for inventory in query!(self.world.player, (&mut inventory)) {
+				for sword in &mut inventory.swords {
+					if sword.cooldown <= 0. {
+						sword.cooldown = 3.;
+					}
+				}
+				for gun in &mut inventory.guns {
+					if gun.cooldown <= 0. {
+						gun.cooldown = 3.;
+					}
+				}
+	
+			}
 		}
 
 		self.get_npc_dialogue();
@@ -213,16 +227,14 @@ pub async fn gameplay() -> State {
 		update_delta_time();
 		draw(&mut gameplay).await;
 
-		gameplay.change_weapon();
-		gameplay.update_health();
-		gameplay.remove_dead_enemies();
-		gameplay.remove_old_attacks();
-		gameplay.try_player_death();
-
 		// Anything that pauses normal gameplay goes here
 		if let Some(state) = gameplay.pause().await {
 			match state {
-				State::Gameplay => gameplay.paused = Paused::None,
+				State::Gameplay => {
+					gameplay.paused = Paused::None;
+					next_frame().await;
+					continue;
+				}
 				state => {
 					return state;
 				}
@@ -234,6 +246,12 @@ pub async fn gameplay() -> State {
 			continue;
 		}
 		// Normal gameplay continues
+
+		gameplay.change_weapon();
+		gameplay.update_health();
+		gameplay.remove_dead_enemies();
+		gameplay.remove_old_attacks();
+		gameplay.try_player_death();
 
 		handle_combat(&mut gameplay);
 		handle_behavior(&mut gameplay);

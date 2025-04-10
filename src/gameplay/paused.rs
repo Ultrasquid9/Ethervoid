@@ -50,7 +50,7 @@ impl Paused {
 			}
 
 			Self::None => {
-				if access_config().keymap.pause.is_down() {
+				if access_config().keymap.pause.is_pressed() {
 					*self = Paused::Pause
 				}
 			}
