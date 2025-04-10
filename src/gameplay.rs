@@ -65,7 +65,6 @@ impl Gameplay {
 						gun.cooldown = 3.;
 					}
 				}
-	
 			}
 		}
 

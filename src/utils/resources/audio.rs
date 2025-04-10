@@ -9,7 +9,7 @@ use kira::{
 
 use crate::cores::audio::get_audio;
 
-use super::{Resource, resource};
+use super::{Resource, resource, set_resource};
 
 /*
  *	Audio
@@ -22,9 +22,7 @@ static SOUNDS: Resource<StaticSoundData> = resource();
 
 /// Populates the Sounds HashMap
 pub(super) fn create_sounds() {
-	let mut access = SOUNDS.write();
-	access.clear();
-	*access = get_audio();
+	set_resource(&SOUNDS, get_audio());
 }
 
 /// Plays the sound at the provided key
@@ -36,7 +34,9 @@ pub fn play_sound(key: &str) {
 		return;
 	};
 
-	MANAGER.write().play(sound.clone()).unwrap();
+	if let Err(e) = MANAGER.write().play(sound.clone()) {
+		error!("Error playing sound: {e}")
+	}
 }
 
 /// Plays a random sound from the provided list of keys

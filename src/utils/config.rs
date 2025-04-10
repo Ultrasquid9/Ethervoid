@@ -14,8 +14,8 @@ pub struct Config {
 	pub keymap: KeyMap,
 
 	// The map where the game starts on a new save
-	// TODO: allow mods to configure this 
-	pub start_map: String
+	// TODO: allow mods to configure this
+	pub start_map: String,
 }
 
 /// The different possible inputs for the player
@@ -74,15 +74,15 @@ impl Default for Config {
 				right: Key::KeyCode(KeyCode::D),
 				dash: Key::KeyCode(KeyCode::LeftShift),
 				sword: Key::MouseButton(MouseButton::Left),
-		
+
 				gun: Key::MouseButton(MouseButton::Right),
 				change_sword: Key::KeyCode(KeyCode::R),
 				change_gun: Key::KeyCode(KeyCode::F),
-		
+
 				pause: Key::KeyCode(KeyCode::Escape),
 			},
-		
-			start_map: String::from("default:test")
+
+			start_map: String::from("default:test"),
 		}
 	}
 }
@@ -91,24 +91,16 @@ impl Key {
 	/// Checks if the key is down
 	pub fn is_down(&self) -> bool {
 		match self {
-			Self::KeyCode(button) => {
-				is_key_down(*button)
-			}
-			Self::MouseButton(button) => {
-				is_mouse_button_down(*button)
-			}
+			Self::KeyCode(button) => is_key_down(*button),
+			Self::MouseButton(button) => is_mouse_button_down(*button),
 		}
 	}
 
 	/// Checks if the key is pressed
 	pub fn is_pressed(&self) -> bool {
 		match self {
-			Self::KeyCode(button) => {
-				is_key_pressed(*button)
-			}
-			Self::MouseButton(button) => {
-				is_mouse_button_pressed(*button)
-			}
+			Self::KeyCode(button) => is_key_pressed(*button),
+			Self::MouseButton(button) => is_mouse_button_pressed(*button),
 		}
 	}
 }

@@ -36,6 +36,13 @@ fn get_resource_ref<'a, T>(resource: &'a Resource<T>, key: &str) -> Option<&'a T
 	unsafe { (*resource.data_ptr()).get(key) }
 }
 
+/// Clears a resource and sets it to the provided data
+fn set_resource<T>(resource: &Resource<T>, data: HashMap<String, T>) {
+	let mut access = resource.write();
+	access.clear();
+	*access = data;
+}
+
 /// Populates global resources, removing ones that were previously present.
 pub fn create_resources() {
 	std::thread::scope(|scope| {
