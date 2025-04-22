@@ -1,4 +1,4 @@
-use log::*;
+use tracing::*;
 use macroquad::math::{DVec2, dvec2};
 use mod_resolver::EvoidResolver;
 use rhai::{Dynamic, Engine, EvalAltResult, FnPtr, NativeCallContext};

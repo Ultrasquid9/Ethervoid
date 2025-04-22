@@ -40,5 +40,5 @@ pub mod prelude {
 
 	pub use ahash::HashMap;
 
-	pub use log::{debug, error, info, trace, warn};
+	pub use tracing::{debug, error, info, trace, warn};
 }

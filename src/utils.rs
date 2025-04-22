@@ -1,5 +1,3 @@
-use fern::colors::ColoredLevelConfig;
-
 use macroquad::prelude::*;
 use raywoke::point::Point;
 use tup_vec::DV2;
@@ -44,29 +42,43 @@ pub async fn init_log() {
 	// Renaming old log
 	_ = std::fs::rename("./output.log", "./output.log.old");
 
-	// Coloring log messages
-	let colors = ColoredLevelConfig::new().info(fern::colors::Color::Green);
+	let subscriber = tracing_subscriber::FmtSubscriber::builder()
+		.with_writer(logger::Logger::new)
+		.finish();
 
-	// Creating new log
-	fern::Dispatch::new()
-		.format(move |out, message, record| {
-			out.finish(format_args!(
-				"[{}] [{}] [{}] {}",
-				jiff::Zoned::now()
-					.datetime()
-					.round(jiff::Unit::Millisecond)
-					.expect("Should only fail if rounding to days or higher"),
-				colors.color(record.level()),
-				record.target(),
-				message
-			));
-		})
-		.level(log::LevelFilter::Warn)
-		.level_for("ethervoid", log::LevelFilter::Debug)
-		.chain(std::io::stdout())
-		.chain(fern::log_file("output.log").unwrap())
-		.apply()
-		.unwrap_or(());
+	tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
+}
+
+mod logger {
+    use std::{fs::File, io::{Stdout, Write}};
+
+	pub struct Logger {
+		stdout: Stdout,
+		file: File
+	}
+
+	impl Logger {
+		pub fn new() -> Self {
+			let file = std::fs::File::create("./output.log").unwrap();
+			let stdout = std::io::stdout();
+
+			Self { stdout, file }
+		}
+	}
+
+	impl Write for Logger {
+		fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+			let ok_stdout = self.stdout.write(buf)?;
+			let ok_file = self.file.write(buf)?;
+			Ok(std::cmp::min(ok_stdout, ok_file))
+		}
+
+		fn flush(&mut self) -> std::io::Result<()> {
+			self.stdout.flush()?;
+			self.file.flush()?;
+			Ok(())
+		}
+	}
 }
 
 /// A dangerous, hacky, and likely irrelevant optimization

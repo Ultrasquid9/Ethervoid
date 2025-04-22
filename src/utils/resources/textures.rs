@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 use crate::{cores::textures::get_textures, gameplay::draw::process::downscale};
 use image::DynamicImage;
 use imageproc::rgba_image;
-use log::error;
+use tracing::error;
 
 use super::{Resource, get_resource_ref, resource, set_resource};
 

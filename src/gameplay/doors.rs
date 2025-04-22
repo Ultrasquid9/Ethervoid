@@ -1,4 +1,4 @@
-use log::error;
+use tracing::error;
 use macroquad::math::DVec2;
 use raywoke::prelude::*;
 use std::fmt::Display;
@@ -96,7 +96,7 @@ impl Door {
 			}
 
 			if !i.direction.is_opposing(&self.direction) {
-				log::error!(
+				error!(
 					"Door in {} does not match expected direction of door in {}\nDirection of Self: {} \nDirection of other: {}",
 					gameplay.current_map,
 					self.dest,

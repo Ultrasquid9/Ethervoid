@@ -1,7 +1,7 @@
 use std::fs;
 
 use keymap::KeyMap;
-use log::error;
+use tracing::error;
 
 use serde::{Deserialize, Serialize};
 

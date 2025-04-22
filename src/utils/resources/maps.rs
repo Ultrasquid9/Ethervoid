@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use log::error;
+use tracing::error;
 
 use crate::{
 	cores::map::{Map, get_maps},

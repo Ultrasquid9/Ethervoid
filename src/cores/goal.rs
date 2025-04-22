@@ -1,6 +1,6 @@
 use ahash::HashMap;
 use engine::init_engine;
-use log::{info, warn};
+use tracing::{info, warn};
 
 use crate::utils::{error::Result, resources::goals::access_goal};
 

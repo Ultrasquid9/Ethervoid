@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use log::error;
+use tracing::error;
 use macroquad::math::DVec2;
 use rhai::{CallFnOptions, Dynamic};
 

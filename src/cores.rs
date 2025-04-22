@@ -1,6 +1,6 @@
 use std::fs::{self, read_dir};
 
-use log::error;
+use tracing::error;
 use serde::Deserialize;
 use walkdir::WalkDir;
 

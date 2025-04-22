@@ -1,5 +1,5 @@
 use crate::cores::{enemytype::EnemyType, goal::Goal};
-use log::warn;
+use tracing::warn;
 use macroquad::math::DVec2;
 use stecs::prelude::*;
 

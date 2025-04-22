@@ -1,4 +1,4 @@
-use log::error;
+use tracing::error;
 use macroquad::rand;
 use parking_lot::RwLock;
 use std::sync::LazyLock;
