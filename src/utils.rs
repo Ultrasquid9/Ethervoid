@@ -47,6 +47,7 @@ pub async fn init_log() {
 		.finish();
 
 	tracing::subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
+	info!("Logger created successfully");
 }
 
 mod logger {
@@ -59,7 +60,12 @@ mod logger {
 
 	impl Logger {
 		pub fn new() -> Self {
-			let file = std::fs::File::create("./output.log").unwrap();
+			let file = std::fs::OpenOptions::new()
+				.append(true)
+				.create(true)
+				.open("./output.log")
+				.expect("Could not create log file");
+
 			let stdout = std::io::stdout();
 
 			Self { stdout, file }
