@@ -2,21 +2,25 @@ use std::sync::OnceLock;
 
 use macroquad::{prelude::*, ui::*};
 
+use crate::utils::error::EvoidResult;
+
 pub mod dialogue;
 pub mod main;
 pub mod pause;
 
 pub static FONT: OnceLock<Font> = OnceLock::new();
 
-pub async fn init_ui() {
+pub async fn init_ui() -> EvoidResult<()> {
 	_ = FONT.set(
 		load_ttf_font("assets/fonts/PixeloidMono.ttf")
 			.await
-			.expect("Font should exist"),
+			?,
 	);
 
 	let skin = make_skin().await; // Warning: moving this directly into `.push_skin()` causes a borrow_mut error
 	root_ui().push_skin(&skin);
+
+	Ok(())
 }
 
 /// Creates a button

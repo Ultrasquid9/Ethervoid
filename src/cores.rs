@@ -4,7 +4,7 @@ use tracing::error;
 use serde::Deserialize;
 use walkdir::WalkDir;
 
-use crate::utils::error::Result;
+use crate::utils::error::EvoidResult;
 
 pub mod audio;
 pub mod enemytype;
@@ -78,7 +78,7 @@ fn gen_name(dir: &str) -> String {
 }
 
 pub trait Readable {
-	fn read(dir: &str) -> Result<Self>
+	fn read(dir: &str) -> EvoidResult<Self>
 	where
 		Self: Sized,
 		Self: for<'a> Deserialize<'a>,

@@ -10,7 +10,7 @@ use crate::{
 		combat::AttackStructOf,
 		ecs::{obj::Obj, sprite::Sprite},
 	},
-	utils::{error::Result, get_delta_time},
+	utils::{error::EvoidResult, get_delta_time},
 };
 
 use stecs::{prelude::*, storage::vec::VecFamily};
@@ -59,7 +59,7 @@ impl Goal {
 			.push_constant(POS_PLAYER, obj_player.pos);
 	}
 
-	fn should_start(&mut self) -> Result<bool> {
+	fn should_start(&mut self) -> EvoidResult<bool> {
 		let res = self
 			.engine
 			.call_fn::<bool>(&mut self.scope, &self.script, "should_start", ())?;
@@ -67,7 +67,7 @@ impl Goal {
 		Ok(res)
 	}
 
-	fn should_stop(&mut self, sprite: &mut Sprite) -> Result<bool> {
+	fn should_stop(&mut self, sprite: &mut Sprite) -> EvoidResult<bool> {
 		let res = self
 			.engine
 			.call_fn::<bool>(&mut self.scope, &self.script, "should_stop", ())?;
@@ -81,7 +81,7 @@ impl Goal {
 		}
 	}
 
-	fn init(&mut self) -> Result<()> {
+	fn init(&mut self) -> EvoidResult<()> {
 		self.engine.call_fn_with_options::<()>(
 			CallFnOptions::new().eval_ast(false).rewind_scope(false),
 			&mut self.scope,
@@ -99,7 +99,7 @@ impl Goal {
 		sprite: &mut Sprite,
 		attacks: &mut AttackStructOf<VecFamily>,
 		current_map: &str,
-	) -> Result<()> {
+	) -> EvoidResult<()> {
 		// Values available in the scope
 		self.scope
 			.push("attacks", Vec::<Dynamic>::new())
@@ -145,8 +145,8 @@ pub fn goal_behavior(
 ) {
 	// Macro to execute a function and check if it returns an error
 	macro_rules! maybe {
-		($result:expr) => {
-			match $result {
+		($EvoidResult:expr) => {
+			match $EvoidResult {
 				Err(e) => {
 					error!("{e}");
 					behavior.err = Some(e);

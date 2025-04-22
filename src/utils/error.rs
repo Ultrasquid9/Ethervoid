@@ -3,7 +3,7 @@ use std::{
 	fmt::{Debug, Display},
 };
 
-pub type Result<T> = std::result::Result<T, Box<dyn Error + Send + Sync>>;
+pub type EvoidResult<T> = std::result::Result<T, Box<dyn Error + Send + Sync>>;
 
 #[derive(Clone)]
 pub enum EtherVoidError {

@@ -2,7 +2,7 @@ use self::prelude::*;
 use gameplay::gameplay;
 
 use menu::{init_ui, main::menu};
-use utils::init_log;
+use utils::{error::EvoidResult, logger::init_log};
 
 mod cores;
 mod gameplay;
@@ -17,9 +17,9 @@ pub enum State {
 }
 
 #[macroquad::main("Ethervoid")]
-async fn main() {
-	init_log().await;
-	init_ui().await;
+async fn main() -> EvoidResult<()> {
+	init_log().await?;
+	init_ui().await?;
 
 	let mut state = State::Menu;
 
@@ -27,7 +27,7 @@ async fn main() {
 		state = match state {
 			State::Menu => menu().await,
 			State::Gameplay => gameplay().await,
-			State::Quit => return,
+			State::Quit => return Ok(()),
 		};
 
 		next_frame().await;

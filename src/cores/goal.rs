@@ -2,7 +2,7 @@ use ahash::HashMap;
 use engine::init_engine;
 use tracing::{info, warn};
 
-use crate::utils::{error::Result, resources::goals::access_goal};
+use crate::utils::{error::EvoidResult, resources::goals::access_goal};
 
 use rhai::{AST, Engine, Scope};
 
@@ -49,7 +49,7 @@ pub fn get_goals() -> HashMap<String, AST> {
 			let maybe_ast = || Ok(engine.compile(std::fs::read_to_string(dir)?)?);
 			(gen_name(dir), maybe_ast())
 		})
-		.filter_map(|(name, result): (String, Result<AST>)| match result {
+		.filter_map(|(name, result): (String, EvoidResult<AST>)| match result {
 			Err(e) => {
 				warn!("Failed to compile goal {name}: {e}");
 				None
