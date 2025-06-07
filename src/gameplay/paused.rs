@@ -19,11 +19,11 @@ impl Paused {
 		*self != Paused::None
 	}
 
-	pub async fn pause(&mut self) -> Option<State> {
+	pub fn pause(&mut self) -> Option<State> {
 		match self {
 			Self::Dialogue(message) => {
 				if let Some(message) = message {
-					dialogue::menu(message).await;
+					dialogue::menu(message);
 
 					if message.should_stop() {
 						*self = Self::None;
@@ -46,7 +46,7 @@ impl Paused {
 					*self = Self::None;
 				}
 
-				return pause::menu().await;
+				return pause::menu();
 			}
 
 			Self::None => {

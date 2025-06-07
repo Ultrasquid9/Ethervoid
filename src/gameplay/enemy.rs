@@ -1,7 +1,7 @@
 use crate::cores::{enemytype::EnemyType, goal::Goal};
-use tracing::warn;
 use macroquad::math::DVec2;
 use stecs::prelude::*;
+use tracing::warn;
 
 use super::ecs::{
 	behavior::{Behavior, goal::GoalBehavior},

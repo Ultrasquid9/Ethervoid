@@ -21,7 +21,7 @@ use super::obj::{Axis, Obj};
 
 #[derive(Clone)]
 pub struct Sprite {
-	sprite: DynamicImage,
+	img: DynamicImage,
 	obj: Obj,
 
 	cache: Option<(u32, Texture2D)>,
@@ -63,7 +63,7 @@ impl Sprite {
 		anims: HashMap<String, Frames>,
 	) -> Self {
 		Self {
-			sprite: if rotation == Rotation::Angle {
+			img: if rotation == Rotation::Angle {
 				downscale(access_image(key), obj.size as u32)
 			} else {
 				access_image(key).clone()
@@ -140,11 +140,11 @@ impl Sprite {
 		self.current_anim = None;
 	}
 
-	pub async fn as_render_params(&mut self) -> (Texture2D, DVec2, Option<DrawTextureParams>) {
+	pub fn as_render_params(&mut self) -> (Texture2D, DVec2, Option<DrawTextureParams>) {
 		let size = if self.rotation == Rotation::EightWay {
-			self.sprite.height() / 5
+			self.img.height() / 5
 		} else {
-			self.sprite.height()
+			self.img.height()
 		};
 
 		let mut x_pos = if self.current_anim.is_some() {
@@ -180,8 +180,8 @@ impl Sprite {
 			x_pos += (self.shaking.sin() * 3.) as u32;
 		}
 
-		x_pos = x_pos.clamp(0, self.sprite.width() - 1);
-		y_pos = y_pos.clamp(0, self.sprite.height() - 1);
+		x_pos = x_pos.clamp(0, self.img.width() - 1);
+		y_pos = y_pos.clamp(0, self.img.height() - 1);
 
 		(
 			if self.rotation == Rotation::Angle {
@@ -193,14 +193,14 @@ impl Sprite {
 				self.obj.pos.x
 					+ match self.rotation {
 						Rotation::Angle => 0.,
-						Rotation::Static => self.sprite.width() as f64 / 2.,
-						Rotation::EightWay => self.sprite.width() as f64,
+						Rotation::Static => self.img.width() as f64 / 2.,
+						Rotation::EightWay => self.img.width() as f64,
 					},
 				self.obj.pos.y
 					+ match self.rotation {
 						Rotation::Angle => 0.,
-						Rotation::Static => self.sprite.width() as f64 / 2.,
-						_ => self.sprite.height() as f64,
+						Rotation::Static => self.img.width() as f64 / 2.,
+						Rotation::EightWay => self.img.height() as f64,
 					},
 			),
 			Some(DrawTextureParams {
@@ -234,8 +234,8 @@ impl Sprite {
 		}
 
 		let img = to_texture(&DynamicImage::ImageRgba8(rotate_about_center(
-			self.sprite
-				.crop_imm(x_pos, y_pos, self.sprite.height(), self.sprite.height())
+			self.img
+				.crop_imm(x_pos, y_pos, self.img.height(), self.img.height())
 				.as_rgba8()
 				.unwrap(),
 			(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x) as f32,
@@ -253,7 +253,7 @@ impl Sprite {
 			return texture.clone();
 		}
 
-		let texture = to_texture(&self.sprite);
+		let texture = to_texture(&self.img);
 		self.cache = Some((0, texture.clone()));
 		texture
 	}

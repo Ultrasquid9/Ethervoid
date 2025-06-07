@@ -126,7 +126,7 @@ impl MapTexture {
 	}
 }
 
-/// Provides a HashMap containing all Maps
+/// Provides a `HashMap` containing all Maps
 pub fn get_maps() -> HashMap<String, Map> {
 	let enemytypes = get_enemytypes();
 	let npctypes = get_npctypes();

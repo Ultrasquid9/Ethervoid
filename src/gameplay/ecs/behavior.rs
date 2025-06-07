@@ -76,7 +76,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 					scope.spawn(|| wander_behavior(&mut *behavior, obj, &gameplay.current_map));
 				}
 
-				_ => (),
+				Behavior::None => (),
 			}
 		}
 	});

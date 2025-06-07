@@ -20,7 +20,7 @@ pub struct NpcType {
 
 impl Readable for NpcType {}
 
-/// Provides a HashMap containing all Npc data
+/// Provides a `HashMap` containing all Npc data
 pub fn get_npctypes() -> HashMap<String, NpcType> {
 	let npcs: HashMap<String, NpcType> = get_files("npcs")
 		.iter()

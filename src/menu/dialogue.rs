@@ -2,7 +2,7 @@ use macroquad::{prelude::*, ui::*};
 
 use crate::gameplay::npc::messages::Message;
 
-pub async fn menu(message: &mut Message) {
+pub fn menu(message: &mut Message) {
 	let height = screen_height() / 2.5;
 
 	let pos = vec2(12., screen_height() - height);

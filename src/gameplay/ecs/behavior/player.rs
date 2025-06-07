@@ -31,7 +31,7 @@ pub fn player_behavior(
 	let axis = |axis: &Axis, f: &mut f64| match axis {
 		Axis::Positive => *f += 1.,
 		Axis::Negative => *f -= 1.,
-		_ => (),
+		Axis::None => (),
 	};
 	axis(&obj.axis_vertical, &mut new_pos.y);
 	axis(&obj.axis_horizontal, &mut new_pos.x);

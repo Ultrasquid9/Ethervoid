@@ -4,8 +4,8 @@ use ahash::HashMap;
 use audio::create_sounds;
 
 use goals::create_goals;
-use tracing::info;
 use maps::create_maps;
+use tracing::info;
 
 use parking_lot::RwLock;
 use textures::create_textures;

@@ -130,6 +130,10 @@ impl Obj {
 	}
 
 	fn try_handle_angle(&mut self, new_pos: &DVec2, current_map: &str) {
+		fn atan2(p0: &DVec2, p1: &DVec2) -> f64 {
+			(p1.y - p0.y).atan2(p1.x - p0.x)
+		}
+
 		let map = access_map(current_map);
 		let mut to_check = DEFAULT_BAR;
 
@@ -147,10 +151,6 @@ impl Obj {
 
 		let point0 = to_check.0.dvec2();
 		let point1 = to_check.1.dvec2();
-
-		fn atan2(p0: &DVec2, p1: &DVec2) -> f64 {
-			(p1.y - p0.y).atan2(p1.x - p0.x)
-		}
 
 		let angle0 = atan2(&point1, &point0);
 		let angle1 = atan2(&point0, &point1);

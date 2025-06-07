@@ -5,7 +5,7 @@ use crate::State;
 use super::button;
 
 /// The pause menu
-pub async fn menu() -> Option<State> {
+pub fn menu() -> Option<State> {
 	let mut to_return: Option<State> = None;
 
 	let y_pos = |height: f32| (screen_height() / 2.) + ((screen_height() / 10.) * height);

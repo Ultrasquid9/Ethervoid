@@ -40,10 +40,10 @@ impl Clone for Goal {
 	}
 }
 
-/// Provides a HashMap containing all Goals
+/// Provides a `HashMap` containing all Goals
 pub fn get_goals() -> HashMap<String, AST> {
 	let engine = init_engine();
-	let goals = get_files("goals")
+	get_files("goals")
 		.iter()
 		.map(|dir| {
 			let maybe_ast = || Ok(engine.compile(std::fs::read_to_string(dir)?)?);
@@ -59,7 +59,5 @@ pub fn get_goals() -> HashMap<String, AST> {
 				Some((name, ast))
 			}
 		})
-		.collect();
-
-	goals
+		.collect()
 }

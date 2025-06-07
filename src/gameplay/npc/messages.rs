@@ -65,7 +65,7 @@ impl Dialogue {
 		&self.text
 	}
 
-	/// Gets the portrait inside as a Texture2D
+	/// Gets the portrait inside as a `Texture2D`
 	pub fn get_portrait(&self) -> Texture2D {
 		to_texture(access_image(&self.portrait))
 	}

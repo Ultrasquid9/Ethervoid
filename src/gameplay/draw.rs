@@ -51,7 +51,7 @@ pub async fn draw(gameplay: &mut Gameplay) {
 
 	render_sprites(gameplay).await;
 
-	for (atk_type, obj) in query!(gameplay.world.attacks, (&attack_type, &obj)) {
+	for (atk_type, obj) in query!(gameplay.world.attacks, (&atk_type, &obj)) {
 		if let AttackType::Hitscan = atk_type {
 			draw_line(
 				obj.pos.x as f32,
@@ -121,15 +121,8 @@ async fn render_sprites(gameplay: &mut Gameplay) {
 	});
 
 	// Processing sprites
-	let mut futures = vec![];
-
 	for sprite in &mut sprites {
-		futures.push(sprite.as_render_params());
-	}
-
-	// Rendering sprites
-	for future in futures {
-		let (texture, pos, params) = future.await;
+		let (texture, pos, params) = sprite.as_render_params();
 		render_texture(&texture, pos, params).await;
 	}
 }

@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
-use tracing::error;
 use parking_lot::RwLock;
+use tracing::error;
 
 use crate::utils::config::Config;
 

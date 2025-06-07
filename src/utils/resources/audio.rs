@@ -1,7 +1,7 @@
-use tracing::error;
 use macroquad::rand;
 use parking_lot::RwLock;
 use std::sync::LazyLock;
+use tracing::error;
 
 use kira::{AudioManager, AudioManagerSettings, sound::static_sound::StaticSoundData};
 
@@ -16,7 +16,7 @@ use super::{Resource, resource, set_resource};
 static MANAGER: LazyLock<RwLock<AudioManager>> = LazyLock::new(init_manager);
 static SOUNDS: Resource<StaticSoundData> = resource();
 
-/// Populates the Sounds HashMap
+/// Populates the Sounds `HashMap`
 pub(super) fn create_sounds() {
 	set_resource(&SOUNDS, get_audio());
 }

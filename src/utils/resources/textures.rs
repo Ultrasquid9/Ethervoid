@@ -14,7 +14,7 @@ use super::{Resource, get_resource_ref, resource, set_resource};
 static ERR_TEXTURE: LazyLock<DynamicImage> = LazyLock::new(init_err_texture);
 static TEXTURES: Resource<DynamicImage> = resource();
 
-/// Populates the texture HashMap
+/// Populates the texture `HashMap`
 pub(super) fn create_textures() {
 	set_resource(&TEXTURES, get_textures());
 }

@@ -16,19 +16,18 @@ use super::{Resource, get_resource_ref, resource, set_resource, textures::access
 static ERR_MAP: LazyLock<Map> = LazyLock::new(init_err_map);
 static MAPS: Resource<Map> = resource();
 
-/// Populates the map HashMap
+/// Populates the map `HashMap`
 pub(super) fn create_maps() {
 	set_resource(&MAPS, get_maps());
 }
 
 /// Gets the map at the provided key
 pub fn access_map(key: &str) -> &Map {
-	match get_resource_ref(&MAPS, key) {
-		Some(map) => map,
-		None => {
-			error!("Map {key} not found");
-			&ERR_MAP
-		}
+	if let Some(map) = get_resource_ref(&MAPS, key) {
+		map
+	} else {
+		error!("Map {key} not found");
+		&ERR_MAP
 	}
 }
 

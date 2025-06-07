@@ -11,9 +11,12 @@ mod utils;
 
 /// Used to determine what state the game is in.
 pub enum State {
-	Menu,     // The main-menu
-	Gameplay, // In-game
-	Quit,     // Exiting the gamej
+	/// The main-menu
+	Menu,
+	/// In-game
+	Gameplay,
+	/// Exiting the gamej
+	Quit,
 }
 
 #[macroquad::main("Ethervoid")]

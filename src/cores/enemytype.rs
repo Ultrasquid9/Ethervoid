@@ -1,5 +1,5 @@
-use tracing::warn;
 use serde::Deserialize;
+use tracing::warn;
 
 use super::{Readable, gen_name, get_files};
 
@@ -17,7 +17,7 @@ pub struct EnemyType {
 
 impl Readable for EnemyType {}
 
-/// Provides a HashMap containing all EnemyTypes
+/// Provides a `HashMap` containing all `EnemyTypes`
 pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 	let enemytypes: HashMap<String, EnemyType> = get_files("enemies")
 		.iter()

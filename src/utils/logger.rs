@@ -1,11 +1,14 @@
-use std::{fs::File, io::{Result, Stdout, Write}};
+use std::{
+	fs::File,
+	io::{Result, Stdout, Write},
+};
 
 use tracing::info;
 
 use super::error::EvoidResult;
 pub struct Logger {
 	stdout: Stdout,
-	file: File
+	file: File,
 }
 
 impl Logger {

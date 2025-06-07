@@ -5,7 +5,7 @@ use imageproc::image::{ColorType, DynamicImage, ImageReader};
 
 use super::{gen_name, get_files};
 
-/// Provides a HashMap containing all Textures
+/// Provides a `HashMap` containing all Textures
 pub fn get_textures() -> HashMap<String, DynamicImage> {
 	let mut textures: HashMap<String, DynamicImage> = HashMap::default();
 	let (transciever, receiver) = mpsc::channel();

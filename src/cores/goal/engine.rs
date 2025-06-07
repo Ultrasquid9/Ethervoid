@@ -1,7 +1,7 @@
-use tracing::*;
 use macroquad::math::{DVec2, dvec2};
 use mod_resolver::EvoidResolver;
 use rhai::{Dynamic, Engine, EvalAltResult, FnPtr, NativeCallContext};
+use tracing::*;
 
 use crate::{
 	gameplay::{
@@ -105,16 +105,24 @@ fn disable_features(engine: &mut Engine) {
 }
 
 fn custom_operators(engine: &mut Engine) {
-	fn ternary(input: bool, array: Vec<Dynamic>) -> OperatorResult {
-		let output = array.get(usize::from(!input));
+	#[allow(clippy::needless_pass_by_value)]
+	fn ternary(context: NativeCallContext, input: bool, array: Vec<Dynamic>) -> OperatorResult {
+		let index = usize::from(!input);
+		let output = array.get(index);
 
 		let Some(output) = output else {
-			return Ok(Dynamic::from(()));
+			return Err(EvalAltResult::ErrorArrayBounds(
+				array.len(),
+				index as i64,
+				context.position(),
+			)
+			.into());
 		};
 
 		Ok(output.clone())
 	}
 
+	#[allow(clippy::needless_pass_by_value)]
 	fn pipeline(context: NativeCallContext, input: Dynamic, mut func: FnPtr) -> OperatorResult {
 		let mut curried = false;
 		let mut args = func.curry().to_vec();

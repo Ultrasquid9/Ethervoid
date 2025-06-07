@@ -1,7 +1,7 @@
-use tracing::error;
 use macroquad::math::DVec2;
 use raywoke::prelude::*;
 use std::fmt::Display;
+use tracing::error;
 
 use crate::utils::{resources::maps::access_map, tup_vec::Tup64};
 
@@ -98,10 +98,7 @@ impl Door {
 			if !i.direction.is_opposing(&self.direction) {
 				error!(
 					"Door in {} does not match expected direction of door in {}\nDirection of Self: {} \nDirection of other: {}",
-					gameplay.current_map,
-					self.dest,
-					self.direction,
-					i.direction
+					gameplay.current_map, self.dest, self.direction, i.direction
 				);
 				return;
 			}
@@ -114,7 +111,7 @@ impl Door {
 			};
 			player.obj.pos = new_pos - self.pos + i.pos;
 
-			gameplay.current_map = self.dest.clone();
+			gameplay.current_map.clone_from(&self.dest);
 			gameplay.world.populate(&gameplay.current_map);
 			return;
 		}

@@ -23,7 +23,7 @@ pub struct Attack {
 	pub owner: Owner,
 	pub is_parried: bool,
 
-	pub attack_type: AttackType,
+	pub atk_type: AttackType,
 	damage: f64,
 	lifetime: f64,
 
@@ -52,7 +52,7 @@ impl Attack {
 			owner,
 			is_parried: false,
 
-			attack_type: AttackType::Physical,
+			atk_type: AttackType::Physical,
 			damage,
 			lifetime: 2.,
 
@@ -73,7 +73,7 @@ impl Attack {
 			owner,
 			is_parried: false,
 
-			attack_type: AttackType::Burst,
+			atk_type: AttackType::Burst,
 			damage,
 			lifetime: 12.,
 
@@ -94,7 +94,7 @@ impl Attack {
 			owner,
 			is_parried: false,
 
-			attack_type: AttackType::Projectile,
+			atk_type: AttackType::Projectile,
 			damage,
 			lifetime: 1.,
 
@@ -115,7 +115,7 @@ impl Attack {
 			owner,
 			is_parried: false,
 
-			attack_type: AttackType::Hitscan,
+			atk_type: AttackType::Hitscan,
 			damage,
 			lifetime: 8.,
 
@@ -144,7 +144,7 @@ pub fn handle_combat(gameplay: &mut Gameplay) {
 		atk.sprite.update(*atk.obj);
 
 		// Handling the lifetime and movement of attacks
-		if *atk.attack_type == AttackType::Projectile {
+		if *atk.atk_type == AttackType::Projectile {
 			let new_pos = atk
 				.obj
 				.pos
@@ -158,7 +158,7 @@ pub fn handle_combat(gameplay: &mut Gameplay) {
 			*atk.lifetime -= get_delta_time();
 		}
 
-		let func = match atk.attack_type {
+		let func = match atk.atk_type {
 			AttackType::Physical => attack_physical,
 			AttackType::Burst => attack_burst,
 			AttackType::Projectile => attack_projectile,
@@ -233,7 +233,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 	for i in attack_ids.iter().rev() {
 		let atk_1 = gameplay.world.attacks.get(*i).expect("Attack should exist");
 
-		if *atk_1.attack_type != AttackType::Physical || *atk_1.is_parried {
+		if *atk_1.atk_type != AttackType::Physical || *atk_1.is_parried {
 			continue;
 		}
 
@@ -248,7 +248,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 				continue;
 			}
 
-			match atk_2.attack_type {
+			match atk_2.atk_type {
 				// Physical attacks should not be able to parry themselves
 				AttackType::Physical => {
 					if atk_1.owner == atk_2.owner {
@@ -258,7 +258,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 				// Burst and hitscan attacks cannot be parried
 				AttackType::Burst | AttackType::Hitscan => continue,
 
-				_ => (),
+				AttackType::Projectile => (),
 			}
 
 			// I have no clue why the borrow checker approved of
@@ -283,12 +283,12 @@ fn try_parry(gameplay: &mut Gameplay) {
 
 			// Yes, I used two match blocks.
 			// Unfortunately, this was needed because of borrow checker shenanigans.
-			match atk_2.attack_type {
+			match atk_2.atk_type {
 				AttackType::Physical => *atk_2.lifetime += get_delta_time(),
 
 				AttackType::Projectile => {
 					*atk_2.lifetime = 6.;
-					*atk_2.attack_type = AttackType::Hitscan;
+					*atk_2.atk_type = AttackType::Hitscan;
 					atk_2.obj.target = match atk_2.owner {
 						Owner::Player => get_mouse_pos() * 999.,
 						Owner::Enemy => new_target * 999.,

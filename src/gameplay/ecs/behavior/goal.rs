@@ -1,8 +1,8 @@
 use std::error::Error;
 
-use tracing::error;
 use macroquad::math::DVec2;
 use rhai::{CallFnOptions, Dynamic};
+use tracing::error;
 
 use crate::{
 	cores::goal::Goal,
@@ -189,11 +189,8 @@ pub fn goal_behavior(
 
 		if let Ok(true) = result {
 			behavior.index = Some(index);
-		} else {
-			continue;
+			maybe!(behavior.goals[index].init());
+			return;
 		}
-
-		maybe!(behavior.goals[index].init());
-		return;
 	}
 }

@@ -1,7 +1,7 @@
 use std::fs::{self, read_dir};
 
-use tracing::error;
 use serde::Deserialize;
+use tracing::error;
 use walkdir::WalkDir;
 
 use crate::utils::error::EvoidResult;

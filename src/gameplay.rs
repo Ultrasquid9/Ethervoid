@@ -50,7 +50,7 @@ impl Gameplay {
 		}
 	}
 
-	async fn pause(&mut self) -> Option<State> {
+	fn pause(&mut self) -> Option<State> {
 		if self.paused.is_paused() {
 			darken_screen();
 
@@ -69,13 +69,13 @@ impl Gameplay {
 		}
 
 		self.get_npc_dialogue();
-		self.paused.pause().await
+		self.paused.pause()
 	}
 
 	fn get_npc_dialogue(&mut self) {
 		if let Paused::Dialogue(Some(_)) = self.paused {
 			return;
-		};
+		}
 
 		for (obj, messages, messages_cooldown) in
 			query!(self.world.npcs, (&obj, &messages, &mut messages_cooldown))
@@ -85,8 +85,7 @@ impl Gameplay {
 				continue;
 			}
 
-			for (atk_obj, atk_type, owner) in
-				query!(self.world.attacks, (&obj, &attack_type, &owner))
+			for (atk_obj, atk_type, owner) in query!(self.world.attacks, (&obj, &atk_type, &owner))
 			{
 				if !atk_obj.is_touching(obj)
 					|| *atk_type == AttackType::Projectile
@@ -178,7 +177,7 @@ impl Gameplay {
 			let mut atk_to_remove = false;
 
 			for (index, atk) in self.world.attacks.iter() {
-				if match atk.attack_type {
+				if match atk.atk_type {
 					AttackType::Physical | AttackType::Burst => atk.sprite.anim_completed(),
 					_ => *atk.lifetime <= 0.,
 				} {
@@ -227,7 +226,7 @@ pub async fn gameplay() -> State {
 		draw(&mut gameplay).await;
 
 		// Anything that pauses normal gameplay goes here
-		if let Some(state) = gameplay.pause().await {
+		if let Some(state) = gameplay.pause() {
 			match state {
 				State::Gameplay => {
 					gameplay.paused = Paused::None;
