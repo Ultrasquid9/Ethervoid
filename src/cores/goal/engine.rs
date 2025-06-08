@@ -114,7 +114,7 @@ fn custom_operators(engine: &mut Engine) {
 			return Err(EvalAltResult::ErrorArrayBounds(
 				array.len(),
 				index as i64,
-				context.position(),
+				context.call_position(),
 			)
 			.into());
 		};

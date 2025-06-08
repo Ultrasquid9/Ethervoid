@@ -17,13 +17,7 @@ impl Tup64 for DVec2 {
 	}
 }
 
-impl DV2 for (f64, f64) {
-	fn dvec2(&self) -> DVec2 {
-		dvec2(self.x(), self.y())
-	}
-}
-
-impl DV2 for dyn Point {
+impl<P: Point> DV2 for P {
 	fn dvec2(&self) -> DVec2 {
 		dvec2(self.x(), self.y())
 	}

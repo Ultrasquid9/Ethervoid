@@ -1,5 +1,4 @@
 use macroquad::prelude::*;
-use raywoke::point::Point;
 use tup_vec::DV2;
 
 use unsafe_delta_time::UnsafeDeltaTime;
@@ -16,7 +15,7 @@ static DELTA_TIME: UnsafeDeltaTime = UnsafeDeltaTime::new();
 /// Gets the current position of the mouse
 pub fn get_mouse_pos() -> DVec2 {
 	let calc = |f: f32| f64::from(f) / 2.;
-	mouse_position().tup_f64().dvec2() - dvec2(calc(screen_width()), calc(screen_height()))
+	mouse_position().dvec2() - dvec2(calc(screen_width()), calc(screen_height()))
 }
 
 /**

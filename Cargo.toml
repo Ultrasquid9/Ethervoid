@@ -22,7 +22,7 @@ rhai = { version = "1.21", features = ["sync"] }
 serde = { version = "1.0", features = ["derive"] }
 ron = "0.10"
 
-raywoke = { version = "0.2", features = ["glam"] }
+raywoke = { version = "0.3", features = ["glam"] }
 
 [profile.dev.package."*"]
 opt-level = 3
