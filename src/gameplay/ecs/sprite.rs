@@ -35,7 +35,7 @@ pub struct Sprite {
 	anims: HashMap<String, Frames>,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 #[allow(dead_code)]
 pub enum Rotation {
 	Angle,
@@ -134,6 +134,24 @@ impl Sprite {
 		}
 
 		Ok(())
+	}
+
+	pub fn set_img(&mut self, img: DynamicImage) {
+		self.img = img;
+		self.cache = None;
+	}
+
+	pub fn img(&self) -> &DynamicImage {
+		&self.img
+	}
+
+	pub fn set_rotation(&mut self, rotation: Rotation) {
+		self.rotation = rotation;
+		self.cache = None;
+	}
+
+	pub fn rotation(&self) -> Rotation {
+		self.rotation
 	}
 
 	pub fn set_default_anim(&mut self) {

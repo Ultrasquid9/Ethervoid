@@ -3,7 +3,11 @@ use raywoke::prelude::*;
 
 use super::SCREEN_SCALE;
 
-use crate::{cores::map::Map, utils::camera_scale};
+use crate::{
+	cores::map::Map,
+	gameplay::ecs::sprite::{Rotation, Sprite},
+	utils::camera_scale,
+};
 
 pub async fn draw_map(map: &Map) {
 	render_texture(&map.texture.clone(), dvec2(0., 0.), None).await;
@@ -29,6 +33,28 @@ pub async fn render_texture(texture: &Texture2D, pos: DVec2, params: Option<Draw
 			},
 		},
 	);
+}
+
+pub async fn render_line(sprite: &mut Sprite) {
+	let mut current = sprite.obj().pos;
+
+	let target = sprite.obj().target;
+	let jmp = SCREEN_SCALE * (sprite.img().width() - 1) as f64;
+
+	if sprite.rotation() != Rotation::Angle {
+		sprite.set_rotation(Rotation::Angle);
+	}
+	let (texture, _, _) = sprite.as_render_params();
+
+	loop {
+		render_texture(&texture, current, None).await;
+		current = current.move_towards(target, jmp);
+
+		let dist = current.distance(target);
+		if dist < jmp {
+			return;
+		}
+	}
 }
 
 /// Renders text

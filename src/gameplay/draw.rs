@@ -2,7 +2,10 @@ use macroquad::prelude::*;
 use std::cmp::Ordering;
 use stecs::prelude::*;
 
-use crate::utils::{camera_scale, resources::maps::access_map};
+use crate::{
+	gameplay::draw::render::render_line,
+	utils::{camera_scale, resources::maps::access_map},
+};
 
 use super::{
 	Gameplay,
@@ -51,16 +54,9 @@ pub async fn draw(gameplay: &mut Gameplay) {
 
 	render_sprites(gameplay).await;
 
-	for (atk_type, obj) in query!(gameplay.world.attacks, (&atk_type, &obj)) {
+	for (atk_type, sprite) in query!(gameplay.world.attacks, (&atk_type, &mut sprite)) {
 		if let AttackType::Hitscan = atk_type {
-			draw_line(
-				obj.pos.x as f32,
-				obj.pos.y as f32,
-				obj.target.x as f32,
-				obj.target.y as f32,
-				obj.size as f32,
-				RED,
-			);
+			render_line(sprite).await;
 		}
 	}
 

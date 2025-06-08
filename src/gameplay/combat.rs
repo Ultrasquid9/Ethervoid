@@ -12,7 +12,9 @@ use super::{
 	paused::Paused,
 };
 
-use crate::utils::{get_delta_time, get_mouse_pos, tup_vec::Tup64};
+use crate::utils::{
+	get_delta_time, get_mouse_pos, resources::textures::access_image, tup_vec::Tup64,
+};
 
 use rhai::{CustomType, TypeBuilder};
 
@@ -289,10 +291,15 @@ fn try_parry(gameplay: &mut Gameplay) {
 				AttackType::Projectile => {
 					*atk_2.lifetime = 6.;
 					*atk_2.atk_type = AttackType::Hitscan;
-					atk_2.obj.target = match atk_2.owner {
-						Owner::Player => get_mouse_pos() * 999.,
-						Owner::Enemy => new_target * 999.,
-					};
+
+					atk_2
+						.sprite
+						.set_img(access_image("default:attacks/hitscan-enemy").clone());
+					atk_2.obj.target = 999.
+						* match atk_2.owner {
+							Owner::Player => get_mouse_pos(),
+							Owner::Enemy => new_target,
+						};
 				}
 
 				_ => unreachable!("How did a non-parryable attack end up here?"),
