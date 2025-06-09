@@ -1,4 +1,4 @@
-use crate::cores::{enemytype::EnemyType, goal::Goal};
+use crate::cores::{enemytype::EnemyType, script::Script};
 use macroquad::math::DVec2;
 use stecs::prelude::*;
 use tracing::error;
@@ -29,9 +29,9 @@ impl Enemy {
 				goals: enemytype
 					.goals
 					.iter()
-					.filter_map(|key| match Goal::new(key) {
+					.filter_map(|key| match Script::new(key) {
 						None => {
-							error!("Goal {key} not found!");
+							error!("Script {key} not found!");
 							None
 						}
 						ok => ok,

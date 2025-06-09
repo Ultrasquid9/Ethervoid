@@ -4,18 +4,18 @@ use mlua::Function;
 use tracing::error;
 
 use crate::{
-	cores::goal::Goal,
+	cores::script::Script,
 	gameplay::{
 		combat::{Attack, AttackStructOf},
 		ecs::{obj::Obj, sprite::Sprite},
 	},
-	utils::{error::EvoidResult, lua::LuaDVec2, resources::goals::lua, smart_time},
+	utils::{error::EvoidResult, lua::LuaDVec2, resources::script_vals::lua, smart_time},
 };
 
 use stecs::{prelude::Archetype, storage::vec::VecFamily};
 
 pub struct GoalBehavior {
-	pub goals: Box<[Goal]>,
+	pub goals: Box<[Script]>,
 	pub prev_goal: String,
 	pub index: Option<usize>,
 
@@ -39,9 +39,9 @@ impl Clone for GoalBehavior {
 	}
 }
 
-impl Goal {
+impl Script {
 	fn init(&mut self) -> EvoidResult<()> {
-		let fun: Function = match self.table.get("init") {
+		let fun: Function = match self.table()?.get("init") {
 			Ok(fun) => fun,
 			Err(e) => match e {
 				mlua::Error::FromLuaConversionError { .. } => return Ok(()),
@@ -49,17 +49,17 @@ impl Goal {
 			},
 		};
 
-		Ok(fun.call(self.table.clone())?)
+		Ok(fun.call(self.table()?.clone())?)
 	}
 
 	fn should_start(&mut self) -> EvoidResult<bool> {
-		let fun: Function = self.table.get("should_start")?;
-		Ok(fun.call(self.table.clone())?)
+		let fun: Function = self.table()?.get("should_start")?;
+		Ok(fun.call(self.table()?.clone())?)
 	}
 
 	fn should_stop(&mut self, sprite: &mut Sprite) -> EvoidResult<bool> {
-		let fun: Function = self.table.get("should_stop")?;
-		let stop: bool = fun.call(self.table.clone())?;
+		let fun: Function = self.table()?.get("should_stop")?;
+		let stop: bool = fun.call(self.table()?.clone())?;
 
 		if stop {
 			sprite.set_default_anim();
@@ -78,9 +78,9 @@ impl Goal {
 		let lua_current_anim =
 			lua().create_string(sprite.get_current_anim().unwrap_or_default())?;
 
-		let fun: Function = self.table.get("update")?;
+		let fun: Function = self.table()?.get("update")?;
 		let new_pos: LuaDVec2 = fun.call((
-			self.table.clone(),
+			self.table()?.clone(),
 			lua_attacks.clone(),
 			lua_current_anim.clone(),
 		))?;

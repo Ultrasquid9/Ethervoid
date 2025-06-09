@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 use ahash::HashMap;
 use audio::create_sounds;
 
-use goals::create_goals;
+use script_vals::create_script_vals;
 use maps::create_maps;
 use tracing::info;
 
@@ -12,7 +12,7 @@ use textures::create_textures;
 
 pub mod audio;
 pub mod config;
-pub mod goals;
+pub mod script_vals;
 pub mod maps;
 pub mod textures;
 
@@ -48,7 +48,7 @@ pub fn create_resources() {
 	std::thread::scope(|scope| {
 		scope.spawn(create_textures);
 		scope.spawn(create_sounds);
-		scope.spawn(create_goals);
+		scope.spawn(create_script_vals);
 	});
 	create_maps(); // Maps depend on the existance of the other resources
 	info!("All resources loaded!");
