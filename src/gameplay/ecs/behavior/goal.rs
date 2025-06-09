@@ -1,7 +1,6 @@
 use std::error::Error;
 
-use macroquad::math::DVec2;
-use rhai::{CallFnOptions, Dynamic};
+use mlua::Function;
 use tracing::error;
 
 use crate::{
@@ -10,10 +9,10 @@ use crate::{
 		combat::AttackStructOf,
 		ecs::{obj::Obj, sprite::Sprite},
 	},
-	utils::{error::EvoidResult, get_delta_time},
+	utils::{error::EvoidResult, get_delta_time, lua::LuaDVec2, resources::goals::lua},
 };
 
-use stecs::{prelude::*, storage::vec::VecFamily};
+use stecs::{storage::vec::VecFamily};
 
 pub struct GoalBehavior {
 	pub goals: Box<[Goal]>,
@@ -41,59 +40,58 @@ impl Clone for GoalBehavior {
 }
 
 impl Goal {
-	fn update_constants(&mut self, obj_self: &Obj, obj_player: &Obj, prev_goal: String) {
-		// The names of the constants
-		const PREV_GOAL: &str = "prev_goal";
-		const POS_SELF: &str = "pos_self";
-		const POS_PLAYER: &str = "pos_player";
-
-		// Removing the constants if they exist, to prevent the scope from growing exponentially
-		_ = self.scope.remove::<Dynamic>(PREV_GOAL);
-		_ = self.scope.remove::<Dynamic>(POS_SELF);
-		_ = self.scope.remove::<Dynamic>(POS_PLAYER);
-
-		// Re-adding the constants with updated values
-		self.scope
-			.push_constant(PREV_GOAL, prev_goal)
-			.push_constant(POS_SELF, obj_self.pos)
-			.push_constant(POS_PLAYER, obj_player.pos);
+	fn init(&mut self) -> EvoidResult<()> {
+		let fun: Function = self.table.get("init")?;
+		Ok(fun.call(self.table.clone())?)
 	}
 
 	fn should_start(&mut self) -> EvoidResult<bool> {
-		let res = self
-			.engine
-			.call_fn::<bool>(&mut self.scope, &self.script, "should_start", ())?;
-
-		Ok(res)
+		let fun: Function = self.table.get("should_start")?;
+		Ok(fun.call(self.table.clone())?)
 	}
 
 	fn should_stop(&mut self, sprite: &mut Sprite) -> EvoidResult<bool> {
-		let res = self
-			.engine
-			.call_fn::<bool>(&mut self.scope, &self.script, "should_stop", ())?;
+		let fun: Function = self.table.get("should_stop")?;
+		let stop: bool = fun.call(self.table.clone())?;
 
-		if res {
-			self.scope.clear();
+		if stop {
 			sprite.set_default_anim();
-			Ok(true)
-		} else {
-			Ok(false)
 		}
-	}
-
-	fn init(&mut self) -> EvoidResult<()> {
-		self.engine.call_fn_with_options::<()>(
-			CallFnOptions::new().eval_ast(false).rewind_scope(false),
-			&mut self.scope,
-			&self.script,
-			"init",
-			(),
-		)?;
-
-		Ok(())
+		Ok(stop)
 	}
 
 	fn update(
+		&mut self,
+		obj: &mut Obj,
+		sprite: &mut Sprite,
+		attacks: &mut AttackStructOf<VecFamily>,
+		current_map: &str,
+	) -> EvoidResult<()> {
+		let lua_attacks = lua().create_table()?;
+		let lua_current_anim = lua().create_string(sprite.get_current_anim().unwrap_or_default())?;
+
+		let fun: Function = self.table.get("update")?;
+		let new_pos: LuaDVec2 = fun.call((
+			self.table.clone(),
+			lua_attacks.clone(),
+			lua_current_anim.clone(),
+		))?;
+
+		println!("{}", lua_attacks.len()?);
+		
+		// Taking delta time into consideration
+		let new_pos = ((new_pos.0 - obj.pos) * get_delta_time()) + obj.pos;
+
+		obj.update(new_pos);
+		obj.try_move(&new_pos, current_map);
+
+		Ok(())
+	}
+}
+
+/* impl Goal {
+
+	fn update2(
 		&mut self,
 		obj: &mut Obj,
 		sprite: &mut Sprite,
@@ -133,6 +131,21 @@ impl Goal {
 
 		Ok(())
 	}
+} */
+
+fn update_lua_constants(obj_self: &Obj, obj_player: &Obj, prev_goal: String) -> EvoidResult<()> {
+	// The names of the constants
+	const PREV_GOAL: &str = "prev_goal";
+	const POS_SELF: &str = "pos_self";
+	const POS_PLAYER: &str = "pos_player";
+
+	let globals = lua().globals();
+
+	globals.set(PREV_GOAL, prev_goal)?;
+	globals.set(POS_SELF, LuaDVec2(obj_self.pos))?;
+	globals.set(POS_PLAYER, LuaDVec2(obj_player.pos))?;
+
+	Ok(())
 }
 
 pub fn goal_behavior(
@@ -161,10 +174,7 @@ pub fn goal_behavior(
 		return;
 	}
 
-	// Probably not the most performant way to do it
-	behavior.goals.iter_mut().for_each(|script| {
-		script.update_constants(obj_self, obj_player, behavior.prev_goal.clone());
-	});
+	maybe!(update_lua_constants(obj_self, obj_player, behavior.prev_goal.clone()));
 
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {

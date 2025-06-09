@@ -16,8 +16,6 @@ use crate::utils::{
 	get_delta_time, get_mouse_pos, resources::textures::access_image, tup_vec::Tup64,
 };
 
-use rhai::{CustomType, TypeBuilder};
-
 #[derive(Clone, SplitFields)]
 pub struct Attack {
 	pub obj: Obj,
@@ -129,13 +127,6 @@ impl Attack {
 				HashMap::default(),
 			),
 		}
-	}
-}
-
-// Allows Attacks to be created by scripts
-impl CustomType for Attack {
-	fn build(mut builder: TypeBuilder<Self>) {
-		builder.with_name("attack");
 	}
 }
 

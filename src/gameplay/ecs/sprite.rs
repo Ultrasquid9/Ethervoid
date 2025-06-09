@@ -121,6 +121,10 @@ impl Sprite {
 		self.frames.anim_completed
 	}
 
+	pub fn get_current_anim(&mut self) -> Option<&str> {
+		self.current_anim.as_deref()
+	}
+
 	pub fn set_new_anim(&mut self, key: String) -> Result<(), Box<EtherVoidError>> {
 		if !self.anims.contains_key(&key) {
 			return Err(Box::new(EtherVoidError::AnimNotFound(key)));

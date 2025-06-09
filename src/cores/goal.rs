@@ -1,55 +1,41 @@
 use ahash::HashMap;
-use engine::init_engine;
+use mlua::Table;
 use tracing::{info, warn};
 
-use crate::utils::{error::EvoidResult, resources::goals::access_goal};
-
-use rhai::{AST, Engine, Scope};
+use crate::utils::{error::EvoidResult, resources::goals::{access_goal, lua}};
 
 use super::{gen_name, get_files};
 
-mod engine;
-
-/// A goal that can be configured via a script.
+/// A goal that can be configured via a Lua script.
+#[derive(Clone)]
 pub struct Goal {
 	pub name: String,
-	pub script: AST,
-	pub scope: Scope<'static>,
-	pub engine: Engine,
+	pub table: Table,
 }
 
 impl Goal {
-	pub fn new(key: &str) -> Option<Goal> {
-		Some(Goal {
-			name: key.to_owned(),
-			script: access_goal(key)?.clone(),
-			scope: Scope::new(),
-			engine: init_engine(),
+	pub fn new(key: &str) -> Option<Self> {
+		Some(Self { 
+			name: key.to_owned(), 
+			table: access_goal(key)?.clone()
 		})
-	}
-}
-
-impl Clone for Goal {
-	fn clone(&self) -> Self {
-		Self {
-			name: self.name.clone(),
-			script: self.script.clone(),
-			scope: self.scope.clone(),
-			engine: engine::init_engine(),
-		}
 	}
 }
 
 /// Provides a `HashMap` containing all Goals
-pub fn get_goals() -> HashMap<String, AST> {
-	let engine = init_engine();
+pub fn get_goals() -> HashMap<String, Table> {
+	let lua = lua();
+
 	get_files("goals")
 		.iter()
 		.map(|dir| {
-			let maybe_ast = || Ok(engine.compile(std::fs::read_to_string(dir)?)?);
+			let maybe_ast = || {
+				Ok(lua.load(std::fs::read_to_string(dir)?).eval()?)
+			};
+		
 			(gen_name(dir), maybe_ast())
 		})
-		.filter_map(|(name, result): (String, EvoidResult<AST>)| match result {
+		.filter_map(|(name, result): (String, EvoidResult<Table>)| match result {
 			Err(e) => {
 				warn!("Failed to compile goal {name}: {e}");
 				None

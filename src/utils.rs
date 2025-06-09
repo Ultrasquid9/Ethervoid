@@ -6,6 +6,7 @@ use unsafe_delta_time::UnsafeDeltaTime;
 pub mod config;
 pub mod error;
 pub mod logger;
+pub mod lua;
 pub mod resources;
 pub mod tup_vec;
 
