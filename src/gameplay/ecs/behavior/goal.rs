@@ -9,7 +9,7 @@ use crate::{
 		combat::{Attack, AttackStructOf},
 		ecs::{obj::Obj, sprite::Sprite},
 	},
-	utils::{error::EvoidResult, get_delta_time, lua::LuaDVec2, resources::goals::lua},
+	utils::{error::EvoidResult, lua::LuaDVec2, resources::goals::lua, smart_time},
 };
 
 use stecs::{prelude::Archetype, storage::vec::VecFamily};
@@ -78,6 +78,7 @@ impl Goal {
 			lua_current_anim.clone(),
 		))?;
 
+		// Getting attacks from the table
 		lua_attacks.for_each(|_: String, atk: Attack| {
 			attacks.insert(atk);
 			Ok(())
@@ -85,12 +86,14 @@ impl Goal {
 
 		// Setting a new anim (if one was set)
 		let current_anim = lua_current_anim.to_str()?.to_string();
-		if !current_anim.is_empty() {
+		if !current_anim.is_empty()
+			&& !matches!(sprite.get_current_anim(), Some(anim) if anim == current_anim)
+		{
 			sprite.set_new_anim(current_anim)?;
 		}
 
 		// Taking delta time into consideration
-		let new_pos = ((new_pos.0 - obj.pos) * get_delta_time()) + obj.pos;
+		let new_pos = ((new_pos.0 - obj.pos) * smart_time()) + obj.pos;
 
 		obj.update(new_pos);
 		obj.try_move(&new_pos, current_map);
@@ -98,27 +101,6 @@ impl Goal {
 		Ok(())
 	}
 }
-
-/* impl Goal {
-
-	fn update2(
-		&mut self,
-		obj: &mut Obj,
-		sprite: &mut Sprite,
-		attacks: &mut AttackStructOf<VecFamily>,
-		current_map: &str,
-	) -> EvoidResult<()> {
-
-		// Getting attacks out of the scope
-		let new_attacks = self
-			.scope
-			.remove::<Vec<Dynamic>>("attacks")
-			.expect("Attacks not found");
-		for attack in new_attacks {
-			attacks.insert(attack.clone_cast());
-		}
-	}
-} */
 
 fn update_lua_constants(obj_self: &Obj, obj_player: &Obj, prev_goal: String) -> EvoidResult<()> {
 	// The names of the constants
@@ -181,17 +163,17 @@ pub fn goal_behavior(
 
 	// Checks each goal to see if they should be started, and selects the first valid one
 	for index in 0..behavior.goals.len() {
-		let result = behavior.goals[index].should_start();
-		if let Err(e) = result {
-			error!("{e}");
-			behavior.err = Some(e);
-			continue;
-		}
-
-		if let Ok(true) = result {
-			behavior.index = Some(index);
-			maybe!(behavior.goals[index].init());
-			return;
+		match behavior.goals[index].should_start() {
+			Err(e) => {
+				error!("{e}");
+				behavior.err = Some(e);
+			}
+			Ok(true) => {
+				behavior.index = Some(index);
+				maybe!(behavior.goals[index].init());
+				return;
+			}
+			_ => (),
 		}
 	}
 }

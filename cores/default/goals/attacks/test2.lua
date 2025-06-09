@@ -18,14 +18,14 @@ function test2:update(attacks, anim)
 		anim = "toss"
 	end
 
-	self.countdown -= delta_time()
+	self.countdown -= delta_time() * 60
 
 	if self.countdown <= 0 then
 		table.insert(attacks, attack.projectile(
 			12,
 			10,
 			pos_self,
-			self.pos_target,
+			pos_player,
 			"default:attacks/projectile-enemy"
 		))
 	end

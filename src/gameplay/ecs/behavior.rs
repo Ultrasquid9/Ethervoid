@@ -7,8 +7,8 @@ use wander::{WanderBehavior, wander_behavior};
 use crate::{
 	gameplay::Gameplay,
 	utils::{
-		get_delta_time,
 		resources::{config::access_config, maps::access_map},
+		smart_time,
 	},
 };
 
@@ -45,7 +45,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 			(&mut obj, &mut behavior, &mut sprite)
 		) {
 			if obj.stunned > 0. {
-				obj.stunned -= get_delta_time();
+				obj.stunned -= smart_time();
 
 				if let Behavior::Goal(behavior) = behavior {
 					behavior.index = None;

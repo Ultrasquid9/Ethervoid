@@ -25,12 +25,19 @@ Gets the current delta time, and stores it.
 This is done because Macroquad's `get_frame_time()` function panics in multithreaded scenarios.
  */
 pub fn update_delta_time() {
-	DELTA_TIME.set(f64::from(get_frame_time()) * 100. * (2. / 3.));
+	DELTA_TIME.set(f64::from(get_frame_time()));
 }
 
 /// Gets the delta time
-pub fn get_delta_time() -> f64 {
+pub fn delta_time() -> f64 {
 	DELTA_TIME.get()
+}
+
+/// Gets the delta time and multiplies it to approximately equal `1` at 60 FPS
+pub fn smart_time() -> f64 {
+	const MULT: f64 = 100. * (2. / 3.);
+
+	delta_time() * MULT
 }
 
 /// Gets the scale that the camera should be rendered at

@@ -9,7 +9,7 @@ function mtp:init()
 end
 
 function mtp:update()
-	self.timeout -= delta_time()
+	self.timeout -= delta_time() * 60
 	return move_towards(pos_self, pos_player, 1.2)
 end
 

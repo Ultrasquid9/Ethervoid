@@ -6,12 +6,11 @@ use stecs::prelude::*;
 use crate::{
 	State,
 	utils::{
-		get_delta_time,
 		resources::{
 			config::{access_config, read_config, update_config},
 			create_resources,
 		},
-		update_delta_time,
+		smart_time, update_delta_time,
 	},
 };
 
@@ -81,7 +80,7 @@ impl Gameplay {
 			query!(self.world.npcs, (&obj, &messages, &mut messages_cooldown))
 		{
 			if *messages_cooldown > 0. {
-				*messages_cooldown -= get_delta_time();
+				*messages_cooldown -= smart_time();
 				continue;
 			}
 
@@ -119,12 +118,12 @@ impl Gameplay {
 			// Cooldown
 			for sword in &mut inventory.swords {
 				if sword.cooldown >= 0. {
-					sword.cooldown -= get_delta_time();
+					sword.cooldown -= smart_time();
 				}
 			}
 			for gun in &mut inventory.guns {
 				if gun.cooldown >= 0. {
-					gun.cooldown -= get_delta_time();
+					gun.cooldown -= smart_time();
 				}
 			}
 

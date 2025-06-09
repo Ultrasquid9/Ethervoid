@@ -13,9 +13,7 @@ use super::{
 	paused::Paused,
 };
 
-use crate::utils::{
-	get_delta_time, get_mouse_pos, resources::textures::access_image, tup_vec::Tup64,
-};
+use crate::utils::{get_mouse_pos, resources::textures::access_image, smart_time, tup_vec::Tup64};
 
 #[derive(Clone, SplitFields)]
 pub struct Attack {
@@ -151,17 +149,14 @@ pub fn handle_combat(gameplay: &mut Gameplay) {
 
 		// Handling the lifetime and movement of attacks
 		if *atk.atk_type == AttackType::Projectile {
-			let new_pos = atk
-				.obj
-				.pos
-				.move_towards(atk.obj.target, get_delta_time() * 5.);
+			let new_pos = atk.obj.pos.move_towards(atk.obj.target, smart_time() * 5.);
 			atk.obj.try_move(&new_pos, &gameplay.current_map);
 
 			if atk.obj.pos != new_pos {
 				*atk.lifetime = 0.;
 			}
 		} else {
-			*atk.lifetime -= get_delta_time();
+			*atk.lifetime -= smart_time();
 		}
 
 		let func = match atk.atk_type {
@@ -275,7 +270,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 			gameplay.paused = Paused::Hitstop(16.);
 
 			let atk_1 = &mut gameplay.world.attacks.get_mut(*i).unwrap();
-			*atk_1.lifetime += get_delta_time();
+			*atk_1.lifetime += smart_time();
 			*atk_1.is_parried = true;
 
 			let new_owner = atk_1.owner.clone();
@@ -290,7 +285,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 			// Yes, I used two match blocks.
 			// Unfortunately, this was needed because of borrow checker shenanigans.
 			match atk_2.atk_type {
-				AttackType::Physical => *atk_2.lifetime += get_delta_time(),
+				AttackType::Physical => *atk_2.lifetime += smart_time(),
 
 				AttackType::Projectile => {
 					*atk_2.lifetime = 6.;
