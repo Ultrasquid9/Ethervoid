@@ -175,7 +175,12 @@ impl Inventory {
 			),
 			Weapon::RadioCannon => {
 				self.guns[self.current_gun].cooldown = 48.;
-				Attack::new_hitscan(Obj::new(pos, get_mouse_pos() * 999., 6.), 6., Owner::Player)
+				Attack::new_hitscan(
+					Obj::new(pos, get_mouse_pos() * 999., 6.),
+					6.,
+					Owner::Player,
+					"default:attacks/hitscan-player",
+				)
 			}
 
 			_ => unreachable!("Sword in Gun position"),

@@ -1,7 +1,7 @@
 use crate::{
 	State,
 	menu::{dialogue, pause},
-	utils::{get_delta_time, resources::config::access_config},
+	utils::{resources::config::access_config, smart_time},
 };
 
 use super::npc::messages::Message;
@@ -37,7 +37,7 @@ impl Paused {
 				if *hitstop <= 0. {
 					*self = Self::None;
 				} else {
-					*hitstop -= get_delta_time();
+					*hitstop -= smart_time();
 				}
 			}
 

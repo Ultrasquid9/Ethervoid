@@ -1,22 +1,21 @@
 use std::error::Error;
 
-use macroquad::math::DVec2;
-use rhai::{CallFnOptions, Dynamic};
+use mlua::Function;
 use tracing::error;
 
 use crate::{
-	cores::goal::Goal,
+	cores::script::Script,
 	gameplay::{
-		combat::AttackStructOf,
+		combat::{Attack, AttackStructOf},
 		ecs::{obj::Obj, sprite::Sprite},
 	},
-	utils::{error::EvoidResult, get_delta_time},
+	utils::{error::EvoidResult, lua::LuaDVec2, resources::script_vals::lua, smart_time},
 };
 
-use stecs::{prelude::*, storage::vec::VecFamily};
+use stecs::{prelude::Archetype, storage::vec::VecFamily};
 
 pub struct GoalBehavior {
-	pub goals: Box<[Goal]>,
+	pub goals: Box<[Script]>,
 	pub prev_goal: String,
 	pub index: Option<usize>,
 
@@ -40,57 +39,32 @@ impl Clone for GoalBehavior {
 	}
 }
 
-impl Goal {
-	fn update_constants(&mut self, obj_self: &Obj, obj_player: &Obj, prev_goal: String) {
-		// The names of the constants
-		const PREV_GOAL: &str = "prev_goal";
-		const POS_SELF: &str = "pos_self";
-		const POS_PLAYER: &str = "pos_player";
+impl Script {
+	fn init(&mut self) -> EvoidResult<()> {
+		let fun: Function = match self.table()?.get("init") {
+			Ok(fun) => fun,
+			Err(e) => match e {
+				mlua::Error::FromLuaConversionError { .. } => return Ok(()),
+				other => return Err(other.into()),
+			},
+		};
 
-		// Removing the constants if they exist, to prevent the scope from growing exponentially
-		_ = self.scope.remove::<Dynamic>(PREV_GOAL);
-		_ = self.scope.remove::<Dynamic>(POS_SELF);
-		_ = self.scope.remove::<Dynamic>(POS_PLAYER);
-
-		// Re-adding the constants with updated values
-		self.scope
-			.push_constant(PREV_GOAL, prev_goal)
-			.push_constant(POS_SELF, obj_self.pos)
-			.push_constant(POS_PLAYER, obj_player.pos);
+		Ok(fun.call(self.table()?.clone())?)
 	}
 
 	fn should_start(&mut self) -> EvoidResult<bool> {
-		let res = self
-			.engine
-			.call_fn::<bool>(&mut self.scope, &self.script, "should_start", ())?;
-
-		Ok(res)
+		let fun: Function = self.table()?.get("should_start")?;
+		Ok(fun.call(self.table()?.clone())?)
 	}
 
 	fn should_stop(&mut self, sprite: &mut Sprite) -> EvoidResult<bool> {
-		let res = self
-			.engine
-			.call_fn::<bool>(&mut self.scope, &self.script, "should_stop", ())?;
+		let fun: Function = self.table()?.get("should_stop")?;
+		let stop: bool = fun.call(self.table()?.clone())?;
 
-		if res {
-			self.scope.clear();
+		if stop {
 			sprite.set_default_anim();
-			Ok(true)
-		} else {
-			Ok(false)
 		}
-	}
-
-	fn init(&mut self) -> EvoidResult<()> {
-		self.engine.call_fn_with_options::<()>(
-			CallFnOptions::new().eval_ast(false).rewind_scope(false),
-			&mut self.scope,
-			&self.script,
-			"init",
-			(),
-		)?;
-
-		Ok(())
+		Ok(stop)
 	}
 
 	fn update(
@@ -100,39 +74,70 @@ impl Goal {
 		attacks: &mut AttackStructOf<VecFamily>,
 		current_map: &str,
 	) -> EvoidResult<()> {
-		// Values available in the scope
-		self.scope
-			.push("attacks", Vec::<Dynamic>::new())
-			.push("current_anim", String::new());
+		let lua_attacks = lua().create_table()?;
+		let lua_current_anim =
+			lua().create_string(sprite.get_current_anim().unwrap_or_default())?;
 
-		// Executing the script
-		let new_pos = self
-			.engine
-			.call_fn::<DVec2>(&mut self.scope, &self.script, "update", ())?;
+		let fun: Function = self.table()?.get("update")?;
+		let new_pos: LuaDVec2 = fun.call((
+			self.table()?.clone(),
+			lua_attacks.clone(),
+			lua_current_anim.clone(),
+		))?;
 
-		// Getting attacks out of the scope
-		let new_attacks = self
-			.scope
-			.remove::<Vec<Dynamic>>("attacks")
-			.expect("Attacks not found");
-		for attack in new_attacks {
-			attacks.insert(attack.clone_cast());
-		}
+		// Getting attacks from the table
+		lua_attacks.for_each(|_: String, atk: Attack| {
+			attacks.insert(atk);
+			Ok(())
+		})?;
 
-		// Getting the new animation from the scope
-		let new_anim = self.scope.remove::<String>("current_anim");
-		if new_anim.is_some() && !new_anim.as_ref().unwrap().is_empty() {
-			sprite.set_new_anim(new_anim.unwrap())?;
+		// Setting a new anim (if one was set)
+		let current_anim = lua_current_anim.to_str()?.to_string();
+		if !current_anim.is_empty()
+			&& !matches!(sprite.get_current_anim(), Some(anim) if anim == current_anim)
+		{
+			sprite.set_new_anim(current_anim)?;
 		}
 
 		// Taking delta time into consideration
-		let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;
+		let new_pos = ((new_pos.0 - obj.pos) * smart_time()) + obj.pos;
 
 		obj.update(new_pos);
 		obj.try_move(&new_pos, current_map);
 
 		Ok(())
 	}
+}
+
+fn update_lua_constants(obj_self: &Obj, obj_player: &Obj, prev_goal: String) -> EvoidResult<()> {
+	// Cloning them here to avoid lifetime issues
+	let pos_player = obj_player.pos;
+	let pos_self = obj_self.pos;
+
+	let lua = lua();
+	let globals = lua.globals();
+
+	let position = lua.create_table()?;
+	position.set(
+		"player",
+		lua.create_function(move |_, ()| Ok(LuaDVec2(pos_player)))?,
+	)?;
+	position.set(
+		"self",
+		lua.create_function(move |_, ()| Ok(LuaDVec2(pos_self)))?,
+	)?;
+
+	let goals = lua.create_table()?;
+	goals.set(
+		"previous",
+		lua.create_function(move |_, ()| Ok(prev_goal.clone()))?,
+	)?;
+
+	// Adding the tables to global
+	globals.set("position", position)?;
+	globals.set("goals", goals)?;
+
+	Ok(())
 }
 
 pub fn goal_behavior(
@@ -161,10 +166,11 @@ pub fn goal_behavior(
 		return;
 	}
 
-	// Probably not the most performant way to do it
-	behavior.goals.iter_mut().for_each(|script| {
-		script.update_constants(obj_self, obj_player, behavior.prev_goal.clone());
-	});
+	maybe!(update_lua_constants(
+		obj_self,
+		obj_player,
+		behavior.prev_goal.clone()
+	));
 
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {
@@ -180,17 +186,17 @@ pub fn goal_behavior(
 
 	// Checks each goal to see if they should be started, and selects the first valid one
 	for index in 0..behavior.goals.len() {
-		let result = behavior.goals[index].should_start();
-		if let Err(e) = result {
-			error!("{e}");
-			behavior.err = Some(e);
-			continue;
-		}
-
-		if let Ok(true) = result {
-			behavior.index = Some(index);
-			maybe!(behavior.goals[index].init());
-			return;
+		match behavior.goals[index].should_start() {
+			Err(e) => {
+				error!("{e}");
+				behavior.err = Some(e);
+			}
+			Ok(true) => {
+				behavior.index = Some(index);
+				maybe!(behavior.goals[index].init());
+				return;
+			}
+			_ => (),
 		}
 	}
 }

@@ -3,9 +3,9 @@
 	size: 15,
 	sprite: "default:entity/player/player_spritesheet_wip",
 	goals: [
-		"default:attacks/test",
-		"default:attacks/test2",
-		"default:movement/move_towards_player",
+		"default:goals/test",
+		"default:goals/test2",
+		"default:goals/move_towards_player",
 	],
 	anims: {
 		"toss": (

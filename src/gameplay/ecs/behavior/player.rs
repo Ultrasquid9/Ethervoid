@@ -4,7 +4,7 @@ use crate::{
 	gameplay::ecs::obj::{Axis, Obj},
 	utils::{
 		config::{Config, keymap::Key},
-		get_delta_time,
+		smart_time,
 	},
 };
 
@@ -47,7 +47,7 @@ pub fn player_behavior(
 		} else {
 			behavior.is_dashing = false;
 		}
-		behavior.dash_cooldown -= get_delta_time();
+		behavior.dash_cooldown -= smart_time();
 	}
 
 	// Makes the player build up speed over time, rather than instantly starting at max speed
@@ -63,7 +63,7 @@ pub fn player_behavior(
 	if new_pos == CENTER {
 		obj.speed = 1.0;
 	} else {
-		obj.update((new_pos.normalize() * get_delta_time()) + obj.pos);
+		obj.update((new_pos.normalize() * smart_time()) + obj.pos);
 		obj.try_move(&obj.target.clone(), current_map);
 	}
 }

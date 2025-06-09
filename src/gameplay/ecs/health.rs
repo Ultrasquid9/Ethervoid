@@ -1,4 +1,4 @@
-use crate::utils::get_delta_time;
+use crate::utils::smart_time;
 
 pub struct Health {
 	pub hp: f64,
@@ -12,7 +12,7 @@ impl Health {
 
 	pub fn update(&mut self) {
 		if self.i_frames > 0. {
-			self.i_frames -= get_delta_time();
+			self.i_frames -= smart_time();
 		}
 	}
 

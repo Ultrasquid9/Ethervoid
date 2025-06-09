@@ -1,4 +1,5 @@
 use ahash::HashMap;
+use mlua::{FromLua, UserData};
 use raywoke::prelude::*;
 use stecs::prelude::*;
 
@@ -12,11 +13,7 @@ use super::{
 	paused::Paused,
 };
 
-use crate::utils::{
-	get_delta_time, get_mouse_pos, resources::textures::access_image, tup_vec::Tup64,
-};
-
-use rhai::{CustomType, TypeBuilder};
+use crate::utils::{get_mouse_pos, resources::textures::access_image, smart_time, tup_vec::Tup64};
 
 #[derive(Clone, SplitFields)]
 pub struct Attack {
@@ -110,7 +107,7 @@ impl Attack {
 		}
 	}
 
-	pub fn new_hitscan(obj: Obj, damage: f64, owner: Owner) -> Attack {
+	pub fn new_hitscan(obj: Obj, damage: f64, owner: Owner, key: &str) -> Attack {
 		Attack {
 			obj,
 
@@ -123,7 +120,7 @@ impl Attack {
 
 			sprite: Sprite::new(
 				obj,
-				"default:attacks/projectile-enemy",
+				key,
 				Rotation::Static,
 				Frames::new_static(),
 				HashMap::default(),
@@ -132,10 +129,15 @@ impl Attack {
 	}
 }
 
-// Allows Attacks to be created by scripts
-impl CustomType for Attack {
-	fn build(mut builder: TypeBuilder<Self>) {
-		builder.with_name("attack");
+impl UserData for Attack {}
+
+impl FromLua for Attack {
+	fn from_lua(value: mlua::Value, _: &mlua::Lua) -> mlua::Result<Self> {
+		let Some(userdata) = value.as_userdata() else {
+			todo!("error handling");
+		};
+
+		userdata.take()
 	}
 }
 
@@ -147,17 +149,14 @@ pub fn handle_combat(gameplay: &mut Gameplay) {
 
 		// Handling the lifetime and movement of attacks
 		if *atk.atk_type == AttackType::Projectile {
-			let new_pos = atk
-				.obj
-				.pos
-				.move_towards(atk.obj.target, get_delta_time() * 5.);
+			let new_pos = atk.obj.pos.move_towards(atk.obj.target, smart_time() * 5.);
 			atk.obj.try_move(&new_pos, &gameplay.current_map);
 
 			if atk.obj.pos != new_pos {
 				*atk.lifetime = 0.;
 			}
 		} else {
-			*atk.lifetime -= get_delta_time();
+			*atk.lifetime -= smart_time();
 		}
 
 		let func = match atk.atk_type {
@@ -271,7 +270,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 			gameplay.paused = Paused::Hitstop(16.);
 
 			let atk_1 = &mut gameplay.world.attacks.get_mut(*i).unwrap();
-			*atk_1.lifetime += get_delta_time();
+			*atk_1.lifetime += smart_time();
 			*atk_1.is_parried = true;
 
 			let new_owner = atk_1.owner.clone();
@@ -286,7 +285,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 			// Yes, I used two match blocks.
 			// Unfortunately, this was needed because of borrow checker shenanigans.
 			match atk_2.atk_type {
-				AttackType::Physical => *atk_2.lifetime += get_delta_time(),
+				AttackType::Physical => *atk_2.lifetime += smart_time(),
 
 				AttackType::Projectile => {
 					*atk_2.lifetime = 6.;

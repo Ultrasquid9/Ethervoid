@@ -1,9 +1,15 @@
 - Bugfixes
 	- Broken wall sliding in some cases
+	- Hitscan rendering performance issues 
 
 - NPCs
-	- Dialogue UI
+	- Use Lua for dialogue and behavior
 	- Translation support
+
+- Combat
+	- Reduce physical/burst/projectile/hitscan split? (might make some things easier to code)
+	- Use Lua for attacks 
+		- Custom weapons
 
 - UI
 	- Better button system
@@ -12,6 +18,10 @@
 		- Title
 		- Background 
 			- Parralax? (use static image if too hard)
+	- Proper dialogue
+		- Character portraits
+		- Fade in/out
+		- Text appearing 1 character at a time 
 
 - Pause Menu
 	- Fix animated sprites

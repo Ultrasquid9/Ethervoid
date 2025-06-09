@@ -5,7 +5,7 @@ use crate::{
 		SCREEN_SCALE,
 		process::{downscale, to_texture},
 	},
-	utils::{error::EtherVoidError, get_delta_time, resources::textures::access_image},
+	utils::{error::EtherVoidError, resources::textures::access_image, smart_time},
 };
 
 use macroquad::prelude::*;
@@ -84,7 +84,7 @@ impl Sprite {
 
 	pub fn update(&mut self, new_obj: Obj) {
 		if self.shaking > 0. {
-			self.shaking -= get_delta_time();
+			self.shaking -= smart_time();
 		}
 
 		if self.current_anim.is_some() {
@@ -119,6 +119,10 @@ impl Sprite {
 
 	pub fn anim_completed(&self) -> bool {
 		self.frames.anim_completed
+	}
+
+	pub fn get_current_anim(&mut self) -> Option<&str> {
+		self.current_anim.as_deref()
 	}
 
 	pub fn set_new_anim(&mut self, key: String) -> Result<(), Box<EtherVoidError>> {
@@ -309,7 +313,7 @@ impl Frames {
 	}
 
 	fn update(&mut self) {
-		self.anim_time += get_delta_time();
+		self.anim_time += smart_time();
 
 		if self.anim_time as usize >= (self.frame_order.len() * self.frame_time as usize) {
 			self.anim_time = 0.;

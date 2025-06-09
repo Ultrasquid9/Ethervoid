@@ -1,6 +1,6 @@
 use macroquad::{math::DVec2, rand::gen_range};
 
-use crate::{gameplay::ecs::obj::Obj, utils::get_delta_time};
+use crate::{gameplay::ecs::obj::Obj, utils::smart_time};
 
 #[derive(PartialEq, Clone)]
 pub struct WanderBehavior {
@@ -12,7 +12,7 @@ pub struct WanderBehavior {
 
 pub fn wander_behavior(behavior: &mut WanderBehavior, obj: &mut Obj, current_map: &str) {
 	if behavior.cooldown > 0. {
-		behavior.cooldown -= get_delta_time();
+		behavior.cooldown -= smart_time();
 		return;
 	} else if obj.pos.distance(obj.target) < 5. {
 		obj.update(DVec2::new(
@@ -28,7 +28,7 @@ pub fn wander_behavior(behavior: &mut WanderBehavior, obj: &mut Obj, current_map
 		behavior.cooldown = 120.;
 		return;
 	}
-	let new_pos = obj.pos.move_towards(obj.target, 2. * get_delta_time());
+	let new_pos = obj.pos.move_towards(obj.target, 2. * smart_time());
 	obj.try_move(&new_pos, current_map);
 
 	if obj.pos != new_pos {
