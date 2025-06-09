@@ -1,8 +1,8 @@
-mtp = {}
-
-function mtp:should_start()
-	return true
-end
+mtp = {
+	should_start = function()
+		return true
+	end
+}
 
 function mtp:init() 
 	self.timeout = 60
@@ -10,7 +10,7 @@ end
 
 function mtp:update()
 	self.timeout -= delta_time() * 60
-	return move_towards(pos_self, pos_player, 1.2)
+	return move_towards(position.self(), position.player(), 1.2)
 end
 
 function mtp:should_stop()

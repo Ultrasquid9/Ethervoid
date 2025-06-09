@@ -41,7 +41,14 @@ impl Clone for GoalBehavior {
 
 impl Goal {
 	fn init(&mut self) -> EvoidResult<()> {
-		let fun: Function = self.table.get("init")?;
+		let fun: Function = match self.table.get("init") {
+			Ok(fun) => fun,
+			Err(e) => match e {
+				mlua::Error::FromLuaConversionError { .. } => return Ok(()),
+				other => return Err(other.into()),
+			},
+		};
+
 		Ok(fun.call(self.table.clone())?)
 	}
 
@@ -103,16 +110,32 @@ impl Goal {
 }
 
 fn update_lua_constants(obj_self: &Obj, obj_player: &Obj, prev_goal: String) -> EvoidResult<()> {
-	// The names of the constants
-	const PREV_GOAL: &str = "prev_goal";
-	const POS_SELF: &str = "pos_self";
-	const POS_PLAYER: &str = "pos_player";
+	// Cloning them here to avoid lifetime issues
+	let pos_player = obj_player.pos;
+	let pos_self = obj_self.pos;
 
-	let globals = lua().globals();
+	let lua = lua();
+	let globals = lua.globals();
 
-	globals.set(PREV_GOAL, prev_goal)?;
-	globals.set(POS_SELF, LuaDVec2(obj_self.pos))?;
-	globals.set(POS_PLAYER, LuaDVec2(obj_player.pos))?;
+	let position = lua.create_table()?;
+	position.set(
+		"player",
+		lua.create_function(move |_, ()| Ok(LuaDVec2(pos_player)))?,
+	)?;
+	position.set(
+		"self",
+		lua.create_function(move |_, ()| Ok(LuaDVec2(pos_self)))?,
+	)?;
+
+	let goals = lua.create_table()?;
+	goals.set(
+		"previous",
+		lua.create_function(move |_, ()| Ok(prev_goal.clone()))?,
+	)?;
+
+	// Adding the tables to global
+	globals.set("position", position)?;
+	globals.set("goals", goals)?;
 
 	Ok(())
 }

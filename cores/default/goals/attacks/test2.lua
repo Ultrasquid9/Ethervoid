@@ -1,11 +1,11 @@
 test2 = {}
 
 function test2:should_start()
-	if prev_goal == "default:attacks/test2" then 
+	if goals.previous() == "default:attacks/test2" then 
 		return false
 	end
 
-	dist = distance_between(pos_self, pos_player)
+	dist = distance_between(position.self(), position.player())
 	return round(dist) % 2 == 0
 end
 
@@ -24,13 +24,13 @@ function test2:update(attacks, anim)
 		table.insert(attacks, attack.projectile(
 			12,
 			10,
-			pos_self,
-			pos_player,
+			position.self(),
+			position.player(),
 			"default:attacks/projectile-enemy"
 		))
 	end
 
-	return pos_self
+	return position.self()
 end
 
 function test2:should_stop()
