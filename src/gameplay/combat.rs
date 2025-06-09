@@ -1,4 +1,5 @@
 use ahash::HashMap;
+use mlua::{FromLua, UserData};
 use raywoke::prelude::*;
 use stecs::prelude::*;
 
@@ -108,7 +109,7 @@ impl Attack {
 		}
 	}
 
-	pub fn new_hitscan(obj: Obj, damage: f64, owner: Owner) -> Attack {
+	pub fn new_hitscan(obj: Obj, damage: f64, owner: Owner, key: &str) -> Attack {
 		Attack {
 			obj,
 
@@ -121,12 +122,24 @@ impl Attack {
 
 			sprite: Sprite::new(
 				obj,
-				"default:attacks/projectile-enemy",
+				key,
 				Rotation::Static,
 				Frames::new_static(),
 				HashMap::default(),
 			),
 		}
+	}
+}
+
+impl UserData for Attack {}
+
+impl FromLua for Attack {
+	fn from_lua(value: mlua::Value, _: &mlua::Lua) -> mlua::Result<Self> {
+		let Some(userdata) = value.as_userdata() else {
+			todo!("error handling");
+		};
+
+		userdata.take()
 	}
 }
 

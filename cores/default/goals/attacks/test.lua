@@ -14,16 +14,19 @@ function test:init()
 end
 
 function test:update(attacks, anim)
-	-- table.insert(attacks, "")
+	table.insert(attacks, attack.physical(
+		10,
+		20,
+		pos_self,
+		self.pos_target,
+		"default:attacks/dash"
+	))
 
-	return { 
-		x = 0, 
-		y = 0,
-	}
+	return move_towards(pos_self, self.pos_target, 1.8)
 end
 
 function test:should_stop()
-	return false
+	return distance_between(pos_self, self.pos_target) < 5
 end
 
 return test

@@ -6,13 +6,13 @@ use tracing::error;
 use crate::{
 	cores::goal::Goal,
 	gameplay::{
-		combat::AttackStructOf,
+		combat::{Attack, AttackStructOf},
 		ecs::{obj::Obj, sprite::Sprite},
 	},
 	utils::{error::EvoidResult, get_delta_time, lua::LuaDVec2, resources::goals::lua},
 };
 
-use stecs::{storage::vec::VecFamily};
+use stecs::{prelude::Archetype, storage::vec::VecFamily};
 
 pub struct GoalBehavior {
 	pub goals: Box<[Goal]>,
@@ -68,7 +68,8 @@ impl Goal {
 		current_map: &str,
 	) -> EvoidResult<()> {
 		let lua_attacks = lua().create_table()?;
-		let lua_current_anim = lua().create_string(sprite.get_current_anim().unwrap_or_default())?;
+		let lua_current_anim =
+			lua().create_string(sprite.get_current_anim().unwrap_or_default())?;
 
 		let fun: Function = self.table.get("update")?;
 		let new_pos: LuaDVec2 = fun.call((
@@ -76,7 +77,18 @@ impl Goal {
 			lua_attacks.clone(),
 			lua_current_anim.clone(),
 		))?;
-		
+
+		lua_attacks.for_each(|_: String, atk: Attack| {
+			attacks.insert(atk);
+			Ok(())
+		})?;
+
+		// Setting a new anim (if one was set)
+		let current_anim = lua_current_anim.to_str()?.to_string();
+		if !current_anim.is_empty() {
+			sprite.set_new_anim(current_anim)?;
+		}
+
 		// Taking delta time into consideration
 		let new_pos = ((new_pos.0 - obj.pos) * get_delta_time()) + obj.pos;
 
@@ -96,15 +108,6 @@ impl Goal {
 		attacks: &mut AttackStructOf<VecFamily>,
 		current_map: &str,
 	) -> EvoidResult<()> {
-		// Values available in the scope
-		self.scope
-			.push("attacks", Vec::<Dynamic>::new())
-			.push("current_anim", String::new());
-
-		// Executing the script
-		let new_pos = self
-			.engine
-			.call_fn::<DVec2>(&mut self.scope, &self.script, "update", ())?;
 
 		// Getting attacks out of the scope
 		let new_attacks = self
@@ -114,20 +117,6 @@ impl Goal {
 		for attack in new_attacks {
 			attacks.insert(attack.clone_cast());
 		}
-
-		// Getting the new animation from the scope
-		let new_anim = self.scope.remove::<String>("current_anim");
-		if new_anim.is_some() && !new_anim.as_ref().unwrap().is_empty() {
-			sprite.set_new_anim(new_anim.unwrap())?;
-		}
-
-		// Taking delta time into consideration
-		let new_pos = ((new_pos - obj.pos) * get_delta_time()) + obj.pos;
-
-		obj.update(new_pos);
-		obj.try_move(&new_pos, current_map);
-
-		Ok(())
 	}
 } */
 
@@ -172,7 +161,11 @@ pub fn goal_behavior(
 		return;
 	}
 
-	maybe!(update_lua_constants(obj_self, obj_player, behavior.prev_goal.clone()));
+	maybe!(update_lua_constants(
+		obj_self,
+		obj_player,
+		behavior.prev_goal.clone()
+	));
 
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {

@@ -1,7 +1,7 @@
 use crate::cores::{enemytype::EnemyType, goal::Goal};
 use macroquad::math::DVec2;
 use stecs::prelude::*;
-use tracing::warn;
+use tracing::error;
 
 use super::ecs::{
 	behavior::{Behavior, goal::GoalBehavior},
@@ -29,14 +29,12 @@ impl Enemy {
 				goals: enemytype
 					.goals
 					.iter()
-					.filter_map(|key| {
-						let opt = Goal::new(key);
-
-						if opt.is_none() {
-							warn!("Goal {key} not found");
+					.filter_map(|key| match Goal::new(key) {
+						None => {
+							error!("Goal {key} not found!");
+							None
 						}
-
-						opt
+						ok => ok,
 					})
 					.collect(),
 

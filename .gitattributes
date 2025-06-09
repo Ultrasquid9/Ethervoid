@@ -1,3 +1,0 @@
-# Script/data languages not automatically detected by Github 
-*.rhai linguist-language=Rhai
-*.ron linguist-language=RON
