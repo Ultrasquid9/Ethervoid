@@ -5,7 +5,8 @@ function test:should_start()
 		return false
 	end
 
-	return true
+	dist = distance_between(pos_self, pos_player)
+	return round(dist) % 3 == 0
 end
 
 function test:init()
@@ -13,7 +14,7 @@ function test:init()
 end
 
 function test:update(attacks, anim)
-	attacks[1] = "test"
+	-- table.insert(attacks, "")
 
 	return { 
 		x = 0, 

@@ -76,8 +76,6 @@ impl Goal {
 			lua_attacks.clone(),
 			lua_current_anim.clone(),
 		))?;
-
-		println!("{}", lua_attacks.len()?);
 		
 		// Taking delta time into consideration
 		let new_pos = ((new_pos.0 - obj.pos) * get_delta_time()) + obj.pos;
