@@ -131,14 +131,9 @@ impl Obj {
 	}
 
 	fn try_handle_angle(&mut self, new_pos: &DVec2, current_map: &str) {
-		fn angle_vec(p0: &DVec2, p1: &DVec2) -> DVec2 {
-			DVec2::from_angle(angle_between(p0, p1))
-		}
-
-		let map = access_map(current_map);
 		let mut to_check = DEFAULT_BAR;
 
-		for wall in &map.walls {
+		for wall in &access_map(current_map).walls {
 			for bar in wall {
 				if cast(&Ray::new(self.tup64(), new_pos.tup64()), bar).is_ok() {
 					to_check = bar.clone();
@@ -153,16 +148,11 @@ impl Obj {
 		let p0 = to_check.0.dvec2();
 		let p1 = to_check.1.dvec2();
 
-		let target = if (*new_pos - self.pos).dot(angle_vec(&p1, &p0) - angle_vec(&p0, &p1)) > 0. {
-			p0
-		} else {
-			p1
-		};
+		let dot = (*new_pos - self.pos).dot(angle_vec(&p1, &p0) - angle_vec(&p0, &p1));
+		let target = if dot > 0. { p0 } else { p1 };
+		let dist = self.pos.distance(*new_pos) * (dot.abs() / 8.) * 1.1;
 
-		self.try_move(
-			&self.pos.move_towards(target, self.pos.distance(*new_pos)),
-			current_map,
-		);
+		self.try_move(&self.pos.move_towards(target, dist), current_map);
 	}
 }
 
@@ -170,4 +160,8 @@ impl Tup64 for Obj {
 	fn tup64(&self) -> (f64, f64) {
 		self.pos.tup64()
 	}
+}
+
+fn angle_vec(p0: &DVec2, p1: &DVec2) -> DVec2 {
+	DVec2::from_angle(angle_between(p0, p1))
 }

@@ -1,4 +1,4 @@
-use crate::{gameplay::npc::messages::Message, prelude::*};
+use crate::{gameplay::npc::messages::Message, prelude::*, utils::ImmutVec};
 
 use super::{Readable, gen_name, get_files};
 
@@ -15,7 +15,7 @@ pub struct NpcType {
 	pub name: String,
 	pub sprite: String,
 	pub movement: NpcMovement,
-	pub messages: Box<[Message]>,
+	pub messages: ImmutVec<Message>,
 }
 
 impl Readable for NpcType {}

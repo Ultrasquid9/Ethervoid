@@ -2,9 +2,15 @@ use ahash::HashMap;
 
 use crate::{
 	gameplay::draw::{
-		process::{downscale, to_texture}, SCREEN_SCALE
+		SCREEN_SCALE,
+		process::{downscale, to_texture},
 	},
-	utils::{angle_between, error::EtherVoidError, resources::textures::access_image, smart_time},
+	utils::{
+		angle_between,
+		error::{EtherVoidError, EvoidResult},
+		resources::textures::access_image,
+		smart_time,
+	},
 };
 
 use macroquad::prelude::*;
@@ -124,9 +130,9 @@ impl Sprite {
 		self.current_anim.as_deref()
 	}
 
-	pub fn set_new_anim(&mut self, key: String) -> Result<(), Box<EtherVoidError>> {
+	pub fn set_new_anim(&mut self, key: String) -> EvoidResult<()> {
 		if !self.anims.contains_key(&key) {
-			return Err(Box::new(EtherVoidError::AnimNotFound(key)));
+			return Err(EtherVoidError::AnimNotFound(key).into());
 		}
 
 		self.current_anim = Some(key);

@@ -1,5 +1,4 @@
 - Bugfixes
-	- Wall sliding velocity
 	- Hitscan rendering performance issues 
 
 - NPCs

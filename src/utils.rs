@@ -10,6 +10,9 @@ pub mod lua;
 pub mod resources;
 pub mod tup_vec;
 
+/// Immutable, heap-allocated slice
+pub type ImmutVec<T> = Box<[T]>;
+
 // Stores the delta time of the given frame.
 static DELTA_TIME: UnsafeDeltaTime = UnsafeDeltaTime::new();
 

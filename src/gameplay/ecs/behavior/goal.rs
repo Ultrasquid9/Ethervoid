@@ -9,13 +9,13 @@ use crate::{
 		combat::{Attack, AttackStructOf},
 		ecs::{obj::Obj, sprite::Sprite},
 	},
-	utils::{error::EvoidResult, lua::LuaDVec2, resources::script_vals::lua, smart_time},
+	utils::{ImmutVec, error::EvoidResult, lua::LuaDVec2, resources::script_vals::lua, smart_time},
 };
 
 use stecs::{prelude::Archetype, storage::vec::VecFamily};
 
 pub struct GoalBehavior {
-	pub goals: Box<[Script]>,
+	pub goals: ImmutVec<Script>,
 	pub prev_goal: String,
 	pub index: Option<usize>,
 

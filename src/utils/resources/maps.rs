@@ -32,16 +32,11 @@ pub fn access_map(key: &str) -> &Map {
 }
 
 fn init_err_map() -> Map {
-	// Shortcut for creating boxed slice
-	fn b<T>() -> Box<[T]> {
-		Box::new([])
-	}
-
 	Map {
-		walls: b(),
-		doors: b(),
-		enemies: b(),
-		npcs: b(),
+		walls: [].into(),
+		doors: [].into(),
+		enemies: [].into(),
+		npcs: [].into(),
 		texture: to_texture(access_image("")),
 	}
 }

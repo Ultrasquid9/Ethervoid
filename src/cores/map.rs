@@ -11,7 +11,7 @@ use super::{
 use crate::{
 	gameplay::{doors::Door, draw::process::to_texture},
 	prelude::*,
-	utils::{resources::textures::access_image, tup_vec::Tup64},
+	utils::{ImmutVec, resources::textures::access_image, tup_vec::Tup64},
 };
 
 use image::{DynamicImage, GenericImage};
@@ -33,10 +33,10 @@ struct MapTexture {
 
 #[derive(Clone)]
 pub struct Map {
-	pub walls: Box<[Box<[Barrier]>]>,
-	pub doors: Box<[Door]>,
-	pub enemies: Box<[(EnemyType, DVec2)]>,
-	pub npcs: Box<[(NpcType, DVec2)]>,
+	pub walls: ImmutVec<ImmutVec<Barrier>>,
+	pub doors: ImmutVec<Door>,
+	pub enemies: ImmutVec<(EnemyType, DVec2)>,
+	pub npcs: ImmutVec<(NpcType, DVec2)>,
 	pub texture: Texture2D,
 }
 
@@ -53,7 +53,7 @@ impl MapBuilder {
 			input: &[(String, DVec2)],
 			hashmap: &HashMap<String, T>,
 			type_name: &str,
-		) -> Box<[(T, DVec2)]> {
+		) -> ImmutVec<(T, DVec2)> {
 			input
 				.iter()
 				.map(|(name, pos)| (name, hashmap.get(name.as_str()), pos))

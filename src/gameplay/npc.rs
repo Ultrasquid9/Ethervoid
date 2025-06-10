@@ -9,7 +9,10 @@ use super::ecs::{
 	sprite::{Frames, Rotation, Sprite},
 };
 
-use crate::cores::npctype::{NpcMovement, NpcType};
+use crate::{
+	cores::npctype::{NpcMovement, NpcType},
+	utils::ImmutVec,
+};
 
 pub mod messages;
 
@@ -19,7 +22,7 @@ pub struct Npc {
 	behavior: Behavior,
 	sprite: Sprite,
 
-	messages: Box<[Message]>,
+	messages: ImmutVec<Message>,
 	messages_cooldown: f64,
 }
 
