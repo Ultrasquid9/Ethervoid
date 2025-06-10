@@ -1,4 +1,4 @@
-use ahash::HashMap;
+use hashbrown::HashMap;
 use mlua::{Compiler, Table, Value};
 use tracing::{error, info, warn};
 

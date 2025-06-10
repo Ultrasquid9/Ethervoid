@@ -1,6 +1,7 @@
 use std::sync::LazyLock;
 
 use parking_lot::RwLock;
+use ron::ser;
 use tracing::error;
 
 use crate::utils::config::Config;
@@ -23,7 +24,7 @@ pub fn access_config() -> &'static Config {
 
 /// Updates and saves the config
 pub fn update_config(cfg: Config) {
-	let result = ron::to_string(&cfg);
+	let result = ser::to_string_pretty(&cfg, ser::PrettyConfig::new().indentor("\t"));
 	*CONFIG.write() = cfg;
 
 	let str = match result {

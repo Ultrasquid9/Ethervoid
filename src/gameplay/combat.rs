@@ -1,4 +1,4 @@
-use ahash::HashMap;
+use hashbrown::HashMap;
 use mlua::{FromLua, UserData};
 use raywoke::prelude::*;
 use stecs::prelude::*;

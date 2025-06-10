@@ -5,9 +5,9 @@ edition = "2024"
 
 [dependencies]
 macroquad = { version = "0.4", features = ["glam-serde"] }
+hashbrown = { version = "0.15", features = ["serde"] }
 stecs = "0.1"
 walkdir = "2.5"
-ahash = "0.8"
 parking_lot = "0.12"
 
 tracing = "0.1"

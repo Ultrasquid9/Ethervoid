@@ -1,4 +1,4 @@
-use ahash::HashMap;
+use hashbrown::HashMap;
 use stecs::prelude::*;
 
 use super::{

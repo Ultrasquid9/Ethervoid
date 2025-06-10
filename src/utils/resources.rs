@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
-use ahash::HashMap;
 use audio::create_sounds;
+use hashbrown::HashMap;
 
 use maps::create_maps;
 use script_vals::create_script_vals;

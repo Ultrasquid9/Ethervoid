@@ -41,7 +41,7 @@ pub mod prelude {
 	pub use macroquad::prelude::*;
 	pub use stecs::prelude::*;
 
-	pub use ahash::HashMap;
+	pub use hashbrown::HashMap;
 
 	pub use tracing::{debug, error, info, trace, warn};
 }
