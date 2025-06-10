@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use parking_lot::RwLock;
+use parking_lot::{RawRwLock, RwLock, lock_api::RwLockReadGuard};
 use ron::ser;
 use tracing::error;
 
@@ -18,8 +18,8 @@ pub fn read_config() -> Config {
 }
 
 /// Gets the current config
-pub fn access_config() -> &'static Config {
-	unsafe { &*CONFIG.data_ptr() }
+pub fn access_config() -> RwLockReadGuard<'static, RawRwLock, Config> {
+	CONFIG.read()
 }
 
 /// Updates and saves the config

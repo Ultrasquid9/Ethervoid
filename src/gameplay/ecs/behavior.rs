@@ -56,7 +56,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 
 			match behavior {
 				Behavior::Player(behavior) => {
-					player_behavior(obj, &mut *behavior, access_config(), &gameplay.current_map);
+					player_behavior(obj, &mut *behavior, &access_config(), &gameplay.current_map);
 				}
 
 				Behavior::Goal(behavior) => {
