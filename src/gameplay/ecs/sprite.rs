@@ -2,10 +2,9 @@ use ahash::HashMap;
 
 use crate::{
 	gameplay::draw::{
-		SCREEN_SCALE,
-		process::{downscale, to_texture},
+		process::{downscale, to_texture}, SCREEN_SCALE
 	},
-	utils::{error::EtherVoidError, resources::textures::access_image, smart_time},
+	utils::{angle_between, error::EtherVoidError, resources::textures::access_image, smart_time},
 };
 
 use macroquad::prelude::*;
@@ -260,7 +259,7 @@ impl Sprite {
 				.crop_imm(x_pos, y_pos, self.img.height(), self.img.height())
 				.as_rgba8()
 				.unwrap(),
-			(self.obj.target.y - self.obj.pos.y).atan2(self.obj.target.x - self.obj.pos.x) as f32,
+			angle_between(&self.obj.pos, &self.obj.target) as f32,
 			imageproc::geometric_transformations::Interpolation::Nearest,
 			Rgba([0, 0, 0, 0]),
 		)));

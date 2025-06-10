@@ -4,6 +4,7 @@ use raywoke::prelude::*;
 use crate::{
 	gameplay::doors::Door,
 	utils::{
+		angle_between,
 		resources::maps::access_map,
 		tup_vec::{DV2, Tup64},
 	},
@@ -130,8 +131,8 @@ impl Obj {
 	}
 
 	fn try_handle_angle(&mut self, new_pos: &DVec2, current_map: &str) {
-		fn atan2(p0: &DVec2, p1: &DVec2) -> f64 {
-			(p1.y - p0.y).atan2(p1.x - p0.x)
+		fn angle_vec(p0: &DVec2, p1: &DVec2) -> DVec2 {
+			DVec2::from_angle(angle_between(p0, p1))
 		}
 
 		let map = access_map(current_map);
@@ -149,17 +150,13 @@ impl Obj {
 			return;
 		}
 
-		let point0 = to_check.0.dvec2();
-		let point1 = to_check.1.dvec2();
+		let p0 = to_check.0.dvec2();
+		let p1 = to_check.1.dvec2();
 
-		let angle0 = atan2(&point1, &point0);
-		let angle1 = atan2(&point0, &point1);
-		let angle2 = atan2(&self.pos, new_pos);
-
-		let target = if (angle0 - angle2).abs() > (angle1 - angle2).abs() {
-			point1
+		let target = if (*new_pos - self.pos).dot(angle_vec(&p1, &p0) - angle_vec(&p0, &p1)) > 0. {
+			p0
 		} else {
-			point0
+			p1
 		};
 
 		self.try_move(

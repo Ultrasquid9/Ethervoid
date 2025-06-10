@@ -9,7 +9,7 @@ use crate::{
 		combat::{Attack, Owner},
 		ecs::obj::Obj,
 	},
-	utils::{delta_time, error::EvoidResult},
+	utils::{angle_between, delta_time, error::EvoidResult},
 };
 
 pub struct LuaDVec2(pub DVec2);
@@ -75,7 +75,7 @@ pub fn create_lua() -> Lua {
 		globals.set(
 			"angle_between",
 			lua_fn!(lua, |current: LuaDVec2, target: LuaDVec2| {
-				(target.y - current.y).atan2(target.x - current.x)
+				angle_between(&target, &current)
 			}),
 		)?;
 		globals.set(

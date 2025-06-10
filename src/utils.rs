@@ -45,6 +45,11 @@ pub fn camera_scale() -> f64 {
 	f64::from(screen_width()) / f64::from(screen_height()) * 512.
 }
 
+/// Calculates the angle between two vectors
+pub fn angle_between(p0: &DVec2, p1: &DVec2) -> f64 {
+	(p1.y - p0.y).atan2(p1.x - p0.x)
+}
+
 /// A dangerous, hacky, and likely irrelevant optimization
 mod unsafe_delta_time {
 	use std::cell::UnsafeCell;
