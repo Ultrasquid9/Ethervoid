@@ -4,13 +4,13 @@ use parking_lot::RwLock;
 use ron::ser;
 use tracing::error;
 
-use crate::utils::config::Config;
+use crate::utils::{config::Config, resources::Global};
 
 // TODO: Make more configurable.
 // Maybe use system's config dir? Or use env variable?
 const CONF_DIR: &str = "./config.ron";
 
-static CONFIG: LazyLock<RwLock<Config>> = LazyLock::new(|| RwLock::new(Config::read(CONF_DIR)));
+static CONFIG: Global<Config> = LazyLock::new(|| RwLock::new(Config::read(CONF_DIR)));
 
 /// Reads the config file
 pub fn read_config() -> Config {

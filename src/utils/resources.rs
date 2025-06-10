@@ -19,8 +19,10 @@ pub mod textures;
 // This module contains globally available resources
 // Everyone always says "don't do this" so fuck you I did
 
+/// Stores a globally available value
+type Global<T> = LazyLock<RwLock<T>>;
 /// Stores a globally available resource
-type Resource<T> = LazyLock<RwLock<HashMap<String, T>>>;
+type Resource<T> = Global<HashMap<String, T>>;
 
 /// Creates a blank resource
 const fn resource<T>() -> Resource<T> {
@@ -53,3 +55,11 @@ pub fn create_resources() {
 	create_maps(); // Maps depend on the existance of the other resources
 	info!("All resources loaded!");
 }
+
+/// Creates a [Global] with the provided data
+macro_rules! global {
+	($input:expr) => {
+		LazyLock::new(|| RwLock::new($input))
+	};
+}
+use global;

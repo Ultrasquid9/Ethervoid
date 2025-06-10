@@ -5,7 +5,10 @@ use tracing::error;
 
 use kira::{AudioManager, AudioManagerSettings, sound::static_sound::StaticSoundData};
 
-use crate::cores::audio::get_audio;
+use crate::{
+	cores::audio::get_audio,
+	utils::resources::{Global, global},
+};
 
 use super::{Resource, resource, set_resource};
 
@@ -13,7 +16,7 @@ use super::{Resource, resource, set_resource};
  *	Audio
  */
 
-static MANAGER: LazyLock<RwLock<AudioManager>> = LazyLock::new(init_manager);
+static MANAGER: Global<AudioManager> = global!(init_manager());
 static SOUNDS: Resource<StaticSoundData> = resource();
 
 /// Populates the Sounds `HashMap`
@@ -40,12 +43,12 @@ pub fn play_random_sound(keys: &[&str]) {
 	play_sound(keys[rand::gen_range(0, keys.len() - 1)]);
 }
 
-fn init_manager() -> RwLock<AudioManager> {
-	RwLock::new(match AudioManager::new(AudioManagerSettings::default()) {
+fn init_manager() -> AudioManager {
+	match AudioManager::new(AudioManagerSettings::default()) {
 		Ok(manager) => manager,
 		Err(e) => {
 			error!("Audio Manager could not be created: {e}");
 			panic!()
 		}
-	})
+	}
 }
