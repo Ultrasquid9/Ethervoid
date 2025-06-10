@@ -1,5 +1,5 @@
 use ahash::HashMap;
-use mlua::{Table, Value};
+use mlua::{Compiler, Table, Value};
 use tracing::{error, info, warn};
 
 use crate::utils::{
@@ -42,11 +42,15 @@ impl Script {
 /// Provides a `HashMap` containing all Script values
 pub fn get_script_vals() -> HashMap<String, Value> {
 	let lua = lua();
+	let compiler = Compiler::new();
 
 	get_files("scripts")
 		.iter()
 		.map(|dir| {
-			let maybe_val = || Ok(lua.load(std::fs::read_to_string(dir)?).eval()?);
+			let maybe_val = || {
+				let bytecode = compiler.compile(std::fs::read_to_string(dir)?)?;
+				Ok(lua.load(bytecode).eval()?)
+			};
 
 			(gen_name(dir), maybe_val())
 		})

@@ -100,7 +100,7 @@ impl Script {
 		}
 
 		// Taking delta time into consideration
-		let new_pos = ((new_pos.0 - obj.pos) * smart_time()) + obj.pos;
+		let new_pos = ((*new_pos - obj.pos) * smart_time()) + obj.pos;
 
 		obj.update(new_pos);
 		obj.try_move(&new_pos, current_map);

@@ -3,8 +3,8 @@ use std::sync::LazyLock;
 use ahash::HashMap;
 use audio::create_sounds;
 
-use script_vals::create_script_vals;
 use maps::create_maps;
+use script_vals::create_script_vals;
 use tracing::info;
 
 use parking_lot::RwLock;
@@ -12,8 +12,8 @@ use textures::create_textures;
 
 pub mod audio;
 pub mod config;
-pub mod script_vals;
 pub mod maps;
+pub mod script_vals;
 pub mod textures;
 
 // This module contains globally available resources

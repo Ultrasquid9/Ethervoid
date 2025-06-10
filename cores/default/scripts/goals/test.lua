@@ -1,11 +1,11 @@
-test = {}
+local test = {}
 
 function test:should_start()
 	if goals.previous() == "default:attacks/test" then 
 		return false
 	end
 
-	dist = distance_between(position.self(), position.player())
+	local dist = distance_between(position.self(), position.player())
 	return round(dist) % 3 == 0
 end
 

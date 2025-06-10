@@ -1,4 +1,4 @@
-mtp = {
+local mtp = {
 	should_start = function()
 		return true
 	end

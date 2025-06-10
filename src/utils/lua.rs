@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use macroquad::prelude::*;
 use mlua::{FromLua, IntoLua, Lua, Number, Table, Value};
 use tracing::error;
@@ -15,10 +17,9 @@ pub struct LuaDVec2(pub DVec2);
 impl IntoLua for LuaDVec2 {
 	fn into_lua(self, lua: &Lua) -> mlua::Result<Value> {
 		let table = lua.create_table()?;
-		let inner = self.0;
 
-		table.set("x", inner.x)?;
-		table.set("y", inner.y)?;
+		table.set("x", self.x)?;
+		table.set("y", self.y)?;
 
 		Ok(Value::Table(table))
 	}
@@ -26,16 +27,42 @@ impl IntoLua for LuaDVec2 {
 
 impl FromLua for LuaDVec2 {
 	fn from_lua(value: Value, _: &Lua) -> mlua::Result<Self> {
-		let Some(table) = value.as_table() else {
-			return Err(mlua::Error::FromLuaConversionError {
-				from: value.type_name(),
+		match value {
+			Value::Table(table) => Ok(dvec2(table.get("x")?, table.get("y")?).into()),
+			other => Err(mlua::Error::FromLuaConversionError {
+				from: other.type_name(),
 				to: "DVec2".into(),
 				message: None,
-			});
-		};
-
-		Ok(Self(dvec2(table.get("x")?, table.get("y")?)))
+			}),
+		}
 	}
+}
+
+impl Deref for LuaDVec2 {
+	type Target = DVec2;
+
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
+}
+
+impl From<DVec2> for LuaDVec2 {
+	fn from(value: DVec2) -> Self {
+		Self(value)
+	}
+}
+
+macro_rules! lua_fn {
+	($lua:ident, | $($arg:ident : $typ:ty),* $(,)? | $content:expr ) => {
+		$lua.create_function(
+			|_, ( $($arg,)* ) : ( $($typ,)* )| Ok($content)
+		)?
+	};
+	($lua:ident, $content:expr ) => {
+		$lua.create_function(
+			|_, ()| Ok($content())
+		)?
+	};
 }
 
 pub fn create_lua() -> Lua {
@@ -43,26 +70,25 @@ pub fn create_lua() -> Lua {
 		let lua = Lua::new();
 		let globals = lua.globals();
 
-		globals.set("delta_time", lua.create_function(|_, ()| Ok(delta_time()))?)?;
-		globals.set(
-			"round",
-			lua.create_function(|_, num: Number| Ok(num.round()))?,
-		)?;
+		globals.set("delta_time", lua_fn!(lua, delta_time))?;
+		globals.set("round", lua_fn!(lua, |num: Number| num.round()))?;
 		globals.set(
 			"angle_between",
-			lua.create_function(|_, args: (LuaDVec2, LuaDVec2)| {
-				Ok((args.1.0.y - args.0.0.y).atan2(args.1.0.x - args.0.0.x))
-			})?,
+			lua_fn!(lua, |current: LuaDVec2, target: LuaDVec2| {
+				(target.y - current.y).atan2(target.x - current.x)
+			}),
 		)?;
 		globals.set(
 			"distance_between",
-			lua.create_function(|_, args: (LuaDVec2, LuaDVec2)| Ok(args.1.0.distance(args.0.0)))?,
+			lua_fn!(lua, |current: LuaDVec2, target: LuaDVec2| {
+				current.distance(*target)
+			}),
 		)?;
 		globals.set(
 			"move_towards",
-			lua.create_function(|_, args: (LuaDVec2, LuaDVec2, Number)| {
-				Ok(LuaDVec2(args.0.0.move_towards(args.1.0, args.2)))
-			})?,
+			lua_fn!(lua, |current: LuaDVec2, target: LuaDVec2, amount: _| {
+				LuaDVec2(current.move_towards(*target, amount))
+			}),
 		)?;
 		globals.set("attack", lua_attack_fns(&lua)?)?;
 
@@ -79,58 +105,33 @@ pub fn create_lua() -> Lua {
 	}
 }
 
+#[rustfmt::skip]
 fn lua_attack_fns(lua: &Lua) -> EvoidResult<Table> {
 	let attacks = lua.create_table()?;
 
 	attacks.set(
 		"physical",
-		lua.create_function(
-			|_, (damage, size, pos, target, key): (_, _, LuaDVec2, LuaDVec2, String)| {
-				Ok(Attack::new_physical(
-					Obj::new(pos.0, target.0, size),
-					damage,
-					Owner::Enemy,
-					&key,
-				))
-			},
-		)?,
+		lua_fn!(lua, |damage: _, size: _, pos: LuaDVec2, target: LuaDVec2, key: String| {
+			Attack::new_physical(Obj::new(*pos, *target, size), damage, Owner::Enemy, &key)
+		}),
 	)?;
 	attacks.set(
 		"burst",
-		lua.create_function(|_, (damage, size, pos, key): (_, _, LuaDVec2, String)| {
-			Ok(Attack::new_burst(
-				Obj::new(pos.0, pos.0, size),
-				damage,
-				Owner::Enemy,
-				&key,
-			))
-		})?,
+		lua_fn!(lua, |damage: _, size: _, pos: LuaDVec2, key: String| {
+			Attack::new_burst(Obj::new(*pos, *pos, size), damage, Owner::Enemy, &key)
+		}),
 	)?;
 	attacks.set(
 		"projectile",
-		lua.create_function(
-			|_, (damage, size, pos, target, key): (_, _, LuaDVec2, LuaDVec2, String)| {
-				Ok(Attack::new_projectile(
-					Obj::new(pos.0, target.0, size),
-					damage,
-					Owner::Enemy,
-					&key,
-				))
-			},
-		)?,
+		lua_fn!(lua, |damage: _, size: _, pos: LuaDVec2, target: LuaDVec2, key: String| {
+			Attack::new_projectile(Obj::new(*pos, *target, size), damage, Owner::Enemy, &key)
+		}),
 	)?;
 	attacks.set(
 		"hitscan",
-		lua.create_function(
-			|_, (damage, size, pos, target, key): (_, _, LuaDVec2, LuaDVec2, String)| {
-				Ok(Attack::new_hitscan(
-					Obj::new(pos.0, target.0, size),
-					damage,
-					Owner::Enemy,
-					&key,
-				))
-			},
-		)?,
+		lua_fn!(lua, |damage: _, size: _, pos: LuaDVec2, target: LuaDVec2, key: String| {
+			Attack::new_hitscan(Obj::new(*pos, *target, size), damage, Owner::Enemy, &key)
+		}),
 	)?;
 
 	Ok(attacks)
