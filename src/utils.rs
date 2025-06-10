@@ -1,7 +1,7 @@
+use std::sync::atomic::{AtomicU64, Ordering};
+
 use macroquad::prelude::*;
 use tup_vec::DV2;
-
-use unsafe_delta_time::UnsafeDeltaTime;
 
 pub mod config;
 pub mod error;
@@ -13,8 +13,25 @@ pub mod tup_vec;
 /// Immutable, heap-allocated slice
 pub type ImmutVec<T> = Box<[T]>;
 
+/// Stores delta time as bits within an [`AtomicU64`].
+struct DeltaTime(AtomicU64);
+
+impl DeltaTime {
+	const fn new() -> Self {
+		Self(AtomicU64::new(0))
+	}
+
+	fn get(&self) -> f64 {
+		f64::from_bits(self.0.load(Ordering::Relaxed))
+	}
+
+	fn set(&self, new: f64) {
+		self.0.store(new.to_bits(), Ordering::Relaxed);
+	}
+}
+
 // Stores the delta time of the given frame.
-static DELTA_TIME: UnsafeDeltaTime = UnsafeDeltaTime::new();
+static DELTA_TIME: DeltaTime = DeltaTime::new();
 
 /// Gets the current position of the mouse
 pub fn get_mouse_pos() -> DVec2 {
@@ -51,33 +68,4 @@ pub fn camera_scale() -> f64 {
 /// Calculates the angle between two vectors
 pub fn angle_between(p0: &DVec2, p1: &DVec2) -> f64 {
 	(p1.y - p0.y).atan2(p1.x - p0.x)
-}
-
-/// A dangerous, hacky, and likely irrelevant optimization
-mod unsafe_delta_time {
-	use std::cell::UnsafeCell;
-
-	pub struct UnsafeDeltaTime(UnsafeCell<f64>);
-
-	unsafe impl Sync for UnsafeDeltaTime {}
-
-	impl UnsafeDeltaTime {
-		pub const fn new() -> Self {
-			Self(UnsafeCell::new(0.))
-		}
-
-		/// Gets the stored value.
-		///
-		/// Should be safe, as no values are changed.
-		pub fn get(&self) -> f64 {
-			unsafe { *self.0.get() }
-		}
-
-		/// Sets the stored value.
-		///
-		/// Likely unsafe if called from multiple threads, so don't do that please.
-		pub fn set(&self, new: f64) {
-			unsafe { *self.0.get() = new }
-		}
-	}
 }
