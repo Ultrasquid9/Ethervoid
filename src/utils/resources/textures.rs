@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use crate::{cores::textures::get_textures, gameplay::draw::process::downscale};
+use crate::{cores::textures::get_textures, gameplay::draw::process::scale};
 use image::DynamicImage;
 use imageproc::rgba_image;
 use tracing::error;
@@ -30,7 +30,7 @@ pub fn access_image(key: &str) -> &DynamicImage {
 }
 
 fn init_err_texture() -> DynamicImage {
-	downscale(
+	scale(
 		&DynamicImage::ImageRgba8(rgba_image!(
 			[0,0,0,255],[255,0,255,255];
 			[255,0,255,255],[0,0,0,255]

@@ -3,8 +3,8 @@ use macroquad::texture::Texture2D;
 
 use fast_image_resize::{ResizeOptions, Resizer};
 
-/// Downscales the provided image
-pub fn downscale(img: &DynamicImage, size: u32) -> DynamicImage {
+/// Scales the provided image
+pub fn scale(img: &DynamicImage, size: u32) -> DynamicImage {
 	let smallest_side = if img.width() < img.height() {
 		img.width()
 	} else {

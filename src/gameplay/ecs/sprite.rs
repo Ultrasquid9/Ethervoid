@@ -1,7 +1,7 @@
 use hashbrown::HashMap;
 
 use crate::{
-	gameplay::draw::process::{downscale, to_texture},
+	gameplay::draw::process::{scale, to_texture},
 	utils::{
 		angle_between,
 		error::{EtherVoidError, EvoidResult},
@@ -66,7 +66,7 @@ impl Sprite {
 	) -> Self {
 		Self {
 			img: if rotation == Rotation::Angle {
-				downscale(access_image(key), obj.size as u32)
+				scale(access_image(key), obj.size as u32)
 			} else {
 				access_image(key).clone()
 			},

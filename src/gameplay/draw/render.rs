@@ -38,8 +38,11 @@ pub async fn render_texture(texture: &Texture2D, pos: DVec2, params: Option<Draw
 pub async fn render_line(sprite: &mut Sprite) {
 	let mut current = sprite.obj().pos;
 
+	let pos = sprite.obj().pos;
 	let target = sprite.obj().target;
+
 	let jmp = access_config().screen_scale * (sprite.img().width() - 1) as f64;
+	let screen_size = screen_width().max(screen_height()) as f64;
 
 	if sprite.rotation() != Rotation::Angle {
 		sprite.set_rotation(Rotation::Angle);
@@ -50,8 +53,7 @@ pub async fn render_line(sprite: &mut Sprite) {
 		render_texture(&texture, current, None).await;
 		current = current.move_towards(target, jmp);
 
-		let dist = current.distance(target);
-		if dist < jmp {
+		if current.distance(pos) > screen_size || current.distance(target) < jmp {
 			return;
 		}
 	}
