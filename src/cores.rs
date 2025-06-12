@@ -8,10 +8,13 @@ use crate::utils::error::EvoidResult;
 
 pub mod audio;
 pub mod enemytype;
+pub mod lang;
 pub mod map;
 pub mod npctype;
 pub mod script;
 pub mod textures;
+
+const DIR_SPLIT: &[char] = &['/', '\\', '.'];
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: &str) -> Vec<String> {
@@ -60,7 +63,7 @@ pub fn get_files(file_type: &str) -> Vec<String> {
 
 /// Turns the provided directory into a name
 fn gen_name(dir: &str) -> String {
-	let split: Vec<&str> = dir.split(&['/', '\\', '.'][..]).collect();
+	let split: Vec<&str> = dir.split(DIR_SPLIT).collect();
 
 	format!("{}:{}", split[3], {
 		let mut str = String::new();

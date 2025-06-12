@@ -1,3 +1,8 @@
+use crate::utils::resources::{
+	config::{read_config, update_config},
+	create_resources,
+};
+
 use self::prelude::*;
 use gameplay::gameplay;
 
@@ -27,6 +32,11 @@ async fn main() -> EvoidResult<()> {
 	let mut state = State::Menu;
 
 	loop {
+		// Locates and creates all the resources in the game (textures, maps, etc.)
+		create_resources();
+		// Updates the config
+		update_config(read_config());
+
 		state = match state {
 			State::Menu => menu().await,
 			State::Gameplay => gameplay().await,

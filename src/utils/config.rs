@@ -12,9 +12,12 @@ pub mod keymap;
 pub struct Config {
 	pub keymap: KeyMap,
 
-	// The map where the game starts on a new save
-	// TODO: allow mods to configure this
+	/// The map where the game starts on a new save
+	/// TODO: allow mods to configure this
 	pub start_map: String,
+
+	/// The language used by the game
+	pub lang: String,
 }
 
 impl Config {
@@ -41,7 +44,8 @@ impl Default for Config {
 		Self {
 			keymap: KeyMap::default(),
 
-			start_map: String::from("default:test"),
+			start_map: "default:test".into(),
+			lang: "en".into(),
 		}
 	}
 }

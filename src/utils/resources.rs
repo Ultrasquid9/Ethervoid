@@ -12,6 +12,7 @@ use textures::create_textures;
 
 pub mod audio;
 pub mod config;
+pub mod langs;
 pub mod maps;
 pub mod script_vals;
 pub mod textures;
@@ -51,6 +52,7 @@ pub fn create_resources() {
 		scope.spawn(create_textures);
 		scope.spawn(create_sounds);
 		scope.spawn(create_script_vals);
+		scope.spawn(create_langs);
 	});
 	create_maps(); // Maps depend on the existance of the other resources
 	info!("All resources loaded!");
@@ -63,3 +65,5 @@ macro_rules! global {
 	};
 }
 use global;
+
+use crate::utils::resources::langs::create_langs;

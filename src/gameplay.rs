@@ -5,13 +5,7 @@ use stecs::prelude::*;
 
 use crate::{
 	State,
-	utils::{
-		resources::{
-			config::{access_config, read_config, update_config},
-			create_resources,
-		},
-		smart_time, update_delta_time,
-	},
+	utils::{resources::config::access_config, smart_time, update_delta_time},
 };
 
 use combat::{AttackType, Owner, handle_combat};
@@ -36,19 +30,6 @@ pub struct Gameplay {
 }
 
 impl Gameplay {
-	fn new() -> Gameplay {
-		// Locates and creates all the resources in the game (textures, maps, etc.)
-		create_resources();
-		// Updates the config
-		update_config(read_config());
-
-		Gameplay {
-			world: World::new(),
-			current_map: access_config().start_map.clone(),
-			paused: Paused::None,
-		}
-	}
-
 	fn pause(&mut self) -> Option<State> {
 		if self.paused.is_paused() {
 			darken_screen();
@@ -214,8 +195,18 @@ impl Gameplay {
 	}
 }
 
+impl Default for Gameplay {
+	fn default() -> Self {
+		Gameplay {
+			world: World::new(),
+			current_map: access_config().start_map.clone(),
+			paused: Paused::None,
+		}
+	}
+}
+
 pub async fn gameplay() -> State {
-	let mut gameplay = Gameplay::new();
+	let mut gameplay = Gameplay::default();
 
 	gameplay.world.player.insert(Player::new());
 	gameplay.world.populate(&gameplay.current_map);
