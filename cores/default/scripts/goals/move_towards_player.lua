@@ -1,10 +1,10 @@
 local mtp = {
 	should_start = function()
 		return true
-	end
+	end,
 }
 
-function mtp:init() 
+function mtp:init()
 	self.timeout = 60
 end
 

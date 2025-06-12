@@ -1,7 +1,7 @@
 local test2 = {}
 
 function test2:should_start()
-	if goals.previous() == "default:attacks/test2" then 
+	if goals.previous() == "default:attacks/test2" then
 		return false
 	end
 
@@ -21,13 +21,10 @@ function test2:update(attacks, anim)
 	self.countdown -= delta_time() * 60
 
 	if self.countdown <= 0 then
-		table.insert(attacks, attack.projectile(
-			12,
-			10,
-			position.self(),
-			position.player(),
-			"default:attacks/projectile-enemy"
-		))
+		table.insert(
+			attacks,
+			attack.projectile(12, 10, position.self(), position.player(), "default:attacks/projectile-enemy")
+		)
 	end
 
 	return position.self()

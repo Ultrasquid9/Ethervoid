@@ -1,7 +1,7 @@
 local test = {}
 
 function test:should_start()
-	if goals.previous() == "default:attacks/test" then 
+	if goals.previous() == "default:attacks/test" then
 		return false
 	end
 
@@ -14,13 +14,7 @@ function test:init()
 end
 
 function test:update(attacks, anim)
-	table.insert(attacks, attack.physical(
-		10,
-		20,
-		position.self(),
-		self.target,
-		"default:attacks/dash"
-	))
+	table.insert(attacks, attack.physical(10, 20, position.self(), self.target, "default:attacks/dash"))
 
 	return move_towards(position.self(), self.target, 1.8)
 end

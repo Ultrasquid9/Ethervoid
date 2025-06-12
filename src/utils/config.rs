@@ -19,8 +19,8 @@ pub struct Config {
 	/// The language used by the game
 	pub lang: String,
 
-	/// How much to scale the game when rendering 
-	pub screen_scale: f64
+	/// How much to scale the game when rendering
+	pub screen_scale: f64,
 }
 
 impl Config {

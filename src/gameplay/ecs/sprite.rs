@@ -1,8 +1,7 @@
 use hashbrown::HashMap;
 
 use crate::{
-	gameplay::draw::
-		process::{downscale, to_texture},
+	gameplay::draw::process::{downscale, to_texture},
 	utils::{
 		angle_between,
 		error::{EtherVoidError, EvoidResult},
