@@ -2,7 +2,7 @@ use std::sync::OnceLock;
 
 use macroquad::{prelude::*, ui::*};
 
-use crate::utils::error::EvoidResult;
+use crate::{gameplay::draw::SCREEN_SCALE, utils::error::EvoidResult};
 
 pub mod dialogue;
 pub mod main;
@@ -21,13 +21,17 @@ pub async fn init_ui() -> EvoidResult<()> {
 
 /// Creates a button
 pub fn button(label: &str, pos: f32) -> bool {
-	let size = vec2(screen_height() / 12., screen_height() / 24.).max(vec2(48., 20.));
-	let pos = vec2(screen_width() - size.x, pos);
+	let size = button_size();
+	let pos = vec2(screen_width() - size.x - 12., pos);
 
 	widgets::Button::new(label)
 		.position(pos)
 		.size(size)
 		.ui(&mut root_ui())
+}
+
+pub fn button_size() -> Vec2 {
+	vec2(28. * SCREEN_SCALE as f32, 16. * SCREEN_SCALE as f32)
 }
 
 /// Creates a skin for the UI
