@@ -2,7 +2,10 @@ use macroquad::prelude::*;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{gameplay::draw::process::to_texture, utils::resources::textures::access_image};
+use crate::{
+	gameplay::draw::process::to_texture,
+	utils::resources::{langs::access_lang, textures::access_image},
+};
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct Message {
@@ -55,14 +58,14 @@ impl Message {
 
 #[allow(unused)] // TODO: Make them no longer unused
 impl Dialogue {
-	/// Gets the name of the character as a &str
-	pub fn get_name(&self) -> &str {
-		&self.name
+	/// Gets the name of the character as a [`String`]
+	pub fn get_name(&self) -> String {
+		access_lang(&self.name)
 	}
 
-	/// Gets the text inside as a &str
-	pub fn get_text(&self) -> &str {
-		&self.text
+	/// Gets the text inside as a [`String`]
+	pub fn get_text(&self) -> String {
+		access_lang(&self.text)
 	}
 
 	/// Gets the portrait inside as a `Texture2D`

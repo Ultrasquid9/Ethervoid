@@ -12,7 +12,6 @@ pub enum NpcMovement {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct NpcType {
-	pub name: String,
 	pub sprite: String,
 	pub movement: NpcMovement,
 	pub messages: ImmutVec<Message>,

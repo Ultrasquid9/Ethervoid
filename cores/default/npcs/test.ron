@@ -1,5 +1,4 @@
 (
-	name: "Testing Bro",
 	sprite: "default:entity/player/player_spritesheet_wip",
 	movement: Wander(32),
 	messages: [
@@ -9,14 +8,14 @@
 			probability: 50,
 			text: [
 				(
-					name: "",
+					name: "testing_bro",
+					text: "testing_bro_gay_1",
 					portrait: "",
-					text: "gay"
 				),
 				(
-					name: "",
+					name: "testing_bro",
+					text: "testing_bro_gay_2",
 					portrait: "",
-					text: "gay again"
 				)
 			]
 		),
@@ -26,14 +25,14 @@
 			probability: 100,
 			text: [
 				(
-					name: "",
+					name: "testing_bro",
+					text: "testing_bro_trans_1",
 					portrait: "",
-					text: "trans"
 				),
 				(
-					name: "",
+					name: "testing_bro",
+					text: "testing_bro_trans_2",
 					portrait: "",
-					text: "trans again"
 				)
 			]
 		),
@@ -43,14 +42,14 @@
 			probability: 255,
 			text: [
 				(
-					name: "",
+					name: "testing_bro",
+					text: "testing_bro_bi_1",
 					portrait: "",
-					text: "this text just goes on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on"
 				),
 				(
-					name: "",
+					name: "testing_bro",
+					text: "testing_bro_bi_2",
 					portrait: "",
-					text: "bi again"
 				)
 			]
 		)
