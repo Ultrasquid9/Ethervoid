@@ -1,4 +1,4 @@
-use tracing::error;
+use tracing::{error, warn};
 
 use crate::{
 	cores::lang::{Lang, get_langs},
@@ -17,18 +17,27 @@ pub(super) fn create_langs() {
 }
 
 /// Gets the image at the provided key
-pub fn access_lang(key: &str) -> &str {
+pub fn access_lang(key: &str) -> String {
 	let lang_key = &access_config().lang;
 
 	if let Some(lang) = get_resource_ref(&LANGS, lang_key) {
-		if let Some(lang) = lang.get(key) {
-			lang
+		if let Some(msg) = lang.get_message(key) {
+			let mut warnings = vec![];
+
+			let out = lang
+				.format_pattern(msg.value().unwrap(), None, &mut warnings)
+				.to_string();
+
+			for e in warnings {
+				warn!("{e}");
+			}
+			out
 		} else {
 			error!("Lang {lang_key} lacks key {key}");
-			key
+			key.to_string()
 		}
 	} else {
 		error!("Language {lang_key} not found");
-		key
+		key.to_string()
 	}
 }

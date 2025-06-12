@@ -20,6 +20,8 @@ fast_image_resize = { version = "5.1", features = ["image", "rayon"] }
 
 mlua = { version = "0.10.5", features = ["luau-jit", "send"]}
 serde = { version = "1.0", features = ["derive"] }
+unic-langid = "0.9"
+fluent = "0.17"
 ron = "0.10"
 
 raywoke = { version = "0.3", features = ["glam"] }

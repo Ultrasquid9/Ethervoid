@@ -1,61 +1,80 @@
-use std::ops::{Deref, DerefMut};
+use std::error::Error;
 
+use fluent::{FluentResource, concurrent::FluentBundle};
 use hashbrown::HashMap;
-use serde::{Deserialize, Serialize};
 use tracing::{info, warn};
+use unic_langid::LanguageIdentifier;
 
-use crate::cores::{DIR_SPLIT, Readable, gen_name, get_files};
+use crate::{
+	cores::{DIR_SPLIT, gen_name, get_files},
+	utils::error::EvoidResult,
+};
 
-#[derive(Serialize, Deserialize)]
-pub struct Lang(HashMap<String, String>);
-
-impl Readable for Lang {}
-
-impl Deref for Lang {
-	type Target = HashMap<String, String>;
-
-	fn deref(&self) -> &Self::Target {
-		&self.0
-	}
-}
-
-impl DerefMut for Lang {
-	fn deref_mut(&mut self) -> &mut Self::Target {
-		&mut self.0
-	}
-}
+pub type Lang = FluentBundle<FluentResource>;
 
 pub fn get_langs() -> HashMap<String, Lang> {
 	let mut langs: HashMap<String, Lang> = HashMap::new();
 
 	for dir in get_files("lang") {
-		let display_name = gen_name(&dir);
-		let lang_name = gen_lang_name(&dir);
-
-		let lang = match Lang::read(&dir) {
-			Ok(ok) => {
-				info!("Lang {display_name} loaded!");
-				ok
-			}
+		let lang_name = gen_name(&dir);
+		let lang_id = match gen_lang_id(&dir) {
+			Ok(ok) => ok,
 			Err(e) => {
-				warn!("Lang {display_name} failed to load: {e}");
+				warn!("Lang {lang_name} has invalid name: {e}");
 				continue;
 			}
 		};
 
-		if let Some(existing) = langs.get_mut(&lang_name) {
-			existing.extend(lang.0.into_iter());
+		let lang = match read_fluent_file(&dir) {
+			Ok(ok) => {
+				info!("Lang {lang_name} loaded!");
+				ok
+			}
+			Err(e) => {
+				warn!("Lang {lang_name} failed to load: {e}");
+				continue;
+			}
+		};
+
+		let lang_id_str = lang_id.language.as_str().to_string();
+
+		if let Some(existing) = langs.get_mut(&lang_id_str) {
+			log_if_err(existing.add_resource(lang));
 		} else {
-			langs.insert(lang_name, lang);
+			let mut bundle = FluentBundle::new_concurrent(vec![lang_id]);
+			log_if_err(bundle.add_resource(lang));
+			langs.insert(lang_id_str, bundle);
 		}
 	}
 
 	langs
 }
 
-fn gen_lang_name(dir: &str) -> String {
+fn gen_lang_id(dir: &str) -> EvoidResult<LanguageIdentifier> {
 	let mut split: Vec<&str> = dir.split(DIR_SPLIT).collect();
 
 	split.pop();
-	split.pop().unwrap_or_default().into()
+	Ok(split.pop().unwrap_or_default().parse()?)
+}
+
+fn read_fluent_file(dir: &str) -> EvoidResult<FluentResource> {
+	let file = std::fs::read_to_string(dir)?;
+	match FluentResource::try_new(file) {
+		Ok(ok) => Ok(ok),
+		Err((ok, err)) => {
+			for e in err {
+				warn!("{e}");
+			}
+
+			Ok(ok)
+		}
+	}
+}
+
+fn log_if_err(maybe_err: Result<(), Vec<impl Error>>) {
+	_ = maybe_err.map_err(|err| {
+		for e in err {
+			warn!("{e}");
+		}
+	});
 }
