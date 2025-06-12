@@ -2,7 +2,7 @@ use std::sync::OnceLock;
 
 use macroquad::{prelude::*, ui::*};
 
-use crate::{gameplay::draw::SCREEN_SCALE, utils::error::EvoidResult};
+use crate::utils::{error::EvoidResult, resources::config::access_config};
 
 pub mod dialogue;
 pub mod main;
@@ -31,7 +31,8 @@ pub fn button(label: &str, pos: f32) -> bool {
 }
 
 pub fn button_size() -> Vec2 {
-	vec2(28. * SCREEN_SCALE as f32, 16. * SCREEN_SCALE as f32)
+	let screen_scale = access_config().screen_scale as f32;
+	vec2(28. * screen_scale, 16. * screen_scale)
 }
 
 /// Creates a skin for the UI

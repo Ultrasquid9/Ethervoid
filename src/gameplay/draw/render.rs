@@ -1,12 +1,10 @@
 use macroquad::prelude::*;
 use raywoke::prelude::*;
 
-use super::SCREEN_SCALE;
-
 use crate::{
 	cores::map::Map,
 	gameplay::ecs::sprite::{Rotation, Sprite},
-	utils::camera_scale,
+	utils::resources::config::access_config,
 };
 
 pub async fn draw_map(map: &Map) {
@@ -15,9 +13,11 @@ pub async fn draw_map(map: &Map) {
 
 /// Renders a texture based upon the screen scale
 pub async fn render_texture(texture: &Texture2D, pos: DVec2, params: Option<DrawTextureParams>) {
+	let screen_scale = access_config().screen_scale;
+
 	let scale = DVec2::new(
-		texture.width() as f64 * SCREEN_SCALE,
-		texture.height() as f64 * SCREEN_SCALE,
+		texture.width() as f64 * screen_scale,
+		texture.height() as f64 * screen_scale,
 	);
 
 	draw_texture_ex(
@@ -39,7 +39,7 @@ pub async fn render_line(sprite: &mut Sprite) {
 	let mut current = sprite.obj().pos;
 
 	let target = sprite.obj().target;
-	let jmp = SCREEN_SCALE * (sprite.img().width() - 1) as f64;
+	let jmp = access_config().screen_scale * (sprite.img().width() - 1) as f64;
 
 	if sprite.rotation() != Rotation::Angle {
 		sprite.set_rotation(Rotation::Angle);
@@ -64,7 +64,7 @@ pub async fn render_text(string: &str, pos: DVec2, color: Color) {
 		pos.x as f32,
 		pos.y as f32,
 		TextParams {
-			font_size: camera_scale() as u16 / 12,
+			font_size: (access_config().screen_scale * 12.) as u16,
 			color,
 
 			..Default::default()
@@ -73,7 +73,9 @@ pub async fn render_text(string: &str, pos: DVec2, color: Color) {
 }
 
 pub fn pixel_offset(base: f64) -> f32 {
-	((base / SCREEN_SCALE).round() * SCREEN_SCALE) as f32
+	let screen_scale = access_config().screen_scale;
+
+	((base / screen_scale).round() * screen_scale) as f32
 }
 
 /// Draws a Barrier

@@ -18,6 +18,9 @@ pub struct Config {
 
 	/// The language used by the game
 	pub lang: String,
+
+	/// How much to scale the game when rendering 
+	pub screen_scale: f64
 }
 
 impl Config {
@@ -46,6 +49,7 @@ impl Default for Config {
 
 			start_map: "default:test".into(),
 			lang: "en".into(),
+			screen_scale: 3.,
 		}
 	}
 }

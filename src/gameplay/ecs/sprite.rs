@@ -1,14 +1,12 @@
 use hashbrown::HashMap;
 
 use crate::{
-	gameplay::draw::{
-		SCREEN_SCALE,
+	gameplay::draw::
 		process::{downscale, to_texture},
-	},
 	utils::{
 		angle_between,
 		error::{EtherVoidError, EvoidResult},
-		resources::textures::access_image,
+		resources::{config::access_config, textures::access_image},
 		smart_time,
 	},
 };
@@ -168,6 +166,8 @@ impl Sprite {
 	}
 
 	pub fn as_render_params(&mut self) -> (Texture2D, DVec2, Option<DrawTextureParams>) {
+		let screen_scale = access_config().screen_scale;
+
 		let size = if self.rotation == Rotation::EightWay {
 			self.img.height() / 5
 		} else {
@@ -244,8 +244,8 @@ impl Sprite {
 				flip_x: self.obj.axis_horizontal == Axis::Negative
 					&& self.rotation == Rotation::EightWay,
 				dest_size: Some(vec2(
-					size as f32 * SCREEN_SCALE as f32,
-					size as f32 * SCREEN_SCALE as f32,
+					size as f32 * screen_scale as f32,
+					size as f32 * screen_scale as f32,
 				)),
 				..Default::default()
 			}),

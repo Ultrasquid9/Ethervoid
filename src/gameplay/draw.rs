@@ -19,8 +19,6 @@ use render::{draw_bar, draw_map, render_text, render_texture};
 pub mod process;
 pub mod render;
 
-pub const SCREEN_SCALE: f64 = 3.; // TODO: make configurable
-
 pub async fn draw(gameplay: &mut Gameplay) {
 	// Draws the background
 	clear_background(Color::from_rgba(46, 34, 47, 255));
