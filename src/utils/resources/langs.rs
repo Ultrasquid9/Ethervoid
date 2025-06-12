@@ -1,3 +1,4 @@
+use fluent::FluentArgs;
 use tracing::{error, warn};
 
 use crate::{
@@ -16,8 +17,13 @@ pub(super) fn create_langs() {
 	set_resource(&LANGS, get_langs());
 }
 
-/// Gets the image at the provided key
+/// Gets the language value at the provided key
 pub fn access_lang(key: &str) -> String {
+	access_lang_with_args(key, &FluentArgs::new())
+}
+
+/// Gets the languaage value at the provided key, passing in the provided [`FluentArgs`]
+pub fn access_lang_with_args(key: &str, args: &FluentArgs) -> String {
 	let lang_key = &access_config().lang;
 
 	if let Some(lang) = get_resource_ref(&LANGS, lang_key) {
@@ -25,7 +31,7 @@ pub fn access_lang(key: &str) -> String {
 			let mut warnings = vec![];
 
 			let out = lang
-				.format_pattern(msg.value().unwrap(), None, &mut warnings)
+				.format_pattern(msg.value().unwrap(), Some(args), &mut warnings)
 				.to_string();
 
 			for e in warnings {

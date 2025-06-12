@@ -3,7 +3,6 @@
 
 - NPCs
 	- Use Lua for dialogue and behavior
-	- Translation support
 
 - Combat
 	- Reduce physical/burst/projectile/hitscan split? (might make some things easier to code)
