@@ -13,7 +13,7 @@ pub static FONT: OnceLock<Font> = OnceLock::new();
 pub async fn init_ui() -> EvoidResult<()> {
 	_ = FONT.set(load_ttf_font("assets/fonts/PixeloidMono.ttf").await?);
 
-	let skin = make_skin(); // Warning: moving this directly into `.push_skin()` causes a borrow_mut error
+	let skin = make_skin()?; // Warning: moving this directly into `.push_skin()` causes a borrow_mut error
 	root_ui().push_skin(&skin);
 
 	Ok(())
@@ -36,18 +36,17 @@ pub fn button_size() -> Vec2 {
 }
 
 /// Creates a skin for the UI
-fn make_skin() -> Skin {
+fn make_skin() -> EvoidResult<Skin> {
 	// Text styling
 	let label_style = root_ui()
 		.style_builder()
 		.font_size(25)
-		.with_font(FONT.get().expect("Font should exist"))
-		.unwrap()
+		.with_font(FONT.get().expect("Font should exist"))?
 		.build();
 
-	Skin {
+	Ok(Skin {
 		label_style,
 
 		..root_ui().default_skin()
-	}
+	})
 }

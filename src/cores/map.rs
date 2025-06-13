@@ -113,7 +113,7 @@ impl MapTexture {
 				let index_hor = i * 16;
 
 				_ = texture.copy_from(
-					access_image(self.keys.get(key).unwrap()),
+					access_image(self.keys.get(key).unwrap_or(&String::new())),
 					index_hor as u32,
 					index_vert as u32,
 				);

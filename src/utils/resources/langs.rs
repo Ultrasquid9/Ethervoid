@@ -29,9 +29,13 @@ pub fn access_lang_with_args(key: &str, args: &FluentArgs) -> String {
 	if let Some(lang) = get_resource_ref(&LANGS, lang_key) {
 		if let Some(msg) = lang.get_message(key) {
 			let mut warnings = vec![];
+			let Some(value) = msg.value() else {
+				error!("Message {msg:?} lacks a value");
+				return key.to_string();
+			};
 
 			let out = lang
-				.format_pattern(msg.value().unwrap(), Some(args), &mut warnings)
+				.format_pattern(value, Some(args), &mut warnings)
 				.to_string();
 
 			for e in warnings {

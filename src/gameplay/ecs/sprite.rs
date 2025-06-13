@@ -89,13 +89,10 @@ impl Sprite {
 			self.shaking -= smart_time();
 		}
 
-		if self.current_anim.is_some() {
-			let anim = self
-				.anims
-				.get_mut(self.current_anim.as_ref().unwrap())
-				.unwrap();
-
-			anim.update();
+		if let Some(ref anim) = self.current_anim {
+			if let Some(anim) = self.anims.get_mut(anim) {
+				anim.update();
+			}
 
 			if self.rotation != Rotation::EightWay {
 				self.obj = new_obj;
@@ -173,11 +170,11 @@ impl Sprite {
 			self.img.height()
 		};
 
-		let mut x_pos = if self.current_anim.is_some() {
+		let mut x_pos = if let Some(ref anim) = self.current_anim {
 			self.anims
-				.get(self.current_anim.as_ref().unwrap())
-				.unwrap()
-				.get_frame()
+				.get(anim)
+				.map(Frames::get_frame)
+				.unwrap_or_default()
 		} else {
 			self.frames.get_frame()
 		} * size;
@@ -263,7 +260,7 @@ impl Sprite {
 			self.img
 				.crop_imm(x_pos, y_pos, self.img.height(), self.img.height())
 				.as_rgba8()
-				.unwrap(),
+				.expect("All textures should be RGBA8!"),
 			angle_between(&self.obj.pos, &self.obj.target) as f32,
 			imageproc::geometric_transformations::Interpolation::Nearest,
 			Rgba([0, 0, 0, 0]),
@@ -333,7 +330,7 @@ impl Frames {
 		*self
 			.frame_order
 			.get((self.anim_time / self.frame_time) as usize)
-			.unwrap()
+			.unwrap_or(&0)
 	}
 }
 

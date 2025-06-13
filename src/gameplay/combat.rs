@@ -133,11 +133,15 @@ impl UserData for Attack {}
 
 impl FromLua for Attack {
 	fn from_lua(value: mlua::Value, _: &mlua::Lua) -> mlua::Result<Self> {
-		let Some(userdata) = value.as_userdata() else {
-			todo!("error handling");
-		};
-
-		userdata.take()
+		if let Some(userdata) = value.as_userdata() {
+			userdata.take()
+		} else {
+			Err(mlua::Error::FromLuaConversionError {
+				from: value.type_name(),
+				to: "Attack".into(),
+				message: None,
+			})
+		}
 	}
 }
 
@@ -249,6 +253,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 				continue;
 			}
 
+			// First match block, to check if attack has parry interactions.
 			match atk_2.atk_type {
 				// Physical attacks should not be able to parry themselves
 				AttackType::Physical => {
@@ -261,11 +266,6 @@ fn try_parry(gameplay: &mut Gameplay) {
 
 				AttackType::Projectile => (),
 			}
-
-			// I have no clue why the borrow checker approved of
-			// the following code.
-			//
-			// I know its safe, but the borrow checker shouldn't.
 
 			gameplay.paused = Paused::Hitstop(16.);
 
@@ -282,8 +282,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 			*atk_2.damage += new_damage;
 			*atk_2.is_parried = true;
 
-			// Yes, I used two match blocks.
-			// Unfortunately, this was needed because of borrow checker shenanigans.
+			// Second match block, to check what those parry interactions should be
 			match atk_2.atk_type {
 				AttackType::Physical => *atk_2.lifetime += smart_time(),
 
@@ -304,6 +303,9 @@ fn try_parry(gameplay: &mut Gameplay) {
 				_ => unreachable!("How did a non-parryable attack end up here?"),
 			}
 
+			// If this were a `continue`, this code would not be valid,
+			// as mutating the attacks requires the immutable references
+			// to be dropped.
 			break;
 		}
 	}
