@@ -6,7 +6,7 @@ function test:should_start()
 	end
 
 	local dist = distance_between(position.self(), position.player())
-	return round(dist) % 3 == 0
+	return math.round(dist) % 3 == 0
 end
 
 function test:init()

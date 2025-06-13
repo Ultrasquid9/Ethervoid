@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use macroquad::prelude::*;
-use mlua::{FromLua, IntoLua, Lua, Number, Table, Value};
+use mlua::{FromLua, IntoLua, Lua, Number, Table, Value, Variadic};
 use tracing::error;
 
 use crate::{
@@ -71,7 +71,6 @@ pub fn create_lua() -> Lua {
 		let globals = lua.globals();
 
 		globals.set("delta_time", lua_fn!(lua, delta_time))?;
-		globals.set("round", lua_fn!(lua, |num: Number| num.round()))?;
 		globals.set(
 			"angle_between",
 			lua_fn!(lua, |current: LuaDVec2, target: LuaDVec2| {
@@ -90,7 +89,9 @@ pub fn create_lua() -> Lua {
 				LuaDVec2(current.move_towards(*target, amount))
 			}),
 		)?;
-		globals.set("attack", lua_attack_fns(&lua)?)?;
+
+		lua_attack_fns(&lua)?;
+		lua_math_fns(&lua)?;
 
 		lua.sandbox(true)?;
 		Ok(lua)
@@ -106,7 +107,7 @@ pub fn create_lua() -> Lua {
 }
 
 #[rustfmt::skip]
-fn lua_attack_fns(lua: &Lua) -> EvoidResult<Table> {
+fn lua_attack_fns(lua: &Lua) -> EvoidResult<()> {
 	let attacks = lua.create_table()?;
 
 	attacks.set(
@@ -134,5 +135,32 @@ fn lua_attack_fns(lua: &Lua) -> EvoidResult<Table> {
 		}),
 	)?;
 
-	Ok(attacks)
+	lua.globals().set("attack", attacks)?;
+	Ok(())
+}
+
+fn lua_math_fns(lua: &Lua) -> EvoidResult<()> {
+	let math: Table = lua.globals().get("math")?;
+
+	// Apparently Lua does not have a round function built-in, so I fixed that
+	math.set("round", lua_fn!(lua, |num: Number| num.round()))?;
+
+	// Making RNG be handled by Macroquad
+	math.set(
+		"random",
+		lua.create_function(|_, args: Variadic<Number>| {
+			use rand::gen_range as rng;
+
+			Ok(match args[..] {
+				[] => rng(0., 1.),
+				[a] => rng(1., a),
+				[a, b] | [a, b, ..] => rng(a, b),
+			})
+		})?,
+	)?;
+
+	// Since RNG is handled by Macroquad, this function would do nothing anyways
+	math.set("randomseed", Value::Nil)?;
+
+	Ok(())
 }
