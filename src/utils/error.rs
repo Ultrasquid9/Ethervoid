@@ -1,31 +1,20 @@
 use std::{
 	error::Error,
-	fmt::{Debug, Display},
+	fmt::{Debug, Display, Formatter, Result},
 };
 
 pub type EvoidResult<T> = std::result::Result<T, Box<dyn Error + Send + Sync>>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum EtherVoidError {
 	AnimNotFound(String),
 }
 
-impl EtherVoidError {
-	fn do_the_formatting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for EtherVoidError {
+	fn fmt(&self, f: &mut Formatter<'_>) -> Result {
 		match self {
 			Self::AnimNotFound(e) => write!(f, "Anim Not Found: \"{e}\" is not a known animation"),
 		}
-	}
-}
-
-impl Display for EtherVoidError {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		self.do_the_formatting(f)
-	}
-}
-impl Debug for EtherVoidError {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		self.do_the_formatting(f)
 	}
 }
 

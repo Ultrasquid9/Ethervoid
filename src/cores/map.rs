@@ -2,10 +2,10 @@ use raywoke::Barrier;
 use serde::Deserialize;
 
 use super::{
-	Readable,
 	enemytype::{EnemyType, get_enemytypes},
 	gen_name, get_files,
 	npctype::{NpcType, get_npctypes},
+	read_from_path,
 };
 
 use crate::{
@@ -39,8 +39,6 @@ pub struct Map {
 	pub npcs: ImmutVec<(NpcType, DVec2)>,
 	pub texture: Texture2D,
 }
-
-impl Readable for MapBuilder {}
 
 impl MapBuilder {
 	pub fn build(
@@ -133,7 +131,7 @@ pub fn get_maps() -> HashMap<String, Map> {
 
 	get_files("maps")
 		.iter()
-		.map(|dir| (gen_name(dir), MapBuilder::read(dir)))
+		.map(|dir| (gen_name(dir), read_from_path::<MapBuilder>(dir)))
 		.filter_map(|(str, result)| match result {
 			Err(e) => {
 				warn!("Map {str} failed to load: {e}");

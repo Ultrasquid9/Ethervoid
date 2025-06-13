@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use tracing::warn;
 
-use super::{Readable, gen_name, get_files};
+use super::{gen_name, get_files, read_from_path};
 
 use crate::{gameplay::ecs::sprite::Frames, prelude::*, utils::ImmutVec};
 
@@ -15,13 +15,11 @@ pub struct EnemyType {
 	pub anims: HashMap<String, Frames>,
 }
 
-impl Readable for EnemyType {}
-
 /// Provides a `HashMap` containing all `EnemyTypes`
 pub fn get_enemytypes() -> HashMap<String, EnemyType> {
 	let enemytypes: HashMap<String, EnemyType> = get_files("enemies")
 		.iter()
-		.map(|dir| (gen_name(dir), EnemyType::read(dir)))
+		.map(|dir| (gen_name(dir), read_from_path(dir)))
 		.filter_map(|(str, result)| match result {
 			Err(e) => {
 				warn!("EnemyType {str} failed to load: {e}");

@@ -1,6 +1,6 @@
 use std::{
 	fs::{self, read_dir},
-	path::PathBuf,
+	path::{Path, PathBuf},
 	time::SystemTime,
 };
 
@@ -23,6 +23,7 @@ pub mod script;
 pub mod textures;
 
 const DIR_SPLIT: &[char] = &['/', '\\', '.'];
+const CORES_DIR: &str = "./cores"; // TODO: Make Configurable 
 
 static DIR_CACHE: Global<HashMap<PathBuf, SystemTime>> = global!(HashMap::new());
 
@@ -45,7 +46,7 @@ pub fn get_files(file_type: &str) -> Vec<String> {
 	let mut files = vec![]; // The complete directory of a file
 	let mut paths = vec![]; // The paths of different cores
 
-	for result in read_dir("./cores").expect("Cores directory should exist") {
+	for result in read_dir(CORES_DIR).expect("Cores directory should exist") {
 		paths.push(maybe!(result).file_name().to_string_lossy().into_owned());
 	}
 
@@ -75,7 +76,7 @@ pub fn get_files(file_type: &str) -> Vec<String> {
 pub fn cores_changed() -> bool {
 	let mut fs = HashMap::new();
 
-	for result in WalkDir::new("./cores") {
+	for result in WalkDir::new(CORES_DIR) {
 		let path = match result {
 			Ok(ok) => ok.into_path(),
 			Err(e) => {
@@ -84,7 +85,7 @@ pub fn cores_changed() -> bool {
 			}
 		};
 
-		let modified = match std::fs::metadata(&path).and_then(|m| m.modified()) {
+		let modified = match fs::metadata(&path).and_then(|m| m.modified()) {
 			Ok(ok) => ok,
 			Err(e) => {
 				warn!("Could not check if {path:?} was modified: {e}");
@@ -101,6 +102,14 @@ pub fn cores_changed() -> bool {
 		*DIR_CACHE.write() = fs;
 		true
 	}
+}
+
+/// Attempts to read a RON file at the provided path
+pub fn read_from_path<T>(dir: impl AsRef<Path>) -> EvoidResult<T>
+where
+	T: for<'a> Deserialize<'a>,
+{
+	Ok(ron::from_str(&fs::read_to_string(dir)?)?)
 }
 
 /// Turns the provided directory into a name
@@ -120,15 +129,4 @@ fn gen_name(dir: &str) -> String {
 
 		str
 	})
-}
-
-pub trait Readable {
-	fn read(dir: &str) -> EvoidResult<Self>
-	where
-		Self: Sized,
-		Self: for<'a> Deserialize<'a>,
-	{
-		let file = fs::read_to_string(dir)?;
-		Ok(ron::from_str(&file)?)
-	}
 }

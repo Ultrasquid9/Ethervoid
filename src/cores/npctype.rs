@@ -1,6 +1,6 @@
 use crate::{gameplay::npc::messages::Message, prelude::*, utils::ImmutVec};
 
-use super::{Readable, gen_name, get_files};
+use super::{gen_name, get_files, read_from_path};
 
 use serde::{Deserialize, Serialize};
 
@@ -17,13 +17,11 @@ pub struct NpcType {
 	pub messages: ImmutVec<Message>,
 }
 
-impl Readable for NpcType {}
-
 /// Provides a `HashMap` containing all Npc data
 pub fn get_npctypes() -> HashMap<String, NpcType> {
 	let npcs: HashMap<String, NpcType> = get_files("npcs")
 		.iter()
-		.map(|dir| (gen_name(dir), NpcType::read(dir)))
+		.map(|dir| (gen_name(dir), read_from_path(dir)))
 		.filter_map(|(str, result)| match result {
 			Err(e) => {
 				warn!("Npc {str} failed to load: {e}");
