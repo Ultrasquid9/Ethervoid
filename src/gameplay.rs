@@ -5,7 +5,10 @@ use stecs::prelude::*;
 
 use crate::{
 	State,
-	utils::{resources::config::access_config, smart_time, update_delta_time},
+	utils::{
+		resources::config::access_config, smart_time, update_delta_time, update_mouse_pos,
+		update_screen_size,
+	},
 };
 
 use combat::{AttackType, Owner, handle_combat};
@@ -198,7 +201,7 @@ impl Gameplay {
 impl Default for Gameplay {
 	fn default() -> Self {
 		Gameplay {
-			world: World::new(),
+			world: World::default(),
 			current_map: access_config().start_map.clone(),
 			paused: Paused::None,
 		}
@@ -213,6 +216,9 @@ pub async fn gameplay() -> State {
 
 	loop {
 		update_delta_time();
+		update_mouse_pos();
+		update_screen_size();
+
 		draw(&mut gameplay).await;
 
 		// Anything that pauses normal gameplay goes here

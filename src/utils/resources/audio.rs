@@ -1,7 +1,10 @@
-use macroquad::rand;
+use macroquad::{prelude::warn, rand};
 use tracing::error;
 
-use kira::{AudioManager, AudioManagerSettings, sound::static_sound::StaticSoundData};
+use kira::{
+	AudioManager, AudioManagerSettings,
+	sound::static_sound::{StaticSoundData, StaticSoundHandle},
+};
 
 use crate::{
 	cores::audio::get_audio,
@@ -23,22 +26,32 @@ pub(super) fn create_sounds() {
 }
 
 /// Plays the sound at the provided key
-pub fn play_sound(key: &str) {
+pub fn play_sound(key: &str) -> Option<StaticSoundHandle> {
 	let thing = SOUNDS.read();
 
 	let Some(sound) = thing.get(key) else {
 		error!("Sound {key} not found");
-		return;
+		return None;
 	};
 
-	if let Err(e) = MANAGER.write().play(sound.clone()) {
-		error!("Error playing sound: {e}")
+	match MANAGER.write().play(sound.clone()) {
+		Ok(ok) => Some(ok),
+		Err(e) => {
+			error!("Error playing sound: {e}");
+			None
+		}
 	}
 }
 
 /// Plays a random sound from the provided list of keys
-pub fn play_random_sound(keys: &[&str]) {
-	play_sound(keys[rand::gen_range(0, keys.len() - 1)]);
+pub fn play_random_sound(keys: &[&str]) -> Option<StaticSoundHandle> {
+	match keys {
+		[] => {
+			warn!("No neys provided!");
+			None
+		}
+		keys => play_sound(keys[rand::gen_range(0, keys.len())]),
+	}
 }
 
 fn init_manager() -> AudioManager {

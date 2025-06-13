@@ -18,7 +18,7 @@ function test2:update(attacks, anim)
 		anim = "toss"
 	end
 
-	self.countdown -= delta_time() * 60
+	self.countdown -= engine.delta_time() * 60
 
 	if self.countdown <= 0 then
 		table.insert(
@@ -31,6 +31,10 @@ function test2:update(attacks, anim)
 end
 
 function test2:should_stop()
+	if self.countdown <= 0 then
+		engine.play_sound("default:sfx/sword_1")
+	end
+
 	return self.countdown <= 0
 end
 

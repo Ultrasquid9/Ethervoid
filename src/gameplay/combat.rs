@@ -13,7 +13,7 @@ use super::{
 	paused::Paused,
 };
 
-use crate::utils::{get_mouse_pos, resources::textures::access_image, smart_time, tup_vec::Tup64};
+use crate::utils::{mouse_pos, resources::textures::access_image, smart_time, tup_vec::Tup64};
 
 #[derive(Clone, SplitFields)]
 pub struct Attack {
@@ -295,7 +295,7 @@ fn try_parry(gameplay: &mut Gameplay) {
 						.set_img(access_image("default:attacks/hitscan-enemy").clone());
 					atk_2.obj.target = 999.
 						* match atk_2.owner {
-							Owner::Player => get_mouse_pos(),
+							Owner::Player => mouse_pos(),
 							Owner::Enemy => new_target,
 						};
 				}

@@ -7,7 +7,10 @@ use crate::{
 		ecs::obj::Obj,
 	},
 	utils::{
-		angle_between, delta_time, error::EvoidResult, resources::script_vals::access_script_val,
+		ImmutVec, angle_between, delta_time,
+		error::EvoidResult,
+		mouse_pos, mouse_pos_local,
+		resources::{audio::play_random_sound, script_vals::access_script_val},
 	},
 };
 
@@ -30,7 +33,6 @@ pub fn try_create_lua() -> EvoidResult<Lua> {
 	let lua = Lua::new();
 	let globals = lua.globals();
 
-	globals.set("delta_time", lua_fn!(lua, delta_time))?;
 	globals.set(
 		"angle_between",
 		lua_fn!(lua, |current: LuaDVec2, target: LuaDVec2| {
@@ -54,6 +56,7 @@ pub fn try_create_lua() -> EvoidResult<Lua> {
 	lua_math_fns(&lua)?;
 	lua_use_fns(&lua)?;
 	lua_log_fns(&lua)?;
+	lua_engine_fns(&lua)?;
 
 	lua.sandbox(true)?;
 	Ok(lua)
@@ -148,6 +151,28 @@ fn lua_log_fns(lua: &Lua) -> EvoidResult<()> {
 
 	globals.set("print", Value::Nil)?;
 	globals.set("io", Value::Nil)?;
+
+	Ok(())
+}
+
+fn lua_engine_fns(lua: &Lua) -> EvoidResult<()> {
+	let engine = lua.create_table()?;
+
+	engine.set("delta_time", lua_fn!(lua, delta_time))?;
+	engine.set("mouse_pos", lua_fn!(lua, || LuaDVec2::from(mouse_pos())))?;
+	engine.set(
+		"mouse_pos_local",
+		lua_fn!(lua, || LuaDVec2::from(mouse_pos_local())),
+	)?;
+
+	engine.set(
+		"play_sound",
+		lua_fn!(lua, |args: Variadic<String>| {
+			play_random_sound(&args.iter().map(String::as_str).collect::<ImmutVec<&str>>());
+		}),
+	)?;
+
+	lua.globals().set("engine", engine)?;
 
 	Ok(())
 }

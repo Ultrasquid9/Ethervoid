@@ -1,11 +1,6 @@
 use stecs::prelude::*;
 
-use super::{
-	combat::{Attack, AttackStructOf},
-	enemy::{Enemy, EnemyStructOf},
-	npc::{Npc, NpcStructOf},
-	player::{Player, PlayerStructOf},
-};
+use super::{combat::Attack, enemy::Enemy, npc::Npc, player::Player};
 
 use crate::utils::resources::maps::access_map;
 
@@ -14,6 +9,7 @@ pub mod health;
 pub mod obj;
 pub mod sprite;
 
+#[derive(Default)]
 pub struct World {
 	pub player: StructOf<Vec<Player>>,
 	pub enemies: StructOf<Vec<Enemy>>,
@@ -22,15 +18,6 @@ pub struct World {
 }
 
 impl World {
-	pub fn new() -> Self {
-		Self {
-			player: PlayerStructOf::default(),
-			enemies: EnemyStructOf::default(),
-			npcs: NpcStructOf::default(),
-			attacks: AttackStructOf::default(),
-		}
-	}
-
 	/// Populates the world with content from the current map, and clears old content if it exists
 	pub fn populate(&mut self, current_map: &str) {
 		macro_rules! clear {

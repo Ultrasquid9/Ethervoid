@@ -11,9 +11,9 @@ use super::{
 	},
 };
 
-use crate::utils::{get_mouse_pos, resources::audio::play_random_sound};
+use crate::utils::{mouse_pos, mouse_pos_local, resources::audio::play_random_sound};
 
-use macroquad::{input::mouse_position_local, math::DVec2};
+use macroquad::prelude::*;
 
 #[derive(SplitFields)]
 pub struct Player {
@@ -126,7 +126,7 @@ impl Inventory {
 
 				self.swords[self.current_sword].cooldown = 16.;
 				Attack::new_physical(
-					Obj::new(pos, pos + mouse_position_local().as_dvec2(), 36.),
+					Obj::new(pos, pos + mouse_pos_local(), 36.),
 					10.,
 					Owner::Player,
 					"default:attacks/slash",
@@ -144,7 +144,7 @@ impl Inventory {
 			Weapon::Boomerang => {
 				self.swords[self.current_sword].cooldown = 48.;
 				Attack::new_projectile(
-					Obj::new(pos, get_mouse_pos() * 999., 10.),
+					Obj::new(pos, mouse_pos() * 999., 10.),
 					10.,
 					Owner::Player,
 					"default:attacks/projectile-player",
@@ -161,7 +161,7 @@ impl Inventory {
 			Weapon::Pistol => {
 				self.guns[self.current_gun].cooldown = 16.;
 				Attack::new_projectile(
-					Obj::new(pos, get_mouse_pos() * 999., 6.),
+					Obj::new(pos, mouse_pos() * 999., 6.),
 					10.,
 					Owner::Player,
 					"default:attacks/projectile-player",
@@ -176,7 +176,7 @@ impl Inventory {
 			Weapon::RadioCannon => {
 				self.guns[self.current_gun].cooldown = 48.;
 				Attack::new_hitscan(
-					Obj::new(pos, get_mouse_pos() * 999., 6.),
+					Obj::new(pos, mouse_pos() * 999., 6.),
 					6.,
 					Owner::Player,
 					"default:attacks/hitscan-player",

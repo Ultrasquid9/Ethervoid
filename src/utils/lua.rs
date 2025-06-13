@@ -46,6 +46,12 @@ impl From<DVec2> for LuaDVec2 {
 	}
 }
 
+impl From<Vec2> for LuaDVec2 {
+	fn from(value: Vec2) -> Self {
+		Self(dvec2(value.x as f64, value.y as f64))
+	}
+}
+
 pub fn create_lua() -> Lua {
 	match instance::try_create_lua() {
 		Ok(ok) => ok,
