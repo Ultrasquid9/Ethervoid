@@ -1,7 +1,5 @@
-use std::sync::LazyLock;
-
 use mlua::{Lua, Value};
-use parking_lot::{RawRwLock, RwLock, lock_api::RwLockReadGuard};
+use parking_lot::{RawRwLock, lock_api::RwLockReadGuard};
 
 use crate::{
 	cores::script::get_script_vals,

@@ -1,10 +1,18 @@
-use std::fs::{self, read_dir};
+use std::{
+	fs::{self, read_dir},
+	path::PathBuf,
+	time::SystemTime,
+};
 
+use hashbrown::HashMap;
 use serde::Deserialize;
-use tracing::error;
+use tracing::{error, warn};
 use walkdir::WalkDir;
 
-use crate::utils::error::EvoidResult;
+use crate::utils::{
+	error::EvoidResult,
+	resources::{Global, global},
+};
 
 pub mod audio;
 pub mod enemytype;
@@ -15,6 +23,8 @@ pub mod script;
 pub mod textures;
 
 const DIR_SPLIT: &[char] = &['/', '\\', '.'];
+
+static DIR_CACHE: Global<HashMap<PathBuf, SystemTime>> = global!(HashMap::new());
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: &str) -> Vec<String> {
@@ -59,6 +69,38 @@ pub fn get_files(file_type: &str) -> Vec<String> {
 	}
 
 	files
+}
+
+/// Checks if any cores have changed since the last time this function was called
+pub fn cores_changed() -> bool {
+	let mut fs = HashMap::new();
+
+	for result in WalkDir::new("./cores") {
+		let path = match result {
+			Ok(ok) => ok.into_path(),
+			Err(e) => {
+				warn!("{e}");
+				return true;
+			}
+		};
+
+		let modified = match std::fs::metadata(&path).and_then(|m| m.modified()) {
+			Ok(ok) => ok,
+			Err(e) => {
+				warn!("Could not check if {path:?} was modified: {e}");
+				return true;
+			}
+		};
+
+		fs.insert(path, modified);
+	}
+
+	if *DIR_CACHE.read() == fs {
+		false
+	} else {
+		*DIR_CACHE.write() = fs;
+		true
+	}
 }
 
 /// Turns the provided directory into a name

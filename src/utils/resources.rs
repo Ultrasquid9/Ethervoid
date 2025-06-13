@@ -10,6 +10,8 @@ use tracing::info;
 use parking_lot::RwLock;
 use textures::create_textures;
 
+use crate::{cores::cores_changed, utils::resources::langs::create_langs};
+
 pub mod audio;
 pub mod config;
 pub mod langs;
@@ -21,7 +23,7 @@ pub mod textures;
 // Everyone always says "don't do this" so fuck you I did
 
 /// Stores a globally available value
-type Global<T> = LazyLock<RwLock<T>>;
+pub type Global<T> = LazyLock<RwLock<T>>;
 /// Stores a globally available resource
 type Resource<T> = Global<HashMap<String, T>>;
 
@@ -48,6 +50,11 @@ fn set_resource<T>(resource: &Resource<T>, data: HashMap<String, T>) {
 
 /// Populates global resources, removing ones that were previously present.
 pub fn create_resources() {
+	if !cores_changed() {
+		info!("Cores unchanged, reusing current resources");
+		return;
+	}
+
 	std::thread::scope(|scope| {
 		scope.spawn(create_textures);
 		scope.spawn(create_sounds);
@@ -61,9 +68,7 @@ pub fn create_resources() {
 /// Creates a [Global] with the provided data
 macro_rules! global {
 	($input:expr) => {
-		LazyLock::new(|| RwLock::new($input))
+		std::sync::LazyLock::new(|| parking_lot::RwLock::new($input))
 	};
 }
-use global;
-
-use crate::utils::resources::langs::create_langs;
+pub(crate) use global;
