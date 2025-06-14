@@ -1,11 +1,9 @@
-- Bugfixes
-	- Hitscan rendering performance issues 
-
 - NPCs
 	- Use Lua for dialogue and behavior
 
 - Combat
 	- Reduce physical/burst/projectile/hitscan split? (might make some things easier to code)
+	- Make enemies parrying you less jank
 	- Use Lua for attacks 
 		- Custom weapons
 
