@@ -16,7 +16,6 @@ Contributions must be under the Artistic 2.0 License, or another license that al
 Note: Windows is currently untested. 
 - Download Rust.
 - Download the project source code through your git client of choice.
-- Download `dav1d`
 - Enter the directory containing the source files with your terminal, and run `cargo build --release`.
 
 ### Linux 

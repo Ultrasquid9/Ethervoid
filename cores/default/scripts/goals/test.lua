@@ -5,8 +5,7 @@ function test:should_start()
 		return false
 	end
 
-	x = use("default:goals/module_test")
-	x()
+	use("default:misc/module_test")()
 
 	local dist = distance_between(position.self(), position.player())
 	return math.round(dist) % 3 == 0

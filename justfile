@@ -1,3 +1,5 @@
+set shell := ["nu", "-c"]
+
 default: lint run
 
 run:
@@ -5,6 +7,9 @@ run:
 
 fg:
 	cargo flamegraph --dev
+
+fg_release:
+	CARGO_PROFILE_RELEASE_DEBUG=true cargo flamegraph
 
 update:
 	git fetch
