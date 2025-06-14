@@ -33,23 +33,26 @@ pub fn menu(message: &mut Message) {
 }
 
 fn calc_text_lines(ui: &mut Ui, size: Vec2, text: &str) -> Vec<String> {
-	let mut lines = vec![];
+	// Using `with_capacity` to avoid extra allocations for every word 
+	let mut lines = Vec::with_capacity(text.len());
 	let mut current_line = String::with_capacity(text.len());
 
-	for word in text.split_whitespace() {
-		let new_line = current_line.clone() + word;
+	for line in text.split('\n') {
+		for word in line.split_whitespace() {
+			let new_line = current_line.clone() + word;
 
-		if ui.calc_size(&new_line).x > size.x {
-			lines.push(current_line.clone());
-			current_line.clear();
-			current_line.push_str(word);
-			current_line.push(' ');
-		} else {
-			current_line.clone_from(&new_line);
+			if ui.calc_size(&new_line).x > size.x {
+				lines.push(current_line.clone());
+				current_line.clear();
+				current_line.push_str(word);
+			} else {
+				current_line.clone_from(&new_line);
+			}
 			current_line.push(' ');
 		}
+		lines.push(current_line.clone());
+		current_line.clear();
 	}
 
-	lines.push(current_line);
 	lines
 }
