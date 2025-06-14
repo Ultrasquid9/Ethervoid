@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 use crate::{
 	State,
 	gameplay::draw::process::to_texture,
-	menu::button_size,
+	menu::{average_screen_size, button_size},
 	utils::resources::{langs::access_lang, textures::access_image},
 };
 
@@ -16,11 +16,8 @@ pub async fn menu() -> State {
 	let label_play = access_lang("menu_main_button_play");
 	let label_quit = access_lang("menu_main_button_quit");
 
-	let img = access_image("default:titlescreen_bad");
-	let width = img.width() as f32;
-	let height = img.height() as f32;
-
-	let texture = to_texture(img);
+	let titlescreen = to_texture(access_image("default:titlescreen_bad"));
+	let logo = to_texture(access_image("default:logo"));
 
 	// The menu
 	let y_pos =
@@ -28,7 +25,19 @@ pub async fn menu() -> State {
 
 	loop {
 		clear_background(GRAY);
-		render_texture_fullscreen(&texture, width, height);
+		render_texture_fullscreen(&titlescreen);
+		draw_texture_ex(
+			&logo,
+			0.,
+			0.,
+			WHITE,
+			DrawTextureParams {
+				dest_size: Some(
+					vec2(logo.width(), logo.height()) * (average_screen_size() / 222.222),
+				),
+				..Default::default()
+			},
+		);
 
 		if button(&label_play, y_pos(0.)) {
 			to_return = Some(State::Gameplay);
@@ -46,20 +55,19 @@ pub async fn menu() -> State {
 	}
 }
 
-fn render_texture_fullscreen(texture: &Texture2D, width: f32, height: f32) {
+fn render_texture_fullscreen(texture: &Texture2D) {
+	let width = texture.width();
+	let height = texture.height();
+
 	let scale_x: f32;
 	let scale_y: f32;
 
 	if screen_width() < screen_height() * (width / height) {
-		let scale = screen_height();
-
-		scale_x = scale * (width / height);
-		scale_y = scale;
+		scale_y = screen_height();
+		scale_x = scale_y * (width / height);
 	} else {
-		let scale = screen_width();
-
-		scale_y = scale * (height / width);
-		scale_x = scale;
+		scale_x = screen_width();
+		scale_y = scale_x * (height / width);
 	}
 
 	draw_texture_ex(

@@ -32,7 +32,16 @@ pub fn button(label: &str, pos: f32) -> bool {
 
 pub fn button_size() -> Vec2 {
 	let screen_scale = access_config().screen_scale as f32;
-	vec2(28. * screen_scale, 16. * screen_scale)
+	let screen_size = average_screen_size();
+
+	vec2(
+		(screen_size / 32.) * screen_scale,
+		(screen_size / 48.) * screen_scale,
+	)
+}
+
+pub fn average_screen_size() -> f32 {
+	f32::midpoint(screen_width(), screen_height())
 }
 
 /// Creates a skin for the UI
