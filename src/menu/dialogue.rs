@@ -25,5 +25,31 @@ pub fn menu(message: &mut Message) {
 		.label(&label_name)
 		.titlebar(true)
 		.movable(false)
-		.ui(&mut root_ui(), |ui| ui.label(None, &label_dialogue));
+		.ui(&mut root_ui(), |ui| {
+			for line in calc_text_lines(ui, size, &label_dialogue) {
+				ui.label(None, &line);
+			}
+		});
+}
+
+fn calc_text_lines(ui: &mut Ui, size: Vec2, text: &str) -> Vec<String> {
+	let mut lines = vec![];
+	let mut current_line = String::with_capacity(text.len());
+
+	for word in text.split_whitespace() {
+		let new_line = current_line.clone() + word;
+
+		if ui.calc_size(&new_line).x > size.x {
+			lines.push(current_line.clone());
+			current_line.clear();
+			current_line.push_str(word);
+			current_line.push(' ');
+		} else {
+			current_line.clone_from(&new_line);
+			current_line.push(' ');
+		}
+	}
+
+	lines.push(current_line);
+	lines
 }

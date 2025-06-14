@@ -10,5 +10,9 @@ testing_bro_gay_1 = Gay
 testing_bro_gay_2 = Gay Again
 testing_bro_trans_1 = Trans
 testing_bro_trans_2 = Trans Again
-testing_bro_bi_1 = This text just goes on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on 
+testing_bro_bi_1 =
+ This text just goes on and on 
+ and on and on and on and on and on 
+ and on and on and on and on and on and on and on and on and on 
+ and on and on and on and on and on and on and on and on and on and on and on 
 testing_bro_bi_2 = Bi Again
