@@ -1,6 +1,6 @@
 use crate::{
 	data::save::Save,
-	utils::resources::{global, Global, GlobalAccess, GlobalAccessMut},
+	utils::resources::{Global, GlobalAccess, GlobalAccessMut, global},
 };
 
 // TODO: Make more configurable.

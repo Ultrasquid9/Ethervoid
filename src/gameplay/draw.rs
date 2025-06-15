@@ -3,8 +3,12 @@ use std::cmp::Ordering;
 use stecs::prelude::*;
 
 use crate::{
-	gameplay::draw::render::render_line,
-	utils::{camera_scale, resources::maps::access_map},
+	gameplay::draw::{process::to_texture, render::render_line},
+	menu::average_screen_size,
+	utils::{
+		camera_scale,
+		resources::{maps::access_map, textures::access_image},
+	},
 };
 
 use super::{
@@ -18,6 +22,7 @@ use render::{draw_bar, draw_map, render_text, render_texture};
 
 pub mod process;
 pub mod render;
+pub mod ui;
 
 pub async fn draw(gameplay: &mut Gameplay) {
 	// Draws the background
@@ -78,13 +83,21 @@ pub async fn draw(gameplay: &mut Gameplay) {
 		}
 	}
 
-	// Drawing a temporary UI
-	render_text(
-		&format!("{}", gameplay.world.player.health[0].hp),
-		DVec2::new(32., 96.),
-		BLACK,
-	)
-	.await;
+	let ui = to_texture(access_image("default:ui/hp"));
+	draw_texture_ex(
+		&ui,
+		0.,
+		0.,
+		WHITE,
+		DrawTextureParams {
+			dest_size: Some(vec2(ui.width(), ui.height()) * (average_screen_size() / 300.)),
+			..Default::default()
+		},
+	);
+
+	for (ui, health) in query!(gameplay.world.player, (&ui, &health)) {
+		ui.draw_hp(health);
+	}
 }
 
 async fn render_sprites(gameplay: &mut Gameplay) {

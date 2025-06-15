@@ -4,7 +4,7 @@ use crate::{
 	cores::script::get_script_vals,
 	utils::{
 		lua::create_lua,
-		resources::{global, Global, GlobalAccess},
+		resources::{Global, GlobalAccess, global},
 	},
 };
 

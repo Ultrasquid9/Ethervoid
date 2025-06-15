@@ -3,7 +3,7 @@ use tracing::error;
 
 use crate::{
 	data::config::Config,
-	utils::resources::{global, Global, GlobalAccess},
+	utils::resources::{Global, GlobalAccess, global},
 };
 
 // TODO: Make more configurable.

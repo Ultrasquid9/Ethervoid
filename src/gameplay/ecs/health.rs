@@ -2,12 +2,17 @@ use crate::utils::smart_time;
 
 pub struct Health {
 	pub hp: f64,
+	pub max: f64,
 	i_frames: f64,
 }
 
 impl Health {
 	pub fn new(hp: f64) -> Self {
-		Self { hp, i_frames: 0. }
+		Self {
+			hp,
+			max: hp,
+			i_frames: 0.,
+		}
 	}
 
 	pub fn update(&mut self) {

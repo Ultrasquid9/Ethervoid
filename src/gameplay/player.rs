@@ -11,7 +11,10 @@ use super::{
 	},
 };
 
-use crate::utils::{mouse_pos, mouse_pos_local, resources::audio::play_random_sound};
+use crate::{
+	gameplay::draw::ui::PlayerUi,
+	utils::{mouse_pos, mouse_pos_local, resources::audio::play_random_sound},
+};
 
 use macroquad::prelude::*;
 
@@ -22,6 +25,7 @@ pub struct Player {
 	pub behavior: Behavior,
 	pub sprite: Sprite,
 
+	pub ui: PlayerUi,
 	pub inventory: Inventory,
 }
 
@@ -71,6 +75,12 @@ impl Player {
 				FxHashMap::default(),
 			),
 
+			ui: PlayerUi::new(
+				"default:ui/hp",
+				"default:ui/hp_bar",
+				"default:ui/heat",
+				"default:ui/heat_bar",
+			),
 			inventory: Inventory {
 				swords: [
 					WeaponInfo {

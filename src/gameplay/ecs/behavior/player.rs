@@ -6,8 +6,6 @@ use crate::{
 	utils::smart_time,
 };
 
-const CENTER: DVec2 = DVec2::new(0., 0.);
-
 #[derive(PartialEq, Clone)]
 pub struct PlayerBehavior {
 	pub dash_cooldown: f64,
@@ -21,7 +19,7 @@ pub fn player_behavior(
 	config: &Config,
 	current_map: &str,
 ) {
-	let mut new_pos = CENTER; // The pos to be moved to
+	let mut new_pos = DVec2::ZERO; // The pos to be moved to
 
 	if !behavior.is_dashing {
 		switch_dir_from_input(config, obj);
@@ -35,7 +33,7 @@ pub fn player_behavior(
 	axis(&obj.axis_horizontal, &mut new_pos.x);
 
 	// Dashing
-	if config.keymap.dash.is_down() && behavior.dash_cooldown <= 0. && new_pos != CENTER {
+	if config.keymap.dash.is_down() && behavior.dash_cooldown <= 0. && new_pos != DVec2::ZERO {
 		obj.speed += 12.;
 		behavior.dash_cooldown += 70.;
 	} else if behavior.dash_cooldown > 0. {
@@ -49,7 +47,7 @@ pub fn player_behavior(
 	}
 
 	// Makes the player build up speed over time, rather than instantly starting at max speed
-	if obj.speed < 3.5 && new_pos != CENTER {
+	if obj.speed < 3.5 && new_pos != DVec2::ZERO {
 		obj.speed += obj.speed / 6.;
 	}
 
@@ -58,7 +56,7 @@ pub fn player_behavior(
 		obj.speed /= 1.5;
 	}
 
-	if new_pos == CENTER {
+	if new_pos == DVec2::ZERO {
 		obj.speed = 1.0;
 	} else {
 		obj.update((new_pos.normalize() * smart_time()) + obj.pos);
