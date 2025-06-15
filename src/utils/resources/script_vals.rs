@@ -1,11 +1,10 @@
 use mlua::{Lua, Value};
-use parking_lot::{RawRwLock, lock_api::RwLockReadGuard};
 
 use crate::{
 	cores::script::get_script_vals,
 	utils::{
 		lua::create_lua,
-		resources::{Global, global},
+		resources::{global, Global, GlobalAccess},
 	},
 };
 
@@ -25,6 +24,6 @@ pub fn access_script_val(key: &str) -> Option<&Value> {
 	get_resource_ref(&SCRIPT_VALS, key)
 }
 
-pub fn lua() -> RwLockReadGuard<'static, RawRwLock, Lua> {
+pub fn lua() -> GlobalAccess<Lua> {
 	LUA.read()
 }

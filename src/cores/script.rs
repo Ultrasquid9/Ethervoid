@@ -1,5 +1,5 @@
-use hashbrown::HashMap;
 use mlua::{Compiler, Table, Value};
+use rustc_hash::FxHashMap;
 use tracing::{error, info, warn};
 
 use crate::utils::{
@@ -40,7 +40,7 @@ impl Script {
 }
 
 /// Provides a `HashMap` containing all Script values
-pub fn get_script_vals() -> HashMap<String, Value> {
+pub fn get_script_vals() -> FxHashMap<String, Value> {
 	let lua = lua();
 	let compiler = Compiler::new();
 

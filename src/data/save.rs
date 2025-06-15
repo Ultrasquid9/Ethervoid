@@ -1,11 +1,15 @@
-use std::{collections::HashSet, fs::File, path::{Path, PathBuf}};
+use std::{
+	fs::File,
+	path::{Path, PathBuf},
+};
 
-use bincode::{config, decode_from_slice, encode_to_vec, Decode, Encode};
+use bincode::{Decode, Encode, config, decode_from_slice, encode_to_vec};
+use rustc_hash::FxHashSet;
 use tracing::{error, info};
 
 #[derive(Encode, Decode, Default)]
 pub struct Save {
-	pub seen_maps: HashSet<String>
+	pub seen_maps: FxHashSet<String>,
 }
 
 impl Save {

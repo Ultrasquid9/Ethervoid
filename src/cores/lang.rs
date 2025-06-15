@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use fluent::{FluentResource, concurrent::FluentBundle};
-use hashbrown::HashMap;
+use rustc_hash::FxHashMap;
 use tracing::{info, warn};
 use unic_langid::LanguageIdentifier;
 
@@ -12,8 +12,8 @@ use crate::{
 
 pub type Lang = FluentBundle<FluentResource>;
 
-pub fn get_langs() -> HashMap<String, Lang> {
-	let mut langs: HashMap<String, Lang> = HashMap::new();
+pub fn get_langs() -> FxHashMap<String, Lang> {
+	let mut langs: FxHashMap<String, Lang> = FxHashMap::default();
 
 	for dir in get_files("lang") {
 		let lang_name = gen_name(&dir);

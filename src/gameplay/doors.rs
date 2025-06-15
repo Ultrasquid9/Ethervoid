@@ -3,7 +3,10 @@ use raywoke::prelude::*;
 use std::fmt::Display;
 use tracing::error;
 
-use crate::utils::{resources::{maps::access_map, save::access_save_mut}, tup_vec::Tup64};
+use crate::utils::{
+	resources::{maps::access_map, save::access_save_mut},
+	tup_vec::Tup64,
+};
 
 use super::Gameplay;
 

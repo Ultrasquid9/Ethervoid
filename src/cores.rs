@@ -4,7 +4,7 @@ use std::{
 	time::SystemTime,
 };
 
-use hashbrown::HashMap;
+use rustc_hash::FxHashMap;
 use serde::Deserialize;
 use tracing::{error, warn};
 use walkdir::WalkDir;
@@ -25,7 +25,7 @@ pub mod textures;
 const DIR_SPLIT: &[char] = &['/', '\\', '.'];
 const CORES_DIR: &str = "./cores"; // TODO: Make Configurable 
 
-static DIR_CACHE: Global<HashMap<PathBuf, SystemTime>> = global!(HashMap::new());
+static DIR_CACHE: Global<FxHashMap<PathBuf, SystemTime>> = global!(FxHashMap::default());
 
 /// Creates a vec of Strings containing the directories of all of the provided files type in all cores
 pub fn get_files(file_type: &str) -> Vec<String> {
@@ -74,7 +74,7 @@ pub fn get_files(file_type: &str) -> Vec<String> {
 
 /// Checks if any cores have changed since the last time this function was called
 pub fn cores_changed() -> bool {
-	let mut fs = HashMap::new();
+	let mut fs = FxHashMap::default();
 
 	for result in WalkDir::new(CORES_DIR) {
 		let path = match result {

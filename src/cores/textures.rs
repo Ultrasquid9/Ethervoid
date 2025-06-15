@@ -6,8 +6,8 @@ use imageproc::image::{ColorType, DynamicImage, ImageReader};
 use super::{gen_name, get_files};
 
 /// Provides a `HashMap` containing all Textures
-pub fn get_textures() -> HashMap<String, DynamicImage> {
-	let mut textures: HashMap<String, DynamicImage> = HashMap::default();
+pub fn get_textures() -> FxHashMap<String, DynamicImage> {
+	let mut textures: FxHashMap<String, DynamicImage> = FxHashMap::default();
 	let (transciever, receiver) = mpsc::channel();
 
 	for dir in get_files("sprites") {

@@ -1,6 +1,6 @@
-use hashbrown::HashMap;
 use macroquad::math::DVec2;
 use messages::Message;
+use rustc_hash::FxHashMap;
 use stecs::prelude::*;
 
 use super::ecs::{
@@ -45,7 +45,7 @@ impl Npc {
 				"default:entity/player/player_spritesheet_wip",
 				Rotation::EightWay,
 				Frames::new_entity(),
-				HashMap::default(),
+				FxHashMap::default(),
 			),
 
 			messages: npctype.messages.clone(),

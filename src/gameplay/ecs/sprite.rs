@@ -1,4 +1,4 @@
-use hashbrown::HashMap;
+use rustc_hash::FxHashMap;
 
 use crate::{
 	gameplay::draw::process::{scale, to_texture},
@@ -34,7 +34,7 @@ pub struct Sprite {
 	shaking: f64,
 
 	current_anim: Option<String>,
-	anims: HashMap<String, Frames>,
+	anims: FxHashMap<String, Frames>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -62,7 +62,7 @@ impl Sprite {
 		key: &str,
 		rotation: Rotation,
 		frames: Frames,
-		anims: HashMap<String, Frames>,
+		anims: FxHashMap<String, Frames>,
 	) -> Self {
 		Self {
 			img: if rotation == Rotation::Angle {

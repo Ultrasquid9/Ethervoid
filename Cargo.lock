@@ -527,7 +527,6 @@ dependencies = [
  "bincode",
  "fast_image_resize",
  "fluent",
- "hashbrown",
  "image 0.25.6",
  "imageproc",
  "kira",
@@ -536,6 +535,7 @@ dependencies = [
  "parking_lot",
  "raywoke",
  "ron",
+ "rustc-hash",
  "serde",
  "stecs",
  "tracing",
@@ -745,7 +745,6 @@ dependencies = [
  "allocator-api2",
  "equivalent",
  "foldhash",
- "serde",
 ]
 
 [[package]]

@@ -1,4 +1,4 @@
-use hashbrown::HashMap;
+use rustc_hash::FxHashMap;
 use stecs::prelude::*;
 
 use super::{
@@ -68,7 +68,7 @@ impl Player {
 				"default:entity/player/player_spritesheet_wip",
 				Rotation::EightWay,
 				Frames::new_entity(),
-				HashMap::default(),
+				FxHashMap::default(),
 			),
 
 			inventory: Inventory {

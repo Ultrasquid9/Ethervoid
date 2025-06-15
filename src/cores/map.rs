@@ -27,7 +27,7 @@ struct MapBuilder {
 
 #[derive(Deserialize)]
 struct MapTexture {
-	keys: HashMap<char, String>,
+	keys: FxHashMap<char, String>,
 	tiles: Vec<Vec<char>>,
 }
 
@@ -43,13 +43,13 @@ pub struct Map {
 impl MapBuilder {
 	pub fn build(
 		self,
-		enemytypes: &HashMap<String, EnemyType>,
-		npctypes: &HashMap<String, NpcType>,
+		enemytypes: &FxHashMap<String, EnemyType>,
+		npctypes: &FxHashMap<String, NpcType>,
 	) -> Map {
 		// Handles the iterator chain for enemies/npcs
 		fn iter_thing<T: Clone>(
 			input: &[(String, DVec2)],
-			hashmap: &HashMap<String, T>,
+			hashmap: &FxHashMap<String, T>,
 			type_name: &str,
 		) -> ImmutVec<(T, DVec2)> {
 			input
@@ -125,7 +125,7 @@ impl MapTexture {
 }
 
 /// Provides a `HashMap` containing all Maps
-pub fn get_maps() -> HashMap<String, Map> {
+pub fn get_maps() -> FxHashMap<String, Map> {
 	let enemytypes = get_enemytypes();
 	let npctypes = get_npctypes();
 

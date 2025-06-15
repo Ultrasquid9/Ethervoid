@@ -33,7 +33,7 @@ pub fn menu(message: &mut Message) {
 }
 
 fn calc_text_lines(ui: &mut Ui, size: Vec2, text: &str) -> Vec<String> {
-	// Using `with_capacity` to avoid extra allocations for every word 
+	// Using `with_capacity` to avoid extra allocations for every word
 	let mut lines = Vec::with_capacity(text.len());
 	let mut current_line = String::with_capacity(text.len());
 

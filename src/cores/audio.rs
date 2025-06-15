@@ -5,8 +5,8 @@ use std::sync::mpsc;
 use super::{gen_name, get_files};
 
 /// Provides a `HashMap` containing all Textures
-pub fn get_audio() -> HashMap<String, StaticSoundData> {
-	let mut audio: HashMap<String, StaticSoundData> = HashMap::default();
+pub fn get_audio() -> FxHashMap<String, StaticSoundData> {
+	let mut audio: FxHashMap<String, StaticSoundData> = FxHashMap::default();
 
 	let (transciever, receiver) = mpsc::channel();
 

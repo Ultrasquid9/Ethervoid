@@ -1,6 +1,6 @@
-use hashbrown::HashMap;
 use mlua::{FromLua, UserData};
 use raywoke::prelude::*;
+use rustc_hash::FxHashMap;
 use stecs::prelude::*;
 
 use super::{
@@ -60,7 +60,7 @@ impl Attack {
 				key,
 				Rotation::Angle,
 				Frames::new_attack(),
-				HashMap::default(),
+				FxHashMap::default(),
 			),
 		}
 	}
@@ -81,7 +81,7 @@ impl Attack {
 				key,
 				Rotation::Static,
 				Frames::new_attack(),
-				HashMap::default(),
+				FxHashMap::default(),
 			),
 		}
 	}
@@ -102,7 +102,7 @@ impl Attack {
 				key,
 				Rotation::Static,
 				Frames::new_static(),
-				HashMap::default(),
+				FxHashMap::default(),
 			),
 		}
 	}
@@ -123,7 +123,7 @@ impl Attack {
 				key,
 				Rotation::Static,
 				Frames::new_static(),
-				HashMap::default(),
+				FxHashMap::default(),
 			),
 		}
 	}

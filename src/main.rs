@@ -1,6 +1,7 @@
 use crate::utils::resources::{
 	config::{read_config, update_config},
-	create_resources, save::save,
+	create_resources,
+	save::save,
 };
 
 use self::prelude::*;
@@ -38,7 +39,7 @@ async fn main() -> EvoidResult<()> {
 		// Updates the config
 		update_config(read_config());
 		// Saves the game
-		// TODO: Save game explicitly 
+		// TODO: Save game explicitly
 		save();
 
 		state = match state {
@@ -55,7 +56,7 @@ pub mod prelude {
 	pub use macroquad::prelude::*;
 	pub use stecs::prelude::*;
 
-	pub use hashbrown::HashMap;
+	pub use rustc_hash::FxHashMap;
 
 	pub use tracing::{debug, error, info, trace, warn};
 }

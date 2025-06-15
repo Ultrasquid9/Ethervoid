@@ -1,13 +1,13 @@
 use std::sync::LazyLock;
 
 use audio::create_sounds;
-use hashbrown::HashMap;
+use rustc_hash::FxHashMap;
 
 use maps::create_maps;
 use script_vals::create_script_vals;
 use tracing::info;
 
-use parking_lot::RwLock;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use textures::create_textures;
 
 use crate::{cores::cores_changed, utils::resources::langs::create_langs};
@@ -26,11 +26,14 @@ pub mod textures;
 /// Stores a globally available value
 pub type Global<T> = LazyLock<RwLock<T>>;
 /// Stores a globally available resource
-type Resource<T> = Global<HashMap<String, T>>;
+type Resource<T> = Global<FxHashMap<String, T>>;
+
+type GlobalAccess<T> = RwLockReadGuard<'static, T>;
+type GlobalAccessMut<T> = RwLockWriteGuard<'static, T>;
 
 /// Creates a blank resource
 const fn resource<T>() -> Resource<T> {
-	LazyLock::new(|| RwLock::new(HashMap::default()))
+	LazyLock::new(|| RwLock::new(FxHashMap::default()))
 }
 
 /// Gets a reference to the item stored in the resource at the given key
@@ -43,7 +46,7 @@ fn get_resource_ref<'a, T>(resource: &'a Resource<T>, key: &str) -> Option<&'a T
 }
 
 /// Clears a resource and sets it to the provided data
-fn set_resource<T>(resource: &Resource<T>, data: HashMap<String, T>) {
+fn set_resource<T>(resource: &Resource<T>, data: FxHashMap<String, T>) {
 	let mut access = resource.write();
 	access.clear();
 	*access = data;

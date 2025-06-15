@@ -1,8 +1,10 @@
-use parking_lot::{RawRwLock, lock_api::RwLockReadGuard};
 use ron::ser;
 use tracing::error;
 
-use crate::{data::config::Config, utils::resources::{global, Global}};
+use crate::{
+	data::config::Config,
+	utils::resources::{global, Global, GlobalAccess},
+};
 
 // TODO: Make more configurable.
 // Maybe use system's config dir? Or use env variable?
@@ -16,7 +18,7 @@ pub fn read_config() -> Config {
 }
 
 /// Gets the current config
-pub fn access_config() -> RwLockReadGuard<'static, RawRwLock, Config> {
+pub fn access_config() -> GlobalAccess<Config> {
 	CONFIG.read()
 }
 

@@ -1,6 +1,7 @@
-use parking_lot::{lock_api::{RwLockReadGuard, RwLockWriteGuard}, RawRwLock};
-
-use crate::{data::save::Save, utils::resources::{global, Global}};
+use crate::{
+	data::save::Save,
+	utils::resources::{global, Global, GlobalAccess, GlobalAccessMut},
+};
 
 // TODO: Make more configurable.
 const SAVE_DIR: &str = "./save.evoid";
@@ -8,12 +9,12 @@ const SAVE_DIR: &str = "./save.evoid";
 static SAVE: Global<Save> = global!(Save::read(SAVE_DIR));
 
 /// Gets the current save
-pub fn access_save() -> RwLockReadGuard<'static, RawRwLock, Save> {
+pub fn access_save() -> GlobalAccess<Save> {
 	SAVE.read()
 }
 
-/// Gets the current save mutably 
-pub fn access_save_mut() -> RwLockWriteGuard<'static, RawRwLock, Save> {
+/// Gets the current save mutably
+pub fn access_save_mut() -> GlobalAccessMut<Save> {
 	SAVE.write()
 }
 
