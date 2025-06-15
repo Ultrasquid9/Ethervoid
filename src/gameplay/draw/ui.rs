@@ -11,22 +11,33 @@ pub struct PlayerUi {
 	hp_texture: Texture2D,
 	hp_bar_texture: Texture2D,
 	hp_bar_offset: Vec2,
+
+	temp_texture: Texture2D,
+	temp_bar_texture: Texture2D,
+	temp_bar_offset: Vec2,
 }
 
 impl PlayerUi {
 	pub fn new(
 		hp_texture: &str,
 		hp_bar_texture: &str,
-		_heat_texture: &str,
-		_heat_bar_texture: &str,
+		temp_texture: &str,
+		temp_bar_texture: &str,
 	) -> Self {
 		let hp_texture = to_texture(access_image(hp_texture));
-		let (hp_bar_offset, hp_bar_img) = remove_alpha_from_img(access_image(hp_bar_texture));
+		let (hp_bar_offset, hp_bar_img) = remove_alpha(access_image(hp_bar_texture));
+
+		let temp_texture = to_texture(access_image(temp_texture));
+		let (temp_bar_offset, temp_bar_img) = remove_alpha(access_image(temp_bar_texture));
 
 		Self {
 			hp_texture,
 			hp_bar_texture: to_texture(&hp_bar_img),
 			hp_bar_offset,
+
+			temp_texture,
+			temp_bar_texture: to_texture(&temp_bar_img),
+			temp_bar_offset,
 		}
 	}
 
@@ -34,11 +45,9 @@ impl PlayerUi {
 		let scale = average_screen_size() / 300.;
 		let size = vec2(self.hp_texture.width(), self.hp_texture.height()) * scale;
 
-		draw_texture_ex(
+		draw_texture_ex2(
 			&self.hp_texture,
-			0.,
-			0.,
-			WHITE,
+			Vec2::ZERO,
 			DrawTextureParams {
 				dest_size: Some(size),
 				..Default::default()
@@ -49,20 +58,49 @@ impl PlayerUi {
 		size.x = (size.x / health.max as f32) * health.hp as f32;
 		size = size.round() * scale;
 
-		draw_texture_ex(
+		draw_texture_ex2(
 			&self.hp_bar_texture,
-			self.hp_bar_offset.x * scale,
-			self.hp_bar_offset.y * scale,
-			WHITE,
+			self.hp_bar_offset * scale,
 			DrawTextureParams {
 				dest_size: Some(size),
 				..Default::default()
 			},
 		);
 	}
+
+	pub fn draw_temp(&self, heat: f64) {
+		let scale = average_screen_size() / 300.;
+		let pos = vec2(screen_width() - (self.temp_texture.width() * scale), 0.);
+		let size = vec2(self.hp_texture.width(), self.hp_texture.height()) * scale;
+
+		draw_texture_ex2(
+			&self.temp_texture,
+			pos,
+			DrawTextureParams {
+				dest_size: Some(size),
+				..Default::default()
+			},
+		);
+
+		let size = vec2(
+			self.temp_bar_texture.width(),
+			self.temp_bar_texture.height(),
+		) * scale;
+
+		draw_texture_ex2(
+			&self.temp_bar_texture,
+			(self.temp_bar_offset * scale) + pos,
+			DrawTextureParams {
+				dest_size: Some(size),
+				..Default::default()
+			},
+		);
+
+		_ = &heat;
+	}
 }
 
-fn remove_alpha_from_img(img: &DynamicImage) -> (Vec2, DynamicImage) {
+fn remove_alpha(img: &DynamicImage) -> (Vec2, DynamicImage) {
 	let mut x_largest = 0;
 	let mut x_smallest = img.width();
 	let mut y_largest = 0;
@@ -101,4 +139,8 @@ fn remove_alpha_from_img(img: &DynamicImage) -> (Vec2, DynamicImage) {
 			y_largest - y_smallest + 1,
 		),
 	)
+}
+
+fn draw_texture_ex2(texture: &Texture2D, pos: Vec2, params: DrawTextureParams) {
+	draw_texture_ex(texture, pos.x, pos.y, WHITE, params);
 }

@@ -78,8 +78,8 @@ impl Player {
 			ui: PlayerUi::new(
 				"default:ui/hp",
 				"default:ui/hp_bar",
-				"default:ui/heat",
-				"default:ui/heat_bar",
+				"default:ui/temp",
+				"default:ui/temp_bar",
 			),
 			inventory: Inventory {
 				swords: [
