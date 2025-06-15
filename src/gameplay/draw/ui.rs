@@ -45,8 +45,9 @@ impl PlayerUi {
 			},
 		);
 
-		let mut size = vec2(self.hp_bar_texture.width(), self.hp_bar_texture.height()) * scale;
+		let mut size = vec2(self.hp_bar_texture.width(), self.hp_bar_texture.height());
 		size.x = (size.x / health.max as f32) * health.hp as f32;
+		size = size.round() * scale;
 
 		draw_texture_ex(
 			&self.hp_bar_texture,
