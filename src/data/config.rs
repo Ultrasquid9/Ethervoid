@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, path::Path};
 
 use keymap::KeyMap;
 use tracing::error;
@@ -25,14 +25,16 @@ pub struct Config {
 
 impl Config {
 	/// Reads the config file
-	pub fn read(dir: &str) -> Self {
-		match ron::from_str(&match fs::read_to_string(dir) {
+	pub fn read(dir: impl AsRef<Path>) -> Self {
+		let str = match fs::read_to_string(dir) {
 			Ok(str) => str,
 			Err(e) => {
 				error!("Error when reading config: {e}");
 				return Self::default();
 			}
-		}) {
+		};
+
+		match ron::from_str(&str) {
 			Ok(config) => config,
 			Err(e) => {
 				error!("Error when deserializing config: {e}");

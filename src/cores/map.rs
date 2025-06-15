@@ -14,7 +14,7 @@ use crate::{
 	utils::{ImmutVec, resources::textures::access_image, tup_vec::Tup64},
 };
 
-use image::{DynamicImage, GenericImage};
+use imageproc::image::{DynamicImage, GenericImage};
 
 #[derive(Deserialize)]
 struct MapBuilder {

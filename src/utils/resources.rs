@@ -16,6 +16,7 @@ pub mod audio;
 pub mod config;
 pub mod langs;
 pub mod maps;
+pub mod save;
 pub mod script_vals;
 pub mod textures;
 

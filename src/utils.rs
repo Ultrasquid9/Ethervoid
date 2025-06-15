@@ -2,7 +2,6 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use macroquad::prelude::*;
 
-pub mod config;
 pub mod error;
 pub mod logger;
 pub mod lua;

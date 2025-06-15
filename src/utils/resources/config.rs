@@ -1,16 +1,14 @@
-use std::sync::LazyLock;
-
-use parking_lot::{RawRwLock, RwLock, lock_api::RwLockReadGuard};
+use parking_lot::{RawRwLock, lock_api::RwLockReadGuard};
 use ron::ser;
 use tracing::error;
 
-use crate::utils::{config::Config, resources::Global};
+use crate::{data::config::Config, utils::resources::{global, Global}};
 
 // TODO: Make more configurable.
 // Maybe use system's config dir? Or use env variable?
 const CONF_DIR: &str = "./config.ron";
 
-static CONFIG: Global<Config> = LazyLock::new(|| RwLock::new(Config::read(CONF_DIR)));
+static CONFIG: Global<Config> = global!(Config::read(CONF_DIR));
 
 /// Reads the config file
 pub fn read_config() -> Config {

@@ -1,11 +1,7 @@
 use macroquad::math::DVec2;
 
 use crate::{
-	gameplay::ecs::obj::{Axis, Obj},
-	utils::{
-		config::{Config, keymap::Key},
-		smart_time,
-	},
+	data::config::{Config, keymap::Key}, gameplay::ecs::obj::{Axis, Obj}, utils::smart_time
 };
 
 const CENTER: DVec2 = DVec2::new(0., 0.);

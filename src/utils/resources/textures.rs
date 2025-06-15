@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
 use crate::{cores::textures::get_textures, gameplay::draw::process::scale};
-use image::DynamicImage;
+use imageproc::image::DynamicImage;
 use imageproc::rgba_image;
 use tracing::error;
 
