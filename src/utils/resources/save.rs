@@ -9,6 +9,7 @@ const SAVE_DIR: &str = "./save.evoid";
 static SAVE: Global<Save> = global!(Save::read(SAVE_DIR));
 
 /// Gets the current save
+#[allow(unused)] // TODO: Use
 pub fn access_save() -> GlobalAccess<Save> {
 	SAVE.read()
 }

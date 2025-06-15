@@ -63,12 +63,19 @@ impl PlayerUi {
 			self.hp_bar_offset * scale,
 			DrawTextureParams {
 				dest_size: Some(size),
+				source: Some(Rect::new(
+					0.,
+					0.,
+					size.x / scale,
+					self.hp_bar_texture.height(),
+				)),
+
 				..Default::default()
 			},
 		);
 	}
 
-	pub fn draw_temp(&self, heat: f64) {
+	pub fn draw_temp(&self, temp: f64) {
 		let scale = average_screen_size() / 300.;
 		let pos = vec2(screen_width() - (self.temp_texture.width() * scale), 0.);
 		let size = vec2(self.hp_texture.width(), self.hp_texture.height()) * scale;
@@ -82,21 +89,22 @@ impl PlayerUi {
 			},
 		);
 
-		let size = vec2(
+		let mut size = vec2(
 			self.temp_bar_texture.width(),
 			self.temp_bar_texture.height(),
-		) * scale;
+		);
+		size.x = (size.x / 100.) * temp as f32;
+		size = size.round() * scale;
 
 		draw_texture_ex2(
 			&self.temp_bar_texture,
-			(self.temp_bar_offset * scale) + pos,
+			(self.temp_bar_offset * scale)
+				+ pos.with_x(pos.x - size.x + (self.temp_bar_texture.width() * scale)),
 			DrawTextureParams {
 				dest_size: Some(size),
 				..Default::default()
 			},
 		);
-
-		_ = &heat;
 	}
 }
 

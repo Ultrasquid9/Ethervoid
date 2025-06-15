@@ -97,7 +97,7 @@ pub async fn draw(gameplay: &mut Gameplay) {
 
 	for (ui, health) in query!(gameplay.world.player, (&ui, &health)) {
 		ui.draw_hp(health);
-		ui.draw_temp(miniquad::date::now().sin().round() * 100.); // TODO: Temperature system 
+		ui.draw_temp(miniquad::date::now().sin().abs() * 100.); // TODO: Temperature system 
 	}
 }
 
