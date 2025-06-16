@@ -1,3 +1,7 @@
+- Bugs
+	- Data race in Lua? 
+	- "Stuck in wall" bug
+
 - NPCs
 	- Use Lua for dialogue and behavior
 
@@ -8,27 +12,30 @@
 		- Custom weapons
 
 - UI
-	- Better button system
-	- Proper skin 
-	- Proper title screen
-		- Title
-		- Background 
-			- Parralax? (use static image if too hard)
+	- Temperature Bar
+	- Weapon Bar
+	- Proper skin
+		- Fix tiny fonts 
+	- Better title screen image
+		- Parralax? 
 	- Proper dialogue
 		- Character portraits
 		- Fade in/out
 		- Text appearing 1 character at a time 
 
 - Pause Menu
-	- Fix animated sprites
 	- Settings Editor
 
 - Saving/Loading
 	- Enemies stay dead (until you save)
-	- Save data structure
-		- Serialization/deserialization
-			- Native mod support 
-			- Postcard? (just use RON if that doesn't work)
+	- Multiple save slots
+	- Save points 
+	- Save file header?
+	- Saved data
+		- NPC flags
+		- Unlocked Weapons
+		- Money 
+		- Inventory 
 
 - Settings
 	- Accessibility
