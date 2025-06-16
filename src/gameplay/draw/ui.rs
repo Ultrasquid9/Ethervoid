@@ -89,17 +89,16 @@ impl PlayerUi {
 			},
 		);
 
-		let mut size = vec2(
-			self.temp_bar_texture.width(),
-			self.temp_bar_texture.height(),
-		);
+		let width = self.temp_bar_texture.width();
+		let height = self.temp_bar_texture.height();
+
+		let mut size = vec2(width, height);
 		size.x = (size.x / 100.) * temp as f32;
 		size = size.round() * scale;
 
 		draw_texture_ex2(
 			&self.temp_bar_texture,
-			(self.temp_bar_offset * scale)
-				+ pos.with_x(pos.x - size.x + (self.temp_bar_texture.width() * scale)),
+			(self.temp_bar_offset * scale) + pos.with_x(pos.x - size.x + (width * scale)),
 			DrawTextureParams {
 				dest_size: Some(size),
 				..Default::default()
