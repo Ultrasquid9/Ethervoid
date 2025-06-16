@@ -30,11 +30,11 @@ impl Enemy {
 					.goals
 					.iter()
 					.filter_map(|key| match Script::new(key) {
-						None => {
-							error!("Script {key} not found!");
+						Ok(ok) => Some(ok),
+						Err(e) => {
+							error!("Failed to eval script {key}: {e}");
 							None
 						}
-						ok => ok,
 					})
 					.collect(),
 

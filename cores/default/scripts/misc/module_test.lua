@@ -1,3 +1,3 @@
 return function()
-	-- log.info("modules work")
+	log.info("modules work")
 end

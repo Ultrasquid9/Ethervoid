@@ -10,7 +10,7 @@ use crate::{
 		ImmutVec, angle_between, delta_time,
 		error::EvoidResult,
 		mouse_pos, mouse_pos_local,
-		resources::{audio::play_random_sound, script_vals::access_script_val},
+		resources::{audio::play_random_sound, script_vals::access_script},
 	},
 };
 
@@ -126,9 +126,7 @@ fn lua_use_fns(lua: &Lua) -> EvoidResult<()> {
 
 	globals.set(
 		"use",
-		lua.create_function(|_, arg: String| {
-			Ok(access_script_val(&arg).unwrap_or(&Value::Nil).clone())
-		})?,
+		lua_fn!(lua, |arg: String| access_script(&arg)?.clone()),
 	)?;
 
 	globals.set("require", Value::Nil)?;

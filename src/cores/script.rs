@@ -2,10 +2,7 @@ use mlua::{Compiler, Table, Value};
 use rustc_hash::FxHashMap;
 use tracing::{error, info, warn};
 
-use crate::utils::{
-	error::EvoidResult,
-	resources::script_vals::{access_script_val, lua},
-};
+use crate::utils::{error::EvoidResult, resources::script_vals::access_script};
 
 use super::{gen_name, get_files};
 
@@ -17,10 +14,10 @@ pub struct Script {
 }
 
 impl Script {
-	pub fn new(key: &str) -> Option<Self> {
-		Some(Self {
+	pub fn new(key: &str) -> mlua::Result<Self> {
+		Ok(Self {
 			name: key.to_owned(),
-			value: access_script_val(key)?.clone(),
+			value: access_script(key)?.clone(),
 		})
 	}
 
@@ -40,22 +37,18 @@ impl Script {
 }
 
 /// Provides a `HashMap` containing all Script values
-pub fn get_script_vals() -> FxHashMap<String, Value> {
-	let lua = lua();
+pub fn get_scripts() -> FxHashMap<String, Vec<u8>> {
 	let compiler = Compiler::new();
 
 	get_files("scripts")
 		.iter()
 		.map(|dir| {
-			let maybe_val = || {
-				let bytecode = compiler.compile(std::fs::read_to_string(dir)?)?;
-				Ok(lua.load(bytecode).eval()?)
-			};
+			let maybe_val = || Ok(compiler.compile(std::fs::read_to_string(dir)?)?);
 
 			(gen_name(dir), maybe_val())
 		})
 		.filter_map(
-			|(name, result): (String, EvoidResult<Value>)| match result {
+			|(name, result): (String, EvoidResult<Vec<u8>>)| match result {
 				Err(e) => {
 					warn!("Failed to compile script {name}: {e}");
 					None
