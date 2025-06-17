@@ -27,7 +27,7 @@ pub fn access_script(key: &str) -> mlua::Result<&Value> {
 	if let Some(val) = get_resource_ref(&EXECUTED_SCRIPTS, key) {
 		Ok(val)
 	} else if let Some(bytecode) = SCRIPTS.read().get(key) {
-		info!("Attempting to execute script {key}");
+		info!("Attempting to evaluate script {key}");
 
 		let val: Value = lua().load(bytecode).eval()?;
 		EXECUTED_SCRIPTS.write().insert(key.to_string(), val);
@@ -39,6 +39,7 @@ pub fn access_script(key: &str) -> mlua::Result<&Value> {
 	}
 }
 
+/// Gets access to the [Lua] instance
 pub fn lua() -> GlobalAccess<Lua> {
 	LUA.read()
 }

@@ -1,7 +1,7 @@
 local test2 = {}
 
 function test2:should_start()
-	if goals.previous() == "default:attacks/test2" then
+	if goals.previous() == "default:goals/test2" then
 		return false
 	end
 

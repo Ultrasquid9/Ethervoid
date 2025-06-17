@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use mlua::Function;
+use mlua::{Function, Table, Value};
 use tracing::error;
 
 use crate::{
@@ -9,7 +9,7 @@ use crate::{
 		combat::{Attack, AttackStructOf},
 		ecs::{obj::Obj, sprite::Sprite},
 	},
-	utils::{ImmutVec, error::EvoidResult, lua::LuaDVec2, resources::script_vals::lua, smart_time},
+	utils::{ImmutVec, error::EvoidResult, lua::LuaDVec2, resources::scripts::lua, smart_time},
 };
 
 use stecs::{prelude::Archetype, storage::vec::VecFamily};
@@ -109,33 +109,34 @@ impl Script {
 	}
 }
 
-fn update_lua_constants(obj_self: &Obj, obj_player: &Obj, prev_goal: String) -> EvoidResult<()> {
+fn lua_goal_fns(
+	table: &Table,
+	obj_self: &Obj,
+	obj_player: &Obj,
+	prev_goal: String,
+) -> EvoidResult<()> {
+	macro_rules! lua_fn {
+		($lua:ident, || $fn:expr) => {
+			$lua.create_function(move |_, ()| Ok($fn))?
+		};
+	}
+
 	// Cloning them here to avoid lifetime issues
 	let pos_player = obj_player.pos;
 	let pos_self = obj_self.pos;
 
 	let lua = lua();
-	let globals = lua.globals();
 
 	let position = lua.create_table()?;
-	position.set(
-		"player",
-		lua.create_function(move |_, ()| Ok(LuaDVec2(pos_player)))?,
-	)?;
-	position.set(
-		"self",
-		lua.create_function(move |_, ()| Ok(LuaDVec2(pos_self)))?,
-	)?;
+	position.set("player", lua_fn!(lua, || LuaDVec2(pos_player)))?;
+	position.set("self", lua_fn!(lua, || LuaDVec2(pos_self)))?;
 
 	let goals = lua.create_table()?;
-	goals.set(
-		"previous",
-		lua.create_function(move |_, ()| Ok(prev_goal.clone()))?,
-	)?;
+	goals.set("previous", lua_fn!(lua, || prev_goal.clone()))?;
 
 	// Adding the tables to global
-	globals.set("position", position)?;
-	globals.set("goals", goals)?;
+	table.set("position", position)?;
+	table.set("goals", goals)?;
 
 	Ok(())
 }
@@ -166,11 +167,21 @@ pub fn goal_behavior(
 		return;
 	}
 
-	maybe!(update_lua_constants(
-		obj_self,
-		obj_player,
-		behavior.prev_goal.clone()
-	));
+	for goal in &*behavior.goals {
+		let Ok(table) = goal.table() else { continue };
+
+		for pair in table.pairs::<Value, Function>() {
+			let Ok((_, fun)) = pair else { continue };
+			let Some(env) = fun.environment() else {
+				continue;
+			};
+
+			if let Err(e) = lua_goal_fns(&env, obj_self, obj_player, behavior.prev_goal.clone()) {
+				behavior.err = Some(e);
+				return;
+			}
+		}
+	}
 
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {

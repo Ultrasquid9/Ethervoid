@@ -44,13 +44,13 @@ pub fn play_sound(key: &str) -> Option<StaticSoundHandle> {
 }
 
 /// Plays a random sound from the provided list of keys
-pub fn play_random_sound(keys: &[&str]) -> Option<StaticSoundHandle> {
+pub fn play_random_sound(keys: &[impl AsRef<str>]) -> Option<StaticSoundHandle> {
 	match keys {
 		[] => {
 			warn!("No neys provided!");
 			None
 		}
-		keys => play_sound(keys[rand::gen_range(0, keys.len())]),
+		keys => play_sound(keys[rand::gen_range(0, keys.len())].as_ref()),
 	}
 }
 

@@ -4,7 +4,7 @@ use audio::create_sounds;
 use rustc_hash::FxHashMap;
 
 use maps::create_maps;
-use script_vals::create_script_vals;
+use scripts::create_script_vals;
 use tracing::info;
 
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
@@ -17,7 +17,7 @@ pub mod config;
 pub mod langs;
 pub mod maps;
 pub mod save;
-pub mod script_vals;
+pub mod scripts;
 pub mod textures;
 
 // This module contains globally available resources

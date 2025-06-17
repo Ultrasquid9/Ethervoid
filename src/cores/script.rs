@@ -2,7 +2,7 @@ use mlua::{Compiler, Table, Value};
 use rustc_hash::FxHashMap;
 use tracing::{error, info, warn};
 
-use crate::utils::{error::EvoidResult, resources::script_vals::access_script};
+use crate::utils::{error::EvoidResult, resources::scripts::access_script};
 
 use super::{gen_name, get_files};
 

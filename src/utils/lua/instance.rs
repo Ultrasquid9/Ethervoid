@@ -7,10 +7,10 @@ use crate::{
 		ecs::obj::Obj,
 	},
 	utils::{
-		ImmutVec, angle_between, delta_time,
+		angle_between, delta_time,
 		error::EvoidResult,
 		mouse_pos, mouse_pos_local,
-		resources::{audio::play_random_sound, script_vals::access_script},
+		resources::{audio::play_random_sound, scripts::access_script},
 	},
 };
 
@@ -104,15 +104,15 @@ fn lua_math_fns(lua: &Lua) -> EvoidResult<()> {
 	// Making RNG be handled by Macroquad
 	math.set(
 		"random",
-		lua.create_function(|_, args: Variadic<Number>| {
+		lua_fn!(lua, |args: Variadic<Number>| {
 			use macroquad::rand::gen_range as rng;
 
-			Ok(match args[..] {
+			match args[..] {
 				[] => rng(0., 1.),
 				[a] => rng(1., a),
 				[a, b] | [a, b, ..] => rng(a, b),
-			})
-		})?,
+			}
+		}),
 	)?;
 
 	// Since RNG is handled by Macroquad, this function would do nothing anyways
@@ -166,7 +166,7 @@ fn lua_engine_fns(lua: &Lua) -> EvoidResult<()> {
 	engine.set(
 		"play_sound",
 		lua_fn!(lua, |args: Variadic<String>| {
-			play_random_sound(&args.iter().map(String::as_str).collect::<ImmutVec<&str>>());
+			play_random_sound(&args);
 		}),
 	)?;
 

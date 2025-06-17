@@ -1,6 +1,6 @@
 - Bugs
-	- Data race in Lua? 
-	- "Stuck in wall" bug
+	- Lua functions not always properly updating 
+	- "Stuck in wall" bug?
 
 - NPCs
 	- Use Lua for dialogue and behavior
