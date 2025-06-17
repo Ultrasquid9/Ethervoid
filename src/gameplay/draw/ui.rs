@@ -54,24 +54,13 @@ impl PlayerUi {
 			},
 		);
 
-		let mut size = vec2(self.hp_bar_texture.width(), self.hp_bar_texture.height());
-		size.x = (size.x / health.max as f32) * health.hp as f32;
-		size = size.round() * scale;
-
-		draw_texture_ex2(
+		draw_bar_right(
 			&self.hp_bar_texture,
-			self.hp_bar_offset * scale,
-			DrawTextureParams {
-				dest_size: Some(size),
-				source: Some(Rect::new(
-					0.,
-					0.,
-					size.x / scale,
-					self.hp_bar_texture.height(),
-				)),
-
-				..Default::default()
-			},
+			self.hp_bar_offset,
+			Vec2::ZERO,
+			scale,
+			health.max,
+			health.hp,
 		);
 	}
 
@@ -89,22 +78,53 @@ impl PlayerUi {
 			},
 		);
 
-		let width = self.temp_bar_texture.width();
-		let height = self.temp_bar_texture.height();
-
-		let mut size = vec2(width, height);
-		size.x = (size.x / 100.) * temp as f32;
-		size = size.round() * scale;
-
-		draw_texture_ex2(
+		draw_bar_left(
 			&self.temp_bar_texture,
-			(self.temp_bar_offset * scale) + pos.with_x(pos.x - size.x + (width * scale)),
-			DrawTextureParams {
-				dest_size: Some(size),
-				..Default::default()
-			},
+			self.temp_bar_offset,
+			pos,
+			scale,
+			100.,
+			temp,
 		);
 	}
+}
+
+fn draw_bar_right(texture: &Texture2D, offset: Vec2, pos: Vec2, scale: f32, max: f64, current: f64) {
+	let mut size = vec2(texture.width(), texture.height());
+	size.x = (size.x / max as f32) * current as f32;
+	size = size.round() * scale;
+
+	draw_texture_ex2(
+		texture,
+		calc_pos(pos, offset, size, scale, texture.width()),
+		DrawTextureParams {
+			dest_size: Some(size),
+			source: Some(Rect::new(0., 0., size.x / scale, texture.height())),
+
+			..Default::default()
+		},
+	);
+}
+
+fn draw_bar_left(texture: &Texture2D, offset: Vec2, pos: Vec2, scale: f32, max: f64, current: f64) {
+	let mut size = vec2(texture.width(), texture.height());
+	size.x = (size.x / max as f32) * current as f32;
+	size = size.round() * scale;
+
+	draw_texture_ex2(
+		texture,
+		calc_pos(pos, offset, size, scale, texture.width()),
+		DrawTextureParams {
+			dest_size: Some(size),
+			source: Some(Rect::new(texture.width()-(size.x / scale), 0., size.x / scale, texture.height())),
+
+			..Default::default()
+		},
+	);
+}
+
+fn calc_pos(pos: Vec2, offset: Vec2, size: Vec2, scale: f32, width: f32) -> Vec2 {
+	(offset * scale) + pos.with_x(pos.x - size.x + (width * scale))
 }
 
 fn remove_alpha(img: &DynamicImage) -> (Vec2, DynamicImage) {
