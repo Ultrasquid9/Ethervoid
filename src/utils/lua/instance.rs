@@ -139,11 +139,23 @@ fn lua_log_fns(lua: &Lua) -> EvoidResult<()> {
 	let globals = lua.globals();
 	let log = lua.create_table()?;
 
-	log.set("info", lua_fn!(lua, |arg: String| info!("{arg}")))?;
-	log.set("warn", lua_fn!(lua, |arg: String| warn!("{arg}")))?;
-	log.set("error", lua_fn!(lua, |arg: String| error!("{arg}")))?;
-	log.set("debug", lua_fn!(lua, |arg: String| debug!("{arg}")))?;
-	log.set("trace", lua_fn!(lua, |arg: String| trace!("{arg}")))?;
+	macro_rules! log {
+		($log:ident) => {
+			log.set(
+				stringify!($log),
+				lua_fn!(lua, |args: Variadic<Value>| $log!(
+					"{}",
+					stringify_args(args)
+				)),
+			)?
+		};
+	}
+
+	log!(info);
+	log!(warn);
+	log!(error);
+	log!(debug);
+	log!(trace);
 
 	globals.set("log", log)?;
 
@@ -173,4 +185,13 @@ fn lua_engine_fns(lua: &Lua) -> EvoidResult<()> {
 	lua.globals().set("engine", engine)?;
 
 	Ok(())
+}
+
+fn stringify_args(args: Variadic<Value>) -> String {
+	args.into_iter()
+		.map(|value| match value {
+			Value::String(str) => str.to_string_lossy(),
+			val => ron::to_string(&val).unwrap(),
+		})
+		.collect::<String>()
 }
