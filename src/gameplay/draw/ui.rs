@@ -13,8 +13,12 @@ pub struct PlayerUi {
 	hp_bar_offset: Vec2,
 
 	temp_texture: Texture2D,
-	temp_bar_texture: Texture2D,
-	temp_bar_offset: Vec2,
+	temp_bar_first_texture: Texture2D,
+	temp_bar_first_offset: Vec2,
+	temp_bar_second_texture: Texture2D,
+	temp_bar_second_offset: Vec2,
+	temp_bar_third_texture: Texture2D,
+	temp_bar_third_offset: Vec2,
 }
 
 impl PlayerUi {
@@ -22,13 +26,21 @@ impl PlayerUi {
 		hp_texture: &str,
 		hp_bar_texture: &str,
 		temp_texture: &str,
-		temp_bar_texture: &str,
+		temp_bar_first_texture: &str,
+		temp_bar_second_texture: &str,
+		temp_bar_third_texture: &str,
 	) -> Self {
 		let hp_texture = to_texture(access_image(hp_texture));
 		let (hp_bar_offset, hp_bar_img) = remove_alpha(access_image(hp_bar_texture));
 
 		let temp_texture = to_texture(access_image(temp_texture));
-		let (temp_bar_offset, temp_bar_img) = remove_alpha(access_image(temp_bar_texture));
+
+		let (temp_bar_first_offset, temp_bar_first_img) =
+			remove_alpha(access_image(temp_bar_first_texture));
+		let (temp_bar_second_offset, temp_bar_second_img) =
+			remove_alpha(access_image(temp_bar_second_texture));
+		let (temp_bar_third_offset, temp_bar_third_img) =
+			remove_alpha(access_image(temp_bar_third_texture));
 
 		Self {
 			hp_texture,
@@ -36,8 +48,12 @@ impl PlayerUi {
 			hp_bar_offset,
 
 			temp_texture,
-			temp_bar_texture: to_texture(&temp_bar_img),
-			temp_bar_offset,
+			temp_bar_first_texture: to_texture(&temp_bar_first_img),
+			temp_bar_first_offset,
+			temp_bar_second_texture: to_texture(&temp_bar_second_img),
+			temp_bar_second_offset,
+			temp_bar_third_texture: to_texture(&temp_bar_third_img),
+			temp_bar_third_offset,
 		}
 	}
 
@@ -78,25 +94,50 @@ impl PlayerUi {
 			},
 		);
 
-		draw_bar_left(
-			&self.temp_bar_texture,
-			self.temp_bar_offset,
+		draw_bar_right(
+			&self.temp_bar_first_texture,
+			self.temp_bar_first_offset,
 			pos,
 			scale,
-			100.,
-			temp,
+			15.,
+			temp.min(15.),
+		);
+
+		draw_bar_up(
+			&self.temp_bar_second_texture,
+			self.temp_bar_second_offset,
+			pos,
+			scale,
+			15.,
+			temp.clamp(15., 30.) - 15.,
+		);
+
+		draw_bar_left(
+			&self.temp_bar_third_texture,
+			self.temp_bar_third_offset,
+			pos,
+			scale,
+			70.,
+			(temp - 30.).max(0.),
 		);
 	}
 }
 
-fn draw_bar_right(texture: &Texture2D, offset: Vec2, pos: Vec2, scale: f32, max: f64, current: f64) {
+fn draw_bar_right(
+	texture: &Texture2D,
+	offset: Vec2,
+	pos: Vec2,
+	scale: f32,
+	max: f64,
+	current: f64,
+) {
 	let mut size = vec2(texture.width(), texture.height());
 	size.x = (size.x / max as f32) * current as f32;
 	size = size.round() * scale;
 
 	draw_texture_ex2(
 		texture,
-		calc_pos(pos, offset, size, scale, texture.width()),
+		(offset * scale) + pos,
 		DrawTextureParams {
 			dest_size: Some(size),
 			source: Some(Rect::new(0., 0., size.x / scale, texture.height())),
@@ -113,18 +154,36 @@ fn draw_bar_left(texture: &Texture2D, offset: Vec2, pos: Vec2, scale: f32, max: 
 
 	draw_texture_ex2(
 		texture,
-		calc_pos(pos, offset, size, scale, texture.width()),
+		(offset * scale) + pos.with_x(pos.x - size.x + (texture.width() * scale)),
 		DrawTextureParams {
 			dest_size: Some(size),
-			source: Some(Rect::new(texture.width()-(size.x / scale), 0., size.x / scale, texture.height())),
+			source: Some(Rect::new(
+				texture.width() - (size.x / scale),
+				0.,
+				size.x / scale,
+				texture.height(),
+			)),
 
 			..Default::default()
 		},
 	);
 }
 
-fn calc_pos(pos: Vec2, offset: Vec2, size: Vec2, scale: f32, width: f32) -> Vec2 {
-	(offset * scale) + pos.with_x(pos.x - size.x + (width * scale))
+fn draw_bar_up(texture: &Texture2D, offset: Vec2, pos: Vec2, scale: f32, max: f64, current: f64) {
+	let mut size = vec2(texture.width(), texture.height());
+	size.y = (size.y / max as f32) * current as f32;
+	size = size.round() * scale;
+
+	draw_texture_ex2(
+		texture,
+		(offset * scale) + pos.with_y(pos.y - size.y + (texture.height() * scale)),
+		DrawTextureParams {
+			dest_size: Some(size),
+			source: Some(Rect::new(0., 0., texture.width(), size.y / scale)),
+
+			..Default::default()
+		},
+	);
 }
 
 fn remove_alpha(img: &DynamicImage) -> (Vec2, DynamicImage) {

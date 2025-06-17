@@ -12,7 +12,6 @@
 		- Custom weapons
 
 - UI
-	- Temperature Bar
 	- Weapon Bar
 	- Proper skin
 		- Fix tiny fonts 

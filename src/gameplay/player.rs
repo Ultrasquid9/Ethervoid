@@ -79,7 +79,9 @@ impl Player {
 				"default:ui/hp",
 				"default:ui/hp_bar",
 				"default:ui/temp",
-				"default:ui/temp_bar3",
+				"default:ui/temp_bar_first",
+				"default:ui/temp_bar_second",
+				"default:ui/temp_bar_third",
 			),
 			inventory: Inventory {
 				swords: [
