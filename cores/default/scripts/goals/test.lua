@@ -16,8 +16,8 @@ function test:init()
 	self.target = position.player()
 end
 
-function test:update(attacks, anim)
-	table.insert(attacks, attack.physical(10, 20, position.self(), self.target, "default:attacks/dash"))
+function test:update(anim)
+	attack.spawn(attack.physical(10, 20, position.self(), self.target, "default:attacks/dash"))
 
 	return move_towards(position.self(), self.target, 1.8)
 end

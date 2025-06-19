@@ -91,6 +91,11 @@ fn lua_attack_fns(lua: &Lua) -> EvoidResult<()> {
 		}),
 	)?;
 
+	attacks.set("_attacks", lua.create_table()?)?;
+	attacks.set("spawn", lua.create_function(|lua, atk: Attack| {
+		lua.globals().get::<Table>("attack")?.get::<Table>("_attacks")?.push(atk)
+	})?)?;
+
 	lua.globals().set("attack", attacks)?;
 	Ok(())
 }

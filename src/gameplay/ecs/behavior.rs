@@ -1,13 +1,14 @@
 use goal::{GoalBehavior, goal_behavior};
-use parking_lot::RwLock;
+use mlua::Table;
 use player::{PlayerBehavior, player_behavior};
 use stecs::prelude::*;
 use wander::{WanderBehavior, wander_behavior};
 
 use crate::{
-	gameplay::Gameplay,
+	gameplay::{Gameplay, combat::Attack},
 	utils::{
-		resources::{config::access_config, maps::access_map},
+		error::EvoidResult,
+		resources::{config::access_config, maps::access_map, scripts::lua},
 		smart_time,
 	},
 };
@@ -33,7 +34,6 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 		.obj
 		.first()
 		.expect("Player should exist");
-	let attacks = RwLock::new(&mut gameplay.world.attacks);
 
 	thread::scope(|scope| {
 		for (obj, behavior, sprite) in query!(
@@ -66,7 +66,6 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 							obj,
 							&obj_player,
 							sprite,
-							*attacks.write(),
 							&gameplay.current_map,
 						);
 					});
@@ -81,7 +80,26 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 		}
 	});
 
+	if let Err(e) = retrieve_lua_attacks(gameplay) {
+		tracing::error!("{e}");
+	}
+
 	for door in &access_map(&gameplay.current_map.clone()).doors {
 		door.try_change_map(gameplay);
 	}
+}
+
+fn retrieve_lua_attacks(gameplay: &mut Gameplay) -> EvoidResult<()> {
+	let attacks = lua()
+		.globals()
+		.get::<Table>("attack")?
+		.get::<Table>("_attacks")?;
+
+	for attack in attacks.pairs::<mlua::Value, Attack>() {
+		let (_, attack) = attack?;
+		gameplay.world.attacks.insert(attack);
+	}
+
+	attacks.clear()?;
+	Ok(())
 }

@@ -5,14 +5,9 @@ use tracing::error;
 
 use crate::{
 	cores::script::Script,
-	gameplay::{
-		combat::{Attack, AttackStructOf},
-		ecs::{obj::Obj, sprite::Sprite},
-	},
+	gameplay::ecs::{obj::Obj, sprite::Sprite},
 	utils::{ImmutVec, error::EvoidResult, lua::LuaDVec2, resources::scripts::lua, smart_time},
 };
-
-use stecs::{prelude::Archetype, storage::vec::VecFamily};
 
 pub struct GoalBehavior {
 	pub goals: ImmutVec<Script>,
@@ -67,29 +62,12 @@ impl Script {
 		Ok(stop)
 	}
 
-	fn update(
-		&mut self,
-		obj: &mut Obj,
-		sprite: &mut Sprite,
-		attacks: &mut AttackStructOf<VecFamily>,
-		current_map: &str,
-	) -> EvoidResult<()> {
-		let lua_attacks = lua().create_table()?;
+	fn update(&mut self, obj: &mut Obj, sprite: &mut Sprite, current_map: &str) -> EvoidResult<()> {
 		let lua_current_anim =
 			lua().create_string(sprite.get_current_anim().unwrap_or_default())?;
 
 		let fun: Function = self.table()?.get("update")?;
-		let new_pos: LuaDVec2 = fun.call((
-			self.table()?.clone(),
-			lua_attacks.clone(),
-			lua_current_anim.clone(),
-		))?;
-
-		// Getting attacks from the table
-		lua_attacks.for_each(|_: String, atk: Attack| {
-			attacks.insert(atk);
-			Ok(())
-		})?;
+		let new_pos: LuaDVec2 = fun.call((self.table()?.clone(), lua_current_anim.clone()))?;
 
 		// Setting a new anim (if one was set)
 		let current_anim = lua_current_anim.to_str()?.to_string();
@@ -146,7 +124,6 @@ pub fn goal_behavior(
 	obj_self: &mut Obj,
 	obj_player: &Obj,
 	sprite: &mut Sprite,
-	attacks: &mut AttackStructOf<VecFamily>,
 	current_map: &str,
 ) {
 	// Macro to execute a function and check if it returns an error
@@ -185,7 +162,7 @@ pub fn goal_behavior(
 
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {
-		maybe!(behavior.goals[index].update(obj_self, sprite, attacks, current_map));
+		maybe!(behavior.goals[index].update(obj_self, sprite, current_map));
 		let should_stop = maybe!(behavior.goals[index].should_stop(sprite));
 
 		if should_stop {

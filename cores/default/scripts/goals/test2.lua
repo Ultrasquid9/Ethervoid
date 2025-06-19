@@ -13,7 +13,7 @@ function test2:init()
 	self.countdown = 20
 end
 
-function test2:update(attacks, anim)
+function test2:update(anim)
 	if self.countdown == 20. then
 		anim = "toss"
 	end
@@ -21,10 +21,7 @@ function test2:update(attacks, anim)
 	self.countdown -= engine.delta_time() * 60
 
 	if self.countdown <= 0 then
-		table.insert(
-			attacks,
-			attack.projectile(12, 10, position.self(), position.player(), "default:attacks/projectile-enemy")
-		)
+		attack.spawn(attack.projectile(12, 10, position.self(), position.player(), "default:attacks/projectile-enemy"))
 	end
 
 	return position.self()
