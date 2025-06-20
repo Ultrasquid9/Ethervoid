@@ -6,8 +6,8 @@ use stecs::prelude::*;
 use crate::{
 	State,
 	utils::{
-		resources::config::access_config, smart_time, update_delta_time, update_mouse_pos,
-		update_screen_size,
+		resources::{config::access_config, save::access_save},
+		smart_time, update_delta_time, update_mouse_pos, update_screen_size,
 	},
 };
 
@@ -213,6 +213,9 @@ pub async fn gameplay() -> State {
 
 	gameplay.world.player.insert(Player::new());
 	gameplay.world.populate(&gameplay.current_map);
+
+	// Seeding the RNG
+	rand::srand(access_save().seed);
 
 	loop {
 		update_delta_time();

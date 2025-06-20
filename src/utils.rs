@@ -100,3 +100,13 @@ pub fn camera_scale() -> f64 {
 pub fn angle_between(p0: &DVec2, p1: &DVec2) -> f64 {
 	(p1.y - p0.y).atan2(p1.x - p0.x)
 }
+
+/// Gets a seed for the random number generator
+pub fn random_seed() -> u64 {
+	// Not truly random, but for the seed alone it doesn't really have to be.
+	//
+	// I would have thrown system temperature in there too, but that would require an
+	// extra library, and I didn't think it was worth it.
+
+	miniquad::date::now().to_bits() ^ (miniquad::date::now() as u64).reverse_bits()
+}

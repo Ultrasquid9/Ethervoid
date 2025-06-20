@@ -7,9 +7,12 @@ use bincode::{Decode, Encode, config, decode_from_slice, encode_to_vec};
 use rustc_hash::FxHashSet;
 use tracing::{error, info};
 
-#[derive(Encode, Decode, Default)]
+use crate::utils::random_seed;
+
+#[derive(Encode, Decode)]
 pub struct Save {
 	pub seen_maps: FxHashSet<String>,
+	pub seed: u64,
 }
 
 impl Save {
@@ -64,5 +67,14 @@ impl Save {
 				info!("Game saved successfully!")
 			}
 		});
+	}
+}
+
+impl Default for Save {
+	fn default() -> Self {
+		Self {
+			seen_maps: FxHashSet::default(),
+			seed: random_seed(),
+		}
 	}
 }
