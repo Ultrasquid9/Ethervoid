@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use mlua::{Function, Table, Value};
+use mlua::Function;
 use tracing::error;
 
 use crate::{
@@ -35,7 +35,7 @@ impl Clone for GoalBehavior {
 }
 
 impl Script {
-	fn init(&mut self) -> EvoidResult<()> {
+	fn init(&mut self, obj_self: &Obj, obj_player: &Obj) -> EvoidResult<()> {
 		let fun: Function = match self.table()?.get("init") {
 			Ok(fun) => fun,
 			Err(e) => match e {
@@ -44,30 +44,54 @@ impl Script {
 			},
 		};
 
-		Ok(fun.call(self.table()?.clone())?)
+		Ok(fun.call((
+			self.table()?.clone(),
+			LuaDVec2(obj_self.pos),
+			LuaDVec2(obj_player.pos),
+		))?)
 	}
 
-	fn should_start(&mut self) -> EvoidResult<bool> {
+	fn should_start(
+		&mut self,
+		obj_self: &Obj,
+		obj_player: &Obj,
+		prev_goal: &str,
+	) -> EvoidResult<bool> {
 		let fun: Function = self.table()?.get("should_start")?;
-		Ok(fun.call(self.table()?.clone())?)
+		Ok(fun.call((
+			self.table()?.clone(),
+			LuaDVec2(obj_self.pos),
+			LuaDVec2(obj_player.pos),
+			prev_goal,
+		))?)
 	}
 
-	fn should_stop(&mut self, sprite: &mut Sprite) -> EvoidResult<bool> {
+	fn should_stop(&mut self, obj_self: &Obj, obj_player: &Obj) -> EvoidResult<bool> {
 		let fun: Function = self.table()?.get("should_stop")?;
-		let stop: bool = fun.call(self.table()?.clone())?;
-
-		if stop {
-			sprite.set_default_anim();
-		}
-		Ok(stop)
+		Ok(fun.call((
+			self.table()?.clone(),
+			LuaDVec2(obj_self.pos),
+			LuaDVec2(obj_player.pos),
+		))?)
 	}
 
-	fn update(&mut self, obj: &mut Obj, sprite: &mut Sprite, current_map: &str) -> EvoidResult<()> {
+	fn update(
+		&mut self,
+		obj_self: &mut Obj,
+		obj_player: &Obj,
+		sprite: &mut Sprite,
+		current_map: &str,
+	) -> EvoidResult<()> {
 		let lua_current_anim =
 			lua().create_string(sprite.get_current_anim().unwrap_or_default())?;
 
 		let fun: Function = self.table()?.get("update")?;
-		let new_pos: LuaDVec2 = fun.call((self.table()?.clone(), lua_current_anim.clone()))?;
+		let new_pos: LuaDVec2 = fun.call((
+			self.table()?.clone(),
+			LuaDVec2(obj_self.pos),
+			LuaDVec2(obj_player.pos),
+			lua_current_anim.clone(),
+		))?;
 
 		// Setting a new anim (if one was set)
 		let current_anim = lua_current_anim.to_str()?.to_string();
@@ -78,45 +102,13 @@ impl Script {
 		}
 
 		// Taking delta time into consideration
-		let new_pos = ((*new_pos - obj.pos) * smart_time()) + obj.pos;
+		let new_pos = ((*new_pos - obj_self.pos) * smart_time()) + obj_self.pos;
 
-		obj.update(new_pos);
-		obj.try_move(&new_pos, current_map);
+		obj_self.update(new_pos);
+		obj_self.try_move(&new_pos, current_map);
 
 		Ok(())
 	}
-}
-
-fn lua_goal_fns(
-	table: &Table,
-	obj_self: &Obj,
-	obj_player: &Obj,
-	prev_goal: String,
-) -> EvoidResult<()> {
-	macro_rules! lua_fn {
-		($lua:ident, || $fn:expr) => {
-			$lua.create_function(move |_, ()| Ok($fn))?
-		};
-	}
-
-	// Cloning them here to avoid lifetime issues
-	let pos_player = obj_player.pos;
-	let pos_self = obj_self.pos;
-
-	let lua = lua();
-
-	let position = lua.create_table()?;
-	position.set("player", lua_fn!(lua, || LuaDVec2(pos_player)))?;
-	position.set("self", lua_fn!(lua, || LuaDVec2(pos_self)))?;
-
-	let goals = lua.create_table()?;
-	goals.set("previous", lua_fn!(lua, || prev_goal.clone()))?;
-
-	// Adding the tables to global
-	table.set("position", position)?;
-	table.set("goals", goals)?;
-
-	Ok(())
 }
 
 pub fn goal_behavior(
@@ -144,28 +136,13 @@ pub fn goal_behavior(
 		return;
 	}
 
-	for goal in &*behavior.goals {
-		let Ok(table) = goal.table() else { continue };
-
-		for pair in table.pairs::<Value, Function>() {
-			let Ok((_, fun)) = pair else { continue };
-			let Some(env) = fun.environment() else {
-				continue;
-			};
-
-			if let Err(e) = lua_goal_fns(&env, obj_self, obj_player, behavior.prev_goal.clone()) {
-				behavior.err = Some(e);
-				return;
-			}
-		}
-	}
-
 	// Updates the current goal, and checks it it should be stopped
 	if let Some(index) = behavior.index {
-		maybe!(behavior.goals[index].update(obj_self, sprite, current_map));
-		let should_stop = maybe!(behavior.goals[index].should_stop(sprite));
+		maybe!(behavior.goals[index].update(obj_self, obj_player, sprite, current_map));
+		let should_stop = maybe!(behavior.goals[index].should_stop(obj_self, obj_player));
 
 		if should_stop {
+			sprite.set_default_anim();
 			behavior.prev_goal.clone_from(&behavior.goals[index].name);
 			behavior.index = None;
 		}
@@ -174,14 +151,14 @@ pub fn goal_behavior(
 
 	// Checks each goal to see if they should be started, and selects the first valid one
 	for index in 0..behavior.goals.len() {
-		match behavior.goals[index].should_start() {
+		match behavior.goals[index].should_start(obj_self, obj_player, &behavior.prev_goal) {
 			Err(e) => {
 				error!("{e}");
 				behavior.err = Some(e);
 			}
 			Ok(true) => {
 				behavior.index = Some(index);
-				maybe!(behavior.goals[index].init());
+				maybe!(behavior.goals[index].init(obj_self, obj_player));
 				return;
 			}
 			_ => (),
