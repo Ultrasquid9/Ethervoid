@@ -56,11 +56,11 @@ pub fn create_resources() {
 		return;
 	}
 
-	std::thread::scope(|scope| {
-		scope.spawn(create_textures);
-		scope.spawn(create_sounds);
-		scope.spawn(create_script_vals);
-		scope.spawn(create_langs);
+	rayon::scope(|s| {
+		s.spawn(|_| create_textures());
+		s.spawn(|_| create_sounds());
+		s.spawn(|_| create_script_vals());
+		s.spawn(|_| create_langs());
 	});
 	create_maps(); // Maps depend on the existance of the other resources
 	info!("All resources loaded!");

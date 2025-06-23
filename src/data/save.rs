@@ -55,7 +55,7 @@ impl Save {
 			}
 		};
 
-		std::thread::spawn(move || {
+		rayon::spawn(move || {
 			let compressed = match zstd::bulk::compress(&bytes, 0) {
 				Ok(ok) => ok,
 				Err(e) => {

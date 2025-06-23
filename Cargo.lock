@@ -543,6 +543,7 @@ dependencies = [
  "macroquad",
  "mlua",
  "parking_lot",
+ "rayon",
  "raywoke",
  "ron",
  "rustc-hash",

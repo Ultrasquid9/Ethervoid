@@ -13,8 +13,6 @@ use crate::{
 	},
 };
 
-use std::thread;
-
 pub mod goal;
 pub mod player;
 pub mod wander;
@@ -34,8 +32,8 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 		.obj
 		.first()
 		.expect("Player should exist");
-
-	thread::scope(|scope| {
+	
+	rayon::in_place_scope(|scope| {
 		for (obj, behavior, sprite) in query!(
 			[
 				gameplay.world.player,
@@ -60,7 +58,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 				}
 
 				Behavior::Goal(behavior) => {
-					scope.spawn(|| {
+					scope.spawn(|_| {
 						goal_behavior(
 							&mut *behavior,
 							obj,
@@ -72,7 +70,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 				}
 
 				Behavior::Wander(behavior) => {
-					scope.spawn(|| wander_behavior(&mut *behavior, obj, &gameplay.current_map));
+					scope.spawn(|_| wander_behavior(&mut *behavior, obj, &gameplay.current_map));
 				}
 
 				Behavior::None => (),
