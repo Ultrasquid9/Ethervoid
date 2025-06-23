@@ -7,7 +7,7 @@ use maps::create_maps;
 use scripts::create_script_vals;
 use tracing::info;
 
-use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use parking_lot::{RwLock, RwLockReadGuard};
 use textures::create_textures;
 
 use crate::{cores::cores_changed, utils::resources::langs::create_langs};
@@ -16,7 +16,6 @@ pub mod audio;
 pub mod config;
 pub mod langs;
 pub mod maps;
-pub mod save;
 pub mod scripts;
 pub mod textures;
 
@@ -27,9 +26,7 @@ pub mod textures;
 pub type Global<T> = LazyLock<RwLock<T>>;
 /// Stores a globally available resource
 type Resource<T> = Global<FxHashMap<String, T>>;
-
 type GlobalAccess<T> = RwLockReadGuard<'static, T>;
-type GlobalAccessMut<T> = RwLockWriteGuard<'static, T>;
 
 /// Creates a blank resource
 const fn resource<T>() -> Resource<T> {

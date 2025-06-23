@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use draw::{draw, render::darken_screen};
 use macroquad::prelude::*;
 use paused::Paused;
@@ -5,9 +7,10 @@ use stecs::prelude::*;
 
 use crate::{
 	State,
+	data::save::Save,
 	utils::{
-		resources::{config::access_config, save::access_save},
-		smart_time, update_delta_time, update_mouse_pos, update_screen_size,
+		resources::config::access_config, smart_time, update_delta_time, update_mouse_pos,
+		update_screen_size,
 	},
 };
 
@@ -26,13 +29,37 @@ pub mod npc;
 pub mod paused;
 pub mod player;
 
+// TODO: Make more configurable.
+pub const SAVE_DIR: &str = "./save.evs";
+
 pub struct Gameplay {
 	pub world: World,
 	pub current_map: String,
 	pub paused: Paused,
+	pub save: Save,
+	save_dir: PathBuf,
 }
 
 impl Gameplay {
+	pub fn new(save: impl AsRef<Path>) -> Self {
+		let mut gameplay = Self {
+			world: World::default(),
+			current_map: access_config().start_map.clone(),
+			paused: Paused::None,
+			save: Save::read(&save),
+			save_dir: save.as_ref().to_path_buf(),
+		};
+
+		// Initial World setup
+		gameplay.world.player.insert(Player::new());
+		gameplay.world.populate(&gameplay.current_map);
+
+		// Seeding the RNG
+		rand::srand(gameplay.save.seed);
+
+		gameplay
+	}
+
 	fn pause(&mut self) -> Option<State> {
 		if self.paused.is_paused() {
 			darken_screen();
@@ -198,24 +225,16 @@ impl Gameplay {
 	}
 }
 
-impl Default for Gameplay {
-	fn default() -> Self {
-		Gameplay {
-			world: World::default(),
-			current_map: access_config().start_map.clone(),
-			paused: Paused::None,
-		}
+// Saves the game automatically whenever you exit
+// TODO: remove this, add actual saving mechanism
+impl Drop for Gameplay {
+	fn drop(&mut self) {
+		self.save.save(&self.save_dir);
 	}
 }
 
-pub async fn gameplay() -> State {
-	let mut gameplay = Gameplay::default();
-
-	gameplay.world.player.insert(Player::new());
-	gameplay.world.populate(&gameplay.current_map);
-
-	// Seeding the RNG
-	rand::srand(access_save().seed);
+pub async fn gameplay(save: impl AsRef<Path>) -> State {
+	let mut gameplay = Gameplay::new(save);
 
 	loop {
 		update_delta_time();

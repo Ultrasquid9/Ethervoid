@@ -3,10 +3,7 @@ use raywoke::prelude::*;
 use std::fmt::Display;
 use tracing::error;
 
-use crate::utils::{
-	resources::{maps::access_map, save::access_save_mut},
-	tup_vec::Tup64,
-};
+use crate::utils::{resources::maps::access_map, tup_vec::Tup64};
 
 use super::Gameplay;
 
@@ -116,7 +113,7 @@ impl Door {
 
 			gameplay.current_map.clone_from(&self.dest);
 			gameplay.world.populate(&gameplay.current_map);
-			access_save_mut().seen_maps.insert(self.dest.clone());
+			gameplay.save.seen_maps.insert(self.dest.clone());
 			return;
 		}
 	}

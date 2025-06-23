@@ -1,11 +1,10 @@
 use crate::utils::resources::{
 	config::{read_config, update_config},
 	create_resources,
-	save::save,
 };
 
 use self::prelude::*;
-use gameplay::gameplay;
+use gameplay::{SAVE_DIR, gameplay};
 
 use menu::{init_ui, main::menu};
 use utils::{error::EvoidResult, logger::init_log};
@@ -38,13 +37,10 @@ async fn main() -> EvoidResult<()> {
 		create_resources();
 		// Updates the config
 		update_config(read_config());
-		// Saves the game
-		// TODO: Save game explicitly
-		save();
 
 		state = match state {
 			State::Menu => menu().await,
-			State::Gameplay => gameplay().await,
+			State::Gameplay => gameplay(SAVE_DIR).await,
 			State::Quit => return Ok(()),
 		};
 

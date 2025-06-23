@@ -34,7 +34,10 @@ impl Save {
 		};
 
 		match decode_from_slice(&bytes, config::standard()) {
-			Ok((ok, _)) => ok,
+			Ok((ok, _)) => {
+				info!("Save file loaded!");
+				ok
+			}
 			Err(e) => {
 				error!("Failed to decode save file: {e}");
 				Self::default()

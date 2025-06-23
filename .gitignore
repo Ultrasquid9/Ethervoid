@@ -8,8 +8,8 @@ output.log.old
 # Game config
 config.ron
 
-# Game save
-save.evoid
+# Game saves
+*.evs
 
 # Flamegraphs
 perf.data
