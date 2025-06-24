@@ -72,29 +72,22 @@ impl Goals {
 		// Updates the current goal, and checks it it should be stopped
 		if let Some(index) = self.index {
 			maybe!(self.scripts[index].update(obj_self, obj_player, sprite, current_map));
-			let should_stop = maybe!(self.scripts[index].should_stop(obj_self, obj_player));
 
-			if should_stop {
+			if maybe!(self.scripts[index].should_stop(obj_self, obj_player)) {
 				sprite.set_default_anim();
 				self.prev_script.clone_from(&self.scripts[index].name);
 				self.index = None;
 			}
+
 			return;
 		}
 
 		// Checks each goal to see if they should be started, and selects the first valid one
 		for index in 0..self.scripts.len() {
-			match self.scripts[index].should_start(obj_self, obj_player, &self.prev_script) {
-				Err(e) => {
-					error!("{e}");
-					self.err = Some(e);
-				}
-				Ok(true) => {
-					self.index = Some(index);
-					maybe!(self.scripts[index].init(obj_self, obj_player));
-					return;
-				}
-				_ => (),
+			if maybe!(self.scripts[index].should_start(obj_self, obj_player, &self.prev_script)) {
+				maybe!(self.scripts[index].init(obj_self, obj_player));
+				self.index = Some(index);
+				return;
 			}
 		}
 	}

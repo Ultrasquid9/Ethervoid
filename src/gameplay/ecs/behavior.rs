@@ -5,7 +5,7 @@ use crate::{
 	gameplay::{Gameplay, combat::Attack},
 	utils::{
 		error::EvoidResult,
-		resources::{config::access_config, maps::access_map, scripts::lua},
+		resources::{maps::access_map, scripts::lua},
 		smart_time,
 	},
 };
@@ -20,7 +20,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 
 	for (obj, controller) in query!(gameplay.world.player, (&mut obj, &mut controller)) {
 		obj_player = *obj;
-		controller.control(obj, &access_config(), &gameplay.current_map);
+		controller.control(obj, &gameplay.current_map);
 	}
 
 	rayon::scope(|scope| {

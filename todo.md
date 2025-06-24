@@ -1,5 +1,5 @@
 - Bugs
-	- Lua functions not always properly updating 
+	- Dash wall clip
 	- "Stuck in wall" bug?
 
 - NPCs

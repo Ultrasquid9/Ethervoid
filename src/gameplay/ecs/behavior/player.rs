@@ -1,9 +1,9 @@
 use macroquad::math::DVec2;
 
 use crate::{
-	data::config::{Config, keymap::Key},
+	data::config::keymap::Key,
 	gameplay::ecs::obj::{Axis, Obj},
-	utils::smart_time,
+	utils::{resources::config::access_config, smart_time},
 };
 
 #[derive(PartialEq, Clone, Default)]
@@ -14,11 +14,11 @@ pub struct PlayerController {
 
 impl PlayerController {
 	/// Handles player controls
-	pub fn control(&mut self, obj: &mut Obj, config: &Config, current_map: &str) {
+	pub fn control(&mut self, obj: &mut Obj, current_map: &str) {
 		let mut new_pos = DVec2::ZERO; // The pos to be moved to
 
 		if !self.is_dashing {
-			switch_dir_from_input(config, obj);
+			switch_dir_from_input(obj);
 		}
 		let axis = |axis: &Axis, f: &mut f64| match axis {
 			Axis::Positive => *f += 1.,
@@ -29,11 +29,16 @@ impl PlayerController {
 		axis(&obj.axis_horizontal, &mut new_pos.x);
 
 		// Dashing
-		if config.keymap.dash.is_down() && self.dash_cooldown <= 0. && new_pos != DVec2::ZERO {
+		if access_config().keymap.dash.is_down()
+			&& self.dash_cooldown <= 0.
+			&& new_pos != DVec2::ZERO
+			&& obj.stunned < 5.
+		{
+			obj.stunned = 0.;
 			obj.speed += 12.;
-			self.dash_cooldown += 70.;
+			self.dash_cooldown += 45.;
 		} else if self.dash_cooldown > 0. {
-			if self.dash_cooldown > 55. {
+			if self.dash_cooldown > 30. {
 				self.is_dashing = true;
 				obj.speed = 12.;
 			} else {
@@ -52,6 +57,13 @@ impl PlayerController {
 			obj.speed /= 1.5;
 		}
 
+		// Makes the player extremely slow if stunned
+		// Unlike enemies, they are not completely frozen - that was the case for awhile, but it felt bad
+		if obj.stunned > 0. {
+			obj.stunned -= smart_time();
+			obj.speed = 0.25;
+		}
+
 		if new_pos == DVec2::ZERO {
 			obj.speed = 1.0;
 		} else {
@@ -61,7 +73,7 @@ impl PlayerController {
 	}
 }
 
-fn switch_dir_from_input(config: &Config, obj: &mut Obj) {
+fn switch_dir_from_input(obj: &mut Obj) {
 	// Checks to see if both key1 and key2 are being held at the same time.
 	// If they are, sets the direction of the axis based upon the most recently pressed key.
 	// Otherwise, sets the direction of the axis based upon the currently pressed key.
@@ -81,6 +93,8 @@ fn switch_dir_from_input(config: &Config, obj: &mut Obj) {
 			*axis = Axis::None;
 		}
 	}
+
+	let config = access_config();
 
 	io(
 		&config.keymap.up,
