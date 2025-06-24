@@ -41,13 +41,7 @@ impl Obj {
 			target,
 			size,
 
-			axis_horizontal: Axis::None,
-			axis_vertical: Axis::None,
-
-			speed: 1.,
-			stunned: 0.,
-
-			depth: 0,
+			..Default::default()
 		}
 	}
 
@@ -159,6 +153,24 @@ impl Obj {
 impl Tup64 for Obj {
 	fn tup64(&self) -> (f64, f64) {
 		self.pos.tup64()
+	}
+}
+
+impl Default for Obj {
+	fn default() -> Self {
+		Self {
+			pos: DVec2::ZERO,
+			target: DVec2::ZERO,
+			size: 0.,
+
+			axis_horizontal: Axis::None,
+			axis_vertical: Axis::None,
+
+			speed: 1.,
+			stunned: 0.,
+
+			depth: 0,
+		}
 	}
 }
 

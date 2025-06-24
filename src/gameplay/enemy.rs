@@ -3,7 +3,7 @@ use macroquad::math::DVec2;
 use stecs::prelude::*;
 
 use super::ecs::{
-	behavior::{Behavior, goal::GoalBehavior},
+	behavior::goal::Goals,
 	health::Health,
 	obj::Obj,
 	sprite::{Frames, Rotation, Sprite},
@@ -13,7 +13,7 @@ use super::ecs::{
 pub struct Enemy {
 	health: Health,
 	obj: Obj,
-	behavior: Behavior,
+	goals: Goals,
 	pub sprite: Sprite,
 }
 
@@ -24,7 +24,7 @@ impl Enemy {
 		Self {
 			health: Health::new(enemytype.max_health),
 			obj,
-			behavior: Behavior::Goal(GoalBehavior::from_scripts(&enemytype.goals)),
+			goals: Goals::from_scripts(&enemytype.goals),
 			sprite: Sprite::new(
 				obj,
 				&enemytype.sprite,

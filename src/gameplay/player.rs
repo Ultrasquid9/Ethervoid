@@ -4,7 +4,7 @@ use stecs::prelude::*;
 use super::{
 	combat::{Attack, Owner},
 	ecs::{
-		behavior::{Behavior, player::PlayerBehavior},
+		behavior::player::PlayerController,
 		health::Health,
 		obj::Obj,
 		sprite::{Frames, Rotation, Sprite},
@@ -22,7 +22,7 @@ use macroquad::prelude::*;
 pub struct Player {
 	pub health: Health,
 	pub obj: Obj,
-	pub behavior: Behavior,
+	pub controller: PlayerController,
 	pub sprite: Sprite,
 
 	pub ui: PlayerUi,
@@ -63,10 +63,7 @@ impl Player {
 		Self {
 			health: Health::new(100.),
 			obj,
-			behavior: Behavior::Player(PlayerBehavior {
-				dash_cooldown: 0.,
-				is_dashing: false,
-			}),
+			controller: PlayerController::default(),
 			sprite: Sprite::new(
 				obj,
 				"default:entity/player/player_spritesheet_wip",

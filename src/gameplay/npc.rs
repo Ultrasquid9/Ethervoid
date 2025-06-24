@@ -4,21 +4,18 @@ use rustc_hash::FxHashMap;
 use stecs::prelude::*;
 
 use super::ecs::{
-	behavior::Behavior,
 	obj::Obj,
 	sprite::{Frames, Rotation, Sprite},
 };
 
-use crate::{
-	cores::npctype::NpcType, gameplay::ecs::behavior::goal::GoalBehavior, utils::ImmutVec,
-};
+use crate::{cores::npctype::NpcType, gameplay::ecs::behavior::goal::Goals, utils::ImmutVec};
 
 pub mod messages;
 
 #[derive(SplitFields)]
 pub struct Npc {
 	obj: Obj,
-	behavior: Behavior,
+	goals: Goals,
 	sprite: Sprite,
 
 	messages: ImmutVec<Message>,
@@ -31,7 +28,7 @@ impl Npc {
 
 		Self {
 			obj,
-			behavior: Behavior::Goal(GoalBehavior::from_scripts(&npctype.goals)),
+			goals: Goals::from_scripts(&npctype.goals),
 			sprite: Sprite::new(
 				obj,
 				"default:entity/player/player_spritesheet_wip",

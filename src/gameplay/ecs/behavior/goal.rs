@@ -9,19 +9,19 @@ use crate::{
 	utils::{ImmutVec, error::EvoidResult, lua::LuaDVec2, resources::scripts::lua, smart_time},
 };
 
-pub struct GoalBehavior {
-	pub goals: ImmutVec<Script>,
-	pub prev_goal: String,
+pub struct Goals {
+	pub scripts: ImmutVec<Script>,
+	pub prev_script: String,
 	pub index: Option<usize>,
 
 	pub err: Option<Box<dyn Error + Send + Sync>>,
 }
 
-impl GoalBehavior {
-	pub fn new(goals: ImmutVec<Script>) -> Self {
+impl Goals {
+	pub fn new(scripts: ImmutVec<Script>) -> Self {
 		Self {
-			goals,
-			prev_goal: "none".to_owned(),
+			scripts,
+			prev_script: "none".to_owned(),
 
 			index: None,
 			err: None,
@@ -42,19 +42,75 @@ impl GoalBehavior {
 				.collect::<ImmutVec<Script>>(),
 		)
 	}
-}
 
-impl PartialEq for GoalBehavior {
-	fn eq(&self, other: &Self) -> bool {
-		self.index == other.index && self.prev_goal == other.prev_goal
+	/// Runs the entity's current goal
+	pub fn run_goal(
+		&mut self,
+		obj_self: &mut Obj,
+		obj_player: &Obj,
+		sprite: &mut Sprite,
+		current_map: &str,
+	) {
+		// Macro to execute a function and check if it returns an error
+		macro_rules! maybe {
+			($EvoidResult:expr) => {
+				match $EvoidResult {
+					Err(e) => {
+						error!("{e}");
+						self.err = Some(e);
+						return;
+					}
+					Ok(ok) => ok,
+				}
+			};
+		}
+
+		if self.err.is_some() {
+			return;
+		}
+
+		// Updates the current goal, and checks it it should be stopped
+		if let Some(index) = self.index {
+			maybe!(self.scripts[index].update(obj_self, obj_player, sprite, current_map));
+			let should_stop = maybe!(self.scripts[index].should_stop(obj_self, obj_player));
+
+			if should_stop {
+				sprite.set_default_anim();
+				self.prev_script.clone_from(&self.scripts[index].name);
+				self.index = None;
+			}
+			return;
+		}
+
+		// Checks each goal to see if they should be started, and selects the first valid one
+		for index in 0..self.scripts.len() {
+			match self.scripts[index].should_start(obj_self, obj_player, &self.prev_script) {
+				Err(e) => {
+					error!("{e}");
+					self.err = Some(e);
+				}
+				Ok(true) => {
+					self.index = Some(index);
+					maybe!(self.scripts[index].init(obj_self, obj_player));
+					return;
+				}
+				_ => (),
+			}
+		}
 	}
 }
 
-impl Clone for GoalBehavior {
+impl PartialEq for Goals {
+	fn eq(&self, other: &Self) -> bool {
+		self.index == other.index && self.prev_script == other.prev_script
+	}
+}
+
+impl Clone for Goals {
 	fn clone(&self) -> Self {
 		Self {
-			goals: self.goals.clone(),
-			prev_goal: self.prev_goal.clone(),
+			scripts: self.scripts.clone(),
+			prev_script: self.prev_script.clone(),
 			index: self.index,
 			err: None,
 		}
@@ -135,60 +191,5 @@ impl Script {
 		obj_self.try_move(&new_pos, current_map);
 
 		Ok(())
-	}
-}
-
-pub fn goal_behavior(
-	behavior: &mut GoalBehavior,
-	obj_self: &mut Obj,
-	obj_player: &Obj,
-	sprite: &mut Sprite,
-	current_map: &str,
-) {
-	// Macro to execute a function and check if it returns an error
-	macro_rules! maybe {
-		($EvoidResult:expr) => {
-			match $EvoidResult {
-				Err(e) => {
-					error!("{e}");
-					behavior.err = Some(e);
-					return;
-				}
-				Ok(ok) => ok,
-			}
-		};
-	}
-
-	if behavior.err.is_some() {
-		return;
-	}
-
-	// Updates the current goal, and checks it it should be stopped
-	if let Some(index) = behavior.index {
-		maybe!(behavior.goals[index].update(obj_self, obj_player, sprite, current_map));
-		let should_stop = maybe!(behavior.goals[index].should_stop(obj_self, obj_player));
-
-		if should_stop {
-			sprite.set_default_anim();
-			behavior.prev_goal.clone_from(&behavior.goals[index].name);
-			behavior.index = None;
-		}
-		return;
-	}
-
-	// Checks each goal to see if they should be started, and selects the first valid one
-	for index in 0..behavior.goals.len() {
-		match behavior.goals[index].should_start(obj_self, obj_player, &behavior.prev_goal) {
-			Err(e) => {
-				error!("{e}");
-				behavior.err = Some(e);
-			}
-			Ok(true) => {
-				behavior.index = Some(index);
-				maybe!(behavior.goals[index].init(obj_self, obj_player));
-				return;
-			}
-			_ => (),
-		}
 	}
 }

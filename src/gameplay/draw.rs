@@ -11,12 +11,7 @@ use crate::{
 	},
 };
 
-use super::{
-	Gameplay,
-	combat::AttackType,
-	ecs::{behavior::Behavior, sprite::Sprite},
-	paused::Paused,
-};
+use super::{Gameplay, combat::AttackType, ecs::sprite::Sprite, paused::Paused};
 
 use render::{draw_bar, draw_map, render_text, render_texture};
 
@@ -67,12 +62,8 @@ pub async fn draw(gameplay: &mut Gameplay) {
 
 	// Render script errors (if any are present)
 	let mut err_height = 128.;
-	for behavior in query!(gameplay.world.enemies, (&behavior)) {
-		let Behavior::Goal(behavior) = behavior else {
-			continue;
-		};
-
-		if let Some(e) = &behavior.err {
+	for goals in query!([gameplay.world.enemies, gameplay.world.npcs], (&goals)) {
+		if let Some(e) = &goals.err {
 			render_text(
 				&format!("Script err: {e}"),
 				DVec2::new(32., err_height),
