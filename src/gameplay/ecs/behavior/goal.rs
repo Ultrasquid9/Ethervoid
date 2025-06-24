@@ -17,6 +17,33 @@ pub struct GoalBehavior {
 	pub err: Option<Box<dyn Error + Send + Sync>>,
 }
 
+impl GoalBehavior {
+	pub fn new(goals: ImmutVec<Script>) -> Self {
+		Self {
+			goals,
+			prev_goal: "none".to_owned(),
+
+			index: None,
+			err: None,
+		}
+	}
+
+	pub fn from_scripts(scripts: &ImmutVec<String>) -> Self {
+		Self::new(
+			scripts
+				.iter()
+				.filter_map(|key| match Script::new(key) {
+					Ok(ok) => Some(ok),
+					Err(e) => {
+						error!("Failed to eval script {key}: {e}");
+						None
+					}
+				})
+				.collect::<ImmutVec<Script>>(),
+		)
+	}
+}
+
 impl PartialEq for GoalBehavior {
 	fn eq(&self, other: &Self) -> bool {
 		self.index == other.index && self.prev_goal == other.prev_goal

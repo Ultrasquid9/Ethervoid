@@ -1,7 +1,6 @@
-use crate::cores::{enemytype::EnemyType, script::Script};
+use crate::cores::enemytype::EnemyType;
 use macroquad::math::DVec2;
 use stecs::prelude::*;
-use tracing::error;
 
 use super::ecs::{
 	behavior::{Behavior, goal::GoalBehavior},
@@ -25,24 +24,7 @@ impl Enemy {
 		Self {
 			health: Health::new(enemytype.max_health),
 			obj,
-			behavior: Behavior::Goal(GoalBehavior {
-				goals: enemytype
-					.goals
-					.iter()
-					.filter_map(|key| match Script::new(key) {
-						Ok(ok) => Some(ok),
-						Err(e) => {
-							error!("Failed to eval script {key}: {e}");
-							None
-						}
-					})
-					.collect(),
-
-				prev_goal: "none".to_owned(),
-
-				index: None,
-				err: None,
-			}),
+			behavior: Behavior::Goal(GoalBehavior::from_scripts(&enemytype.goals)),
 			sprite: Sprite::new(
 				obj,
 				&enemytype.sprite,

@@ -5,15 +5,9 @@ use super::{gen_name, get_files, read_from_path};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
-pub enum NpcMovement {
-	Wander(f64),
-	Still,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
 pub struct NpcType {
 	pub sprite: String,
-	pub movement: NpcMovement,
+	pub goals: ImmutVec<String>,
 	pub messages: ImmutVec<Message>,
 }
 

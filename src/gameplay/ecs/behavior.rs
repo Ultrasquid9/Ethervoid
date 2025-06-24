@@ -2,7 +2,6 @@ use goal::{GoalBehavior, goal_behavior};
 use mlua::Table;
 use player::{PlayerBehavior, player_behavior};
 use stecs::prelude::*;
-use wander::{WanderBehavior, wander_behavior};
 
 use crate::{
 	gameplay::{Gameplay, combat::Attack},
@@ -15,14 +14,12 @@ use crate::{
 
 pub mod goal;
 pub mod player;
-pub mod wander;
 
+#[deprecated(note = "Should be replaced with using `PlayerBehavior` and `GoalBehavior` directly")]
 #[derive(PartialEq, Clone)]
 pub enum Behavior {
 	Player(PlayerBehavior),
 	Goal(GoalBehavior),
-	Wander(WanderBehavior),
-	None,
 }
 
 pub fn handle_behavior(gameplay: &mut Gameplay) {
@@ -32,7 +29,7 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 		.obj
 		.first()
 		.expect("Player should exist");
-	
+
 	rayon::in_place_scope(|scope| {
 		for (obj, behavior, sprite) in query!(
 			[
@@ -68,12 +65,6 @@ pub fn handle_behavior(gameplay: &mut Gameplay) {
 						);
 					});
 				}
-
-				Behavior::Wander(behavior) => {
-					scope.spawn(|_| wander_behavior(&mut *behavior, obj, &gameplay.current_map));
-				}
-
-				Behavior::None => (),
 			}
 		}
 	});

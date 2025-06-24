@@ -4,14 +4,13 @@ use rustc_hash::FxHashMap;
 use stecs::prelude::*;
 
 use super::ecs::{
-	behavior::{Behavior, wander::WanderBehavior},
+	behavior::Behavior,
 	obj::Obj,
 	sprite::{Frames, Rotation, Sprite},
 };
 
 use crate::{
-	cores::npctype::{NpcMovement, NpcType},
-	utils::ImmutVec,
+	cores::npctype::NpcType, gameplay::ecs::behavior::goal::GoalBehavior, utils::ImmutVec,
 };
 
 pub mod messages;
@@ -32,14 +31,7 @@ impl Npc {
 
 		Self {
 			obj,
-			behavior: match npctype.movement {
-				NpcMovement::Wander(range) => Behavior::Wander(WanderBehavior {
-					pos: *pos,
-					range,
-					cooldown: 0.,
-				}),
-				NpcMovement::Still => Behavior::None,
-			},
+			behavior: Behavior::Goal(GoalBehavior::from_scripts(&npctype.goals)),
 			sprite: Sprite::new(
 				obj,
 				"default:entity/player/player_spritesheet_wip",
